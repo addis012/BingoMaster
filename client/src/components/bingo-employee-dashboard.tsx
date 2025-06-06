@@ -88,17 +88,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Generate next random number
   const callNumber = () => {
-    console.log("callNumber called", { gameActive, gamePaused, gameFinished, calledNumbersLength: calledNumbers.length });
+    console.log("🎯 callNumber invoked", { 
+      gameActive, 
+      gamePaused, 
+      gameFinished, 
+      calledNumbersLength: calledNumbers.length,
+      currentNumber,
+      intervalActive: !!autoCallInterval
+    });
     
     if (!gameActive || gamePaused || gameFinished) {
-      console.log("Stopping callNumber due to game state");
+      console.log("❌ Stopping callNumber due to game state", { gameActive, gamePaused, gameFinished });
       return;
     }
     
     const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
     const availableNumbers = allNumbers.filter(num => !calledNumbers.includes(num));
     
+    console.log("📊 Available numbers:", availableNumbers.length, "out of 75");
+    
     if (availableNumbers.length === 0) {
+      console.log("🏁 All numbers called - ending game");
       setGameActive(false);
       setGameFinished(true);
       stopAutoCalling();
@@ -109,15 +119,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const randomIndex = Math.floor(Math.random() * availableNumbers.length);
     const newNumber = availableNumbers[randomIndex];
     
-    console.log("Calling number:", newNumber);
+    console.log("🔊 Calling number:", newNumber, "Letter:", getLetterForNumber(newNumber));
     
     setCurrentNumber(newNumber);
     setCalledNumbers(prev => {
       const updated = [...prev, newNumber];
-      console.log("Updated called numbers:", updated.length);
+      console.log("📝 Updated called numbers count:", updated.length);
       
       // Check if all 75 numbers have been called
       if (updated.length === 75) {
+        console.log("🎉 Game complete - all 75 numbers called");
         setGameActive(false);
         setGameFinished(true);
         stopAutoCalling();
@@ -134,11 +145,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Start new game with automatic number calling
   const startNewGame = () => {
+    console.log("🚀 Starting new game - clearing all state");
+    
     // Clear any existing interval first
     if (autoCallInterval) {
+      console.log("🛑 Clearing existing interval");
       clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
     }
     
+    // Reset all game state
     setCalledNumbers([]);
     setCurrentNumber(null);
     setGameActive(true);
@@ -147,17 +163,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setGameFinished(false);
     setGamePaused(false);
     
-    console.log("Starting new game...");
+    console.log("✅ Game state reset - starting automatic calling");
     
-    // Call the first number immediately
-    callNumber();
-    
-    // Set up interval for subsequent numbers
-    const interval = setInterval(() => {
+    // Use setTimeout to ensure state has updated before starting
+    setTimeout(() => {
+      console.log("🎯 Calling first number");
       callNumber();
-    }, 3000);
-    
-    setAutoCallInterval(interval);
+      
+      // Set up interval for subsequent numbers
+      console.log("⏰ Setting up interval for every 3 seconds");
+      const interval = setInterval(() => {
+        console.log("⏱️ Interval tick - calling next number");
+        callNumber();
+      }, 3000);
+      
+      setAutoCallInterval(interval);
+      console.log("✅ Interval set successfully:", interval);
+    }, 100);
   };
 
   // Stop automatic calling
