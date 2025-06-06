@@ -2,6 +2,7 @@ import type { Express, Request } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
+import session from "express-session";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import { insertUserSchema, insertShopSchema, insertGameSchema, insertGamePlayerSchema, insertTransactionSchema } from "@shared/schema";
@@ -18,6 +19,14 @@ declare module 'express-serve-static-core' {
 const gameClients = new Map<number, Set<WebSocket>>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session middleware
+  app.use(session({
+    secret: 'bingo-session-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+  }));
+
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static('attached_assets'));
   
@@ -35,7 +44,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
+      console.log("Comparing password:", password);
+      console.log("Stored hash:", user.password);
       const isValidPassword = await bcrypt.compare(password, user.password);
+      console.log("Password valid:", isValidPassword);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
