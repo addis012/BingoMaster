@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
   const [gameFinished, setGameFinished] = useState(false);
   const [gamePaused, setGamePaused] = useState(false);
+  
+  // Use ref to track game state for reliable interval access
+  const gameStateRef = useRef({
+    active: false,
+    paused: false,
+    finished: false,
+    calledNumbers: [] as number[]
+  });
 
   // Play Amharic audio for number announcements
   const playAmharicAudio = (number: number) => {
@@ -86,73 +94,70 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return false;
   };
 
-  // Generate next random number using functional state updates
+  // Update ref when state changes
+  useEffect(() => {
+    gameStateRef.current.active = gameActive;
+    gameStateRef.current.paused = gamePaused;
+    gameStateRef.current.finished = gameFinished;
+    gameStateRef.current.calledNumbers = calledNumbers;
+  }, [gameActive, gamePaused, gameFinished, calledNumbers]);
+
+  // Generate next random number using refs for reliable state access
   const callNumber = () => {
-    setGameActive(prevActive => {
-      setGamePaused(prevPaused => {
-        setGameFinished(prevFinished => {
-          setCalledNumbers(prevCalled => {
-            console.log("🎯 callNumber invoked", { 
-              gameActive: prevActive, 
-              gamePaused: prevPaused, 
-              gameFinished: prevFinished, 
-              calledNumbersLength: prevCalled.length
-            });
-            
-            if (!prevActive || prevPaused || prevFinished) {
-              console.log("❌ Stopping callNumber due to game state", { 
-                gameActive: prevActive, 
-                gamePaused: prevPaused, 
-                gameFinished: prevFinished 
-              });
-              return prevCalled;
-            }
-            
-            const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
-            const availableNumbers = allNumbers.filter(num => !prevCalled.includes(num));
-            
-            console.log("📊 Available numbers:", availableNumbers.length, "out of 75");
-            
-            if (availableNumbers.length === 0) {
-              console.log("🏁 All numbers called - ending game");
-              setGameActive(false);
-              setGameFinished(true);
-              stopAutoCalling();
-              speak("Game finished. All numbers have been called.");
-              return prevCalled;
-            }
-            
-            const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-            const newNumber = availableNumbers[randomIndex];
-            
-            console.log("🔊 Calling number:", newNumber, "Letter:", getLetterForNumber(newNumber));
-            
-            setCurrentNumber(newNumber);
-            setLastCalledLetter(getLetterForNumber(newNumber));
-            
-            // Play Amharic audio announcement
-            playAmharicAudio(newNumber);
-            
-            const updated = [...prevCalled, newNumber];
-            console.log("📝 Updated called numbers count:", updated.length);
-            
-            // Check if all 75 numbers have been called
-            if (updated.length === 75) {
-              console.log("🎉 Game complete - all 75 numbers called");
-              setGameActive(false);
-              setGameFinished(true);
-              stopAutoCalling();
-              setTimeout(() => speak("Game finished. All numbers have been called."), 1000);
-            }
-            
-            return updated;
-          });
-          return prevFinished;
-        });
-        return prevPaused;
-      });
-      return prevActive;
+    console.log("🎯 callNumber invoked", { 
+      gameActive: gameStateRef.current.active, 
+      gamePaused: gameStateRef.current.paused, 
+      gameFinished: gameStateRef.current.finished, 
+      calledNumbersLength: gameStateRef.current.calledNumbers.length
     });
+    
+    if (!gameStateRef.current.active || gameStateRef.current.paused || gameStateRef.current.finished) {
+      console.log("❌ Stopping callNumber due to game state", { 
+        gameActive: gameStateRef.current.active, 
+        gamePaused: gameStateRef.current.paused, 
+        gameFinished: gameStateRef.current.finished 
+      });
+      return;
+    }
+    
+    const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
+    const availableNumbers = allNumbers.filter(num => !gameStateRef.current.calledNumbers.includes(num));
+    
+    console.log("📊 Available numbers:", availableNumbers.length, "out of 75");
+    
+    if (availableNumbers.length === 0) {
+      console.log("🏁 All numbers called - ending game");
+      setGameActive(false);
+      setGameFinished(true);
+      stopAutoCalling();
+      speak("Game finished. All numbers have been called.");
+      return;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+    const newNumber = availableNumbers[randomIndex];
+    
+    console.log("🔊 Calling number:", newNumber, "Letter:", getLetterForNumber(newNumber));
+    
+    setCurrentNumber(newNumber);
+    setLastCalledLetter(getLetterForNumber(newNumber));
+    
+    // Play Amharic audio announcement
+    playAmharicAudio(newNumber);
+    
+    const updated = [...gameStateRef.current.calledNumbers, newNumber];
+    setCalledNumbers(updated);
+    
+    console.log("📝 Updated called numbers count:", updated.length);
+    
+    // Check if all 75 numbers have been called
+    if (updated.length === 75) {
+      console.log("🎉 Game complete - all 75 numbers called");
+      setGameActive(false);
+      setGameFinished(true);
+      stopAutoCalling();
+      setTimeout(() => speak("Game finished. All numbers have been called."), 1000);
+    }
   };
 
   // Start new game with automatic number calling
