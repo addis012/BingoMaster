@@ -230,11 +230,30 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Stop automatic calling
   const stopAutoCalling = () => {
+    console.log("🛑 Stopping automatic calling");
     if (autoCallInterval) {
       clearInterval(autoCallInterval);
       setAutoCallInterval(null);
+      console.log("✅ Interval cleared");
     }
   };
+
+  // Clean up interval on component unmount or game end
+  useEffect(() => {
+    return () => {
+      if (autoCallInterval) {
+        clearInterval(autoCallInterval);
+      }
+    };
+  }, [autoCallInterval]);
+
+  // Stop calling when game is no longer active
+  useEffect(() => {
+    if (!gameActive && autoCallInterval) {
+      console.log("🚫 Game inactive - stopping auto calling");
+      stopAutoCalling();
+    }
+  }, [gameActive, autoCallInterval]);
 
   // Verify winner
   const verifyWinner = () => {
@@ -289,6 +308,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Reset game
   const resetGame = () => {
+    console.log("🔄 Resetting game");
+    stopAutoCalling(); // Stop automatic calling first
     setCalledNumbers([]);
     setCurrentNumber(null);
     setGameActive(false);
@@ -524,6 +545,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   disabled={gamePaused}
                 >
                   {gamePaused ? "Checking..." : "Check for BINGO"}
+                </Button>
+              )}
+
+              {/* Stop Auto Calling Button */}
+              {gameActive && autoCallInterval && (
+                <Button 
+                  onClick={stopAutoCalling}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                >
+                  Stop Auto Calling
                 </Button>
               )}
 
