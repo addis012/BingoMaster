@@ -19,7 +19,8 @@ export default function LoginPage() {
       const response = await apiRequest("POST", "/api/auth/login", credentials);
       return response;
     },
-    onSuccess: (user) => {
+    onSuccess: (data: any) => {
+      const user = data.user;
       toast({
         title: "Login successful",
         description: `Welcome back, ${user.name}!`,
