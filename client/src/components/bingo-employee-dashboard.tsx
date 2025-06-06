@@ -19,6 +19,37 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [selectedCartela, setSelectedCartela] = useState<number | null>(null);
   const [cartelaCards, setCartelaCards] = useState<{[key: number]: number[][]}>({});
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
+  const [gameAmount, setGameAmount] = useState("10");
+  const [winnerFound, setWinnerFound] = useState<string | null>(null);
+
+  // Check for Bingo winning patterns
+  const checkForBingo = (card: number[][], calledNums: number[]): boolean => {
+    // Check rows
+    for (let row = 0; row < 5; row++) {
+      if (card[row].every(num => calledNums.includes(num))) {
+        return true;
+      }
+    }
+    
+    // Check columns
+    for (let col = 0; col < 5; col++) {
+      if (card.every(row => calledNums.includes(row[col]))) {
+        return true;
+      }
+    }
+    
+    // Check diagonal (top-left to bottom-right)
+    if (card.every((row, index) => calledNums.includes(row[index]))) {
+      return true;
+    }
+    
+    // Check diagonal (top-right to bottom-left)
+    if (card.every((row, index) => calledNums.includes(row[4 - index]))) {
+      return true;
+    }
+    
+    return false;
+  };
 
   // Generate next random number
   const callNumber = () => {
@@ -33,9 +64,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const randomIndex = Math.floor(Math.random() * availableNumbers.length);
     const newNumber = availableNumbers[randomIndex];
     
+    const newCalledNumbers = [...calledNumbers, newNumber];
     setCurrentNumber(newNumber);
-    setCalledNumbers(prev => [...prev, newNumber]);
+    setCalledNumbers(newCalledNumbers);
     setLastCalledLetter(getLetterForNumber(newNumber));
+    
+    // Check for Bingo after each number call
+    bookedCartelas.forEach(cartelaNum => {
+      const card = cartelaCards[cartelaNum];
+      if (card && checkForBingo(card, newCalledNumbers)) {
+        setWinnerFound(`Cartela #${cartelaNum}`);
+        setGameActive(false);
+      }
+    });
   };
 
   // Start new game
@@ -44,6 +85,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setCurrentNumber(null);
     setGameActive(true);
     setLastCalledLetter("");
+    setWinnerFound(null);
   };
 
   // Reset game
@@ -204,6 +246,43 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               </div>
             </CardContent>
           </Card>
+
+          {/* Game Amount Setting */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Game Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Game Amount (Birr)
+                </label>
+                <Input
+                  type="number"
+                  value={gameAmount}
+                  onChange={(e) => setGameAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  className="text-center font-semibold"
+                />
+              </div>
+              <div className="text-center text-sm text-gray-600">
+                Current: {gameAmount} Birr per card
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Winner Notification */}
+          {winnerFound && (
+            <Card className="border-green-500 bg-green-50">
+              <CardContent className="p-4 text-center">
+                <div className="text-green-800 font-bold text-xl mb-2">🎉 BINGO! 🎉</div>
+                <div className="text-green-700 font-semibold">{winnerFound} WINS!</div>
+                <div className="text-green-600 text-sm mt-2">
+                  Prize: {gameAmount} Birr
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Game Controls */}
           <Card>
