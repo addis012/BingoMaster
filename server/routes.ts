@@ -158,6 +158,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete user (admin can delete employees from their shop)
+  app.delete("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const currentUser = req.session.user;
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Get the user to be deleted
+      const userToDelete = await storage.getUser(id);
+      if (!userToDelete) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check permissions: admin can only delete employees from their shop
+      if (currentUser.role === 'admin') {
+        if (userToDelete.role !== 'employee' || userToDelete.shopId !== currentUser.shopId) {
+          return res.status(403).json({ message: "Cannot delete this user" });
+        }
+      } else if (currentUser.role !== 'super_admin') {
+        return res.status(403).json({ message: "Insufficient permissions" });
+      }
+
+      const success = await storage.deleteUser(id);
+      if (!success) {
+        return res.status(500).json({ message: "Failed to delete user" });
+      }
+      
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   app.get("/api/users/shop/:shopId", async (req, res) => {
     try {
       const shopId = parseInt(req.params.shopId);
