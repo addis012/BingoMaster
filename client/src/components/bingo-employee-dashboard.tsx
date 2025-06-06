@@ -252,7 +252,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             <CardHeader>
               <CardTitle className="text-lg">Game Settings</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Game Amount (Birr)
@@ -268,6 +268,46 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <div className="text-center text-sm text-gray-600">
                 Current: {gameAmount} Birr per card
               </div>
+
+              {/* Selected Cartelas */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Selected Cartelas ({bookedCartelas.size})
+                </label>
+                {bookedCartelas.size > 0 ? (
+                  <div className="flex flex-wrap gap-1 p-2 bg-gray-50 rounded-lg max-h-20 overflow-y-auto">
+                    {Array.from(bookedCartelas).sort((a, b) => a - b).map(num => (
+                      <Badge key={num} variant="secondary" className="bg-green-100 text-green-800">
+                        #{num}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center text-sm text-gray-500 p-3 bg-gray-50 rounded-lg">
+                    No cartelas selected
+                  </div>
+                )}
+              </div>
+
+              {/* Current Collected Amount */}
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <div className="text-sm font-medium text-blue-700 mb-1">Total Collected</div>
+                <div className="text-xl font-bold text-blue-800">
+                  {(bookedCartelas.size * parseFloat(gameAmount || "0")).toFixed(2)} Birr
+                </div>
+                <div className="text-xs text-blue-600">
+                  {bookedCartelas.size} cards × {gameAmount} Birr
+                </div>
+              </div>
+
+              {/* Start Game Button */}
+              <Button 
+                onClick={startNewGame}
+                disabled={bookedCartelas.size === 0 || gameActive}
+                className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300"
+              >
+                {gameActive ? "Game in Progress" : "Start Game"}
+              </Button>
             </CardContent>
           </Card>
 
