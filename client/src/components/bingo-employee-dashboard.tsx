@@ -134,6 +134,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Start new game with automatic number calling
   const startNewGame = () => {
+    // Clear any existing interval first
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+    }
+    
     setCalledNumbers([]);
     setCurrentNumber(null);
     setGameActive(true);
@@ -142,12 +147,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setGameFinished(false);
     setGamePaused(false);
     
-    // Call first number immediately
-    setTimeout(() => {
-      callNumber();
-    }, 500);
+    console.log("Starting new game...");
     
-    // Start automatic number calling every 3 seconds after first call
+    // Call the first number immediately
+    callNumber();
+    
+    // Set up interval for subsequent numbers
     const interval = setInterval(() => {
       callNumber();
     }, 3000);
