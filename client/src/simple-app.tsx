@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import BingoEmployeeDashboard from "@/components/bingo-employee-dashboard";
 
 export default function SimpleApp() {
   const [currentPage, setCurrentPage] = useState("login");
@@ -80,58 +81,7 @@ export default function SimpleApp() {
   }
 
   if (currentPage === "employee") {
-    return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Employee Dashboard</h1>
-            <Button onClick={() => setCurrentPage("login")} variant="outline">
-              Logout
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Bingo Game</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-5 gap-2 mb-4">
-                  {Array.from({ length: 25 }, (_, i) => (
-                    <div 
-                      key={i} 
-                      className="aspect-square border rounded flex items-center justify-center text-sm font-medium"
-                    >
-                      {i + 1}
-                    </div>
-                  ))}
-                </div>
-                <Button className="w-full">Start New Game</Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Player Registration</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <input 
-                    placeholder="Player Name" 
-                    className="w-full p-2 border rounded"
-                  />
-                  <input 
-                    placeholder="Entry Fee" 
-                    className="w-full p-2 border rounded"
-                  />
-                  <Button className="w-full">Register Player</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
+    return <BingoEmployeeDashboard onLogout={() => setCurrentPage("login")} />;
   }
 
   return null;
