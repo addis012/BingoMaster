@@ -21,6 +21,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
   const [gameAmount, setGameAmount] = useState("10");
   const [winnerFound, setWinnerFound] = useState<string | null>(null);
+  const [showWinnerVerification, setShowWinnerVerification] = useState(false);
+  const [verificationCartela, setVerificationCartela] = useState("");
+  const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
 
   // Check for Bingo winning patterns
   const checkForBingo = (card: number[][], calledNums: number[]): boolean => {
@@ -79,13 +82,54 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     });
   };
 
-  // Start new game
+  // Start new game with automatic number calling
   const startNewGame = () => {
     setCalledNumbers([]);
     setCurrentNumber(null);
     setGameActive(true);
     setLastCalledLetter("");
     setWinnerFound(null);
+    
+    // Start automatic number calling every 3 seconds
+    const interval = setInterval(() => {
+      callNumber();
+    }, 3000);
+    
+    setAutoCallInterval(interval);
+  };
+
+  // Stop automatic calling
+  const stopAutoCalling = () => {
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+  };
+
+  // Verify winner
+  const verifyWinner = () => {
+    const cartelaNum = parseInt(verificationCartela);
+    if (!cartelaNum || !bookedCartelas.has(cartelaNum)) {
+      alert("Please enter a valid cartela number");
+      return;
+    }
+
+    const card = cartelaCards[cartelaNum];
+    if (!card) {
+      alert("Cartela not found");
+      return;
+    }
+
+    const isWinner = checkForBingo(card, calledNumbers);
+    if (isWinner) {
+      setWinnerFound(`Cartela #${cartelaNum}`);
+      setGameActive(false);
+      stopAutoCalling();
+      setShowWinnerVerification(false);
+      setVerificationCartela("");
+    } else {
+      alert("This cartela does not have BINGO! Please check again.");
+    }
   };
 
   // Reset game
@@ -94,6 +138,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setCurrentNumber(null);
     setGameActive(false);
     setLastCalledLetter("");
+    setWinnerFound(null);
+    stopAutoCalling();
   };
 
   // Generate unique Bingo card based on cartela number
@@ -308,6 +354,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               >
                 {gameActive ? "Game in Progress" : "Start Game"}
               </Button>
+
+              {/* Check for BINGO Button */}
+              {gameActive && !winnerFound && (
+                <Button 
+                  onClick={() => setShowWinnerVerification(true)}
+                  className="w-full bg-yellow-500 hover:bg-yellow-600"
+                >
+                  Check for BINGO
+                </Button>
+              )}
+
+              {/* Stop Game Button */}
+              {gameActive && (
+                <Button 
+                  onClick={resetGame}
+                  variant="outline"
+                  className="w-full border-red-500 text-red-500 hover:bg-red-50"
+                >
+                  Stop Game
+                </Button>
+              )}
             </CardContent>
           </Card>
 
@@ -512,6 +579,53 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           </Card>
         </div>
       </div>
+
+      {/* Winner Verification Dialog */}
+      <Dialog open={showWinnerVerification} onOpenChange={setShowWinnerVerification}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Verify BINGO Winner</DialogTitle>
+            <DialogDescription>
+              Enter the cartela number of the player claiming BINGO to verify their win.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Cartela Number
+              </label>
+              <Input
+                type="number"
+                value={verificationCartela}
+                onChange={(e) => setVerificationCartela(e.target.value)}
+                placeholder="Enter cartela number"
+                className="text-center"
+                min="1"
+                max="100"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={verifyWinner}
+                className="flex-1 bg-green-500 hover:bg-green-600"
+                disabled={!verificationCartela}
+              >
+                Verify BINGO
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowWinnerVerification(false);
+                  setVerificationCartela("");
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
