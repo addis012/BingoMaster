@@ -50,7 +50,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      res.status(500).json({ message: "Login failed" });
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed", error: error.message });
     }
   });
 
