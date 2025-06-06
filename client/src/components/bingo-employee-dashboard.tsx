@@ -176,6 +176,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setWinnerFound(null);
     setGameFinished(false);
     setGamePaused(false);
+    setBookedCartelas(new Set()); // Clear all booked cartelas
+    setCartelaCards({}); // Clear cartela cards
+    setShowWinnerVerification(false);
+    setVerificationCartela("");
     stopAutoCalling();
   };
 
@@ -686,6 +690,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 onClick={() => {
                   setShowWinnerVerification(false);
                   setVerificationCartela("");
+                  setGamePaused(false); // Resume the game
                 }}
                 variant="outline"
                 className="flex-1"
