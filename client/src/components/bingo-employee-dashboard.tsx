@@ -21,6 +21,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
   const [gameAmount, setGameAmount] = useState("10");
   const [winnerFound, setWinnerFound] = useState<string | null>(null);
+  const [winnerPattern, setWinnerPattern] = useState<string | null>(null);
+  const [winnerPatternCells, setWinnerPatternCells] = useState<number[][] | null>(null);
+  const [winnerCartelaCard, setWinnerCartelaCard] = useState<number[][] | null>(null);
   const [showWinnerVerification, setShowWinnerVerification] = useState(false);
   const [verificationCartela, setVerificationCartela] = useState("");
   const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
@@ -65,8 +68,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   };
 
-  // Check for Bingo winning patterns based on traditional patterns
-  const checkForBingo = (card: number[][], calledNums: number[]): boolean => {
+  // Check for Bingo winning patterns and return pattern info
+  const checkForBingo = (card: number[][], calledNums: number[]): { hasWin: boolean; pattern?: string; patternCells?: number[][] } => {
     // Helper function to check if number is called (center is free space)
     const isMarked = (row: number, col: number) => {
       if (row === 2 && col === 2) return true; // Center is free space
@@ -76,51 +79,84 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     // Pattern 1: Any horizontal line
     for (let row = 0; row < 5; row++) {
       if ([0, 1, 2, 3, 4].every(col => isMarked(row, col))) {
-        return true;
+        return { 
+          hasWin: true, 
+          pattern: `Horizontal Line (Row ${row + 1})`,
+          patternCells: [[row, 0], [row, 1], [row, 2], [row, 3], [row, 4]]
+        };
       }
     }
     
     // Pattern 2: Any vertical line
     for (let col = 0; col < 5; col++) {
+      const colNames = ['B', 'I', 'N', 'G', 'O'];
       if ([0, 1, 2, 3, 4].every(row => isMarked(row, col))) {
-        return true;
+        return { 
+          hasWin: true, 
+          pattern: `Vertical Line (${colNames[col]} Column)`,
+          patternCells: [[0, col], [1, col], [2, col], [3, col], [4, col]]
+        };
       }
     }
     
     // Pattern 3: Diagonal (top-left to bottom-right)
     if ([0, 1, 2, 3, 4].every(i => isMarked(i, i))) {
-      return true;
+      return { 
+        hasWin: true, 
+        pattern: "Diagonal (Top-Left to Bottom-Right)",
+        patternCells: [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]]
+      };
     }
     
     // Pattern 4: Diagonal (top-right to bottom-left)
     if ([0, 1, 2, 3, 4].every(i => isMarked(i, 4 - i))) {
-      return true;
+      return { 
+        hasWin: true, 
+        pattern: "Diagonal (Top-Right to Bottom-Left)",
+        patternCells: [[0, 4], [1, 3], [2, 2], [3, 1], [4, 0]]
+      };
     }
     
     // Pattern 5: Four corners
     if (isMarked(0, 0) && isMarked(0, 4) && isMarked(4, 0) && isMarked(4, 4)) {
-      return true;
+      return { 
+        hasWin: true, 
+        pattern: "Four Corners",
+        patternCells: [[0, 0], [0, 4], [4, 0], [4, 4]]
+      };
     }
     
     // Pattern 6: L-shape (bottom-left L)
     if (isMarked(0, 0) && isMarked(1, 0) && isMarked(2, 0) && isMarked(3, 0) && isMarked(4, 0) &&
         isMarked(4, 1) && isMarked(4, 2) && isMarked(4, 3) && isMarked(4, 4)) {
-      return true;
+      return { 
+        hasWin: true, 
+        pattern: "L-Shape",
+        patternCells: [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [4, 1], [4, 2], [4, 3], [4, 4]]
+      };
     }
     
     // Pattern 7: T-shape (top T)
     if (isMarked(0, 0) && isMarked(0, 1) && isMarked(0, 2) && isMarked(0, 3) && isMarked(0, 4) &&
         isMarked(1, 2) && isMarked(2, 2) && isMarked(3, 2) && isMarked(4, 2)) {
-      return true;
+      return { 
+        hasWin: true, 
+        pattern: "T-Shape",
+        patternCells: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [1, 2], [2, 2], [3, 2], [4, 2]]
+      };
     }
     
     // Pattern 8: Plus/Cross pattern
     if (isMarked(0, 2) && isMarked(1, 2) && isMarked(2, 2) && isMarked(3, 2) && isMarked(4, 2) &&
         isMarked(2, 0) && isMarked(2, 1) && isMarked(2, 3) && isMarked(2, 4)) {
-      return true;
+      return { 
+        hasWin: true, 
+        pattern: "Plus/Cross",
+        patternCells: [[0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [2, 0], [2, 1], [2, 3], [2, 4]]
+      };
     }
     
-    return false;
+    return { hasWin: false };
   };
 
   // Update ref when state changes
@@ -269,9 +305,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
 
-    const isWinner = checkForBingo(card, calledNumbers);
-    if (isWinner) {
+    const winResult = checkForBingo(card, calledNumbers);
+    if (winResult.hasWin) {
       setWinnerFound(`Cartela #${cartelaNum}`);
+      setWinnerPattern(winResult.pattern || null);
+      setWinnerPatternCells(winResult.patternCells || null);
+      setWinnerCartelaCard(card);
       setGameActive(false);
       setGameFinished(true);
       stopAutoCalling();
@@ -315,13 +354,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setGameActive(false);
     setLastCalledLetter("");
     setWinnerFound(null);
+    setWinnerPattern(null);
+    setWinnerPatternCells(null);
+    setWinnerCartelaCard(null);
     setGameFinished(false);
     setGamePaused(false);
     setBookedCartelas(new Set()); // Clear all booked cartelas
     setCartelaCards({}); // Clear cartela cards
     setShowWinnerVerification(false);
     setVerificationCartela("");
-    stopAutoCalling();
   };
 
   // Generate unique Bingo card based on cartela number
@@ -802,6 +843,77 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               </div>
             </CardContent>
           </Card>
+
+          {/* Winner Pattern Display */}
+          {winnerFound && winnerCartelaCard && winnerPattern && winnerPatternCells && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-center text-xl text-green-600">🎉 Winner Pattern 🎉</CardTitle>
+                <p className="text-center text-sm text-gray-600">
+                  {winnerFound} won with: <span className="font-semibold text-green-700">{winnerPattern}</span>
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="max-w-xs mx-auto">
+                  {/* BINGO Header */}
+                  <div className="grid grid-cols-5 gap-1 mb-2">
+                    {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                      const colors = ['bg-orange-500', 'bg-green-500', 'bg-blue-500', 'bg-red-500', 'bg-purple-500'];
+                      return (
+                        <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-sm`}>
+                          {letter}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Cartela Grid with Winning Pattern Highlighted */}
+                  <div className="grid grid-cols-5 gap-1">
+                    {winnerCartelaCard.map((row, rowIndex) =>
+                      row.map((number, colIndex) => {
+                        const isFree = rowIndex === 2 && colIndex === 2;
+                        const isInPattern = winnerPatternCells.some(([pRow, pCol]) => pRow === rowIndex && pCol === colIndex);
+                        const isCalled = calledNumbers.includes(number) || isFree;
+                        
+                        return (
+                          <div
+                            key={`${rowIndex}-${colIndex}`}
+                            className={`
+                              h-10 border-2 rounded flex items-center justify-center text-xs font-semibold
+                              ${isInPattern 
+                                ? 'bg-yellow-400 text-black border-yellow-600 shadow-lg ring-2 ring-yellow-300' 
+                                : isCalled 
+                                  ? 'bg-green-200 text-green-800 border-green-400' 
+                                  : 'bg-gray-100 text-gray-600 border-gray-300'
+                              }
+                            `}
+                          >
+                            {isFree ? 'FREE' : number}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                  
+                  <div className="mt-3 text-center">
+                    <div className="text-sm text-gray-600 mb-2">
+                      Prize Amount: <span className="font-bold text-green-600">{gameAmount} Birr</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-4 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-yellow-400 border border-yellow-600 rounded"></div>
+                        <span>Winning Pattern</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-green-200 border border-green-400 rounded"></div>
+                        <span>Called Numbers</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
