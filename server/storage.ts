@@ -1,8 +1,9 @@
 import { 
-  users, shops, games, gamePlayers, transactions, commissionPayments,
+  users, shops, games, gamePlayers, transactions, commissionPayments, gameHistory,
   type User, type InsertUser, type Shop, type InsertShop, 
   type Game, type InsertGame, type GamePlayer, type InsertGamePlayer,
-  type Transaction, type InsertTransaction, type CommissionPayment, type InsertCommissionPayment
+  type Transaction, type InsertTransaction, type CommissionPayment, type InsertCommissionPayment,
+  type GameHistory, type InsertGameHistory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, sum, count } from "drizzle-orm";
@@ -43,6 +44,10 @@ export interface IStorage {
   // Commission methods
   createCommissionPayment(payment: InsertCommissionPayment): Promise<CommissionPayment>;
   getCommissionPayments(shopId: number): Promise<CommissionPayment[]>;
+  
+  // Game History methods
+  createGameHistory(history: InsertGameHistory): Promise<GameHistory>;
+  getGameHistory(shopId: number, startDate?: Date, endDate?: Date): Promise<GameHistory[]>;
   
   // Analytics methods
   getShopStats(shopId: number, startDate?: Date, endDate?: Date): Promise<{

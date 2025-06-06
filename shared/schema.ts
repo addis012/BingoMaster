@@ -54,9 +54,23 @@ export const transactions = pgTable("transactions", {
   shopId: integer("shop_id").references(() => shops.id).notNull(),
   employeeId: integer("employee_id").references(() => users.id).notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  type: text("type").notNull(), // 'entry_fee', 'prize_payout', 'commission'
+  type: text("type").notNull(), // 'entry_fee', 'prize_payout', 'commission', 'admin_profit', 'super_admin_commission'
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const gameHistory = pgTable("game_history", {
+  id: serial("id").primaryKey(),
+  gameId: integer("game_id").references(() => games.id).notNull(),
+  shopId: integer("shop_id").references(() => shops.id).notNull(),
+  employeeId: integer("employee_id").references(() => users.id).notNull(),
+  totalCollected: decimal("total_collected", { precision: 10, scale: 2 }).notNull(),
+  prizeAmount: decimal("prize_amount", { precision: 10, scale: 2 }).notNull(),
+  adminProfit: decimal("admin_profit", { precision: 10, scale: 2 }).notNull(),
+  superAdminCommission: decimal("super_admin_commission", { precision: 10, scale: 2 }).notNull(),
+  playerCount: integer("player_count").notNull(),
+  winnerName: text("winner_name"),
+  completedAt: timestamp("completed_at").defaultNow(),
 });
 
 export const commissionPayments = pgTable("commission_payments", {
@@ -139,6 +153,21 @@ export const commissionPaymentsRelations = relations(commissionPayments, ({ one 
   }),
 }));
 
+export const gameHistoryRelations = relations(gameHistory, ({ one }) => ({
+  game: one(games, {
+    fields: [gameHistory.gameId],
+    references: [games.id],
+  }),
+  shop: one(shops, {
+    fields: [gameHistory.shopId],
+    references: [shops.id],
+  }),
+  employee: one(users, {
+    fields: [gameHistory.employeeId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -172,6 +201,11 @@ export const insertCommissionPaymentSchema = createInsertSchema(commissionPaymen
   paidAt: true,
 });
 
+export const insertGameHistorySchema = createInsertSchema(gameHistory).omit({
+  id: true,
+  completedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -185,3 +219,5 @@ export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type CommissionPayment = typeof commissionPayments.$inferSelect;
 export type InsertCommissionPayment = z.infer<typeof insertCommissionPaymentSchema>;
+export type GameHistory = typeof gameHistory.$inferSelect;
+export type InsertGameHistory = z.infer<typeof insertGameHistorySchema>;
