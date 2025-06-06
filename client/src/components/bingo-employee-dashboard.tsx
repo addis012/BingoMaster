@@ -106,6 +106,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setCalledNumbers(prev => [...prev, newNumber]);
     setLastCalledLetter(getLetterForNumber(newNumber));
     
+    // Play Amharic audio announcement
+    playAmharicAudio(newNumber);
+    
     // Check if this is O75 (number 75)
     if (newNumber === 75) {
       setGameActive(false);
