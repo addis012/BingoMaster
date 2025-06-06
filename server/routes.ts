@@ -443,10 +443,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const players = await storage.getGamePlayers(gameId);
       const winner = players.find(p => p.id === winnerId);
       
-      // Convert USD to Ethiopian Birr (1 USD = ~55 ETB)
-      const USD_TO_BIRR_RATE = 55;
-      const totalCollectedUSD = parseFloat(game.prizePool || "0");
-      const totalCollectedBirr = totalCollectedUSD * USD_TO_BIRR_RATE;
+      // System already uses Ethiopian Birr (ETB)
+      const totalCollectedBirr = parseFloat(game.prizePool || "0");
       
       // Calculate profit margin and commission
       const profitMargin = parseFloat(shop?.profitMargin || "0");
@@ -514,9 +512,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: 'game_completed', 
           game: updatedGame, 
           winnerId,
-          prizeAmountBirr: prizeAmountBirr.toFixed(2),
+          prizeAmount: prizeAmountBirr.toFixed(2),
           adminProfit: adminProfit.toFixed(2),
-          superAdminCommission: superAdminCommission.toFixed(2)
+          superAdminCommission: superAdminCommission.toFixed(2),
+          currency: 'ETB'
         });
         clients.forEach(client => {
           if (client.readyState === WebSocket.OPEN) {
@@ -528,8 +527,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         game: updatedGame,
         financial: {
-          totalCollectedBirr: totalCollectedBirr.toFixed(2),
-          prizeAmountBirr: prizeAmountBirr.toFixed(2),
+          totalCollected: totalCollectedBirr.toFixed(2),
+          prizeAmount: prizeAmountBirr.toFixed(2),
           adminProfit: adminProfit.toFixed(2),
           superAdminCommission: superAdminCommission.toFixed(2),
           currency: 'ETB'
