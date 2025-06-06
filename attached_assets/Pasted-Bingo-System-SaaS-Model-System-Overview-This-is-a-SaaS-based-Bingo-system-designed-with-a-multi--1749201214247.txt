@@ -1,0 +1,140 @@
+Bingo System - SaaS Model
+
+System Overview
+
+This is a SaaS-based Bingo system designed with a multi-role structure to manage profit, user access, employee activity, and money collection across multiple shops.
+
+
+---
+
+User Roles and Responsibilities
+
+1. Super Admin (System Owner)
+
+Has full access and control over all shops (Admins).
+
+Can:
+
+Set and update commission rates.
+
+Monitor and track daily, weekly, or monthly income across all shops using a calendar-based dashboard.
+
+Block or unblock Admins if they fail to pay commission on time.
+
+Lock out Admins and employees, making them unable to log in.
+
+
+
+2. Admin (Shop Owner)
+
+Sets their own profit margin on the money collected by employees.
+
+Gets a percentage of total income based on profit margin agreed with the Super Admin.
+
+Can:
+
+Add and manage multiple employees.
+
+Track income from employees via dashboard.
+
+Manage their own panel with employee-level details.
+
+
+
+3. Employee (Shop Cashier)
+
+Registers players and their Cartela numbers in the system.
+
+Collects money from local players.
+
+Can cancel or change Cartela numbers before the game starts.
+
+Initiates game session once there are enough players.
+
+System randomly calls out numbers until a winner is found.
+
+Cartela board highlights called numbers and the winning number.
+
+
+
+---
+
+Game Mechanics
+
+Players submit Cartela numbers via the cashier.
+
+Once the required number of players and funds are met:
+
+The cashier clicks "Play/Start."
+
+The system begins random number calls (e.g., B2, B13, I7).
+
+The first player with a matching Cartela wins.
+
+The system displays the winner and highlights the board number.
+
+
+
+
+---
+
+Profit and Commission System
+
+1. Profit Margin Logic:
+
+Admin sets their profit margin.
+
+Super Admin agrees and gets a percentage from Admin’s collected margin.
+
+Employees collect money and system tracks all collections.
+
+
+
+2. Commission Enforcement:
+
+If Admin fails to pay on time, Super Admin can:
+
+Lock their access.
+
+Block their entire panel.
+
+Unblock them upon payment.
+
+
+
+
+
+
+---
+
+Dashboards
+
+Super Admin Dashboard:
+
+View all Admins and track total income across shops.
+
+Monitor income over different time frames (daily, weekly, monthly).
+
+
+Admin Dashboard:
+
+Monitor income per employee.
+
+Track profit and payouts.
+
+Manage employee activities.
+
+
+
+
+---
+
+Technical Requirements
+
+Web-based system (SaaS) with login panels for Super Admin, Admin, and Employees.
+
+Calendar-based tracking system.
+
+Real-time number-calling and Cartela board management.
+
+Role-based access control (RBAC).
