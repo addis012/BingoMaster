@@ -220,6 +220,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Select Cartela Number (1-100)</DialogTitle>
+                    <DialogDescription>
+                      Choose a cartela number from 1 to 100. Each number generates a unique Bingo card combination.
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-10 gap-2 p-4">
                     {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
