@@ -28,16 +28,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [gamePaused, setGamePaused] = useState(false);
 
   // Play Amharic audio for number announcements
-  const playAmharicAudio = async (number: number) => {
+  const playAmharicAudio = (number: number) => {
     try {
       const letter = getLetterForNumber(number);
       const audioFile = `${letter}${number}.mp3`;
       
-      // Import the audio file dynamically
-      const audioModule = await import(`@assets/${audioFile}`);
-      const audio = new Audio(audioModule.default);
+      // Use direct path to attached assets
+      const audio = new Audio(`/attached_assets/${audioFile}`);
       audio.volume = 0.9;
-      await audio.play();
+      audio.play().catch(() => {
+        // Fallback to text-to-speech if audio fails
+        speak(`${letter} ${number}`);
+      });
     } catch (error) {
       console.error(`Error playing audio for ${getLetterForNumber(number)}${number}:`, error);
       // Fallback to text-to-speech
@@ -86,7 +88,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Generate next random number
   const callNumber = () => {
-    if (gamePaused || gameFinished) return;
+    if (!gameActive || gamePaused || gameFinished) return;
     
     const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
     const availableNumbers = allNumbers.filter(num => !calledNumbers.includes(num));
@@ -103,21 +105,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const newNumber = availableNumbers[randomIndex];
     
     setCurrentNumber(newNumber);
-    setCalledNumbers(prev => [...prev, newNumber]);
+    const newCalledNumbers = [...calledNumbers, newNumber];
+    setCalledNumbers(newCalledNumbers);
     setLastCalledLetter(getLetterForNumber(newNumber));
     
     // Play Amharic audio announcement
     playAmharicAudio(newNumber);
     
-    // Check if this is O75 (number 75)
-    if (newNumber === 75) {
+    // Check if all 75 numbers have been called (game ends after all numbers)
+    if (newCalledNumbers.length === 75) {
       setGameActive(false);
       setGameFinished(true);
       stopAutoCalling();
-      speak("Game finished. All numbers have been called.");
+      setTimeout(() => speak("Game finished. All numbers have been called."), 1000);
     }
-    
-    // Don't check for automatic Bingo - only manual verification
   };
 
   // Start new game with automatic number calling
@@ -177,14 +178,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setVerificationCartela("");
       setGamePaused(false);
       
+      // Resume automatic calling if game is still active
+      if (gameActive && !gameFinished) {
+        const interval = setInterval(() => {
+          callNumber();
+        }, 3000);
+        setAutoCallInterval(interval);
+      }
+      
       // Audio announcement for not winner
       speak("Not a winner. Game continues.");
     }
   };
 
-  // Handle "Check for BINGO" button click
+  // Handle "Check for BINGO" button click - immediately pause and stop calling
   const handleCheckBingo = () => {
     setGamePaused(true);
+    stopAutoCalling(); // Stop the interval immediately
     setShowWinnerVerification(true);
   };
 
@@ -711,7 +721,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 onClick={() => {
                   setShowWinnerVerification(false);
                   setVerificationCartela("");
-                  setGamePaused(false); // Resume the game
+                  setGamePaused(false);
+                  
+                  // Resume automatic calling if game is still active
+                  if (gameActive && !gameFinished) {
+                    const interval = setInterval(() => {
+                      callNumber();
+                    }, 3000);
+                    setAutoCallInterval(interval);
+                  }
                 }}
                 variant="outline"
                 className="flex-1"
