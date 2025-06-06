@@ -88,7 +88,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Generate next random number
   const callNumber = () => {
-    if (!gameActive || gamePaused || gameFinished) return;
+    console.log("callNumber called", { gameActive, gamePaused, gameFinished, calledNumbersLength: calledNumbers.length });
+    
+    if (!gameActive || gamePaused || gameFinished) {
+      console.log("Stopping callNumber due to game state");
+      return;
+    }
     
     const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
     const availableNumbers = allNumbers.filter(num => !calledNumbers.includes(num));
@@ -104,21 +109,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const randomIndex = Math.floor(Math.random() * availableNumbers.length);
     const newNumber = availableNumbers[randomIndex];
     
+    console.log("Calling number:", newNumber);
+    
     setCurrentNumber(newNumber);
-    const newCalledNumbers = [...calledNumbers, newNumber];
-    setCalledNumbers(newCalledNumbers);
+    setCalledNumbers(prev => {
+      const updated = [...prev, newNumber];
+      console.log("Updated called numbers:", updated.length);
+      
+      // Check if all 75 numbers have been called
+      if (updated.length === 75) {
+        setGameActive(false);
+        setGameFinished(true);
+        stopAutoCalling();
+        setTimeout(() => speak("Game finished. All numbers have been called."), 1000);
+      }
+      
+      return updated;
+    });
     setLastCalledLetter(getLetterForNumber(newNumber));
     
     // Play Amharic audio announcement
     playAmharicAudio(newNumber);
-    
-    // Check if all 75 numbers have been called (game ends after all numbers)
-    if (newCalledNumbers.length === 75) {
-      setGameActive(false);
-      setGameFinished(true);
-      stopAutoCalling();
-      setTimeout(() => speak("Game finished. All numbers have been called."), 1000);
-    }
   };
 
   // Start new game with automatic number calling
@@ -131,7 +142,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setGameFinished(false);
     setGamePaused(false);
     
-    // Start automatic number calling every 3 seconds
+    // Call first number immediately
+    setTimeout(() => {
+      callNumber();
+    }, 500);
+    
+    // Start automatic number calling every 3 seconds after first call
     const interval = setInterval(() => {
       callNumber();
     }, 3000);
