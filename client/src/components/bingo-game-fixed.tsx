@@ -110,6 +110,60 @@ export default function BingoGameFixed({ employeeName, employeeId, shopId, onLog
     return collectedAmount - shopProfit;
   };
 
+  // Automatic number calling with 3-second intervals
+  const startAutomaticNumberCalling = () => {
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+    }
+    
+    const interval = setInterval(() => {
+      callNumber();
+    }, 3000);
+    
+    setAutoCallInterval(interval);
+  };
+
+  const stopAutomaticNumberCalling = () => {
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+  };
+
+  // Call a single number
+  const callNumber = () => {
+    if (!gameActive || gamePaused || gameFinished) return;
+    
+    const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
+    const availableNumbers = allNumbers.filter(num => !calledNumbers.includes(num));
+    
+    if (availableNumbers.length === 0) {
+      setGameActive(false);
+      setGameFinished(true);
+      stopAutomaticNumberCalling();
+      return;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+    const newNumber = availableNumbers[randomIndex];
+    
+    setCurrentNumber(newNumber);
+    setLastCalledLetter(getLetterForNumber(newNumber));
+    
+    // Play Amharic audio announcement
+    playAmharicAudio(newNumber);
+    
+    const updated = [...calledNumbers, newNumber];
+    setCalledNumbers(updated);
+    
+    // Check if all numbers have been called
+    if (updated.length === 75) {
+      setGameActive(false);
+      setGameFinished(true);
+      stopAutomaticNumberCalling();
+    }
+  };
+
   // Update payout calculation when total collected or shop data changes
   useEffect(() => {
     if (totalCollected > 0 && shopData) {
@@ -391,14 +445,52 @@ export default function BingoGameFixed({ employeeName, employeeId, shopId, onLog
                 onClick={() => {
                   setGameActive(true);
                   setGameFinished(false);
+                  setGamePaused(false);
                   setCalledNumbers([]);
                   setCurrentNumber(null);
                   setWinnerFound(null);
+                  setLastCalledLetter("");
+                  
+                  // Start automatic number calling
+                  setTimeout(() => {
+                    callNumber();
+                    startAutomaticNumberCalling();
+                  }, 1000);
                 }}
                 className="w-full bg-green-500 hover:bg-green-600"
+                disabled={gameActive}
               >
-                Start Game
+                {gameActive ? "Game Running..." : "Start Game"}
               </Button>
+
+              {gameActive && (
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => {
+                      setGamePaused(!gamePaused);
+                      if (gamePaused) {
+                        startAutomaticNumberCalling();
+                      } else {
+                        stopAutomaticNumberCalling();
+                      }
+                    }}
+                    className="flex-1 bg-yellow-500 hover:bg-yellow-600"
+                  >
+                    {gamePaused ? "Resume Game" : "Pause Game"}
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => {
+                      setGameActive(false);
+                      setGameFinished(true);
+                      stopAutomaticNumberCalling();
+                    }}
+                    className="flex-1 bg-red-500 hover:bg-red-600"
+                  >
+                    End Game
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
