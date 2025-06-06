@@ -173,31 +173,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTransactionsByShop(shopId: number, startDate?: Date, endDate?: Date): Promise<Transaction[]> {
-    let query = db.select().from(transactions).where(eq(transactions.shopId, shopId));
-    
     if (startDate && endDate) {
-      query = query.where(and(
+      return await db.select().from(transactions).where(and(
         eq(transactions.shopId, shopId),
         gte(transactions.createdAt, startDate),
         lte(transactions.createdAt, endDate)
-      ));
+      )).orderBy(desc(transactions.createdAt));
     }
     
-    return await query.orderBy(desc(transactions.createdAt));
+    return await db.select().from(transactions)
+      .where(eq(transactions.shopId, shopId))
+      .orderBy(desc(transactions.createdAt));
   }
 
   async getTransactionsByEmployee(employeeId: number, startDate?: Date, endDate?: Date): Promise<Transaction[]> {
-    let query = db.select().from(transactions).where(eq(transactions.employeeId, employeeId));
-    
     if (startDate && endDate) {
-      query = query.where(and(
+      return await db.select().from(transactions).where(and(
         eq(transactions.employeeId, employeeId),
         gte(transactions.createdAt, startDate),
         lte(transactions.createdAt, endDate)
-      ));
+      )).orderBy(desc(transactions.createdAt));
     }
     
-    return await query.orderBy(desc(transactions.createdAt));
+    return await db.select().from(transactions)
+      .where(eq(transactions.employeeId, employeeId))
+      .orderBy(desc(transactions.createdAt));
   }
 
   async createCommissionPayment(insertPayment: InsertCommissionPayment): Promise<CommissionPayment> {
