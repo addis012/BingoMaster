@@ -86,61 +86,73 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return false;
   };
 
-  // Generate next random number
+  // Generate next random number using functional state updates
   const callNumber = () => {
-    console.log("🎯 callNumber invoked", { 
-      gameActive, 
-      gamePaused, 
-      gameFinished, 
-      calledNumbersLength: calledNumbers.length,
-      currentNumber,
-      intervalActive: !!autoCallInterval
+    setGameActive(prevActive => {
+      setGamePaused(prevPaused => {
+        setGameFinished(prevFinished => {
+          setCalledNumbers(prevCalled => {
+            console.log("🎯 callNumber invoked", { 
+              gameActive: prevActive, 
+              gamePaused: prevPaused, 
+              gameFinished: prevFinished, 
+              calledNumbersLength: prevCalled.length
+            });
+            
+            if (!prevActive || prevPaused || prevFinished) {
+              console.log("❌ Stopping callNumber due to game state", { 
+                gameActive: prevActive, 
+                gamePaused: prevPaused, 
+                gameFinished: prevFinished 
+              });
+              return prevCalled;
+            }
+            
+            const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
+            const availableNumbers = allNumbers.filter(num => !prevCalled.includes(num));
+            
+            console.log("📊 Available numbers:", availableNumbers.length, "out of 75");
+            
+            if (availableNumbers.length === 0) {
+              console.log("🏁 All numbers called - ending game");
+              setGameActive(false);
+              setGameFinished(true);
+              stopAutoCalling();
+              speak("Game finished. All numbers have been called.");
+              return prevCalled;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+            const newNumber = availableNumbers[randomIndex];
+            
+            console.log("🔊 Calling number:", newNumber, "Letter:", getLetterForNumber(newNumber));
+            
+            setCurrentNumber(newNumber);
+            setLastCalledLetter(getLetterForNumber(newNumber));
+            
+            // Play Amharic audio announcement
+            playAmharicAudio(newNumber);
+            
+            const updated = [...prevCalled, newNumber];
+            console.log("📝 Updated called numbers count:", updated.length);
+            
+            // Check if all 75 numbers have been called
+            if (updated.length === 75) {
+              console.log("🎉 Game complete - all 75 numbers called");
+              setGameActive(false);
+              setGameFinished(true);
+              stopAutoCalling();
+              setTimeout(() => speak("Game finished. All numbers have been called."), 1000);
+            }
+            
+            return updated;
+          });
+          return prevFinished;
+        });
+        return prevPaused;
+      });
+      return prevActive;
     });
-    
-    if (!gameActive || gamePaused || gameFinished) {
-      console.log("❌ Stopping callNumber due to game state", { gameActive, gamePaused, gameFinished });
-      return;
-    }
-    
-    const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
-    const availableNumbers = allNumbers.filter(num => !calledNumbers.includes(num));
-    
-    console.log("📊 Available numbers:", availableNumbers.length, "out of 75");
-    
-    if (availableNumbers.length === 0) {
-      console.log("🏁 All numbers called - ending game");
-      setGameActive(false);
-      setGameFinished(true);
-      stopAutoCalling();
-      speak("Game finished. All numbers have been called.");
-      return;
-    }
-    
-    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-    const newNumber = availableNumbers[randomIndex];
-    
-    console.log("🔊 Calling number:", newNumber, "Letter:", getLetterForNumber(newNumber));
-    
-    setCurrentNumber(newNumber);
-    setCalledNumbers(prev => {
-      const updated = [...prev, newNumber];
-      console.log("📝 Updated called numbers count:", updated.length);
-      
-      // Check if all 75 numbers have been called
-      if (updated.length === 75) {
-        console.log("🎉 Game complete - all 75 numbers called");
-        setGameActive(false);
-        setGameFinished(true);
-        stopAutoCalling();
-        setTimeout(() => speak("Game finished. All numbers have been called."), 1000);
-      }
-      
-      return updated;
-    });
-    setLastCalledLetter(getLetterForNumber(newNumber));
-    
-    // Play Amharic audio announcement
-    playAmharicAudio(newNumber);
   };
 
   // Start new game with automatic number calling
