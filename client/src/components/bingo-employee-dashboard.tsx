@@ -4,12 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
 
 interface BingoEmployeeDashboardProps {
   onLogout: () => void;
 }
 
 export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashboardProps) {
+  const { user } = useAuth();
+  
+  // Fetch shop data to get profit margin
+  const { data: shops } = useQuery({
+    queryKey: ['/api/shops'],
+  });
+  
+  const currentShop = shops?.find((shop: any) => shop.id === user?.shopId);
+  const profitMarginPercentage = currentShop?.profitMargin || 0;
+  
   const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
   const [currentNumber, setCurrentNumber] = useState<number | null>(null);
   const [gameActive, setGameActive] = useState(false);
@@ -29,6 +41,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
   const [gameFinished, setGameFinished] = useState(false);
   const [gamePaused, setGamePaused] = useState(false);
+  
+  // Calculate total collected and winner payout
+  const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
+  const winnerPayout = totalCollected * (1 - profitMarginPercentage / 100);
   
   // Use ref to track game state for reliable interval access
   const gameStateRef = useRef({
@@ -458,11 +474,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Bingo Play</h1>
-          <p className="text-sm text-gray-600">@buzo02 - Employee</p>
+          <p className="text-sm text-gray-600">{user?.name || 'Employee'} - Employee</p>
         </div>
-        <Button onClick={onLogout} variant="outline" className="bg-teal-500 text-white hover:bg-teal-600">
-          Log Out
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="text-right text-sm">
+            <p className="text-gray-600">Total Collected</p>
+            <p className="font-bold text-green-600">{totalCollected} Birr</p>
+          </div>
+          <div className="text-right text-sm">
+            <p className="text-gray-600">Winner Gets</p>
+            <p className="font-bold text-blue-600">{winnerPayout.toFixed(2)} Birr</p>
+          </div>
+          {currentShop && (
+            <div className="text-right text-sm">
+              <p className="text-gray-600">Profit Margin</p>
+              <p className="font-bold text-purple-600">{profitMarginPercentage}%</p>
+            </div>
+          )}
+          <Button onClick={onLogout} variant="outline" className="bg-teal-500 text-white hover:bg-teal-600">
+            Log Out
+          </Button>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">

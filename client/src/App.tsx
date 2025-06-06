@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./hooks/use-auth";
 import LoginPage from "./pages/login-page";
 import SimpleAdminDashboard from "./pages/simple-admin-dashboard";
-import EmployeeDashboard from "./pages/employee-dashboard-new";
+import BingoEmployeeDashboard from "./components/bingo-employee-dashboard";
 
 function App() {
   const handleLogout = () => {
@@ -22,7 +22,7 @@ function App() {
             <SimpleAdminDashboard onLogout={handleLogout} />
           </Route>
           <Route path="/employee">
-            <EmployeeDashboard />
+            <BingoEmployeeDashboard onLogout={handleLogout} />
           </Route>
         </Router>
       </AuthProvider>
