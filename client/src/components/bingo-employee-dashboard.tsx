@@ -212,7 +212,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setGameActive(false);
       setGameFinished(true);
       stopAutoCalling();
-      console.log("🎉 Game complete - all 75 numbers called");
     }
   };
 
