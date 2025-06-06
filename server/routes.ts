@@ -437,6 +437,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update shop settings (commission rate, profit margin)
+  app.patch("/api/shops/:shopId", async (req, res) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const updatedShop = await storage.updateShop(shopId, req.body);
+      
+      if (!updatedShop) {
+        return res.status(404).json({ message: "Shop not found" });
+      }
+      
+      res.json(updatedShop);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update shop" });
+    }
+  });
+
+  // Get today's games for a shop
+  app.get("/api/games/shop/:shopId/today", async (req, res) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      
+      const games = await storage.getGamesByShop(shopId);
+      const todayGames = games.filter(game => {
+        const gameDate = new Date(game.createdAt);
+        return gameDate >= startOfDay && gameDate < endOfDay;
+      });
+
+      // Get players for each game
+      const gamesWithPlayers = await Promise.all(
+        todayGames.map(async (game) => {
+          const players = await storage.getGamePlayers(game.id);
+          const employee = await storage.getUser(game.employeeId);
+          return { 
+            ...game, 
+            players,
+            employee: employee ? { name: employee.name } : null
+          };
+        })
+      );
+      
+      res.json(gamesWithPlayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get today's games" });
+    }
+  });
+
+  // Get daily income for a shop
+  app.get("/api/shops/:shopId/daily-income", async (req, res) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      
+      const transactions = await storage.getTransactionsByShop(shopId, startOfDay);
+      const totalIncome = transactions
+        .filter(t => t.type === 'entry_fee')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      const totalPayout = transactions
+        .filter(t => t.type === 'prize_payout')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      res.json({
+        amount: (totalIncome - totalPayout).toFixed(2),
+        totalIncome: totalIncome.toFixed(2),
+        totalPayout: totalPayout.toFixed(2)
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get daily income" });
+    }
+  });
+
+  // Update employee password
+  app.patch("/api/users/:userId/password", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { password } = req.body;
+      
+      if (!password) {
+        return res.status(400).json({ message: "Password is required" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const updatedUser = await storage.updateUser(userId, { password: hashedPassword });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update password" });
+    }
+  });
+
   // Transaction routes
   app.get("/api/transactions/shop/:shopId", async (req, res) => {
     try {
