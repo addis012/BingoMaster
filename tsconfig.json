@@ -7,6 +7,7 @@
     "noEmit": true,
     "module": "ESNext",
     "strict": false,
+    "noImplicitAny": false,
     "lib": ["esnext", "dom", "dom.iterable"],
     "jsx": "react-jsx",
     "esModuleInterop": true,

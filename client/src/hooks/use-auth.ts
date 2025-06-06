@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, createElement } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getQueryFn } from "@/lib/queryClient";
 
@@ -21,7 +21,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider(props: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -67,17 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [isLoading]);
 
   const value = {
-    user: userData?.user || null,
+    user: (userData as any)?.user || null,
     login,
     logout,
     isLoading: !isInitialized || loginMutation.isPending || logoutMutation.isPending,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return createElement(AuthContext.Provider, { value }, props.children);
 }
 
 export function useAuth() {
