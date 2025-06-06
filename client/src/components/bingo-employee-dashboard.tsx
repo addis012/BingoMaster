@@ -645,7 +645,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 <div className="text-green-800 font-bold text-xl mb-2">🎉 BINGO! 🎉</div>
                 <div className="text-green-700 font-semibold">{winnerFound} WINS!</div>
                 <div className="text-green-600 text-sm mt-2">
-                  Prize: {gameAmount} Birr
+                  Prize: {winnerPayout.toFixed(2)} Birr
                 </div>
               </CardContent>
             </Card>
