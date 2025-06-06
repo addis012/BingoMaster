@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { NavigationHeader } from "@/components/navigation-header";
 import { FinancialDashboard } from "@/components/financial-dashboard";
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, Users, DollarSign, AlertTriangle } from "lucide-react";
+import { Building2, Users, DollarSign, AlertTriangle, TrendingUp, GamepadIcon, BarChart3 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -41,10 +41,68 @@ export default function SuperAdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavigationHeader user={user} title="Super Admin Panel" />
+      <NavigationHeader user={user} title="Admin Dashboard" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Overview */}
+        {/* Main Navigation Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          
+          {/* Shop Management Card */}
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <Building2 className="h-8 w-8 text-blue-600" />
+              </div>
+              <CardTitle className="text-xl">Shop Management</CardTitle>
+              <CardDescription className="text-sm">
+                Manage shops and employees
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                Manage Shops
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Financial Reports Card */}
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <BarChart3 className="h-8 w-8 text-green-600" />
+              </div>
+              <CardTitle className="text-xl">Financial Reports</CardTitle>
+              <CardDescription className="text-sm">
+                View revenue and commissions
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button className="w-full bg-green-600 hover:bg-green-700">
+                View Reports
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Game Monitoring Card */}
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                <GamepadIcon className="h-8 w-8 text-purple-600" />
+              </div>
+              <CardTitle className="text-xl">Game Monitoring</CardTitle>
+              <CardDescription className="text-sm">
+                Monitor active games
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                View Games
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
@@ -103,12 +161,13 @@ export default function SuperAdminDashboard() {
           </Card>
         </div>
 
+        {/* Detailed Management Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Shops Management */}
+          {/* Recent Shops */}
           <Card>
             <CardHeader>
-              <CardTitle>Shop Management</CardTitle>
-              <CardDescription>Manage all shops and their status</CardDescription>
+              <CardTitle>Recent Shops</CardTitle>
+              <CardDescription>Latest registered shops</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -122,7 +181,7 @@ export default function SuperAdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {shops.map((shop: any) => (
+                    {shops.slice(0, 5).map((shop: any) => (
                       <TableRow key={shop.id}>
                         <TableCell className="font-medium">{shop.name}</TableCell>
                         <TableCell>
@@ -148,8 +207,36 @@ export default function SuperAdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Financial Dashboard */}
-          <FinancialDashboard userRole="super_admin" />
+          {/* System Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>System Overview</CardTitle>
+              <CardDescription>Platform performance metrics</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm font-medium">Total Shops</span>
+                <span className="text-lg font-bold text-blue-600">{totalShops}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                <span className="text-sm font-medium">Active Shops</span>
+                <span className="text-lg font-bold text-green-600">{activeShops}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                <span className="text-sm font-medium">Total Revenue</span>
+                <span className="text-lg font-bold text-purple-600">${totalRevenue.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                <span className="text-sm font-medium">Commission Rate Avg</span>
+                <span className="text-lg font-bold text-orange-600">
+                  {shops.length > 0 
+                    ? (shops.reduce((sum: number, shop: any) => sum + parseFloat(shop.commissionRate || "0"), 0) / shops.length).toFixed(1)
+                    : "0"
+                  }%
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
