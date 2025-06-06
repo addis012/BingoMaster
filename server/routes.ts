@@ -433,31 +433,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameId = parseInt(req.params.id);
       const { winnerId } = req.body;
       
-      const game = await storage.updateGame(gameId, {
-        status: 'completed',
-        winnerId,
-        completedAt: new Date(),
-      });
-
+      // Get game, shop, and winner details
+      const game = await storage.getGame(gameId);
       if (!game) {
         return res.status(404).json({ message: "Game not found" });
       }
+      
+      const shop = await storage.getShop(game.shopId);
+      const players = await storage.getGamePlayers(gameId);
+      const winner = players.find(p => p.id === winnerId);
+      
+      // Convert USD to Ethiopian Birr (1 USD = ~55 ETB)
+      const USD_TO_BIRR_RATE = 55;
+      const totalCollectedUSD = parseFloat(game.prizePool || "0");
+      const totalCollectedBirr = totalCollectedUSD * USD_TO_BIRR_RATE;
+      
+      // Calculate profit margin and commission
+      const profitMargin = parseFloat(shop?.profitMargin || "0");
+      const commissionRate = parseFloat(shop?.commissionRate || "0");
+      
+      const adminProfit = (totalCollectedBirr * profitMargin) / 100;
+      const prizeAmountBirr = totalCollectedBirr - adminProfit;
+      const superAdminCommission = (adminProfit * commissionRate) / 100;
+      
+      // Update game status
+      const updatedGame = await storage.updateGame(gameId, {
+        status: 'completed',
+        winnerId,
+        completedAt: new Date(),
+        prizePool: prizeAmountBirr.toString(),
+      });
 
-      // Create prize payout transaction
-      const prizeAmount = parseFloat(game.prizePool || "0");
+      // Create transactions in Birr
       await storage.createTransaction({
         gameId,
         shopId: game.shopId,
         employeeId: game.employeeId,
-        amount: prizeAmount.toString(),
+        amount: prizeAmountBirr.toString(),
         type: 'prize_payout',
-        description: `Prize payout for game ${gameId}`,
+        description: `Prize payout for game ${gameId} - ${prizeAmountBirr.toFixed(2)} Birr`,
+      });
+
+      await storage.createTransaction({
+        gameId,
+        shopId: game.shopId,
+        employeeId: game.employeeId,
+        amount: adminProfit.toString(),
+        type: 'admin_profit',
+        description: `Admin profit for game ${gameId} - ${adminProfit.toFixed(2)} Birr`,
+      });
+
+      if (superAdminCommission > 0) {
+        await storage.createTransaction({
+          gameId,
+          shopId: game.shopId,
+          employeeId: game.employeeId,
+          amount: superAdminCommission.toString(),
+          type: 'super_admin_commission',
+          description: `Super admin commission for game ${gameId} - ${superAdminCommission.toFixed(2)} Birr`,
+        });
+      }
+
+      // Create game history record
+      await storage.createGameHistory({
+        gameId,
+        shopId: game.shopId,
+        employeeId: game.employeeId,
+        totalCollected: totalCollectedBirr.toString(),
+        prizeAmount: prizeAmountBirr.toString(),
+        adminProfit: adminProfit.toString(),
+        superAdminCommission: superAdminCommission.toString(),
+        playerCount: players.length,
+        winnerName: winner?.playerName || 'Unknown',
       });
 
       // Notify WebSocket clients
       const clients = gameClients.get(gameId);
       if (clients) {
-        const message = JSON.stringify({ type: 'game_completed', game, winnerId });
+        const message = JSON.stringify({ 
+          type: 'game_completed', 
+          game: updatedGame, 
+          winnerId,
+          prizeAmountBirr: prizeAmountBirr.toFixed(2),
+          adminProfit: adminProfit.toFixed(2),
+          superAdminCommission: superAdminCommission.toFixed(2)
+        });
         clients.forEach(client => {
           if (client.readyState === WebSocket.OPEN) {
             client.send(message);
@@ -465,9 +525,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      res.json(game);
+      res.json({
+        game: updatedGame,
+        financial: {
+          totalCollectedBirr: totalCollectedBirr.toFixed(2),
+          prizeAmountBirr: prizeAmountBirr.toFixed(2),
+          adminProfit: adminProfit.toFixed(2),
+          superAdminCommission: superAdminCommission.toFixed(2),
+          currency: 'ETB'
+        }
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to declare winner" });
+    }
+  });
+
+  // Game History routes
+  app.get("/api/game-history/:shopId", async (req, res) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const { startDate, endDate } = req.query;
+      
+      const start = startDate ? new Date(startDate as string) : undefined;
+      const end = endDate ? new Date(endDate as string) : undefined;
+      
+      const history = await storage.getGameHistory(shopId, start, end);
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get game history" });
     }
   });
 

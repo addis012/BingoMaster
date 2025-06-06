@@ -48,6 +48,12 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     queryKey: ["/api/games/shop", shopId],
   });
 
+  // Fetch game history
+  const { data: gameHistory = [] } = useQuery({
+    queryKey: ["/api/game-history", shopId],
+    queryFn: () => fetch(`/api/game-history/${shopId}`).then(res => res.json()),
+  });
+
   // Update commission settings
   const updateCommissionMutation = useMutation({
     mutationFn: async (data: { profitMargin: string }) => {
@@ -350,6 +356,117 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                       <div>
                         <span className="text-gray-600">Profit Margin: </span>
                         <span className="font-medium">{shopData.profitMargin || "0"}%</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Game History</CardTitle>
+                <CardDescription>View completed games with financial details (Ethiopian Birr)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Game ID
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Winner
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Players
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Total Collected (ETB)
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Prize Amount (ETB)
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Admin Profit (ETB)
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Super Admin Commission (ETB)
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {gameHistory.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
+                            No game history available
+                          </td>
+                        </tr>
+                      ) : (
+                        gameHistory.map((game: any) => (
+                          <tr key={game.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              #{game.gameId}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {new Date(game.completedAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {game.winnerName}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {game.playerCount}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                              {parseFloat(game.totalCollected).toFixed(2)} ETB
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                              {parseFloat(game.prizeAmount).toFixed(2)} ETB
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-purple-600">
+                              {parseFloat(game.adminProfit).toFixed(2)} ETB
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-orange-600">
+                              {parseFloat(game.superAdminCommission).toFixed(2)} ETB
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {gameHistory.length > 0 && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium mb-2">Financial Summary (Ethiopian Birr)</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Total Games: </span>
+                        <span className="font-medium">{gameHistory.length}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Total Collected: </span>
+                        <span className="font-medium text-green-600">
+                          {gameHistory.reduce((sum: number, game: any) => sum + parseFloat(game.totalCollected || "0"), 0).toFixed(2)} ETB
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Total Admin Profit: </span>
+                        <span className="font-medium text-purple-600">
+                          {gameHistory.reduce((sum: number, game: any) => sum + parseFloat(game.adminProfit || "0"), 0).toFixed(2)} ETB
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Total Commission: </span>
+                        <span className="font-medium text-orange-600">
+                          {gameHistory.reduce((sum: number, game: any) => sum + parseFloat(game.superAdminCommission || "0"), 0).toFixed(2)} ETB
+                        </span>
                       </div>
                     </div>
                   </div>

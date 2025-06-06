@@ -211,6 +211,25 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(commissionPayments.paidAt));
   }
 
+  async createGameHistory(insertHistory: InsertGameHistory): Promise<GameHistory> {
+    const [history] = await db.insert(gameHistory).values(insertHistory).returning();
+    return history;
+  }
+
+  async getGameHistory(shopId: number, startDate?: Date, endDate?: Date): Promise<GameHistory[]> {
+    let query = db.select().from(gameHistory).where(eq(gameHistory.shopId, shopId));
+    
+    if (startDate && endDate) {
+      query = query.where(and(
+        eq(gameHistory.shopId, shopId),
+        gte(gameHistory.completedAt, startDate),
+        lte(gameHistory.completedAt, endDate)
+      ));
+    }
+    
+    return await query.orderBy(desc(gameHistory.completedAt));
+  }
+
   async getShopStats(shopId: number, startDate?: Date, endDate?: Date): Promise<{
     totalRevenue: string;
     totalGames: number;
