@@ -24,6 +24,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [showWinnerVerification, setShowWinnerVerification] = useState(false);
   const [verificationCartela, setVerificationCartela] = useState("");
   const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
+  const [gameFinished, setGameFinished] = useState(false);
+  const [gamePaused, setGamePaused] = useState(false);
+
+  // Text-to-speech function
+  const speak = (text: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.8;
+      utterance.volume = 0.9;
+      speechSynthesis.speak(utterance);
+    }
+  };
 
   // Check for Bingo winning patterns
   const checkForBingo = (card: number[][], calledNums: number[]): boolean => {
@@ -56,30 +68,35 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Generate next random number
   const callNumber = () => {
+    if (gamePaused || gameFinished) return;
+    
     const allNumbers = Array.from({ length: 75 }, (_, i) => i + 1);
     const availableNumbers = allNumbers.filter(num => !calledNumbers.includes(num));
     
     if (availableNumbers.length === 0) {
       setGameActive(false);
+      setGameFinished(true);
+      stopAutoCalling();
+      speak("Game finished. All numbers have been called.");
       return;
     }
     
     const randomIndex = Math.floor(Math.random() * availableNumbers.length);
     const newNumber = availableNumbers[randomIndex];
     
-    const newCalledNumbers = [...calledNumbers, newNumber];
     setCurrentNumber(newNumber);
-    setCalledNumbers(newCalledNumbers);
+    setCalledNumbers(prev => [...prev, newNumber]);
     setLastCalledLetter(getLetterForNumber(newNumber));
     
-    // Check for Bingo after each number call
-    bookedCartelas.forEach(cartelaNum => {
-      const card = cartelaCards[cartelaNum];
-      if (card && checkForBingo(card, newCalledNumbers)) {
-        setWinnerFound(`Cartela #${cartelaNum}`);
-        setGameActive(false);
-      }
-    });
+    // Check if this is O75 (number 75)
+    if (newNumber === 75) {
+      setGameActive(false);
+      setGameFinished(true);
+      stopAutoCalling();
+      speak("Game finished. All numbers have been called.");
+    }
+    
+    // Don't check for automatic Bingo - only manual verification
   };
 
   // Start new game with automatic number calling
@@ -89,6 +106,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setGameActive(true);
     setLastCalledLetter("");
     setWinnerFound(null);
+    setGameFinished(false);
+    setGamePaused(false);
     
     // Start automatic number calling every 3 seconds
     const interval = setInterval(() => {
@@ -124,12 +143,28 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     if (isWinner) {
       setWinnerFound(`Cartela #${cartelaNum}`);
       setGameActive(false);
+      setGameFinished(true);
       stopAutoCalling();
       setShowWinnerVerification(false);
       setVerificationCartela("");
+      setGamePaused(false);
+      
+      // Audio announcement for winner
+      speak(`Cartela number ${cartelaNum} won!`);
     } else {
-      alert("This cartela does not have BINGO! Please check again.");
+      setShowWinnerVerification(false);
+      setVerificationCartela("");
+      setGamePaused(false);
+      
+      // Audio announcement for not winner
+      speak("Not a winner. Game continues.");
     }
+  };
+
+  // Handle "Check for BINGO" button click
+  const handleCheckBingo = () => {
+    setGamePaused(true);
+    setShowWinnerVerification(true);
   };
 
   // Reset game
@@ -139,6 +174,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setGameActive(false);
     setLastCalledLetter("");
     setWinnerFound(null);
+    setGameFinished(false);
+    setGamePaused(false);
     stopAutoCalling();
   };
 
