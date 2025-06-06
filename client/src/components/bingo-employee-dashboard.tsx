@@ -27,7 +27,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [gameFinished, setGameFinished] = useState(false);
   const [gamePaused, setGamePaused] = useState(false);
 
-  // Text-to-speech function
+  // Play Amharic audio for number announcements
+  const playAmharicAudio = (number: number) => {
+    try {
+      const letter = getLetterForNumber(number);
+      const audioFile = `${letter}${number}.mp3`;
+      const audio = new Audio(`/src/assets/${audioFile}`);
+      audio.volume = 0.9;
+      audio.play().catch(console.error);
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      // Fallback to text-to-speech
+      speak(`${getLetterForNumber(number)} ${number}`);
+    }
+  };
+
+  // Text-to-speech function (fallback)
   const speak = (text: string) => {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text);
