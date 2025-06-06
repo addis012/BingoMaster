@@ -372,10 +372,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Fixed cartela patterns - each cartela number (1-100) has predetermined numbers
   const getFixedCartelaCard = (cartelaNum: number) => {
     // Create deterministic pattern based on cartela number
-    // Each cartela will ALWAYS have the same numbers
+    // Each cartela will ALWAYS have the same numbers using a proper seeded shuffle
     const createFixedPattern = (num: number): number[][] => {
-      // Use cartela number as seed for consistent generation
-      const seed = num * 7919; // Large prime for good distribution
+      // Seeded random number generator for consistent results
+      let seed = num * 12345; // Use cartela number as seed
+      const seededRandom = () => {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      };
       
       const card: number[][] = [[], [], [], [], []]; // 5 columns
       const ranges = [
@@ -386,22 +390,24 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         [61, 75]   // O column
       ];
 
+      // Generate each column independently with seeded shuffling
       for (let col = 0; col < 5; col++) {
         const [min, max] = ranges[col];
-        const availableNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+        const columnNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i);
         
+        // Shuffle the column numbers deterministically using seeded random
+        for (let i = columnNumbers.length - 1; i > 0; i--) {
+          const j = Math.floor(seededRandom() * (i + 1));
+          [columnNumbers[i], columnNumbers[j]] = [columnNumbers[j], columnNumbers[i]];
+        }
+        
+        // Take first 5 numbers from shuffled array for this column
         for (let row = 0; row < 5; row++) {
           if (col === 2 && row === 2) {
             card[row].push(0); // FREE space in center
           } else {
-            // Create deterministic selection based on cartela number and position
-            const position = col * 5 + row;
-            const seedValue = (seed + position * 12289) % availableNumbers.length; // Another large prime
-            const selectedNum = availableNumbers[seedValue];
-            card[row].push(selectedNum);
-            
-            // Remove selected number to avoid duplicates in column
-            availableNumbers.splice(seedValue, 1);
+            const numberIndex = row < 2 ? row : row - 1; // Skip center for N column
+            card[row].push(columnNumbers[numberIndex]);
           }
         }
       }
