@@ -761,5 +761,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Additional API routes for admin dashboard
+  app.get("/api/games/shop", async (req, res) => {
+    try {
+      const games = await storage.getGamesByShop(1);
+      res.json(games);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get games" });
+    }
+  });
+
+  app.get("/api/users/shop", async (req, res) => {
+    try {
+      const users = await storage.getUsersByShop(1);
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      res.json(usersWithoutPasswords);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get shop users" });
+    }
+  });
+
   return httpServer;
 }
