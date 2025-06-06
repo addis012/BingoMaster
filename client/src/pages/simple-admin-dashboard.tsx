@@ -126,15 +126,16 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   });
 
   const handleUpdateCommission = () => {
-    if (!commissionRate || !profitMargin) {
+    if (!profitMargin) {
       toast({
         title: "Error",
-        description: "Please fill in both commission rate and profit margin",
+        description: "Please enter a profit margin",
         variant: "destructive",
       });
       return;
     }
-    updateCommissionMutation.mutate({ commissionRate, profitMargin });
+    // Only send profit margin for regular admins (commission rate is super admin only)
+    updateCommissionMutation.mutate({ profitMargin });
   };
 
   const handleCreateEmployee = () => {
@@ -307,14 +308,17 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="commission">Commission Rate (%)</Label>
+                    <Label htmlFor="commission">Commission Rate (%) - Super Admin Only</Label>
                     <Input 
                       id="commission"
                       type="number" 
                       placeholder="5.0" 
                       value={commissionRate}
                       onChange={(e) => setCommissionRate(e.target.value)}
+                      disabled={true}
+                      className="bg-gray-100"
                     />
+                    <p className="text-sm text-gray-500">Contact Super Admin to change commission rates</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="profit">Profit Margin (%)</Label>

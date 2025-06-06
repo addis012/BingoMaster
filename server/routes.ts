@@ -491,7 +491,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/shops/:shopId", async (req, res) => {
     try {
       const shopId = parseInt(req.params.shopId);
-      const updatedShop = await storage.updateShop(shopId, req.body);
+      const user = req.session?.user;
+      
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { commissionRate, profitMargin } = req.body;
+      
+      // Only super admins can update commission rates
+      if (commissionRate !== undefined && user.role !== "super_admin") {
+        return res.status(403).json({ message: "Only super admins can update commission rates" });
+      }
+      
+      // Regular admins can only update profit margins
+      const updateData: any = {};
+      if (user.role === "super_admin" && commissionRate !== undefined) {
+        updateData.commissionRate = commissionRate;
+      }
+      if (profitMargin !== undefined) {
+        updateData.profitMargin = profitMargin;
+      }
+      
+      const updatedShop = await storage.updateShop(shopId, updateData);
       
       if (!updatedShop) {
         return res.status(404).json({ message: "Shop not found" });
