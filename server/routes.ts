@@ -555,6 +555,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Today's stats route for admin dashboard
+  app.get("/api/stats/today/:shopId", async (req, res) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+      
+      const todayTransactions = await storage.getTransactionsByShop(shopId, startOfDay, endOfDay);
+      
+      const todayRevenue = todayTransactions
+        .filter(t => t.type === 'entry_fee')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        
+      const todayPrizes = todayTransactions
+        .filter(t => t.type === 'prize_payout')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        
+      const todayProfit = todayTransactions
+        .filter(t => t.type === 'admin_profit')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      res.json({
+        revenue: todayRevenue,
+        prizes: todayPrizes,
+        profit: todayProfit,
+        netIncome: todayProfit
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get today's stats" });
+    }
+  });
+
   // Stats routes
   app.get("/api/stats/employee/:id", async (req, res) => {
     try {

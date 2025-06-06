@@ -54,6 +54,13 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     queryFn: () => fetch(`/api/game-history/${shopId}`).then(res => res.json()),
   });
 
+  // Fetch today's stats
+  const { data: todayStats } = useQuery({
+    queryKey: ["/api/stats/today", shopId],
+    queryFn: () => fetch(`/api/stats/today/${shopId}`).then(res => res.json()),
+    enabled: !!shopId,
+  });
+
   // Update commission settings
   const updateCommissionMutation = useMutation({
     mutationFn: async (data: { profitMargin: string }) => {
@@ -215,7 +222,9 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Today's Income</p>
-                      <p className="text-2xl font-semibold text-gray-900">Br 0.00</p>
+                      <p className="text-2xl font-semibold text-gray-900">
+                        Br {todayStats?.netIncome?.toFixed(2) || '0.00'}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
