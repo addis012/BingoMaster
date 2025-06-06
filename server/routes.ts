@@ -507,10 +507,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Regular admins can only update profit margins
       const updateData: any = {};
       if (user.role === "super_admin" && commissionRate !== undefined) {
-        updateData.commissionRate = commissionRate;
+        updateData.commissionRate = parseFloat(commissionRate);
       }
       if (profitMargin !== undefined) {
-        updateData.profitMargin = profitMargin;
+        updateData.profitMargin = parseFloat(profitMargin);
       }
       
       const updatedShop = await storage.updateShop(shopId, updateData);

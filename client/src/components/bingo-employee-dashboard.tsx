@@ -491,12 +491,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             <p className="text-gray-600">Winner Gets</p>
             <p className="font-bold text-blue-600">{winnerPayout.toFixed(2)} Birr</p>
           </div>
-          {currentShop && (
-            <div className="text-right text-sm">
-              <p className="text-gray-600">Profit Margin</p>
-              <p className="font-bold text-purple-600">{profitMarginPercentage}%</p>
-            </div>
-          )}
           <Button onClick={onLogout} variant="outline" className="bg-teal-500 text-white hover:bg-teal-600">
             Log Out
           </Button>
