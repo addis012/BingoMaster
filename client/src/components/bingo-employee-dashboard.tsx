@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface BingoEmployeeDashboardProps {
   onLogout: () => void;
@@ -16,6 +17,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [players, setPlayers] = useState<string[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [entryFee, setEntryFee] = useState("50.00");
+  const [showCartelaSelector, setShowCartelaSelector] = useState(false);
+  const [selectedCartela, setSelectedCartela] = useState<number | null>(null);
+  const [cartelaCards, setCartelaCards] = useState<{[key: number]: number[][]}>({});
 
   // Generate next random number
   const callNumber = () => {
@@ -49,6 +53,51 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setCurrentNumber(null);
     setGameActive(false);
     setLastCalledLetter("");
+  };
+
+  // Generate unique Bingo card based on cartela number
+  const generateCartelaCard = (cartelaNum: number) => {
+    // Use cartela number as seed for consistent generation
+    const seed = cartelaNum;
+    const ranges = [
+      [1, 15],   // B column
+      [16, 30],  // I column  
+      [31, 45],  // N column
+      [46, 60],  // G column
+      [61, 75]   // O column
+    ];
+
+    const card: number[][] = [];
+    
+    for (let col = 0; col < 5; col++) {
+      const column: number[] = [];
+      const [min, max] = ranges[col];
+      
+      // Create seeded random selection based on cartela number and column
+      const availableNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+      
+      for (let row = 0; row < 5; row++) {
+        if (col === 2 && row === 2) {
+          column.push(0); // FREE space
+        } else {
+          // Use cartela number + position as seed for consistent randomness
+          const seedValue = (seed * 1000) + (col * 10) + row;
+          const randomIndex = seedValue % availableNumbers.length;
+          column.push(availableNumbers.splice(randomIndex, 1)[0]);
+        }
+      }
+      card.push(column);
+    }
+    
+    return card;
+  };
+
+  // Select cartela and generate card
+  const selectCartela = (cartelaNum: number) => {
+    const card = generateCartelaCard(cartelaNum);
+    setCartelaCards(prev => ({ ...prev, [cartelaNum]: card }));
+    setSelectedCartela(cartelaNum);
+    setShowCartelaSelector(false);
   };
 
   // Add player
@@ -144,13 +193,95 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           {/* Game Controls */}
           <Card>
             <CardContent className="p-4 space-y-3">
-              <Button 
-                onClick={callNumber} 
-                disabled={!gameActive}
-                className="w-full bg-blue-500 hover:bg-blue-600"
-              >
-                Select Cartela
-              </Button>
+              <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="w-full bg-blue-500 hover:bg-blue-600"
+                    onClick={() => setShowCartelaSelector(true)}
+                  >
+                    Select Cartela
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Select Cartela Number (1-100)</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid grid-cols-10 gap-2 p-4">
+                    {Array.from({ length: 100 }, (_, i) => i + 1).map(num => (
+                      <Button
+                        key={num}
+                        variant={selectedCartela === num ? "default" : "outline"}
+                        className={`h-12 w-12 text-sm ${
+                          selectedCartela === num ? "bg-orange-500 hover:bg-orange-600" : ""
+                        }`}
+                        onClick={() => selectCartela(num)}
+                      >
+                        {num}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {selectedCartela && cartelaCards[selectedCartela] && (
+                    <div className="mt-6 p-4 border-t">
+                      <h3 className="text-lg font-semibold mb-4 text-center">
+                        Cartela #{selectedCartela} - Bingo Card Preview
+                      </h3>
+                      <div className="max-w-sm mx-auto">
+                        {/* Header */}
+                        <div className="grid grid-cols-5 gap-1 mb-2">
+                          {['B', 'I', 'N', 'G', 'O'].map(letter => (
+                            <div key={letter} className="h-8 bg-red-500 text-white rounded flex items-center justify-center font-bold text-lg">
+                              {letter}
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Numbers */}
+                        <div className="grid grid-cols-5 gap-1">
+                          {Array.from({ length: 5 }, (_, row) =>
+                            Array.from({ length: 5 }, (_, col) => {
+                              const number = cartelaCards[selectedCartela][col][row];
+                              const isFree = col === 2 && row === 2;
+                              
+                              return (
+                                <div
+                                  key={`${row}-${col}`}
+                                  className={`h-8 border-2 rounded flex items-center justify-center font-bold text-sm ${
+                                    isFree 
+                                      ? 'bg-yellow-300 text-black border-yellow-400' 
+                                      : 'bg-white text-black border-gray-300'
+                                  }`}
+                                >
+                                  {isFree ? 'FREE' : number}
+                                </div>
+                              );
+                            })
+                          ).flat()}
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-4 justify-center">
+                        <Button 
+                          className="bg-green-500 hover:bg-green-600"
+                          onClick={() => setShowCartelaSelector(false)}
+                        >
+                          Book Card
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          className="bg-red-500 text-white hover:bg-red-600"
+                          onClick={() => {
+                            setSelectedCartela(null);
+                            setShowCartelaSelector(false);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
               <Button 
                 onClick={resetGame}
                 variant="outline" 
