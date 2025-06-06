@@ -65,29 +65,58 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   };
 
-  // Check for Bingo winning patterns
+  // Check for Bingo winning patterns based on traditional patterns
   const checkForBingo = (card: number[][], calledNums: number[]): boolean => {
-    // Check rows
+    // Helper function to check if number is called (center is free space)
+    const isMarked = (row: number, col: number) => {
+      if (row === 2 && col === 2) return true; // Center is free space
+      return calledNums.includes(card[row][col]);
+    };
+
+    // Pattern 1: Any horizontal line
     for (let row = 0; row < 5; row++) {
-      if (card[row].every(num => calledNums.includes(num))) {
+      if ([0, 1, 2, 3, 4].every(col => isMarked(row, col))) {
         return true;
       }
     }
     
-    // Check columns
+    // Pattern 2: Any vertical line
     for (let col = 0; col < 5; col++) {
-      if (card.every(row => calledNums.includes(row[col]))) {
+      if ([0, 1, 2, 3, 4].every(row => isMarked(row, col))) {
         return true;
       }
     }
     
-    // Check diagonal (top-left to bottom-right)
-    if (card.every((row, index) => calledNums.includes(row[index]))) {
+    // Pattern 3: Diagonal (top-left to bottom-right)
+    if ([0, 1, 2, 3, 4].every(i => isMarked(i, i))) {
       return true;
     }
     
-    // Check diagonal (top-right to bottom-left)
-    if (card.every((row, index) => calledNums.includes(row[4 - index]))) {
+    // Pattern 4: Diagonal (top-right to bottom-left)
+    if ([0, 1, 2, 3, 4].every(i => isMarked(i, 4 - i))) {
+      return true;
+    }
+    
+    // Pattern 5: Four corners
+    if (isMarked(0, 0) && isMarked(0, 4) && isMarked(4, 0) && isMarked(4, 4)) {
+      return true;
+    }
+    
+    // Pattern 6: L-shape (bottom-left L)
+    if (isMarked(0, 0) && isMarked(1, 0) && isMarked(2, 0) && isMarked(3, 0) && isMarked(4, 0) &&
+        isMarked(4, 1) && isMarked(4, 2) && isMarked(4, 3) && isMarked(4, 4)) {
+      return true;
+    }
+    
+    // Pattern 7: T-shape (top T)
+    if (isMarked(0, 0) && isMarked(0, 1) && isMarked(0, 2) && isMarked(0, 3) && isMarked(0, 4) &&
+        isMarked(1, 2) && isMarked(2, 2) && isMarked(3, 2) && isMarked(4, 2)) {
+      return true;
+    }
+    
+    // Pattern 8: Plus/Cross pattern
+    if (isMarked(0, 2) && isMarked(1, 2) && isMarked(2, 2) && isMarked(3, 2) && isMarked(4, 2) &&
+        isMarked(2, 0) && isMarked(2, 1) && isMarked(2, 3) && isMarked(2, 4)) {
       return true;
     }
     
