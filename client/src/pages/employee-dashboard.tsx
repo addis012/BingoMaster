@@ -1,54 +1,17 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NavigationHeader } from "@/components/navigation-header";
-import { GameManagement } from "@/components/game-management";
-import { BingoBoard } from "@/components/bingo-board";
-import { PlayerRegistration } from "@/components/player-registration";
+import BingoGameFixed from "@/components/bingo-game-fixed";
 import { useAuth } from "@/hooks/use-auth";
-import { useWebSocket } from "@/lib/websocket";
 import { DollarSign, GamepadIcon, Users } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export default function EmployeeDashboard() {
-  const { user } = useAuth();
-  const [activeGameId, setActiveGameId] = useState<number | null>(null);
-
-  const { data: activeGame, refetch: refetchActiveGame } = useQuery({
-    queryKey: ["/api/games/active", user?.id],
-    enabled: !!user?.id,
-  });
-
-  const { data: employeeStats } = useQuery({
-    queryKey: ["/api/stats/employee", user?.id],
-    enabled: !!user?.id,
-  });
-
-  const { data: gamePlayers = [], refetch: refetchPlayers } = useQuery({
-    queryKey: ["/api/games", activeGame?.id, "players"],
-    enabled: !!activeGame?.id,
-  });
-
-  // Set up WebSocket connection for real-time updates
-  const { isConnected, sendMessage } = useWebSocket(
-    activeGame?.id || 0,
-    (message) => {
-      if (message.type === 'player_registered' || message.type === 'player_removed') {
-        refetchPlayers();
-      }
-      if (message.type === 'game_updated') {
-        refetchActiveGame();
-      }
-    }
-  );
-
-  useEffect(() => {
-    if (activeGame) {
-      setActiveGameId(activeGame.id);
-    }
-  }, [activeGame]);
+  const { user, logout } = useAuth();
+  
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   const handleGameUpdate = () => {
     refetchActiveGame();

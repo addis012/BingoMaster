@@ -49,7 +49,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
 
   // Update commission settings
   const updateCommissionMutation = useMutation({
-    mutationFn: async (data: { commissionRate: string; profitMargin: string }) => {
+    mutationFn: async (data: { profitMargin: string }) => {
       return await apiRequest("PATCH", `/api/shops/${shopId}`, data);
     },
     onSuccess: () => {
