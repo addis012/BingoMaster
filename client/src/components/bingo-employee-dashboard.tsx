@@ -38,35 +38,26 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     calledNumbers: [] as number[]
   });
 
-  // Play Amharic audio for number announcements
+  // Play Amharic audio for number announcements (only your uploaded files)
   const playAmharicAudio = (number: number) => {
     try {
       const letter = getLetterForNumber(number);
       const audioFile = `${letter}${number}.mp3`;
       
-      // Use direct path to attached assets
+      console.log(`🎵 Playing your custom audio: ${audioFile}`);
+      
+      // Use direct path to attached assets - only your uploaded files
       const audio = new Audio(`/attached_assets/${audioFile}`);
       audio.volume = 0.9;
-      audio.play().catch(() => {
-        // Fallback to text-to-speech if audio fails
-        speak(`${letter} ${number}`);
+      audio.play().catch((error) => {
+        console.error(`Failed to play your audio file ${audioFile}:`, error);
       });
     } catch (error) {
-      console.error(`Error playing audio for ${getLetterForNumber(number)}${number}:`, error);
-      // Fallback to text-to-speech
-      speak(`${getLetterForNumber(number)} ${number}`);
+      console.error(`Error loading audio file for ${getLetterForNumber(number)}${number}:`, error);
     }
   };
 
-  // Text-to-speech function (fallback)
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.8;
-      utterance.volume = 0.9;
-      speechSynthesis.speak(utterance);
-    }
-  };
+
 
   // Check for Bingo winning patterns and return pattern info
   const checkForBingo = (card: number[][], calledNums: number[]): { hasWin: boolean; pattern?: string; patternCells?: number[][] } => {
@@ -318,8 +309,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setVerificationCartela("");
       setGamePaused(false);
       
-      // Audio announcement for winner
-      speak(`Cartela number ${cartelaNum} won!`);
+      // Only visual notification for winner - no audio
     } else {
       setShowWinnerVerification(false);
       setVerificationCartela("");
@@ -333,8 +323,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setAutoCallInterval(interval);
       }
       
-      // Audio announcement for not winner
-      speak("Not a winner. Game continues.");
+      // Only visual notification - no audio
     }
   };
 
