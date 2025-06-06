@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const { data: user = null, isLoading } = useQuery({
+  const { data: userData = null, isLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
@@ -67,13 +67,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [isLoading]);
 
   const value = {
-    user: user?.user || null,
+    user: userData?.user || null,
     login,
     logout,
     isLoading: !isInitialized || loginMutation.isPending || logoutMutation.isPending,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

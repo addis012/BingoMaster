@@ -1,10 +1,17 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import { insertUserSchema, insertShopSchema, insertGameSchema, insertGamePlayerSchema, insertTransactionSchema } from "@shared/schema";
 import { z } from "zod";
+
+// Extend Express Request to include session
+declare module 'express-serve-static-core' {
+  interface Request {
+    session: any;
+  }
+}
 
 // WebSocket clients by game ID
 const gameClients = new Map<number, Set<WebSocket>>();
@@ -34,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Set session
-      (req.session as any).userId = user.id;
+      req.session.userId = user.id;
       
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
