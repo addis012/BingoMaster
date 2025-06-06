@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BingoEmployeeDashboard from "@/components/bingo-employee-dashboard";
-import AdminDashboard from "@/pages/admin-dashboard";
+import SimpleAdminDashboard from "@/pages/simple-admin-dashboard";
 
 export default function SimpleApp() {
   const [currentPage, setCurrentPage] = useState("login");
@@ -35,7 +35,7 @@ export default function SimpleApp() {
   }
 
   if (currentPage === "admin") {
-    return <AdminDashboard />;
+    return <SimpleAdminDashboard onLogout={() => setCurrentPage("login")} />;
   }
 
   if (currentPage === "employee") {
