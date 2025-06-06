@@ -19,14 +19,6 @@ declare module 'express-serve-static-core' {
 const gameClients = new Map<number, Set<WebSocket>>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configure session middleware
-  app.use(session({
-    secret: 'bingo-session-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
-  }));
-
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static('attached_assets'));
   
