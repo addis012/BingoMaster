@@ -28,15 +28,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [gamePaused, setGamePaused] = useState(false);
 
   // Play Amharic audio for number announcements
-  const playAmharicAudio = (number: number) => {
+  const playAmharicAudio = async (number: number) => {
     try {
       const letter = getLetterForNumber(number);
       const audioFile = `${letter}${number}.mp3`;
-      const audio = new Audio(`/src/assets/${audioFile}`);
+      
+      // Import the audio file dynamically
+      const audioModule = await import(`@assets/${audioFile}`);
+      const audio = new Audio(audioModule.default);
       audio.volume = 0.9;
-      audio.play().catch(console.error);
+      await audio.play();
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error(`Error playing audio for ${getLetterForNumber(number)}${number}:`, error);
       // Fallback to text-to-speech
       speak(`${getLetterForNumber(number)} ${number}`);
     }
