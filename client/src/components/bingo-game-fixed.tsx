@@ -42,6 +42,7 @@ export default function BingoGameFixed({ employeeName, employeeId, shopId, onLog
   // Fetch shop data for profit margin calculation
   const { data: shopData } = useQuery({
     queryKey: ["/api/shops", shopId],
+    enabled: !!shopId,
   });
 
   // Get letter for BINGO number
@@ -461,7 +462,7 @@ export default function BingoGameFixed({ employeeName, employeeId, shopId, onLog
                 <div className="mt-6">
                   <h3 className="font-medium mb-2">Booked Cartelas ({bookedCartelas.size})</h3>
                   <div className="flex flex-wrap gap-1">
-                    {Array.from(bookedCartelas).map(num => (
+                    {[...bookedCartelas].map(num => (
                       <Badge key={num} variant="outline" className="text-xs">
                         #{num}
                       </Badge>
