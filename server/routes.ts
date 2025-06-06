@@ -1,4 +1,5 @@
 import type { Express, Request } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
@@ -17,6 +18,9 @@ declare module 'express-serve-static-core' {
 const gameClients = new Map<number, Set<WebSocket>>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve static files from attached_assets directory
+  app.use('/attached_assets', express.static('attached_assets'));
+  
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
     try {
