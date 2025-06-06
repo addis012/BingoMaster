@@ -353,73 +353,47 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setVerificationCartela("");
   };
 
-  // Fixed cartela patterns - each cartela number has predetermined numbers
+  // Fixed cartela patterns - each cartela number (1-100) has predetermined numbers
   const getFixedCartelaCard = (cartelaNum: number) => {
-    // Pre-defined fixed cartela patterns (cartela number -> fixed card layout)
-    const fixedCartelas: { [key: number]: number[][] } = {
-      1: [
-        [2, 17, 32, 47, 62],
-        [5, 19, 34, 49, 64], 
-        [8, 22, 0, 52, 67],  // 0 = FREE space
-        [11, 25, 38, 55, 70],
-        [14, 28, 43, 58, 73]
-      ],
-      2: [
-        [1, 16, 31, 46, 61],
-        [4, 18, 33, 48, 63],
-        [7, 21, 0, 51, 66],
-        [10, 24, 37, 54, 69],
-        [13, 27, 42, 57, 72]
-      ],
-      3: [
-        [3, 20, 35, 50, 65],
-        [6, 23, 39, 53, 68],
-        [9, 26, 0, 56, 71],
-        [12, 29, 41, 59, 74],
-        [15, 30, 44, 60, 75]
-      ],
-      4: [
-        [4, 19, 34, 49, 64],
-        [7, 22, 37, 52, 67],
-        [10, 25, 0, 55, 70],
-        [13, 28, 41, 58, 73],
-        [1, 16, 44, 46, 61]
-      ],
-      5: [
-        [5, 18, 33, 48, 63],
-        [8, 21, 36, 51, 66],
-        [11, 24, 0, 54, 69],
-        [14, 27, 40, 57, 72],
-        [2, 30, 43, 60, 75]
-      ]
+    // Create deterministic pattern based on cartela number
+    // Each cartela will ALWAYS have the same numbers
+    const createFixedPattern = (num: number): number[][] => {
+      // Use cartela number as seed for consistent generation
+      const seed = num * 7919; // Large prime for good distribution
+      
+      const card: number[][] = [[], [], [], [], []]; // 5 columns
+      const ranges = [
+        [1, 15],   // B column
+        [16, 30],  // I column  
+        [31, 45],  // N column
+        [46, 60],  // G column
+        [61, 75]   // O column
+      ];
+
+      for (let col = 0; col < 5; col++) {
+        const [min, max] = ranges[col];
+        const availableNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+        
+        for (let row = 0; row < 5; row++) {
+          if (col === 2 && row === 2) {
+            card[row].push(0); // FREE space in center
+          } else {
+            // Create deterministic selection based on cartela number and position
+            const position = col * 5 + row;
+            const seedValue = (seed + position * 12289) % availableNumbers.length; // Another large prime
+            const selectedNum = availableNumbers[seedValue];
+            card[row].push(selectedNum);
+            
+            // Remove selected number to avoid duplicates in column
+            availableNumbers.splice(seedValue, 1);
+          }
+        }
+      }
+      
+      return card;
     };
 
-    // If cartela number exists in fixed patterns, return it
-    if (fixedCartelas[cartelaNum]) {
-      return fixedCartelas[cartelaNum];
-    }
-
-    // For cartela numbers beyond predefined ones, generate based on mathematical pattern
-    // This ensures consistency - same cartela number always generates same card
-    const basePattern = fixedCartelas[((cartelaNum - 1) % 5) + 1];
-    const offset = Math.floor((cartelaNum - 1) / 5) * 3;
-    
-    return basePattern.map(column => 
-      column.map(num => {
-        if (num === 0) return 0; // Keep FREE space
-        const letter = getLetterForNumber(num);
-        let newNum = num + offset;
-        
-        // Keep within letter ranges
-        if (letter === 'B' && newNum > 15) newNum = ((newNum - 1) % 15) + 1;
-        if (letter === 'I' && newNum > 30) newNum = ((newNum - 16) % 15) + 16;
-        if (letter === 'N' && newNum > 45) newNum = ((newNum - 31) % 15) + 31;
-        if (letter === 'G' && newNum > 60) newNum = ((newNum - 46) % 15) + 46;
-        if (letter === 'O' && newNum > 75) newNum = ((newNum - 61) % 15) + 61;
-        
-        return newNum;
-      })
-    );
+    return createFixedPattern(cartelaNum);
   };
 
   // Select cartela and generate card (don't close popup)
