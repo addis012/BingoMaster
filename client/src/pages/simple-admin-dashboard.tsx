@@ -28,6 +28,8 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const [newPassword, setNewPassword] = useState("");
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [createEmployeeDialogOpen, setCreateEmployeeDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<any>(null);
 
   // Mock shop ID for demo (in real app this would come from auth)
   const shopId = 1;
@@ -134,6 +136,29 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
       toast({
         title: "Error",
         description: "Failed to reset password",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete employee
+  const deleteEmployeeMutation = useMutation({
+    mutationFn: async (employeeId: number) => {
+      return await apiRequest("DELETE", `/api/users/${employeeId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Employee deleted successfully",
+      });
+      refetchEmployees();
+      setDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete employee",
         variant: "destructive",
       });
     },
@@ -594,16 +619,28 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                             </span>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedEmployee(employee);
-                                setPasswordDialogOpen(true);
-                              }}
-                            >
-                              Reset Password
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedEmployee(employee);
+                                  setPasswordDialogOpen(true);
+                                }}
+                              >
+                                Reset Password
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  setEmployeeToDelete(employee);
+                                  setDeleteDialogOpen(true);
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -712,6 +749,36 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
               disabled={resetPasswordMutation.isPending}
             >
               {resetPasswordMutation.isPending ? "Resetting..." : "Reset Password"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Employee Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Employee</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete employee "{employeeToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setEmployeeToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteEmployeeMutation.mutate(employeeToDelete?.id)}
+              disabled={deleteEmployeeMutation.isPending}
+            >
+              {deleteEmployeeMutation.isPending ? "Deleting..." : "Delete Employee"}
             </Button>
           </DialogFooter>
         </DialogContent>
