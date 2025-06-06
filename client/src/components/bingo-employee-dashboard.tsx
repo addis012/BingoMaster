@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface BingoEmployeeDashboardProps {
   onLogout: () => void;
@@ -14,12 +14,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [currentNumber, setCurrentNumber] = useState<number | null>(null);
   const [gameActive, setGameActive] = useState(false);
   const [lastCalledLetter, setLastCalledLetter] = useState<string>("");
-  const [players, setPlayers] = useState<string[]>([]);
-  const [newPlayerName, setNewPlayerName] = useState("");
-  const [entryFee, setEntryFee] = useState("50.00");
+
   const [showCartelaSelector, setShowCartelaSelector] = useState(false);
   const [selectedCartela, setSelectedCartela] = useState<number | null>(null);
   const [cartelaCards, setCartelaCards] = useState<{[key: number]: number[][]}>({});
+  const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
 
   // Generate next random number
   const callNumber = () => {
@@ -92,21 +91,37 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return card;
   };
 
-  // Select cartela and generate card
+  // Select cartela and generate card (don't close popup)
   const selectCartela = (cartelaNum: number) => {
     const card = generateCartelaCard(cartelaNum);
     setCartelaCards(prev => ({ ...prev, [cartelaNum]: card }));
     setSelectedCartela(cartelaNum);
+    // Don't close popup - let user decide to book or cancel
+  };
+
+  // Book the selected cartela
+  const bookCartela = () => {
+    if (selectedCartela) {
+      setBookedCartelas(prev => new Set([...Array.from(prev), selectedCartela]));
+      setSelectedCartela(null);
+      setShowCartelaSelector(false);
+    }
+  };
+
+  // Cancel cartela booking and unbook if previously booked
+  const cancelCartela = () => {
+    if (selectedCartela && bookedCartelas.has(selectedCartela)) {
+      setBookedCartelas(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedCartela);
+        return newSet;
+      });
+    }
+    setSelectedCartela(null);
     setShowCartelaSelector(false);
   };
 
-  // Add player
-  const addPlayer = () => {
-    if (newPlayerName.trim()) {
-      setPlayers(prev => [...prev, newPlayerName.trim()]);
-      setNewPlayerName("");
-    }
-  };
+
 
   // Get letter for number
   const getLetterForNumber = (num: number) => {
@@ -207,18 +222,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     <DialogTitle>Select Cartela Number (1-100)</DialogTitle>
                   </DialogHeader>
                   <div className="grid grid-cols-10 gap-2 p-4">
-                    {Array.from({ length: 100 }, (_, i) => i + 1).map(num => (
-                      <Button
-                        key={num}
-                        variant={selectedCartela === num ? "default" : "outline"}
-                        className={`h-12 w-12 text-sm ${
-                          selectedCartela === num ? "bg-orange-500 hover:bg-orange-600" : ""
-                        }`}
-                        onClick={() => selectCartela(num)}
-                      >
-                        {num}
-                      </Button>
-                    ))}
+                    {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                      const isBooked = bookedCartelas.has(num);
+                      const isSelected = selectedCartela === num;
+                      
+                      return (
+                        <Button
+                          key={num}
+                          variant={isSelected ? "default" : "outline"}
+                          className={`h-12 w-12 text-sm ${
+                            isBooked && !isSelected 
+                              ? "bg-green-500 text-white hover:bg-green-600" 
+                              : isSelected 
+                                ? "bg-orange-500 hover:bg-orange-600" 
+                                : ""
+                          }`}
+                          onClick={() => selectCartela(num)}
+                        >
+                          {num}
+                        </Button>
+                      );
+                    })}
                   </div>
                   
                   {selectedCartela && cartelaCards[selectedCartela] && (
@@ -263,17 +287,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       <div className="flex gap-2 mt-4 justify-center">
                         <Button 
                           className="bg-green-500 hover:bg-green-600"
-                          onClick={() => setShowCartelaSelector(false)}
+                          onClick={bookCartela}
                         >
                           Book Card
                         </Button>
                         <Button 
                           variant="outline"
                           className="bg-red-500 text-white hover:bg-red-600"
-                          onClick={() => {
-                            setSelectedCartela(null);
-                            setShowCartelaSelector(false);
-                          }}
+                          onClick={cancelCartela}
                         >
                           Cancel
                         </Button>
@@ -306,39 +327,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             </CardContent>
           </Card>
 
-          {/* Player Registration */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Register Player</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Input
-                placeholder="Player Name"
-                value={newPlayerName}
-                onChange={(e) => setNewPlayerName(e.target.value)}
-              />
-              <Input
-                placeholder="Entry Fee"
-                value={entryFee}
-                onChange={(e) => setEntryFee(e.target.value)}
-              />
-              <Button onClick={addPlayer} className="w-full">
-                Add Player
-              </Button>
-              {players.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-semibold mb-2">Players ({players.length}):</h4>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {players.map((player, index) => (
-                      <div key={index} className="text-sm bg-gray-100 p-2 rounded">
-                        {player}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
         </div>
 
         {/* Right Panel - Called Numbers Board */}
