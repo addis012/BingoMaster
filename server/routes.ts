@@ -535,6 +535,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Retail Report API
+  app.get("/api/reports/retail/:shopId", async (req, res) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const { dateFrom, dateTo, sortBy, order } = req.query;
+      
+      const start = dateFrom ? new Date(dateFrom as string) : new Date();
+      const end = dateTo ? new Date(dateTo as string) : new Date();
+      
+      const games = await storage.getGamesByShop(shopId);
+      const filteredGames = games.filter(game => {
+        const gameDate = new Date(game.createdAt);
+        return gameDate >= start && gameDate <= end;
+      });
+
+      const reportData = await Promise.all(
+        filteredGames.map(async (game) => {
+          const players = await storage.getGamePlayers(game.id);
+          const employee = await storage.getUser(game.employeeId);
+          return {
+            ...game,
+            shopName: employee?.name || 'Shop',
+            playerCount: players.length,
+            stakeAmount: (players.length * parseFloat(game.entryFee || "0")).toString(),
+            claimedAmount: game.status === 'completed' ? game.prizePool : "0.00",
+            netBalance: (players.length * parseFloat(game.entryFee || "0") - parseFloat(game.prizePool || "0")).toString()
+          };
+        })
+      );
+
+      // Sort data
+      if (sortBy === 'stake') {
+        reportData.sort((a, b) => {
+          const aVal = parseFloat(a.stakeAmount);
+          const bVal = parseFloat(b.stakeAmount);
+          return order === 'DESC' ? bVal - aVal : aVal - bVal;
+        });
+      }
+      
+      res.json(reportData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get retail report" });
+    }
+  });
+
+  // Report Summary API
+  app.get("/api/reports/summary/:shopId", async (req, res) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const { dateFrom, dateTo } = req.query;
+      
+      const start = dateFrom ? new Date(dateFrom as string) : new Date();
+      const end = dateTo ? new Date(dateTo as string) : new Date();
+      
+      const transactions = await storage.getTransactionsByShop(shopId, start, end);
+      const totalIncome = transactions
+        .filter(t => t.type === 'entry_fee')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      const totalPayout = transactions
+        .filter(t => t.type === 'prize_payout')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      res.json({
+        netBalance: (totalIncome - totalPayout).toFixed(2),
+        totalIncome: totalIncome.toFixed(2),
+        totalPayout: totalPayout.toFixed(2)
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get report summary" });
+    }
+  });
+
   // Transaction routes
   app.get("/api/transactions/shop/:shopId", async (req, res) => {
     try {

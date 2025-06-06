@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NavigationHeader } from "@/components/navigation-header";
 import { FinancialDashboard } from "@/components/financial-dashboard";
+import { RetailReport } from "@/components/retail-report";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -187,11 +188,12 @@ export default function AdminDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="settings">Commission Settings</TabsTrigger>
             <TabsTrigger value="employees">Employee Management</TabsTrigger>
             <TabsTrigger value="history">Game History</TabsTrigger>
+            <TabsTrigger value="reports">Retail Report</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -421,6 +423,10 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-6">
+            <RetailReport />
           </TabsContent>
         </Tabs>
 
