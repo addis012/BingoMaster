@@ -59,7 +59,15 @@ export default function LoginPage() {
       <Card className="w-96">
         <CardHeader>
           <CardTitle>Bingo System Login</CardTitle>
-          <CardDescription>Enter your credentials to access the system</CardDescription>
+          <CardDescription>
+            Enter your username and password to access the system
+            <br />
+            <span className="text-sm text-gray-500 mt-1">
+              Admin users will be redirected to admin dashboard
+              <br />
+              Employee users will be redirected to employee dashboard
+            </span>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -93,21 +101,36 @@ export default function LoginPage() {
           </form>
           
           <div className="mt-6 pt-4 border-t">
-            <p className="text-sm text-gray-600 mb-3">Quick access for testing:</p>
-            <div className="space-y-2">
+            <p className="text-sm text-gray-600 mb-3">Test Credentials:</p>
+            <div className="space-y-3 text-xs">
+              <div className="bg-blue-50 p-2 rounded">
+                <p className="font-medium text-blue-800">Admin Account:</p>
+                <p className="text-blue-600">Username: admin1</p>
+                <p className="text-blue-600">Password: password</p>
+              </div>
+              <div className="bg-green-50 p-2 rounded">
+                <p className="font-medium text-green-800">Employee Accounts:</p>
+                <p className="text-green-600">Username: emp1, emp2</p>
+                <p className="text-green-600">Password: password</p>
+              </div>
+              <div className="bg-gray-50 p-2 rounded">
+                <p className="font-medium text-gray-800">Or create new employees in admin dashboard</p>
+              </div>
+            </div>
+            <div className="space-y-2 mt-4">
               <Button 
                 onClick={() => setLocation("/admin")} 
                 variant="outline"
                 className="w-full"
               >
-                Admin Dashboard
+                Go Directly to Admin Dashboard
               </Button>
               <Button 
                 onClick={() => setLocation("/employee")} 
                 variant="outline"
                 className="w-full"
               >
-                Employee Dashboard
+                Go Directly to Employee Dashboard
               </Button>
             </div>
           </div>
