@@ -393,12 +393,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               </Button>
 
               {/* Check for BINGO Button */}
-              {gameActive && !winnerFound && (
+              {gameActive && !winnerFound && !gameFinished && (
                 <Button 
-                  onClick={() => setShowWinnerVerification(true)}
+                  onClick={handleCheckBingo}
                   className="w-full bg-yellow-500 hover:bg-yellow-600"
+                  disabled={gamePaused}
                 >
-                  Check for BINGO
+                  {gamePaused ? "Checking..." : "Check for BINGO"}
                 </Button>
               )}
 
@@ -563,53 +564,87 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <CardTitle className="text-center text-xl">Called Numbers Board</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {(['B', 'I', 'N', 'G', 'O'] as const).map(letter => (
-                  <div key={letter} className="flex items-start gap-3">
-                    <div className="w-12 h-12 bg-red-500 text-white rounded-lg flex items-center justify-center font-bold text-xl shrink-0">
-                      {letter}
-                    </div>
-                    <div className="flex flex-wrap gap-2 min-h-[3rem] items-center">
-                      {Array.from({ length: 15 }, (_, i) => {
-                        let num;
-                        if (letter === 'B') num = i + 1;
-                        else if (letter === 'I') num = i + 16;
-                        else if (letter === 'N') num = i + 31;
-                        else if (letter === 'G') num = i + 46;
-                        else num = i + 61;
-                        
-                        const isCalled = numbersByLetter[letter].includes(num);
-                        const isCurrentNumber = num === currentNumber;
-                        
-                        return (
-                          <div
-                            key={num}
-                            className={`w-10 h-10 rounded flex items-center justify-center text-sm font-medium border-2 ${
-                              isCurrentNumber
-                                ? 'bg-yellow-400 text-black border-yellow-500 font-bold'
-                                : isCalled
-                                ? 'bg-green-500 text-white border-green-600'
-                                : 'bg-white text-gray-700 border-gray-300'
-                            }`}
-                          >
-                            {num}
-                          </div>
-                        );
-                      })}
-                    </div>
+              {gameFinished ? (
+                // Game finished - show only called numbers
+                <div className="space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-bold text-green-600">Game Completed!</h3>
+                    <p className="text-sm text-gray-600">Numbers Called: {calledNumbers.length}</p>
                   </div>
-                ))}
-              </div>
-              
-              <div className="mt-6 text-center text-sm text-gray-600">
-                Numbers Called: {calledNumbers.length} / 75
-              </div>
-              
-              {!gameActive && calledNumbers.length === 0 && (
-                <div className="text-center mt-4">
-                  <Button onClick={startNewGame} className="px-8 py-2">
-                    Start New Game
-                  </Button>
+                  
+                  <div className="grid grid-cols-8 gap-2 max-w-lg mx-auto">
+                    {calledNumbers.sort((a, b) => a - b).map(num => (
+                      <div
+                        key={num}
+                        className="w-12 h-12 bg-green-500 text-white rounded flex items-center justify-center text-sm font-bold border-2 border-green-600"
+                      >
+                        {getLetterForNumber(num)}{num}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="text-center mt-6">
+                    <Button onClick={resetGame} className="px-8 py-2">
+                      Start New Game
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Active game - show traditional board
+                <div className="space-y-4">
+                  {gamePaused && (
+                    <div className="text-center bg-yellow-100 border border-yellow-400 rounded p-2 mb-4">
+                      <p className="text-yellow-800 font-medium">Game Paused - Checking for BINGO...</p>
+                    </div>
+                  )}
+                  
+                  {(['B', 'I', 'N', 'G', 'O'] as const).map(letter => (
+                    <div key={letter} className="flex items-start gap-3">
+                      <div className="w-12 h-12 bg-red-500 text-white rounded-lg flex items-center justify-center font-bold text-xl shrink-0">
+                        {letter}
+                      </div>
+                      <div className="flex flex-wrap gap-2 min-h-[3rem] items-center">
+                        {Array.from({ length: 15 }, (_, i) => {
+                          let num;
+                          if (letter === 'B') num = i + 1;
+                          else if (letter === 'I') num = i + 16;
+                          else if (letter === 'N') num = i + 31;
+                          else if (letter === 'G') num = i + 46;
+                          else num = i + 61;
+                          
+                          const isCalled = numbersByLetter[letter].includes(num);
+                          const isCurrentNumber = num === currentNumber;
+                          
+                          return (
+                            <div
+                              key={num}
+                              className={`w-10 h-10 rounded flex items-center justify-center text-sm font-medium border-2 ${
+                                isCurrentNumber
+                                  ? 'bg-yellow-400 text-black border-yellow-500 font-bold'
+                                  : isCalled
+                                  ? 'bg-green-500 text-white border-green-600'
+                                  : 'bg-white text-gray-700 border-gray-300'
+                              }`}
+                            >
+                              {num}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="mt-6 text-center text-sm text-gray-600">
+                    Numbers Called: {calledNumbers.length} / 75
+                  </div>
+                  
+                  {!gameActive && calledNumbers.length === 0 && (
+                    <div className="text-center mt-4">
+                      <Button onClick={startNewGame} className="px-8 py-2">
+                        Start New Game
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
