@@ -40,6 +40,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   // Fetch shop data
   const { data: shopData, refetch: refetchShop } = useQuery({
     queryKey: ["/api/shops", shopId],
+    queryFn: () => fetch(`/api/shops/${shopId}`).then(res => res.json()),
   });
 
   // Fetch today's games
