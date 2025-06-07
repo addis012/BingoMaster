@@ -38,6 +38,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [transferScreenshot, setTransferScreenshot] = useState("");
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
 
   const { data: employees = [], refetch: refetchEmployees } = useQuery({
@@ -130,8 +131,8 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     },
   });
 
-  const handleLoadCredit = () => {
-    if (!loadAmount || !transferScreenshot) {
+  const handleLoadCredit = async () => {
+    if (!loadAmount || !screenshotFile) {
       toast({
         title: "Error",
         description: "Please provide amount and bank transfer screenshot",
@@ -140,14 +141,21 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
       return;
     }
     
-    loadCreditMutation.mutate({
-      amount: loadAmount,
-      paymentMethod: paymentMethod,
-      referenceNumber: referenceNumber,
-      transferScreenshot: transferScreenshot,
-      adminAccountNumber: userAccountNumber,
-      notes: notes,
-    });
+    // Convert file to base64
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64Screenshot = reader.result as string;
+      
+      loadCreditMutation.mutate({
+        amount: loadAmount,
+        paymentMethod: paymentMethod,
+        referenceNumber: referenceNumber,
+        transferScreenshot: base64Screenshot,
+        adminAccountNumber: userAccountNumber,
+        notes: notes,
+      });
+    };
+    reader.readAsDataURL(screenshotFile);
   };
 
   const handleTransferCredit = () => {
@@ -455,13 +463,13 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                             />
                           </div>
                           <div>
-                            <Label htmlFor="transferScreenshot">Bank Transfer Screenshot</Label>
-                            <textarea
-                              id="transferScreenshot"
-                              className="w-full p-2 border rounded h-20"
-                              placeholder="Paste base64 encoded screenshot or describe transfer proof"
-                              value={transferScreenshot}
-                              onChange={(e) => setTransferScreenshot(e.target.value)}
+                            <FileUpload
+                              label="Bank Transfer Screenshot"
+                              onFileSelect={(file) => setScreenshotFile(file)}
+                              onFileRemove={() => setScreenshotFile(null)}
+                              selectedFile={screenshotFile}
+                              accept="image/*"
+                              maxSize={5}
                             />
                             <p className="text-sm text-muted-foreground mt-1">
                               Upload proof of bank transfer to your account: {userAccountNumber}
