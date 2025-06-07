@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NavigationHeader } from "@/components/navigation-header";
 import { FinancialDashboard } from "@/components/financial-dashboard";
 import { AdminCreationForm } from "@/components/admin-creation-form";
+import { ShopCreationForm } from "@/components/shop-creation-form";
 import { useAuth } from "@/hooks/use-auth";
 import { Building2, Users, DollarSign, AlertTriangle, TrendingUp, GamepadIcon, BarChart3, UserPlus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -263,55 +264,66 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
         )}
 
         {activeTab === "shops" && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Shop Management
-              </CardTitle>
-              <CardDescription>Manage all shops and their settings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Shop Name</TableHead>
-                      <TableHead>Admin</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Commission Rate</TableHead>
-                      <TableHead>Revenue</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {shops.map((shop: any) => (
-                      <TableRow key={shop.id}>
-                        <TableCell className="font-medium">{shop.name}</TableCell>
-                        <TableCell>{shop.adminName || "No Admin"}</TableCell>
-                        <TableCell>
-                          <Badge variant={shop.isBlocked ? "destructive" : "default"}>
-                            {shop.isBlocked ? "Blocked" : "Active"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{shop.commissionRate}%</TableCell>
-                        <TableCell>${shop.totalRevenue || "0.00"}</TableCell>
-                        <TableCell>
-                          <Button
-                            size="sm"
-                            variant={shop.isBlocked ? "default" : "destructive"}
-                            onClick={() => handleBlockShop(shop.id, shop.isBlocked)}
-                          >
-                            {shop.isBlocked ? "Unblock" : "Block"}
-                          </Button>
-                        </TableCell>
+          <div className="space-y-6">
+            <ShopCreationForm onSuccess={() => {
+              refetchShops();
+              refetchAdmins();
+              toast({
+                title: "Success",
+                description: "Shop created successfully",
+              });
+            }} />
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Shop Management
+                </CardTitle>
+                <CardDescription>Manage all shops and their settings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Shop Name</TableHead>
+                        <TableHead>Admin</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Profit Margin</TableHead>
+                        <TableHead>Super Admin Commission</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {shops.map((shop: any) => (
+                        <TableRow key={shop.id}>
+                          <TableCell className="font-medium">{shop.name}</TableCell>
+                          <TableCell>{shop.adminName || "No Admin"}</TableCell>
+                          <TableCell>
+                            <Badge variant={shop.isBlocked ? "destructive" : "default"}>
+                              {shop.isBlocked ? "Blocked" : "Active"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{shop.profitMargin}%</TableCell>
+                          <TableCell>{shop.superAdminCommission}%</TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant={shop.isBlocked ? "default" : "destructive"}
+                              onClick={() => handleBlockShop(shop.id, shop.isBlocked)}
+                            >
+                              {shop.isBlocked ? "Unblock" : "Block"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {activeTab === "admins" && (
