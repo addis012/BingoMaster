@@ -108,7 +108,10 @@ export const creditLoads = pgTable("credit_loads", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   paymentMethod: text("payment_method").notNull(), // 'telebirr', 'bank_transfer', 'cash'
   referenceNumber: text("reference_number"), // External payment reference
+  transferScreenshot: text("transfer_screenshot"), // Base64 encoded image or file path
+  adminAccountNumber: text("admin_account_number"), // Account number used for transfer
   status: text("status").notNull().default("pending"), // 'pending', 'confirmed', 'rejected'
+  notes: text("notes"), // Admin notes or super admin rejection reason
   requestedAt: timestamp("requested_at").defaultNow(),
   processedAt: timestamp("processed_at"),
   processedBy: integer("processed_by").references(() => users.id), // Super admin who processed

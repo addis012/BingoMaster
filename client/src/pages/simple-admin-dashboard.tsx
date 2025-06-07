@@ -33,6 +33,10 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const [loadBankAccount, setLoadBankAccount] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [transferRecipient, setTransferRecipient] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
+  const [referenceNumber, setReferenceNumber] = useState("");
+  const [transferScreenshot, setTransferScreenshot] = useState("");
+  const [notes, setNotes] = useState("");
 
   const { data: employees = [], refetch: refetchEmployees } = useQuery({
     queryKey: ["/api/admin/employees"],
