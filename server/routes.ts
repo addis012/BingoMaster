@@ -1101,6 +1101,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get own credit load requests
+  app.get("/api/credit/loads/admin", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const creditLoads = await storage.getCreditLoads(user.id);
+      res.json(creditLoads);
+    } catch (error) {
+      console.error("Get admin credit loads error:", error);
+      res.status(500).json({ message: "Failed to get credit loads" });
+    }
+  });
+
   // Super admin: Process credit load
   app.post("/api/admin/credit-loads/:id/process", async (req, res) => {
     try {
