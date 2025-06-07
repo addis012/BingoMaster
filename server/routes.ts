@@ -1109,18 +1109,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const loadId = parseInt(req.params.id);
-      const { status } = req.body; // 'confirmed' or 'rejected'
+      const { status, notes } = req.body; // 'confirmed' or 'rejected'
       
       if (!['confirmed', 'rejected'].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
 
-      const processedLoad = await storage.processCreditLoad(loadId, status, user.id);
+      const processedLoad = await storage.processCreditLoad(loadId, status, userId);
       res.json(processedLoad);
     } catch (error) {
+      console.error("Credit load processing error:", error);
       res.status(500).json({ message: "Failed to process credit load" });
     }
   });
+
 
   // System settings management
   app.post("/api/admin/system-settings", async (req, res) => {
