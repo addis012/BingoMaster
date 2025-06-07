@@ -119,30 +119,27 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {userRole === 'super_admin' ? (
-                  <div>
-                    <Label htmlFor="commissionRate">Super Admin Commission Rate (%)</Label>
-                    <Input
-                      id="commissionRate"
-                      type="number"
-                      min="0"
-                      max="50"
-                      step="0.5"
-                      value={commissionRate}
-                      onChange={(e) => setCommissionRate(e.target.value)}
-                      placeholder="15"
-                    />
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Percentage of game revenue that goes to super admin
-                    </p>
-                  </div>
-                ) : (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      Commission rate settings are only accessible to super admin
-                    </p>
-                  </div>
-                )}
+                <div>
+                  <Label htmlFor="commissionRate">Super Admin Commission Rate (%)</Label>
+                  <Input
+                    id="commissionRate"
+                    type="number"
+                    min="0"
+                    max="50"
+                    step="0.5"
+                    value={commissionRate}
+                    onChange={(e) => userRole === 'super_admin' ? setCommissionRate(e.target.value) : null}
+                    placeholder="15"
+                    disabled={userRole !== 'super_admin'}
+                    className={userRole !== 'super_admin' ? 'bg-gray-100 cursor-not-allowed' : ''}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {userRole === 'super_admin' 
+                      ? 'Percentage of game revenue that goes to super admin'
+                      : 'Commission rate can only be modified by super admin'
+                    }
+                  </p>
+                </div>
               </CardContent>
             </Card>
 

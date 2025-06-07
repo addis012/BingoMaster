@@ -1076,7 +1076,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Super admin: Get pending credit loads
   app.get("/api/admin/credit-loads", async (req, res) => {
     try {
-      const user = req.session.user;
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
       if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
@@ -1092,7 +1097,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Super admin: Process credit load
   app.post("/api/admin/credit-loads/:id/process", async (req, res) => {
     try {
-      const user = req.session.user;
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
       if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
