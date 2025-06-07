@@ -12,6 +12,9 @@ export const users = pgTable("users", {
   email: text("email"),
   isBlocked: boolean("is_blocked").default(false),
   shopId: integer("shop_id").references(() => shops.id),
+  creditBalance: decimal("credit_balance", { precision: 12, scale: 2 }).default("0.00"), // Admin credit balance
+  accountNumber: text("account_number").unique(), // Unique bank-like account number for Admins
+  referredBy: integer("referred_by").references(() => users.id), // Admin who referred this admin
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -19,8 +22,9 @@ export const shops = pgTable("shops", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   adminId: integer("admin_id").references(() => users.id),
-  profitMargin: decimal("profit_margin", { precision: 5, scale: 2 }).default("0.00"),
-  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("0.00"),
+  profitMargin: decimal("profit_margin", { precision: 5, scale: 2 }).default("20.00"), // Admin cut from employee collections
+  superAdminCommission: decimal("super_admin_commission", { precision: 5, scale: 2 }).default("25.00"), // Super admin cut from admin
+  referralCommission: decimal("referral_commission", { precision: 5, scale: 2 }).default("3.00"), // Referral bonus percentage
   isBlocked: boolean("is_blocked").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -51,11 +55,15 @@ export const gamePlayers = pgTable("game_players", {
 export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
   gameId: integer("game_id").references(() => games.id),
-  shopId: integer("shop_id").references(() => shops.id).notNull(),
-  employeeId: integer("employee_id").references(() => users.id).notNull(),
+  shopId: integer("shop_id").references(() => shops.id),
+  employeeId: integer("employee_id").references(() => users.id),
+  adminId: integer("admin_id").references(() => users.id),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  type: text("type").notNull(), // 'entry_fee', 'prize_payout', 'commission', 'admin_profit', 'super_admin_commission'
+  type: text("type").notNull(), // 'entry_fee', 'prize_payout', 'admin_profit', 'super_admin_commission', 'credit_load', 'credit_transfer', 'referral_bonus'
   description: text("description"),
+  referenceId: text("reference_id"), // For tracking external payments like Telebirr
+  fromUserId: integer("from_user_id").references(() => users.id), // For credit transfers
+  toUserId: integer("to_user_id").references(() => users.id), // For credit transfers
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -82,6 +90,30 @@ export const commissionPayments = pgTable("commission_payments", {
   status: text("status").notNull(), // 'pending', 'paid', 'overdue'
 });
 
+// Credit transfers between admins
+export const creditTransfers = pgTable("credit_transfers", {
+  id: serial("id").primaryKey(),
+  fromAdminId: integer("from_admin_id").references(() => users.id).notNull(),
+  toAdminId: integer("to_admin_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  status: text("status").notNull().default("completed"), // 'pending', 'completed', 'failed'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Credit load requests and confirmations
+export const creditLoads = pgTable("credit_loads", {
+  id: serial("id").primaryKey(),
+  adminId: integer("admin_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: text("payment_method").notNull(), // 'telebirr', 'bank_transfer', 'cash'
+  referenceNumber: text("reference_number"), // External payment reference
+  status: text("status").notNull().default("pending"), // 'pending', 'confirmed', 'rejected'
+  requestedAt: timestamp("requested_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
+  processedBy: integer("processed_by").references(() => users.id), // Super admin who processed
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   shop: one(shops, {
@@ -92,8 +124,15 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [shops.adminId],
   }),
+  referrer: one(users, {
+    fields: [users.referredBy],
+    references: [users.id],
+  }),
   games: many(games),
   transactions: many(transactions),
+  creditTransfersFrom: many(creditTransfers, { relationName: "fromAdmin" }),
+  creditTransfersTo: many(creditTransfers, { relationName: "toAdmin" }),
+  creditLoads: many(creditLoads),
 }));
 
 export const shopsRelations = relations(shops, ({ one, many }) => ({
@@ -164,6 +203,30 @@ export const gameHistoryRelations = relations(gameHistory, ({ one }) => ({
   }),
   employee: one(users, {
     fields: [gameHistory.employeeId],
+    references: [users.id],
+  }),
+}));
+
+export const creditTransfersRelations = relations(creditTransfers, ({ one }) => ({
+  fromAdmin: one(users, {
+    fields: [creditTransfers.fromAdminId],
+    references: [users.id],
+    relationName: "fromAdmin",
+  }),
+  toAdmin: one(users, {
+    fields: [creditTransfers.toAdminId], 
+    references: [users.id],
+    relationName: "toAdmin",
+  }),
+}));
+
+export const creditLoadsRelations = relations(creditLoads, ({ one }) => ({
+  admin: one(users, {
+    fields: [creditLoads.adminId],
+    references: [users.id],
+  }),
+  processor: one(users, {
+    fields: [creditLoads.processedBy],
     references: [users.id],
   }),
 }));
