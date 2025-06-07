@@ -271,10 +271,16 @@ export function CreditLoadManagement({ userRole }: CreditLoadManagementProps) {
                       <Image className="w-5 h-5 text-blue-600" />
                       <span className="font-medium">Transfer Proof Submitted</span>
                     </div>
-                    <div className="text-sm text-gray-600 max-h-32 overflow-y-auto break-all">
-                      {selectedLoad.transferScreenshot.length > 100 
-                        ? selectedLoad.transferScreenshot.substring(0, 100) + "..." 
-                        : selectedLoad.transferScreenshot}
+                    <div className="mt-3">
+                      <img 
+                        src={selectedLoad.transferScreenshot} 
+                        alt="Bank Transfer Screenshot" 
+                        className="max-w-full h-auto max-h-96 rounded border border-gray-200 shadow-sm"
+                        onError={(e) => {
+                          console.error('Image load error:', e);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
                     </div>
                   </div>
                 </div>

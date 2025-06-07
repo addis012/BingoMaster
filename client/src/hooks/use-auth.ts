@@ -80,6 +80,13 @@ export function AuthProvider(props: { children: ReactNode }) {
     isLoading: !isInitialized || loginMutation.isPending || logoutMutation.isPending,
   };
 
+  // Debug authentication state
+  useEffect(() => {
+    if (userData) {
+      console.log('Auth state updated:', (userData as any)?.user);
+    }
+  }, [userData]);
+
   return createElement(AuthContext.Provider, { value }, props.children);
 }
 
