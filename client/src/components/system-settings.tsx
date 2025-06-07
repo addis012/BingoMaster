@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
 import { Settings, Percent, DollarSign, Save, History } from "lucide-react";
 
 interface SystemSettingsProps {
@@ -17,7 +16,6 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
   const { toast } = useToast();
   const [commissionRate, setCommissionRate] = useState("15");
   const [adminProfitMargin, setAdminProfitMargin] = useState("70");
-  const [prizePoolPercentage, setPrizePoolPercentage] = useState("15");
 
   const { data: gameHistory = [] } = useQuery({
     queryKey: ["/api/admin/game-history"],
@@ -55,21 +53,32 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
   });
 
   const handleSaveSettings = () => {
-    const settings = {
-      commissionRate: parseFloat(commissionRate),
-      adminProfitMargin: parseFloat(adminProfitMargin),
-      prizePoolPercentage: parseFloat(prizePoolPercentage),
-    };
-
-    // Validate percentages add up correctly
-    const total = settings.commissionRate + settings.prizePoolPercentage;
-    if (total > 100 || settings.adminProfitMargin > 100) {
-      toast({
-        title: "Invalid Settings",
-        description: "Percentages must not exceed 100%",
-        variant: "destructive",
-      });
-      return;
+    const settings: any = {};
+    
+    // Admin can only edit profit margin
+    if (userRole === 'admin') {
+      settings.adminProfitMargin = parseFloat(adminProfitMargin);
+      if (settings.adminProfitMargin > 100) {
+        toast({
+          title: "Invalid Settings",
+          description: "Profit margin cannot exceed 100%",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else if (userRole === 'super_admin') {
+      // Super admin can edit commission rate and profit margin
+      settings.commissionRate = parseFloat(commissionRate);
+      settings.adminProfitMargin = parseFloat(adminProfitMargin);
+      
+      if (settings.commissionRate > 100 || settings.adminProfitMargin > 100) {
+        toast({
+          title: "Invalid Settings",
+          description: "Percentages cannot exceed 100%",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     updateSettingsMutation.mutate(settings);
@@ -79,7 +88,9 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
     return (
       <Card>
         <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">Access denied. Admin privileges required.</p>
+          <p className="text-center text-muted-foreground">
+            Access denied. Admin privileges required.
+          </p>
         </CardContent>
       </Card>
     );
@@ -108,39 +119,30 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="commissionRate">Super Admin Commission Rate (%)</Label>
-                  <Input
-                    id="commissionRate"
-                    type="number"
-                    min="0"
-                    max="50"
-                    step="0.5"
-                    value={commissionRate}
-                    onChange={(e) => setCommissionRate(e.target.value)}
-                    placeholder="15"
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Percentage of game revenue that goes to super admin
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="prizePoolPercentage">Prize Pool Percentage (%)</Label>
-                  <Input
-                    id="prizePoolPercentage"
-                    type="number"
-                    min="0"
-                    max="50"
-                    step="0.5"
-                    value={prizePoolPercentage}
-                    onChange={(e) => setPrizePoolPercentage(e.target.value)}
-                    placeholder="15"
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Percentage of game revenue allocated to prize pool
-                  </p>
-                </div>
+                {userRole === 'super_admin' ? (
+                  <div>
+                    <Label htmlFor="commissionRate">Super Admin Commission Rate (%)</Label>
+                    <Input
+                      id="commissionRate"
+                      type="number"
+                      min="0"
+                      max="50"
+                      step="0.5"
+                      value={commissionRate}
+                      onChange={(e) => setCommissionRate(e.target.value)}
+                      placeholder="15"
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Percentage of game revenue that goes to super admin
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      Commission rate settings are only accessible to super admin
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -169,14 +171,17 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
                   </p>
                 </div>
 
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-medium text-blue-800 mb-2">Revenue Distribution Preview</h4>
-                  <div className="space-y-1 text-sm text-blue-700">
-                    <div>Super Admin Commission: {commissionRate}%</div>
-                    <div>Prize Pool: {prizePoolPercentage}%</div>
-                    <div>Admin Profit: {adminProfitMargin}% of remaining {100 - parseFloat(commissionRate) - parseFloat(prizePoolPercentage)}%</div>
-                    <div className="font-medium border-t border-blue-200 pt-1">
-                      Admin Gets: {((100 - parseFloat(commissionRate) - parseFloat(prizePoolPercentage)) * parseFloat(adminProfitMargin) / 100).toFixed(1)}% of total
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-medium mb-2">Revenue Distribution Preview:</h3>
+                  <div className="space-y-1 text-sm">
+                    <div>
+                      Super Admin Commission: {commissionRate}%
+                    </div>
+                    <div>
+                      Admin Profit Margin: {adminProfitMargin}% of remaining revenue
+                    </div>
+                    <div>
+                      Admin Gets: {((100 - parseFloat(commissionRate || "0")) * parseFloat(adminProfitMargin || "0") / 100).toFixed(1)}% of total
                     </div>
                   </div>
                 </div>
@@ -192,7 +197,7 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
                 className="w-full md:w-auto"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Save Settings
+                {updateSettingsMutation.isPending ? "Saving..." : "Save Settings"}
               </Button>
             </CardContent>
           </Card>
@@ -220,35 +225,26 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
                                 {new Date(game.completedAt).toLocaleDateString()}
                               </span>
                             </div>
-                            
                             <div className="space-y-1 text-sm">
                               <div className="flex justify-between">
-                                <span>Shop:</span>
-                                <span className="font-medium">{game.shop?.name || `ID: ${game.shopId}`}</span>
+                                <span>Status:</span>
+                                <span className="capitalize">{game.status}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span>Employee:</span>
-                                <span className="font-medium">{game.employee?.name || `ID: ${game.employeeId}`}</span>
+                                <span>Total Amount:</span>
+                                <span>{game.amount} ETB</span>
                               </div>
                               <div className="flex justify-between">
                                 <span>Players:</span>
-                                <span className="font-medium">{game.playerCount}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Total Revenue:</span>
-                                <span className="font-medium text-green-600">ETB {game.totalRevenue}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Prize Amount:</span>
-                                <span className="font-medium text-blue-600">ETB {game.prizeAmount}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Super Admin Commission:</span>
-                                <span className="font-medium text-purple-600">ETB {game.superAdminCommission}</span>
+                                <span>{game.playerCount}</span>
                               </div>
                               <div className="flex justify-between">
                                 <span>Admin Profit:</span>
-                                <span className="font-medium text-orange-600">ETB {game.adminProfit}</span>
+                                <span>{game.adminProfit} ETB</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Super Admin Commission:</span>
+                                <span>{game.superAdminCommission} ETB</span>
                               </div>
                             </div>
                           </div>
@@ -260,7 +256,7 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
               ) : (
                 <div className="text-center py-8">
                   <History className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No game history available yet.</p>
+                  <p className="text-muted-foreground">No game history available</p>
                 </div>
               )}
             </CardContent>
