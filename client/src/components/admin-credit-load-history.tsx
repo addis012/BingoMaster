@@ -29,9 +29,9 @@ export function AdminCreditLoadHistory() {
   const { data: creditLoads = [], isLoading, refetch } = useQuery({
     queryKey: ['/api/credit/loads/admin'],
     enabled: true,
+    staleTime: 0,
+    cacheTime: 0,
   });
-
-  console.log('Credit loads data:', creditLoads);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -151,14 +151,22 @@ export function AdminCreditLoadHistory() {
                               <span className="ml-2">Loading image...</span>
                             </div>
                           )}
-                          <img
-                            src={load.transferScreenshot}
-                            alt="Payment Screenshot"
-                            className="w-full h-auto rounded-lg border"
-                            onLoad={handleImageLoad}
-                            onError={handleImageError}
-                            style={{ display: isImageLoading ? 'none' : 'block' }}
-                          />
+                          {load.transferScreenshot.startsWith('data:') ? (
+                            <img
+                              src={load.transferScreenshot}
+                              alt="Payment Screenshot"
+                              className="w-full h-auto rounded-lg border"
+                              onLoad={handleImageLoad}
+                              onError={handleImageError}
+                              style={{ display: isImageLoading ? 'none' : 'block' }}
+                            />
+                          ) : (
+                            <div className="p-6 bg-gray-100 rounded-lg border-2 border-dashed text-center">
+                              <p className="text-sm text-gray-600 font-medium">Screenshot Reference</p>
+                              <p className="text-xs text-gray-500 mt-1">{load.transferScreenshot}</p>
+                              <p className="text-xs text-gray-400 mt-2">Unable to display - screenshot not in proper image format</p>
+                            </div>
+                          )}
                         </div>
                       </DialogContent>
                     </Dialog>

@@ -272,15 +272,22 @@ export function CreditLoadManagement({ userRole }: CreditLoadManagementProps) {
                       <span className="font-medium">Transfer Proof Submitted</span>
                     </div>
                     <div className="mt-3">
-                      <img 
-                        src={selectedLoad.transferScreenshot} 
-                        alt="Bank Transfer Screenshot" 
-                        className="max-w-full h-auto max-h-96 rounded border border-gray-200 shadow-sm"
-                        onError={(e) => {
-                          console.error('Image load error:', e);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
+                      {selectedLoad.transferScreenshot.startsWith('data:') ? (
+                        <img 
+                          src={selectedLoad.transferScreenshot} 
+                          alt="Bank Transfer Screenshot" 
+                          className="max-w-full h-auto max-h-96 rounded border border-gray-200 shadow-sm"
+                          onError={(e) => {
+                            console.error('Image load error:', e);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="p-4 bg-gray-100 rounded border-2 border-dashed">
+                          <p className="text-sm text-gray-600">Screenshot reference: {selectedLoad.transferScreenshot}</p>
+                          <p className="text-xs text-gray-500 mt-1">Unable to display - not in proper image format</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
