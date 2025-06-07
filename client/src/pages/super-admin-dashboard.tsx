@@ -10,7 +10,11 @@ import { Building2, Users, DollarSign, AlertTriangle, TrendingUp, GamepadIcon, B
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-export default function SuperAdminDashboard() {
+interface SuperAdminDashboardProps {
+  onLogout: () => void;
+}
+
+export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 

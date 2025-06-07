@@ -27,10 +27,12 @@ export default function LoginPage() {
       });
       
       // Redirect based on user role
-      if (user.role === "admin") {
-        setLocation("/admin");
+      if (user.role === "super_admin") {
+        setLocation("/dashboard/super-admin");
+      } else if (user.role === "admin") {
+        setLocation("/dashboard/admin");
       } else if (user.role === "employee") {
-        setLocation("/employee");
+        setLocation("/dashboard/employee");
       }
     },
     onError: (error: any) => {
@@ -104,6 +106,11 @@ export default function LoginPage() {
           <div className="mt-6 pt-4 border-t">
             <p className="text-sm text-gray-600 mb-3">Test Credentials:</p>
             <div className="space-y-3 text-xs">
+              <div className="bg-purple-50 p-2 rounded">
+                <p className="font-medium text-purple-800">Super Admin Account:</p>
+                <p className="text-purple-600">Username: superadmin</p>
+                <p className="text-purple-600">Password: password</p>
+              </div>
               <div className="bg-blue-50 p-2 rounded">
                 <p className="font-medium text-blue-800">Admin Account:</p>
                 <p className="text-blue-600">Username: admin1</p>
@@ -120,14 +127,21 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2 mt-4">
               <Button 
-                onClick={() => setLocation("/admin")} 
+                onClick={() => setLocation("/dashboard/super-admin")} 
+                variant="outline"
+                className="w-full"
+              >
+                Go Directly to Super Admin Dashboard
+              </Button>
+              <Button 
+                onClick={() => setLocation("/dashboard/admin")} 
                 variant="outline"
                 className="w-full"
               >
                 Go Directly to Admin Dashboard
               </Button>
               <Button 
-                onClick={() => setLocation("/employee")} 
+                onClick={() => setLocation("/dashboard/employee")} 
                 variant="outline"
                 className="w-full"
               >
