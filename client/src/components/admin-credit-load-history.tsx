@@ -31,6 +31,8 @@ export function AdminCreditLoadHistory() {
     enabled: true,
   });
 
+  console.log('Credit loads data:', creditLoads);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
@@ -97,13 +99,16 @@ export function AdminCreditLoadHistory() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {creditLoads.length === 0 ? (
+        {(!Array.isArray(creditLoads) || creditLoads.length === 0) ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No credit load requests found.
+            <div className="text-xs mt-2">
+              Data type: {typeof creditLoads}, Length: {Array.isArray(creditLoads) ? creditLoads.length : 'Not array'}
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
-            {creditLoads.map((load: CreditLoad) => (
+            {(creditLoads as CreditLoad[]).map((load: CreditLoad) => (
               <div
                 key={load.id}
                 className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm"
