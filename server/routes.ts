@@ -1131,7 +1131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         role: 'admin',
         accountNumber,
-        referredBy: referredBy ? parseInt(referredBy) : undefined,
+        referredBy: referredBy && typeof referredBy === 'number' ? referredBy : undefined,
       });
 
       // Create shop for admin

@@ -58,7 +58,7 @@ export function AdminCreationForm({ onSuccess }: AdminCreationFormProps) {
     mutationFn: async (data: AdminCreationForm) => {
       const payload = {
         ...data,
-        referredBy: data.referredBy && data.referredBy !== "" ? parseInt(data.referredBy) : undefined,
+        referredBy: data.referredBy && data.referredBy !== "none" && data.referredBy !== "" ? parseInt(data.referredBy) : undefined,
       };
       const response = await apiRequest("POST", "/api/admin/create-admin", payload);
       return await response.json();
@@ -253,7 +253,7 @@ export function AdminCreationForm({ onSuccess }: AdminCreationFormProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">No referrer</SelectItem>
+                          <SelectItem value="none">No referrer</SelectItem>
                           {existingAdmins.map((admin: any) => (
                             <SelectItem key={admin.id} value={admin.id.toString()}>
                               {admin.name} ({admin.accountNumber || `ID: ${admin.id}`})

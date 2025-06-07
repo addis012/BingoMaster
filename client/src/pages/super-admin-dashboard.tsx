@@ -60,25 +60,25 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Main Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           
-          {/* Shop Management Card */}
+          {/* Admin Management Card */}
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <Building2 className="h-8 w-8 text-blue-600" />
+              <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                <UserPlus className="h-8 w-8 text-purple-600" />
               </div>
-              <CardTitle className="text-xl">Shop Management</CardTitle>
+              <CardTitle className="text-xl">Admin Management</CardTitle>
               <CardDescription className="text-sm">
-                Manage shops and employees
+                Create and manage admins
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
               <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={() => setActiveTab("shops")}
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                onClick={() => setActiveTab("admins")}
               >
-                Manage Shops
+                Manage Admins
               </Button>
             </CardContent>
           </Card>
@@ -103,7 +103,6 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
               </Button>
             </CardContent>
           </Card>
-
 
         </div>
 
@@ -169,42 +168,34 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
         {/* Tabbed Content */}
         {activeTab === "overview" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Recent Shops */}
+            {/* Recent Admins */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Shops</CardTitle>
-                <CardDescription>Latest registered shops</CardDescription>
+                <CardTitle>Recent Admins</CardTitle>
+                <CardDescription>Latest registered admins</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Shop Name</TableHead>
+                        <TableHead>Admin Name</TableHead>
+                        <TableHead>Username</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Commission Rate</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>Account Number</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {shops.slice(0, 5).map((shop: any) => (
-                        <TableRow key={shop.id}>
-                          <TableCell className="font-medium">{shop.name}</TableCell>
+                      {admins.slice(0, 5).map((admin: any) => (
+                        <TableRow key={admin.id}>
+                          <TableCell className="font-medium">{admin.name}</TableCell>
+                          <TableCell>{admin.username}</TableCell>
                           <TableCell>
-                            <Badge variant={shop.isBlocked ? "destructive" : "default"}>
-                              {shop.isBlocked ? "Blocked" : "Active"}
+                            <Badge variant={admin.isBlocked ? "destructive" : "default"}>
+                              {admin.isBlocked ? "Blocked" : "Active"}
                             </Badge>
                           </TableCell>
-                          <TableCell>{shop.commissionRate}%</TableCell>
-                          <TableCell>
-                            <Button
-                              variant={shop.isBlocked ? "default" : "destructive"}
-                              size="sm"
-                              onClick={() => handleBlockShop(shop.id, shop.isBlocked)}
-                            >
-                              {shop.isBlocked ? "Unblock" : "Block"}
-                            </Button>
-                          </TableCell>
+                          <TableCell>{admin.accountNumber || `ID: ${admin.id}`}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
