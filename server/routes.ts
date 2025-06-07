@@ -1022,7 +1022,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(transfer);
     } catch (error) {
-      res.status(500).json({ message: "Failed to process credit transfer" });
+      console.error("Credit transfer error details:", error);
+      res.status(500).json({ message: "Failed to process credit transfer", error: error.message });
     }
   });
 

@@ -394,39 +394,26 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, adminId));
   }
 
-  async createCreditTransfer(transfer: InsertCreditTransfer): Promise<CreditTransfer> {
-    const [creditTransfer] = await db.insert(creditTransfers).values({
-      fromAdminId: transfer.fromAdminId,
-      toAdminId: transfer.toAdminId,
-      amount: transfer.amount,
-      description: transfer.description,
-      status: transfer.status || 'completed'
-    }).returning();
-    
-    // Update balances
-    await this.updateCreditBalance(transfer.fromAdminId, transfer.amount, 'subtract');
-    await this.updateCreditBalance(transfer.toAdminId, transfer.amount, 'add');
-    
-    // Create transaction records
-    await db.insert(transactions).values({
-      type: 'credit_transfer',
-      amount: `-${transfer.amount}`,
-      description: `Credit transfer to Admin ID ${transfer.toAdminId}`,
-      fromUserId: transfer.fromAdminId,
-      toUserId: transfer.toAdminId,
-      adminId: transfer.fromAdminId,
-    });
+  async createCreditTransfer(transferData: { fromAdminId: number; toAdminId: number; amount: string; description?: string }): Promise<CreditTransfer> {
+    try {
+      // Update balances first
+      await this.updateCreditBalance(transferData.fromAdminId, transferData.amount, 'subtract');
+      await this.updateCreditBalance(transferData.toAdminId, transferData.amount, 'add');
+      
+      // Create credit transfer record
+      const [creditTransfer] = await db.insert(creditTransfers).values({
+        fromAdminId: transferData.fromAdminId,
+        toAdminId: transferData.toAdminId,
+        amount: transferData.amount,
+        description: transferData.description || '',
+        status: 'completed'
+      }).returning();
 
-    await db.insert(transactions).values({
-      type: 'credit_transfer',
-      amount: transfer.amount,
-      description: `Credit received from Admin ID ${transfer.fromAdminId}`,
-      fromUserId: transfer.fromAdminId,
-      toUserId: transfer.toAdminId,
-      adminId: transfer.toAdminId,
-    });
-
-    return creditTransfer;
+      return creditTransfer as CreditTransfer;
+    } catch (error) {
+      console.error('Credit transfer error:', error);
+      throw error;
+    }
   }
 
   async getCreditTransfers(adminId: number): Promise<CreditTransfer[]> {
