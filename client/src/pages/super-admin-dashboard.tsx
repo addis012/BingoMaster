@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NavigationHeader } from "@/components/navigation-header";
 import { FinancialDashboard } from "@/components/financial-dashboard";
+import { AdminCreationForm } from "@/components/admin-creation-form";
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, Users, DollarSign, AlertTriangle, TrendingUp, GamepadIcon, BarChart3 } from "lucide-react";
+import { Building2, Users, DollarSign, AlertTriangle, TrendingUp, GamepadIcon, BarChart3, UserPlus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,9 +20,14 @@ interface SuperAdminDashboardProps {
 export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("overview");
 
   const { data: shops = [], refetch: refetchShops } = useQuery({
     queryKey: ["/api/shops"],
+  });
+
+  const { data: allAdmins = [], refetch: refetchAdmins } = useQuery({
+    queryKey: ["/api/admin/all-admins"],
   });
 
   const handleBlockShop = async (shopId: number, isBlocked: boolean) => {

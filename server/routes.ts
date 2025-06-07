@@ -1182,5 +1182,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all admins for super admin
+  app.get("/api/admin/all-admins", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const admins = await storage.getUsers();
+      const adminUsers = admins.filter(u => u.role === 'admin');
+      
+      // Remove passwords from response
+      const safeAdmins = adminUsers.map(admin => ({
+        ...admin,
+        password: undefined
+      }));
+
+      res.json(safeAdmins);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get admins" });
+    }
+  });
+
+  // Admin creates employee
+  app.post("/api/admin/create-employee", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { name, username, password, email } = req.body;
+      
+      if (!name || !username || !password) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create employee user
+      const employee = await storage.createUser({
+        name,
+        username,
+        password: hashedPassword,
+        email: email || null,
+        role: 'employee',
+        shopId: user.shopId!,
+      });
+
+      res.json({ 
+        employee: { ...employee, password: undefined }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create employee" });
+    }
+  });
+
+  // Get admin's employees
+  app.get("/api/admin/employees", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      if (!user.shopId) {
+        return res.status(400).json({ message: "Admin not assigned to a shop" });
+      }
+
+      const employees = await storage.getUsersByShop(user.shopId);
+      const employeeUsers = employees.filter(u => u.role === 'employee');
+      
+      // Remove passwords from response
+      const safeEmployees = employeeUsers.map(emp => ({
+        ...emp,
+        password: undefined
+      }));
+
+      res.json(safeEmployees);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get employees" });
+    }
+  });
+
   return httpServer;
 }
