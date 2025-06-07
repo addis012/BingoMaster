@@ -29,6 +29,9 @@ export function AuthProvider(props: { children: ReactNode }) {
     queryKey: ["/api/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const loginMutation = useMutation({
@@ -70,7 +73,7 @@ export function AuthProvider(props: { children: ReactNode }) {
   }, [isLoading]);
 
   const value = {
-    user: userData?.user || null,
+    user: (userData as any)?.user || null,
     login,
     logout,
     isLoading: !isInitialized || loginMutation.isPending || logoutMutation.isPending,

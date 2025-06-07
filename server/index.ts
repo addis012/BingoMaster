@@ -43,7 +43,8 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     httpOnly: false,
     sameSite: 'lax',
-    path: '/'
+    path: '/',
+    domain: undefined
   },
   name: 'connect.sid'
 }));

@@ -67,6 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", (req, res) => {
     req.session.destroy(() => {
+      res.clearCookie('connect.sid');
       res.json({ message: "Logged out" });
     });
   });
