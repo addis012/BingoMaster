@@ -254,17 +254,26 @@ export const insertGamePlayerSchema = createInsertSchema(gamePlayers).omit({
   registeredAt: true,
 });
 
-export const insertTransactionSchema = createInsertSchema(transactions).omit({
+export const insertTransactionSchema = createInsertSchema(transactions, {
+  amount: z.string(),
+}).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertCommissionPaymentSchema = createInsertSchema(commissionPayments).omit({
+export const insertCommissionPaymentSchema = createInsertSchema(commissionPayments, {
+  amount: z.string(),
+}).omit({
   id: true,
   paidAt: true,
 });
 
-export const insertGameHistorySchema = createInsertSchema(gameHistory).omit({
+export const insertGameHistorySchema = createInsertSchema(gameHistory, {
+  totalRevenue: z.string(),
+  prizeAmount: z.string(),
+  adminProfit: z.string(),
+  superAdminCommission: z.string(),
+}).omit({
   id: true,
   completedAt: true,
 });
