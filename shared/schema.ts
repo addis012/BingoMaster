@@ -256,16 +256,10 @@ export const insertGamePlayerSchema = createInsertSchema(gamePlayers).omit({
 
 export const insertTransactionSchema = createInsertSchema(transactions, {
   amount: z.string(),
-}).omit({
-  id: true,
-  createdAt: true,
 });
 
 export const insertCommissionPaymentSchema = createInsertSchema(commissionPayments, {
   amount: z.string(),
-}).omit({
-  id: true,
-  paidAt: true,
 });
 
 export const insertGameHistorySchema = createInsertSchema(gameHistory, {
@@ -273,9 +267,6 @@ export const insertGameHistorySchema = createInsertSchema(gameHistory, {
   prizeAmount: z.string(),
   adminProfit: z.string(),
   superAdminCommission: z.string(),
-}).omit({
-  id: true,
-  completedAt: true,
 });
 
 // Types
@@ -295,13 +286,12 @@ export type GameHistory = typeof gameHistory.$inferSelect;
 export type InsertGameHistory = z.infer<typeof insertGameHistorySchema>;
 
 // Credit system types
-export const insertCreditTransferSchema = createInsertSchema(creditTransfers).omit({
-  id: true,
-  createdAt: true,
+export const insertCreditTransferSchema = createInsertSchema(creditTransfers, {
+  amount: z.string(),
 });
-export const insertCreditLoadSchema = createInsertSchema(creditLoads).omit({
-  id: true,
-  requestedAt: true,
+
+export const insertCreditLoadSchema = createInsertSchema(creditLoads, {
+  amount: z.string(),
 });
 
 export type CreditTransfer = typeof creditTransfers.$inferSelect;

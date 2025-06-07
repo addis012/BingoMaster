@@ -360,7 +360,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span>Account Number:</span>
-                        <span className="font-mono">{user.accountNumber || `ID: ${user.id}`}</span>
+                        <span className="font-mono">{userAccountNumber}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Account Holder:</span>
