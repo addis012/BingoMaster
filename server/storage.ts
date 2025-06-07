@@ -563,8 +563,14 @@ export class DatabaseStorage implements IStorage {
 
     const profits = await this.calculateProfitSharing(totalCollected, game.shopId);
     
-    // Deduct admin profit from admin's credit balance
-    await this.updateCreditBalance(shop.adminId!, profits.adminProfit, 'subtract');
+    // CORRECT LOGIC: Deduct super admin's commission from admin's credit balance
+    // Admin keeps their profit but pays super admin commission from their credit
+    await this.updateCreditBalance(shop.adminId!, profits.superAdminCommission, 'subtract');
+    
+    // Update shop revenue (this represents the money actually collected)
+    await this.updateShop(game.shopId, {
+      totalRevenue: (parseFloat(shop.totalRevenue || "0") + parseFloat(totalCollected)).toFixed(2)
+    });
     
     // Create transaction records
     await this.createTransaction({
@@ -572,17 +578,19 @@ export class DatabaseStorage implements IStorage {
       shopId: game.shopId,
       employeeId: game.employeeId,
       adminId: shop.adminId!,
-      type: 'admin_profit',
-      amount: `-${profits.adminProfit}`,
-      description: `Admin profit deduction for game ${gameId}`,
+      type: 'game_collection',
+      amount: totalCollected,
+      description: `Game ${gameId} collection by employee`,
     });
 
     await this.createTransaction({
       gameId,
       shopId: game.shopId,
+      employeeId: null,
+      adminId: shop.adminId!,
       type: 'super_admin_commission',
-      amount: profits.superAdminCommission,
-      description: `Super admin commission from game ${gameId}`,
+      amount: `-${profits.superAdminCommission}`,
+      description: `Super admin commission deducted for game ${gameId}`,
     });
 
     // Process referral bonus if applicable
@@ -593,10 +601,12 @@ export class DatabaseStorage implements IStorage {
         
         await this.createTransaction({
           gameId,
+          shopId: null,
+          employeeId: null,
+          adminId: admin.referredBy,
           type: 'referral_bonus',
           amount: profits.referralBonus,
           description: `Referral bonus for game ${gameId}`,
-          adminId: admin.referredBy,
         });
       }
     }

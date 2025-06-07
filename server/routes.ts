@@ -537,6 +537,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Process game profits with credit deduction
+      await storage.processGameProfits(gameId, totalCollectedBirr.toString());
+      
       // Create game history record
       await storage.createGameHistory({
         gameId,
