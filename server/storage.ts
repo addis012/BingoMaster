@@ -438,7 +438,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCreditLoads(adminId?: number, status?: string): Promise<CreditLoad[]> {
-    let query = db.select().from(creditLoads);
+    let query = db.select({
+      id: creditLoads.id,
+      adminId: creditLoads.adminId,
+      amount: creditLoads.amount,
+      paymentMethod: creditLoads.paymentMethod,
+      referenceNumber: creditLoads.referenceNumber,
+      transferScreenshot: creditLoads.transferScreenshot,
+      adminAccountNumber: creditLoads.adminAccountNumber,
+      notes: creditLoads.notes,
+      status: creditLoads.status,
+      requestedAt: creditLoads.requestedAt,
+      processedAt: creditLoads.processedAt,
+      processedBy: creditLoads.processedBy,
+      admin: {
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        accountNumber: users.accountNumber,
+      }
+    }).from(creditLoads)
+    .leftJoin(users, eq(creditLoads.adminId, users.id));
     
     const conditions = [];
     if (adminId) conditions.push(eq(creditLoads.adminId, adminId));
@@ -471,6 +491,9 @@ export class DatabaseStorage implements IStorage {
       // Add credit to admin's balance
       await this.updateCreditBalance(load.adminId, load.amount, 'add');
       
+      // Get admin's shop ID for the transaction
+      const admin = await this.getUser(load.adminId);
+      
       // Create transaction record
       await this.createTransaction({
         type: 'credit_load',
@@ -478,6 +501,11 @@ export class DatabaseStorage implements IStorage {
         description: `Credit loaded via ${load.paymentMethod}`,
         referenceId: load.referenceNumber,
         adminId: load.adminId,
+        shopId: admin?.shopId || null,
+        employeeId: null,
+        gameId: null,
+        fromUserId: null,
+        toUserId: load.adminId,
       });
     }
 
