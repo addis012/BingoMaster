@@ -185,11 +185,12 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="finance">Finance</TabsTrigger>
             <TabsTrigger value="credits">Credits</TabsTrigger>
+            <TabsTrigger value="settings">Settings & History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -567,6 +568,10 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <SystemSettings userRole="admin" />
           </TabsContent>
         </Tabs>
       </div>

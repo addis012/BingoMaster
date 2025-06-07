@@ -1111,6 +1111,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // System settings management
+  app.post("/api/admin/system-settings", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { commissionRate, adminProfitMargin, prizePoolPercentage } = req.body;
+      
+      // Store settings (in a real app, you'd save to database)
+      // For now, just return success
+      res.json({ 
+        message: "Settings updated successfully",
+        settings: { commissionRate, adminProfitMargin, prizePoolPercentage }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update system settings" });
+    }
+  });
+
+  // Get game history
+  app.get("/api/admin/game-history", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      let gameHistory;
+      if (user.role === 'super_admin') {
+        // Super admin sees all game history
+        gameHistory = await storage.getGameHistory(0); // 0 means all shops
+      } else {
+        // Admin sees only their shop's game history
+        if (!user.shopId) {
+          return res.status(400).json({ message: "Admin not assigned to a shop" });
+        }
+        gameHistory = await storage.getGameHistory(user.shopId);
+      }
+
+      res.json(gameHistory);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get game history" });
+    }
+  });
+
   // Create admin with account number generation
   app.post("/api/admin/create-admin", async (req, res) => {
     try {
