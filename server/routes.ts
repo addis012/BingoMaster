@@ -1263,7 +1263,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get admin's employees
   app.get("/api/admin/employees", async (req, res) => {
     try {
-      const user = req.session.user;
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -1284,6 +1289,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(safeEmployees);
     } catch (error) {
       res.status(500).json({ message: "Failed to get employees" });
+    }
+  });
+
+  // Get admin's shop statistics
+  app.get("/api/admin/shop-stats", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      if (!user.shopId) {
+        return res.status(400).json({ message: "Admin not assigned to a shop" });
+      }
+
+      const shopStats = await storage.getShopStats(user.shopId);
+      res.json(shopStats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get shop statistics" });
     }
   });
 
