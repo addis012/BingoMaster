@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./hooks/use-auth";
 import LoginPage from "./pages/login-page";
+import TestLogin from "./pages/test-login";
 import AdminDashboard from "./pages/admin-dashboard";
 import SuperAdminDashboard from "./pages/super-admin-dashboard";
 import BingoEmployeeDashboard from "./components/bingo-employee-dashboard";
@@ -19,6 +20,7 @@ function App() {
         <Router>
           <Route path="/" component={LoginPage} />
           <Route path="/login" component={LoginPage} />
+          <Route path="/test-login" component={TestLogin} />
           
           {/* Dashboard Routes */}
           <Route path="/dashboard/super-admin">
