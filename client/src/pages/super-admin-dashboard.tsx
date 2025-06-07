@@ -113,7 +113,10 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button className="w-full bg-purple-600 hover:bg-purple-700">
+              <Button 
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                onClick={() => setActiveTab("games")}
+              >
                 View Games
               </Button>
             </CardContent>
@@ -179,13 +182,94 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
           </Card>
         </div>
 
-        {/* Detailed Management Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Shops */}
+        {/* Tabbed Content */}
+        {activeTab === "overview" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Recent Shops */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Shops</CardTitle>
+                <CardDescription>Latest registered shops</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Shop Name</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Commission Rate</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {shops.slice(0, 5).map((shop: any) => (
+                        <TableRow key={shop.id}>
+                          <TableCell className="font-medium">{shop.name}</TableCell>
+                          <TableCell>
+                            <Badge variant={shop.isBlocked ? "destructive" : "default"}>
+                              {shop.isBlocked ? "Blocked" : "Active"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{shop.commissionRate}%</TableCell>
+                          <TableCell>
+                            <Button
+                              variant={shop.isBlocked ? "default" : "destructive"}
+                              size="sm"
+                              onClick={() => handleBlockShop(shop.id, shop.isBlocked)}
+                            >
+                              {shop.isBlocked ? "Unblock" : "Block"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* System Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle>System Overview</CardTitle>
+                <CardDescription>Platform performance metrics</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <span className="text-sm font-medium">Total Shops</span>
+                  <span className="text-lg font-bold text-blue-600">{totalShops}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                  <span className="text-sm font-medium">Active Shops</span>
+                  <span className="text-lg font-bold text-green-600">{activeShops}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                  <span className="text-sm font-medium">Total Revenue</span>
+                  <span className="text-lg font-bold text-purple-600">${totalRevenue.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                  <span className="text-sm font-medium">Commission Rate Avg</span>
+                  <span className="text-lg font-bold text-orange-600">
+                    {shops.length > 0 
+                      ? (shops.reduce((sum: number, shop: any) => sum + parseFloat(shop.commissionRate || "0"), 0) / shops.length).toFixed(1)
+                      : "0"
+                    }%
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === "shops" && (
           <Card>
             <CardHeader>
-              <CardTitle>Recent Shops</CardTitle>
-              <CardDescription>Latest registered shops</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Shop Management
+              </CardTitle>
+              <CardDescription>Manage all shops and their settings</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -193,25 +277,29 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                   <TableHeader>
                     <TableRow>
                       <TableHead>Shop Name</TableHead>
+                      <TableHead>Admin</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Commission Rate</TableHead>
+                      <TableHead>Revenue</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {shops.slice(0, 5).map((shop: any) => (
+                    {shops.map((shop: any) => (
                       <TableRow key={shop.id}>
                         <TableCell className="font-medium">{shop.name}</TableCell>
+                        <TableCell>{shop.adminName || "No Admin"}</TableCell>
                         <TableCell>
                           <Badge variant={shop.isBlocked ? "destructive" : "default"}>
                             {shop.isBlocked ? "Blocked" : "Active"}
                           </Badge>
                         </TableCell>
                         <TableCell>{shop.commissionRate}%</TableCell>
+                        <TableCell>${shop.totalRevenue || "0.00"}</TableCell>
                         <TableCell>
                           <Button
-                            variant={shop.isBlocked ? "default" : "destructive"}
                             size="sm"
+                            variant={shop.isBlocked ? "default" : "destructive"}
                             onClick={() => handleBlockShop(shop.id, shop.isBlocked)}
                           >
                             {shop.isBlocked ? "Unblock" : "Block"}
@@ -224,38 +312,98 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
               </div>
             </CardContent>
           </Card>
+        )}
 
-          {/* System Overview */}
+        {activeTab === "admins" && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5" />
+                  Create New Admin
+                </CardTitle>
+                <CardDescription>
+                  Add new admin accounts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminCreationForm onSuccess={() => {
+                  refetchAdmins();
+                  refetchShops();
+                  toast({
+                    title: "Success",
+                    description: "Admin created successfully",
+                  });
+                }} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>All Admins</CardTitle>
+                <CardDescription>Manage existing admin accounts</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Credit Balance</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {allAdmins.map((admin: any) => (
+                        <TableRow key={admin.id}>
+                          <TableCell className="font-medium">{admin.name}</TableCell>
+                          <TableCell>{admin.username}</TableCell>
+                          <TableCell>{admin.email}</TableCell>
+                          <TableCell>${admin.creditBalance}</TableCell>
+                          <TableCell>
+                            <Badge variant={admin.isBlocked ? "destructive" : "default"}>
+                              {admin.isBlocked ? "Blocked" : "Active"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button size="sm" variant="outline">
+                              Edit
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === "financial" && (
+          <FinancialDashboard userRole="super_admin" />
+        )}
+
+        {activeTab === "games" && (
           <Card>
             <CardHeader>
-              <CardTitle>System Overview</CardTitle>
-              <CardDescription>Platform performance metrics</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <GamepadIcon className="h-5 w-5" />
+                Game Monitoring
+              </CardTitle>
+              <CardDescription>Monitor active games across all shops</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <span className="text-sm font-medium">Total Shops</span>
-                <span className="text-lg font-bold text-blue-600">{totalShops}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                <span className="text-sm font-medium">Active Shops</span>
-                <span className="text-lg font-bold text-green-600">{activeShops}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                <span className="text-sm font-medium">Total Revenue</span>
-                <span className="text-lg font-bold text-purple-600">${totalRevenue.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                <span className="text-sm font-medium">Commission Rate Avg</span>
-                <span className="text-lg font-bold text-orange-600">
-                  {shops.length > 0 
-                    ? (shops.reduce((sum: number, shop: any) => sum + parseFloat(shop.commissionRate || "0"), 0) / shops.length).toFixed(1)
-                    : "0"
-                  }%
-                </span>
+            <CardContent>
+              <div className="text-center py-8">
+                <GamepadIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500">Game monitoring dashboard coming soon</p>
               </div>
             </CardContent>
           </Card>
-        </div>
+        )}
       </div>
     </div>
   );
