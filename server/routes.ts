@@ -1050,11 +1050,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid load request data" });
       }
 
+      const { transferScreenshot, adminAccountNumber, notes } = req.body;
+
       const load = await storage.createCreditLoad({
         adminId: user.id,
         amount,
         paymentMethod,
         referenceNumber,
+        transferScreenshot,
+        adminAccountNumber,
+        notes,
       });
 
       res.json(load);

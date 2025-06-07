@@ -129,10 +129,10 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   });
 
   const handleLoadCredit = () => {
-    if (!loadAmount || !loadBankAccount) {
+    if (!loadAmount || !transferScreenshot) {
       toast({
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please provide amount and bank transfer screenshot",
         variant: "destructive",
       });
       return;
@@ -140,8 +140,11 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     
     loadCreditMutation.mutate({
       amount: loadAmount,
-      paymentMethod: "bank_transfer",
-      bankAccount: loadBankAccount,
+      paymentMethod: paymentMethod,
+      referenceNumber: referenceNumber,
+      transferScreenshot: transferScreenshot,
+      adminAccountNumber: userAccountNumber,
+      notes: notes,
     });
   };
 
@@ -427,12 +430,48 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                             />
                           </div>
                           <div>
-                            <Label htmlFor="bankAccount">Bank Account Number</Label>
+                            <Label htmlFor="paymentMethod">Payment Method</Label>
+                            <select
+                              id="paymentMethod"
+                              className="w-full p-2 border rounded"
+                              value={paymentMethod}
+                              onChange={(e) => setPaymentMethod(e.target.value)}
+                            >
+                              <option value="bank_transfer">Bank Transfer</option>
+                              <option value="telebirr">TeleBirr</option>
+                              <option value="cash">Cash</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label htmlFor="referenceNumber">Reference Number (Optional)</Label>
                             <Input
-                              id="bankAccount"
-                              placeholder="Enter your bank account number"
-                              value={loadBankAccount}
-                              onChange={(e) => setLoadBankAccount(e.target.value)}
+                              id="referenceNumber"
+                              placeholder="Enter transaction reference"
+                              value={referenceNumber}
+                              onChange={(e) => setReferenceNumber(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="transferScreenshot">Bank Transfer Screenshot</Label>
+                            <textarea
+                              id="transferScreenshot"
+                              className="w-full p-2 border rounded h-20"
+                              placeholder="Paste base64 encoded screenshot or describe transfer proof"
+                              value={transferScreenshot}
+                              onChange={(e) => setTransferScreenshot(e.target.value)}
+                            />
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Upload proof of bank transfer to your account: {userAccountNumber}
+                            </p>
+                          </div>
+                          <div>
+                            <Label htmlFor="notes">Additional Notes (Optional)</Label>
+                            <textarea
+                              id="notes"
+                              className="w-full p-2 border rounded h-16"
+                              placeholder="Any additional information about this request"
+                              value={notes}
+                              onChange={(e) => setNotes(e.target.value)}
                             />
                           </div>
                           <div className="flex justify-end gap-2">

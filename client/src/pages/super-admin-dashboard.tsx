@@ -9,6 +9,7 @@ import { NavigationHeader } from "@/components/navigation-header";
 import { FinancialDashboard } from "@/components/financial-dashboard";
 import { AdminCreationForm } from "@/components/admin-creation-form";
 import { ShopCreationForm } from "@/components/shop-creation-form";
+import { CreditLoadManagement } from "@/components/credit-load-management";
 import { useAuth } from "@/hooks/use-auth";
 import { Building2, Users, DollarSign, AlertTriangle, TrendingUp, GamepadIcon, BarChart3, UserPlus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
