@@ -6,6 +6,20 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Add CORS headers for proper browser communication
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -19,15 +33,18 @@ app.use(session({
     tableName: 'session',
     createTableIfMissing: true
   }),
-  secret: 'bingo-session-secret-key',
+  secret: 'bingo-session-secret-key-longer-for-security',
   resave: false,
   saveUninitialized: false,
+  rolling: true,
   cookie: { 
     secure: false, 
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    httpOnly: false, // Allow JavaScript access for debugging
-    sameSite: 'lax'
-  }
+    httpOnly: false,
+    sameSite: 'lax',
+    path: '/'
+  },
+  name: 'connect.sid'
 }));
 
 app.use((req, res, next) => {
