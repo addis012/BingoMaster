@@ -1007,6 +1007,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid transfer data" });
       }
 
+      // Check if recipient exists and is an admin
+      const recipient = await storage.getUser(parseInt(toAdminId));
+      if (!recipient || recipient.role !== 'admin') {
+        return res.status(400).json({ message: "Invalid recipient - user not found or not an admin" });
+      }
+
       // Check if sender has sufficient balance
       const currentBalance = await storage.getCreditBalance(user.id);
       if (parseFloat(currentBalance) < parseFloat(amount)) {
