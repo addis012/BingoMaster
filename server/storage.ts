@@ -61,6 +61,26 @@ export interface IStorage {
     gamesCompleted: number;
     playersRegistered: number;
   }>;
+
+  // Credit system methods
+  getCreditBalance(adminId: number): Promise<string>;
+  updateCreditBalance(adminId: number, amount: string, operation: 'add' | 'subtract'): Promise<void>;
+  createCreditTransfer(transfer: InsertCreditTransfer): Promise<CreditTransfer>;
+  getCreditTransfers(adminId: number): Promise<CreditTransfer[]>;
+  createCreditLoad(load: InsertCreditLoad): Promise<CreditLoad>;
+  getCreditLoads(adminId?: number, status?: string): Promise<CreditLoad[]>;
+  processCreditLoad(loadId: number, status: 'confirmed' | 'rejected', processedBy: number): Promise<CreditLoad>;
+  
+  // Profit sharing and referral methods
+  calculateProfitSharing(gameAmount: string, shopId: number): Promise<{
+    adminProfit: string;
+    superAdminCommission: string;
+    prizeAmount: string;
+    referralBonus?: string;
+  }>;
+  processGameProfits(gameId: number, totalCollected: string): Promise<void>;
+  generateAccountNumber(): Promise<string>;
+  getAdminsByReferrer(referrerId: number): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -344,6 +364,222 @@ export class DatabaseStorage implements IStorage {
       gamesCompleted: gamesResult.count || 0,
       playersRegistered: playersResult.count || 0,
     };
+  }
+
+  // Credit system methods
+  async getCreditBalance(adminId: number): Promise<string> {
+    const [user] = await db.select({ creditBalance: users.creditBalance })
+      .from(users)
+      .where(eq(users.id, adminId));
+    return user?.creditBalance || "0.00";
+  }
+
+  async updateCreditBalance(adminId: number, amount: string, operation: 'add' | 'subtract'): Promise<void> {
+    const currentBalance = await this.getCreditBalance(adminId);
+    const currentAmount = parseFloat(currentBalance);
+    const changeAmount = parseFloat(amount);
+    
+    const newBalance = operation === 'add' 
+      ? currentAmount + changeAmount 
+      : currentAmount - changeAmount;
+
+    await db.update(users)
+      .set({ creditBalance: newBalance.toFixed(2) })
+      .where(eq(users.id, adminId));
+  }
+
+  async createCreditTransfer(transfer: InsertCreditTransfer): Promise<CreditTransfer> {
+    const [creditTransfer] = await db.insert(creditTransfers).values(transfer).returning();
+    
+    // Update balances
+    await this.updateCreditBalance(transfer.fromAdminId, transfer.amount, 'subtract');
+    await this.updateCreditBalance(transfer.toAdminId, transfer.amount, 'add');
+    
+    // Create transaction records
+    await this.createTransaction({
+      type: 'credit_transfer',
+      amount: `-${transfer.amount}`,
+      description: `Credit transfer to Admin ID ${transfer.toAdminId}`,
+      fromUserId: transfer.fromAdminId,
+      toUserId: transfer.toAdminId,
+      adminId: transfer.fromAdminId,
+    });
+
+    await this.createTransaction({
+      type: 'credit_transfer',
+      amount: transfer.amount,
+      description: `Credit received from Admin ID ${transfer.fromAdminId}`,
+      fromUserId: transfer.fromAdminId,
+      toUserId: transfer.toAdminId,
+      adminId: transfer.toAdminId,
+    });
+
+    return creditTransfer;
+  }
+
+  async getCreditTransfers(adminId: number): Promise<CreditTransfer[]> {
+    return await db.select().from(creditTransfers)
+      .where(or(
+        eq(creditTransfers.fromAdminId, adminId),
+        eq(creditTransfers.toAdminId, adminId)
+      ))
+      .orderBy(desc(creditTransfers.createdAt));
+  }
+
+  async createCreditLoad(load: InsertCreditLoad): Promise<CreditLoad> {
+    const [creditLoad] = await db.insert(creditLoads).values(load).returning();
+    return creditLoad;
+  }
+
+  async getCreditLoads(adminId?: number, status?: string): Promise<CreditLoad[]> {
+    let query = db.select().from(creditLoads);
+    
+    const conditions = [];
+    if (adminId) conditions.push(eq(creditLoads.adminId, adminId));
+    if (status) conditions.push(eq(creditLoads.status, status));
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(creditLoads.requestedAt));
+  }
+
+  async processCreditLoad(loadId: number, status: 'confirmed' | 'rejected', processedBy: number): Promise<CreditLoad> {
+    const [load] = await db.select().from(creditLoads).where(eq(creditLoads.id, loadId));
+    
+    if (!load) {
+      throw new Error('Credit load not found');
+    }
+
+    const [updatedLoad] = await db.update(creditLoads)
+      .set({
+        status,
+        processedAt: new Date(),
+        processedBy,
+      })
+      .where(eq(creditLoads.id, loadId))
+      .returning();
+
+    if (status === 'confirmed') {
+      // Add credit to admin's balance
+      await this.updateCreditBalance(load.adminId, load.amount, 'add');
+      
+      // Create transaction record
+      await this.createTransaction({
+        type: 'credit_load',
+        amount: load.amount,
+        description: `Credit loaded via ${load.paymentMethod}`,
+        referenceId: load.referenceNumber,
+        adminId: load.adminId,
+      });
+    }
+
+    return updatedLoad;
+  }
+
+  async calculateProfitSharing(gameAmount: string, shopId: number): Promise<{
+    adminProfit: string;
+    superAdminCommission: string;
+    prizeAmount: string;
+    referralBonus?: string;
+  }> {
+    const [shop] = await db.select().from(shops).where(eq(shops.id, shopId));
+    
+    if (!shop) {
+      throw new Error('Shop not found');
+    }
+
+    const totalAmount = parseFloat(gameAmount);
+    const profitMarginPercent = parseFloat(shop.profitMargin);
+    const superAdminCommissionPercent = parseFloat(shop.superAdminCommission);
+    
+    // Calculate admin profit (admin's cut from total collected)
+    const adminProfit = (totalAmount * profitMarginPercent) / 100;
+    
+    // Calculate super admin commission (super admin's cut from admin profit)
+    const superAdminCommission = (adminProfit * superAdminCommissionPercent) / 100;
+    
+    // Calculate prize amount (remaining after admin cut)
+    const prizeAmount = totalAmount - adminProfit;
+
+    const result = {
+      adminProfit: adminProfit.toFixed(2),
+      superAdminCommission: superAdminCommission.toFixed(2),
+      prizeAmount: prizeAmount.toFixed(2),
+    };
+
+    // Check for referral bonus
+    const [admin] = await db.select().from(users).where(eq(users.id, shop.adminId!));
+    if (admin?.referredBy) {
+      const referralCommissionPercent = parseFloat(shop.referralCommission);
+      const referralBonus = (adminProfit * referralCommissionPercent) / 100;
+      result.referralBonus = referralBonus.toFixed(2);
+    }
+
+    return result;
+  }
+
+  async processGameProfits(gameId: number, totalCollected: string): Promise<void> {
+    const [game] = await db.select().from(games).where(eq(games.id, gameId));
+    if (!game) return;
+
+    const [shop] = await db.select().from(shops).where(eq(shops.id, game.shopId));
+    if (!shop) return;
+
+    const profits = await this.calculateProfitSharing(totalCollected, game.shopId);
+    
+    // Deduct admin profit from admin's credit balance
+    await this.updateCreditBalance(shop.adminId!, profits.adminProfit, 'subtract');
+    
+    // Create transaction records
+    await this.createTransaction({
+      gameId,
+      shopId: game.shopId,
+      employeeId: game.employeeId,
+      adminId: shop.adminId!,
+      type: 'admin_profit',
+      amount: `-${profits.adminProfit}`,
+      description: `Admin profit deduction for game ${gameId}`,
+    });
+
+    await this.createTransaction({
+      gameId,
+      shopId: game.shopId,
+      type: 'super_admin_commission',
+      amount: profits.superAdminCommission,
+      description: `Super admin commission from game ${gameId}`,
+    });
+
+    // Process referral bonus if applicable
+    if (profits.referralBonus) {
+      const [admin] = await db.select().from(users).where(eq(users.id, shop.adminId!));
+      if (admin?.referredBy) {
+        await this.updateCreditBalance(admin.referredBy, profits.referralBonus, 'add');
+        
+        await this.createTransaction({
+          gameId,
+          type: 'referral_bonus',
+          amount: profits.referralBonus,
+          description: `Referral bonus for game ${gameId}`,
+          adminId: admin.referredBy,
+        });
+      }
+    }
+  }
+
+  async generateAccountNumber(): Promise<string> {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `BGO${timestamp}${random}`;
+  }
+
+  async getAdminsByReferrer(referrerId: number): Promise<User[]> {
+    return await db.select().from(users)
+      .where(and(
+        eq(users.referredBy, referrerId),
+        eq(users.role, 'admin')
+      ));
   }
 }
 
