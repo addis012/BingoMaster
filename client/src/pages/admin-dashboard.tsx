@@ -67,7 +67,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    ETB {shopStats?.totalRevenue || '0'}
+                    ETB {(shopStats as any)?.totalRevenue || '0'}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     This month
@@ -81,7 +81,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   <Users className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{employees?.length || 0}</div>
+                  <div className="text-2xl font-bold">{(employees as any)?.length || 0}</div>
                   <p className="text-xs text-muted-foreground">
                     Active staff members
                   </p>
@@ -94,7 +94,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   <GamepadIcon className="h-4 w-4 text-purple-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{shopStats?.totalGames || 0}</div>
+                  <div className="text-2xl font-bold">{(shopStats as any)?.totalGames || 0}</div>
                   <p className="text-xs text-muted-foreground">
                     Total games played
                   </p>
@@ -107,7 +107,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   <CreditCard className="h-4 w-4 text-orange-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">ETB {creditBalance || '0'}</div>
+                  <div className="text-2xl font-bold">ETB {(creditBalance as any)?.balance || '0.00'}</div>
                   <p className="text-xs text-muted-foreground">
                     Available credits
                   </p>
@@ -130,11 +130,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center p-4 border rounded-lg">
                     <h4 className="font-medium">Today's Revenue</h4>
-                    <p className="text-2xl font-bold text-green-600">ETB {shopStats?.todayRevenue || '0'}</p>
+                    <p className="text-2xl font-bold text-green-600">ETB {(shopStats as any)?.todayRevenue || '0'}</p>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
                     <h4 className="font-medium">Active Games</h4>
-                    <p className="text-2xl font-bold text-blue-600">{shopStats?.activeGames || 0}</p>
+                    <p className="text-2xl font-bold text-blue-600">{(shopStats as any)?.activeGames || 0}</p>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
                     <h4 className="font-medium">Players Today</h4>
@@ -249,7 +249,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span>Account Number:</span>
-                          <span className="font-mono">{user.accountNumber}</span>
+                          <span className="font-mono">{user.accountNumber || `ID: ${user.id}`}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Account Holder:</span>
