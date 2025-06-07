@@ -270,28 +270,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                 </CardContent>
               </Card>
 
-              {/* Shop Creation Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    Create Shop
-                  </CardTitle>
-                  <CardDescription>
-                    Create a new shop and assign it to an admin
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ShopCreationForm onSuccess={() => {
-                    refetchShops();
-                    refetchAdmins();
-                    toast({
-                      title: "Success",
-                      description: "Shop created successfully",
-                    });
-                  }} />
-                </CardContent>
-              </Card>
+
             </div>
 
             {/* Existing Shops Table */}

@@ -67,7 +67,7 @@ export function AuthProvider(props: { children: ReactNode }) {
   }, [isLoading]);
 
   const value = {
-    user: (userData as any)?.user || null,
+    user: userData?.user || null,
     login,
     logout,
     isLoading: !isInitialized || loginMutation.isPending || logoutMutation.isPending,
