@@ -28,10 +28,11 @@ export function AuthProvider(props: { children: ReactNode }) {
   const { data: userData = null, isLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
-    retry: false,
-    refetchOnWindowFocus: false,
+    retry: 1,
+    refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
+    refetchInterval: 30000, // Refetch every 30 seconds to maintain session
   });
 
   const loginMutation = useMutation({
@@ -41,7 +42,7 @@ export function AuthProvider(props: { children: ReactNode }) {
       return data.user;
     },
     onSuccess: (user) => {
-      // Force immediate state update
+      // Force immediate state update with correct structure
       queryClient.setQueryData(["/api/auth/me"], { user });
       // Then refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
@@ -54,7 +55,7 @@ export function AuthProvider(props: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/auth/me"], null);
-      queryClient.clear();
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
   });
 
