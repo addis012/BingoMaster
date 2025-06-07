@@ -186,7 +186,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {admins.slice(0, 5).map((admin: any) => (
+                      {allAdmins.slice(0, 5).map((admin: any) => (
                         <TableRow key={admin.id}>
                           <TableCell className="font-medium">{admin.name}</TableCell>
                           <TableCell>{admin.username}</TableCell>
@@ -237,77 +237,56 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
           </div>
         )}
 
-        {activeTab === "shops" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Admin Creation Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserPlus className="h-5 w-5" />
-                    Create Admin First
-                  </CardTitle>
-                  <CardDescription>
-                    Create an admin account before creating a shop
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <AdminCreationForm onSuccess={() => {
-                    refetchAdmins();
-                    refetchShops();
-                    toast({
-                      title: "Success",
-                      description: "Admin created successfully - you can now create a shop for them",
-                    });
-                  }} />
-                </CardContent>
-              </Card>
-
-
-            </div>
-
-            {/* Existing Shops Table */}
-            <Card>
+        {activeTab === "admins" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Admin Creation Form */}
+            <Card className="lg:col-span-1">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  All Shops
-                </CardTitle>
-                <CardDescription>Manage all existing shops and their settings</CardDescription>
+                <CardTitle>Create New Admin</CardTitle>
+                <CardDescription>
+                  Add a new admin to the system
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminCreationForm onSuccess={() => {
+                  refetchAdmins();
+                  toast({
+                    title: "Success",
+                    description: "Admin created successfully",
+                  });
+                }} />
+              </CardContent>
+            </Card>
+
+            {/* Admin List */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>All Admins</CardTitle>
+                <CardDescription>Manage existing admins</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Shop Name</TableHead>
-                        <TableHead>Admin</TableHead>
+                        <TableHead>Admin Name</TableHead>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Account Number</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Profit Margin</TableHead>
-                        <TableHead>Super Admin Commission</TableHead>
-                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {shops.map((shop: any) => (
-                        <TableRow key={shop.id}>
-                          <TableCell className="font-medium">{shop.name}</TableCell>
-                          <TableCell>{shop.adminName || "No Admin"}</TableCell>
+                      {allAdmins.map((admin: any) => (
+                        <TableRow key={admin.id}>
+                          <TableCell className="font-medium">{admin.name}</TableCell>
+                          <TableCell>{admin.username}</TableCell>
+                          <TableCell>{admin.email}</TableCell>
+                          <TableCell>{admin.accountNumber || `ID: ${admin.id}`}</TableCell>
                           <TableCell>
-                            <Badge variant={shop.isBlocked ? "destructive" : "default"}>
-                              {shop.isBlocked ? "Blocked" : "Active"}
+                            <Badge variant={admin.isBlocked ? "destructive" : "default"}>
+                              {admin.isBlocked ? "Blocked" : "Active"}
                             </Badge>
-                          </TableCell>
-                          <TableCell>{shop.profitMargin}%</TableCell>
-                          <TableCell>{shop.superAdminCommission}%</TableCell>
-                          <TableCell>
-                            <Button
-                              size="sm"
-                              variant={shop.isBlocked ? "default" : "destructive"}
-                              onClick={() => handleBlockShop(shop.id, shop.isBlocked)}
-                            >
-                              {shop.isBlocked ? "Unblock" : "Block"}
-                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
