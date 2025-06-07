@@ -958,5 +958,229 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Credit System API Endpoints
+  
+  // Get admin credit balance
+  app.get("/api/credit/balance", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const balance = await storage.getCreditBalance(user.id);
+      res.json({ balance });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get credit balance" });
+    }
+  });
+
+  // Create credit transfer between admins
+  app.post("/api/credit/transfer", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { toAdminId, amount, description } = req.body;
+      
+      if (!toAdminId || !amount || parseFloat(amount) <= 0) {
+        return res.status(400).json({ message: "Invalid transfer data" });
+      }
+
+      // Check if sender has sufficient balance
+      const currentBalance = await storage.getCreditBalance(user.id);
+      if (parseFloat(currentBalance) < parseFloat(amount)) {
+        return res.status(400).json({ message: "Insufficient credit balance" });
+      }
+
+      const transfer = await storage.createCreditTransfer({
+        fromAdminId: user.id,
+        toAdminId: parseInt(toAdminId),
+        amount,
+        description,
+      });
+
+      res.json(transfer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to process credit transfer" });
+    }
+  });
+
+  // Get credit transfer history
+  app.get("/api/credit/transfers", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const transfers = await storage.getCreditTransfers(user.id);
+      res.json(transfers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get credit transfers" });
+    }
+  });
+
+  // Request credit load
+  app.post("/api/credit/load", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { amount, paymentMethod, referenceNumber } = req.body;
+      
+      if (!amount || !paymentMethod || parseFloat(amount) <= 0) {
+        return res.status(400).json({ message: "Invalid load request data" });
+      }
+
+      const load = await storage.createCreditLoad({
+        adminId: user.id,
+        amount,
+        paymentMethod,
+        referenceNumber,
+      });
+
+      res.json(load);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create credit load request" });
+    }
+  });
+
+  // Super admin: Get pending credit loads
+  app.get("/api/admin/credit-loads", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const { status = 'pending' } = req.query;
+      const loads = await storage.getCreditLoads(undefined, status as string);
+      res.json(loads);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get credit loads" });
+    }
+  });
+
+  // Super admin: Process credit load
+  app.post("/api/admin/credit-loads/:id/process", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const loadId = parseInt(req.params.id);
+      const { status } = req.body; // 'confirmed' or 'rejected'
+      
+      if (!['confirmed', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const processedLoad = await storage.processCreditLoad(loadId, status, user.id);
+      res.json(processedLoad);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to process credit load" });
+    }
+  });
+
+  // Create admin with account number generation
+  app.post("/api/admin/create-admin", async (req, res) => {
+    try {
+      const currentUser = req.session.user;
+      if (!currentUser || currentUser.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const { name, username, password, email, shopName, referredBy } = req.body;
+      
+      if (!name || !username || !password || !shopName) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const accountNumber = await storage.generateAccountNumber();
+
+      // Create admin user
+      const admin = await storage.createUser({
+        name,
+        username,
+        password: hashedPassword,
+        email,
+        role: 'admin',
+        accountNumber,
+        referredBy: referredBy ? parseInt(referredBy) : undefined,
+      });
+
+      // Create shop for admin
+      const shop = await storage.createShop({
+        name: shopName,
+        adminId: admin.id,
+      });
+
+      // Update admin with shop assignment
+      await storage.updateUser(admin.id, { shopId: shop.id });
+
+      res.json({ 
+        admin: { ...admin, password: undefined }, 
+        shop,
+        accountNumber 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create admin" });
+    }
+  });
+
+  // Get profit sharing calculation for a game amount
+  app.post("/api/calculate-profits", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { gameAmount, shopId } = req.body;
+      
+      if (!gameAmount || !shopId) {
+        return res.status(400).json({ message: "Missing required data" });
+      }
+
+      const profits = await storage.calculateProfitSharing(gameAmount, shopId);
+      res.json(profits);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to calculate profits" });
+    }
+  });
+
+  // Get referral earnings for an admin
+  app.get("/api/referrals/earnings", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const referredAdmins = await storage.getAdminsByReferrer(user.id);
+      
+      // Get referral bonus transactions
+      const transactions = await storage.getTransactionsByEmployee(user.id);
+      const referralBonuses = transactions.filter(t => t.type === 'referral_bonus');
+      
+      const totalEarnings = referralBonuses.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+      res.json({
+        referredAdmins: referredAdmins.length,
+        totalEarnings: totalEarnings.toFixed(2),
+        recentBonuses: referralBonuses.slice(0, 10)
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get referral earnings" });
+    }
+  });
+
   return httpServer;
 }

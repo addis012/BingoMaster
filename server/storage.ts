@@ -1,12 +1,14 @@
 import { 
   users, shops, games, gamePlayers, transactions, commissionPayments, gameHistory,
+  creditTransfers, creditLoads,
   type User, type InsertUser, type Shop, type InsertShop, 
   type Game, type InsertGame, type GamePlayer, type InsertGamePlayer,
   type Transaction, type InsertTransaction, type CommissionPayment, type InsertCommissionPayment,
-  type GameHistory, type InsertGameHistory
+  type GameHistory, type InsertGameHistory, type CreditTransfer, type InsertCreditTransfer,
+  type CreditLoad, type InsertCreditLoad
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, lte, sum, count } from "drizzle-orm";
+import { eq, and, or, desc, gte, lte, sum, count } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
