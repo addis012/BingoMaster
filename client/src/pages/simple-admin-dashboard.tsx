@@ -13,10 +13,11 @@ import { NavigationHeader } from "@/components/navigation-header";
 import { EmployeeCreationForm } from "@/components/employee-creation-form";
 import { SystemSettings } from "@/components/system-settings";
 import { FileUpload } from "@/components/file-upload";
+import { AdminCreditLoadHistory } from "@/components/admin-credit-load-history";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight } from "lucide-react";
+import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History } from "lucide-react";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
@@ -194,12 +195,13 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="finance">Finance</TabsTrigger>
             <TabsTrigger value="credits">Credits</TabsTrigger>
-            <TabsTrigger value="settings">Settings & History</TabsTrigger>
+            <TabsTrigger value="credit-history">Credit History</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -577,6 +579,10 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="credit-history" className="space-y-6">
+            <AdminCreditLoadHistory />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
