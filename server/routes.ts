@@ -1231,7 +1231,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin creates employee
   app.post("/api/admin/create-employee", async (req, res) => {
     try {
-      const user = req.session.user;
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
