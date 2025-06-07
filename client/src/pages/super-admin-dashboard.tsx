@@ -25,10 +25,12 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   const { data: shops = [], refetch: refetchShops } = useQuery({
     queryKey: ["/api/shops"],
+    enabled: !!user,
   });
 
   const { data: allAdmins = [], refetch: refetchAdmins } = useQuery({
     queryKey: ["/api/admin/all-admins"],
+    enabled: !!user && user.role === 'super_admin',
   });
 
   const handleBlockShop = async (shopId: number, isBlocked: boolean) => {
@@ -48,9 +50,9 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     }
   };
 
-  const totalShops = shops.length;
-  const activeShops = shops.filter((shop: any) => !shop.isBlocked).length;
-  const totalRevenue = shops.reduce((sum: number, shop: any) => sum + parseFloat(shop.totalRevenue || "0"), 0);
+  const totalShops = Array.isArray(shops) ? shops.length : 0;
+  const activeShops = Array.isArray(shops) ? shops.filter((shop: any) => !shop.isBlocked).length : 0;
+  const totalRevenue = Array.isArray(shops) ? shops.reduce((sum: number, shop: any) => sum + parseFloat(shop.totalRevenue || "0"), 0) : 0;
 
   return (
     <div className="min-h-screen bg-background">
