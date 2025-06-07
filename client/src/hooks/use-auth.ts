@@ -38,7 +38,9 @@ export function AuthProvider(props: { children: ReactNode }) {
       return data.user;
     },
     onSuccess: (user) => {
+      // Force immediate state update
       queryClient.setQueryData(["/api/auth/me"], { user });
+      // Then refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
   });

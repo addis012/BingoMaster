@@ -17,12 +17,17 @@ export default function TestLogin() {
     setIsLoading(true);
 
     try {
-      await login(username, password);
+      const userData = await login(username, password);
+      console.log("Login successful:", userData);
       toast({
         title: "Success",
         description: "Logged in successfully",
       });
+      // Clear form
+      setUsername("");
+      setPassword("");
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
         description: error.message || "Login failed",
