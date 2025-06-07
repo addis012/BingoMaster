@@ -395,14 +395,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCreditTransfer(transfer: InsertCreditTransfer): Promise<CreditTransfer> {
-    const [creditTransfer] = await db.insert(creditTransfers).values(transfer).returning();
+    const [creditTransfer] = await db.insert(creditTransfers).values({
+      fromAdminId: transfer.fromAdminId,
+      toAdminId: transfer.toAdminId,
+      amount: transfer.amount,
+      description: transfer.description,
+      status: transfer.status || 'completed'
+    }).returning();
     
     // Update balances
     await this.updateCreditBalance(transfer.fromAdminId, transfer.amount, 'subtract');
     await this.updateCreditBalance(transfer.toAdminId, transfer.amount, 'add');
     
     // Create transaction records
-    await this.createTransaction({
+    await db.insert(transactions).values({
       type: 'credit_transfer',
       amount: `-${transfer.amount}`,
       description: `Credit transfer to Admin ID ${transfer.toAdminId}`,
@@ -411,7 +417,7 @@ export class DatabaseStorage implements IStorage {
       adminId: transfer.fromAdminId,
     });
 
-    await this.createTransaction({
+    await db.insert(transactions).values({
       type: 'credit_transfer',
       amount: transfer.amount,
       description: `Credit received from Admin ID ${transfer.fromAdminId}`,
