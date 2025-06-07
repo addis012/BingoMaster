@@ -102,26 +102,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
             </CardContent>
           </Card>
 
-          {/* Game Monitoring Card */}
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                <GamepadIcon className="h-8 w-8 text-purple-600" />
-              </div>
-              <CardTitle className="text-xl">Game Monitoring</CardTitle>
-              <CardDescription className="text-sm">
-                Monitor active games
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <Button 
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                onClick={() => setActiveTab("games")}
-              >
-                View Games
-              </Button>
-            </CardContent>
-          </Card>
+
         </div>
 
         {/* Quick Stats */}
@@ -366,96 +347,13 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
           </div>
         )}
 
-        {activeTab === "admins" && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5" />
-                  Create New Admin
-                </CardTitle>
-                <CardDescription>
-                  Add new admin accounts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AdminCreationForm onSuccess={() => {
-                  refetchAdmins();
-                  refetchShops();
-                  toast({
-                    title: "Success",
-                    description: "Admin created successfully",
-                  });
-                }} />
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>All Admins</CardTitle>
-                <CardDescription>Manage existing admin accounts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Username</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Credit Balance</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {allAdmins.map((admin: any) => (
-                        <TableRow key={admin.id}>
-                          <TableCell className="font-medium">{admin.name}</TableCell>
-                          <TableCell>{admin.username}</TableCell>
-                          <TableCell>{admin.email}</TableCell>
-                          <TableCell>${admin.creditBalance}</TableCell>
-                          <TableCell>
-                            <Badge variant={admin.isBlocked ? "destructive" : "default"}>
-                              {admin.isBlocked ? "Blocked" : "Active"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button size="sm" variant="outline">
-                              Edit
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
 
         {activeTab === "financial" && (
           <FinancialDashboard userRole="super_admin" />
         )}
 
-        {activeTab === "games" && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <GamepadIcon className="h-5 w-5" />
-                Game Monitoring
-              </CardTitle>
-              <CardDescription>Monitor active games across all shops</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <GamepadIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">Game monitoring dashboard coming soon</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
       </div>
     </div>
   );
