@@ -1350,5 +1350,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Credit management routes
+  
+  // Get credit balance
+  app.get("/api/credit/balance", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const balance = await storage.getCreditBalance(userId);
+      res.json({ balance });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get credit balance" });
+    }
+  });
+
+  // Load credit request
+  app.post("/api/credit/load", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { amount, paymentMethod, bankAccount } = req.body;
+      
+      if (!amount || !paymentMethod || !bankAccount) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const creditLoad = await storage.createCreditLoad({
+        adminId: userId,
+        amount: amount.toString(),
+        paymentMethod,
+        bankAccount,
+        status: "pending"
+      });
+
+      res.json(creditLoad);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create credit load request" });
+    }
+  });
+
+  // Transfer credit
+  app.post("/api/credit/transfer", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { amount, toAdminId } = req.body;
+      
+      if (!amount || !toAdminId) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Check if recipient exists and is an admin
+      const recipient = await storage.getUser(parseInt(toAdminId));
+      if (!recipient || recipient.role !== 'admin') {
+        return res.status(400).json({ message: "Invalid recipient" });
+      }
+
+      // Check sender's balance
+      const senderBalance = parseFloat(await storage.getCreditBalance(userId));
+      const transferAmount = parseFloat(amount);
+      
+      if (senderBalance < transferAmount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      const transfer = await storage.createCreditTransfer({
+        fromAdminId: userId,
+        toAdminId: parseInt(toAdminId),
+        amount: amount.toString()
+      });
+
+      res.json(transfer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to transfer credit" });
+    }
+  });
+
   return httpServer;
 }

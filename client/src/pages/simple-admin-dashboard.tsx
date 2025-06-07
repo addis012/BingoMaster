@@ -22,7 +22,17 @@ interface SimpleAdminDashboardProps {
 
 export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Credit management states
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [loadAmount, setLoadAmount] = useState("");
+  const [loadBankAccount, setLoadBankAccount] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferRecipient, setTransferRecipient] = useState("");
 
   const { data: employees = [], refetch: refetchEmployees } = useQuery({
     queryKey: ["/api/admin/employees"],
@@ -38,6 +48,113 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
 
   const handleEmployeeCreated = () => {
     refetchEmployees();
+  };
+
+  // Credit load mutation
+  const loadCreditMutation = useMutation({
+    mutationFn: async (data: { amount: string; paymentMethod: string; bankAccount: string }) => {
+      const response = await fetch("/api/credit/load", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to load credit");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/credit/balance"] });
+      setShowLoadDialog(false);
+      setLoadAmount("");
+      setLoadBankAccount("");
+      toast({
+        title: "Credit Load Requested",
+        description: "Your credit load request has been submitted for approval.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit credit load request",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Credit transfer mutation
+  const transferCreditMutation = useMutation({
+    mutationFn: async (data: { amount: string; toAdminId: number }) => {
+      const response = await fetch("/api/credit/transfer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to transfer credit");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/credit/balance"] });
+      setShowTransferDialog(false);
+      setTransferAmount("");
+      setTransferRecipient("");
+      toast({
+        title: "Credit Transferred",
+        description: "Credit has been successfully transferred.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to transfer credit",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLoadCredit = () => {
+    if (!loadAmount || !loadBankAccount) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    loadCreditMutation.mutate({
+      amount: loadAmount,
+      paymentMethod: "bank_transfer",
+      bankAccount: loadBankAccount,
+    });
+  };
+
+  const handleTransferCredit = () => {
+    if (!transferAmount || !transferRecipient) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    transferCreditMutation.mutate({
+      amount: transferAmount,
+      toAdminId: parseInt(transferRecipient),
+    });
   };
 
   if (!user || user.role !== 'admin') {
@@ -279,12 +396,110 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button className="w-full" size="lg">
-                      Load Credits
-                    </Button>
-                    <Button variant="outline" className="w-full" size="lg">
-                      Transfer Credits
-                    </Button>
+                    <Dialog open={showLoadDialog} onOpenChange={setShowLoadDialog}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" size="lg">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Load Credits
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Load Credits</DialogTitle>
+                          <DialogDescription>
+                            Request to load credits into your account. All requests require approval.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="loadAmount">Amount (ETB)</Label>
+                            <Input
+                              id="loadAmount"
+                              type="number"
+                              placeholder="Enter amount"
+                              value={loadAmount}
+                              onChange={(e) => setLoadAmount(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="bankAccount">Bank Account Number</Label>
+                            <Input
+                              id="bankAccount"
+                              placeholder="Enter your bank account number"
+                              value={loadBankAccount}
+                              onChange={(e) => setLoadBankAccount(e.target.value)}
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setShowLoadDialog(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleLoadCredit}
+                              disabled={loadCreditMutation.isPending}
+                            >
+                              {loadCreditMutation.isPending ? "Submitting..." : "Submit Request"}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full" size="lg">
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          Transfer Credits
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Transfer Credits</DialogTitle>
+                          <DialogDescription>
+                            Transfer credits to another admin account.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="transferAmount">Amount (ETB)</Label>
+                            <Input
+                              id="transferAmount"
+                              type="number"
+                              placeholder="Enter amount"
+                              value={transferAmount}
+                              onChange={(e) => setTransferAmount(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="recipient">Recipient Admin ID</Label>
+                            <Input
+                              id="recipient"
+                              type="number"
+                              placeholder="Enter admin ID"
+                              value={transferRecipient}
+                              onChange={(e) => setTransferRecipient(e.target.value)}
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setShowTransferDialog(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleTransferCredit}
+                              disabled={transferCreditMutation.isPending}
+                            >
+                              {transferCreditMutation.isPending ? "Transferring..." : "Transfer"}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
 
                   <div className="mt-6">
