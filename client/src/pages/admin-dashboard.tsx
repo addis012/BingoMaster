@@ -138,7 +138,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   </div>
                   <div className="text-center p-4 border rounded-lg">
                     <h4 className="font-medium">Players Today</h4>
-                    <p className="text-2xl font-bold text-purple-600">{shopStats?.todayPlayers || 0}</p>
+                    <p className="text-2xl font-bold text-purple-600">{(shopStats as any)?.todayPlayers || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -174,7 +174,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {employees?.map((employee) => (
+                    {(employees as any)?.map((employee: any) => (
                       <div key={employee.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div>
                           <h4 className="font-medium">{employee.name}</h4>
@@ -208,7 +208,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <FinancialDashboard userRole="admin" shopId={user.shopId} />
+                <FinancialDashboard userRole="admin" shopId={user.shopId} employeeId={user.id} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -228,7 +228,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 <div className="space-y-6">
                   <div className="text-center p-6 border-2 border-dashed rounded-lg">
                     <h3 className="text-2xl font-bold">Current Balance</h3>
-                    <p className="text-4xl font-bold text-green-600 mt-2">ETB {creditBalance || '0'}</p>
+                    <p className="text-4xl font-bold text-green-600 mt-2">ETB {(creditBalance as any)?.balance || '0.00'}</p>
                     <p className="text-muted-foreground mt-2">Available for transfers and operations</p>
                   </div>
 

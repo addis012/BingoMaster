@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./hooks/use-auth";
 import LoginPage from "./pages/login-page";
 import TestLogin from "./pages/test-login";
-import AdminDashboard from "./pages/admin-dashboard";
+import SimpleAdminDashboard from "./pages/simple-admin-dashboard";
 import SuperAdminDashboard from "./pages/super-admin-dashboard";
 import BingoEmployeeDashboard from "./components/bingo-employee-dashboard";
 
@@ -27,7 +27,7 @@ function App() {
             <SuperAdminDashboard onLogout={handleLogout} />
           </Route>
           <Route path="/dashboard/admin">
-            <AdminDashboard onLogout={handleLogout} />
+            <SimpleAdminDashboard onLogout={handleLogout} />
           </Route>
           <Route path="/dashboard/employee">
             <BingoEmployeeDashboard onLogout={handleLogout} />
@@ -35,7 +35,7 @@ function App() {
           
           {/* Legacy Routes for backward compatibility */}
           <Route path="/admin">
-            <AdminDashboard onLogout={handleLogout} />
+            <SimpleAdminDashboard onLogout={handleLogout} />
           </Route>
           <Route path="/employee">
             <BingoEmployeeDashboard onLogout={handleLogout} />
