@@ -45,8 +45,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Account is blocked" });
       }
 
-      // Set session
+      // Set session with both userId and user for compatibility
       req.session.userId = user.id;
+      req.session.user = user;
       
       // Ensure session is saved before sending response
       req.session.save((err) => {
