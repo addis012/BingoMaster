@@ -149,7 +149,7 @@ export function ShopCreationForm({ onSuccess }: ShopCreationFormProps) {
                         ))
                       ) : (
                         <SelectItem value="none" disabled>
-                          No available admins
+                          Create an admin first (left panel)
                         </SelectItem>
                       )}
                     </SelectContent>

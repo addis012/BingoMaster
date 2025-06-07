@@ -265,22 +265,62 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
         {activeTab === "shops" && (
           <div className="space-y-6">
-            <ShopCreationForm onSuccess={() => {
-              refetchShops();
-              refetchAdmins();
-              toast({
-                title: "Success",
-                description: "Shop created successfully",
-              });
-            }} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Admin Creation Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserPlus className="h-5 w-5" />
+                    Create Admin First
+                  </CardTitle>
+                  <CardDescription>
+                    Create an admin account before creating a shop
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AdminCreationForm onSuccess={() => {
+                    refetchAdmins();
+                    refetchShops();
+                    toast({
+                      title: "Success",
+                      description: "Admin created successfully - you can now create a shop for them",
+                    });
+                  }} />
+                </CardContent>
+              </Card>
 
+              {/* Shop Creation Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Create Shop
+                  </CardTitle>
+                  <CardDescription>
+                    Create a new shop and assign it to an admin
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ShopCreationForm onSuccess={() => {
+                    refetchShops();
+                    refetchAdmins();
+                    toast({
+                      title: "Success",
+                      description: "Shop created successfully",
+                    });
+                  }} />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Existing Shops Table */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5" />
-                  Shop Management
+                  All Shops
                 </CardTitle>
-                <CardDescription>Manage all shops and their settings</CardDescription>
+                <CardDescription>Manage all existing shops and their settings</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
