@@ -284,3 +284,18 @@ export type CommissionPayment = typeof commissionPayments.$inferSelect;
 export type InsertCommissionPayment = z.infer<typeof insertCommissionPaymentSchema>;
 export type GameHistory = typeof gameHistory.$inferSelect;
 export type InsertGameHistory = z.infer<typeof insertGameHistorySchema>;
+
+// Credit system types
+export const insertCreditTransferSchema = createInsertSchema(creditTransfers).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertCreditLoadSchema = createInsertSchema(creditLoads).omit({
+  id: true,
+  requestedAt: true,
+});
+
+export type CreditTransfer = typeof creditTransfers.$inferSelect;
+export type InsertCreditTransfer = z.infer<typeof insertCreditTransferSchema>;
+export type CreditLoad = typeof creditLoads.$inferSelect;
+export type InsertCreditLoad = z.infer<typeof insertCreditLoadSchema>;
