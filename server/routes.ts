@@ -1185,7 +1185,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all admins for super admin
   app.get("/api/admin/all-admins", async (req, res) => {
     try {
-      const user = req.session.user;
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
       if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }

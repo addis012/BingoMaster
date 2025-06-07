@@ -6,16 +6,21 @@ import { Dice1, Bell, LogOut } from "lucide-react";
 
 interface NavigationHeaderProps {
   user: any;
-  title: string;
+  title?: string;
+  onLogout?: () => void;
 }
 
-export function NavigationHeader({ user, title }: NavigationHeaderProps) {
+export function NavigationHeader({ user, title, onLogout }: NavigationHeaderProps) {
   const { logout } = useAuth();
   const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
-    await logout();
-    setLocation('/login');
+    if (onLogout) {
+      onLogout();
+    } else {
+      await logout();
+      setLocation('/login');
+    }
   };
 
   const getRoleBadge = (role: string) => {
