@@ -164,6 +164,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const stats = shopStats as any || {};
   const balance = creditBalance as any || {};
   const employeeList = employees as any[] || [];
+  const userAccountNumber = (user as any).accountNumber || `ACC${String(user.id).padStart(6, '0')}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -507,7 +508,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span>Account Number:</span>
-                        <span className="font-mono">{user.accountNumber || `ID: ${user.id}`}</span>
+                        <span className="font-mono">{userAccountNumber}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Account Holder:</span>
