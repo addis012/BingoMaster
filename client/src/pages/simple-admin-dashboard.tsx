@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NavigationHeader } from "@/components/navigation-header";
 import { EmployeeCreationForm } from "@/components/employee-creation-form";
+import { SystemSettings } from "@/components/system-settings";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
