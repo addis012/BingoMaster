@@ -61,7 +61,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Main Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           
           {/* Admin Management Card */}
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
@@ -80,6 +80,27 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                 onClick={() => setActiveTab("admins")}
               >
                 Manage Admins
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Credit Load Management Card */}
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <DollarSign className="h-8 w-8 text-green-600" />
+              </div>
+              <CardTitle className="text-xl">Credit Requests</CardTitle>
+              <CardDescription className="text-sm">
+                Review admin credit load requests
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700"
+                onClick={() => setActiveTab("credit-loads")}
+              >
+                Review Requests
               </Button>
             </CardContent>
           </Card>
@@ -300,6 +321,10 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
         )}
 
 
+
+        {activeTab === "credit-loads" && (
+          <CreditLoadManagement userRole="super_admin" />
+        )}
 
         {activeTab === "financial" && (
           <FinancialDashboard userRole="super_admin" />
