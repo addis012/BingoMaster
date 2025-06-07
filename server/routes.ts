@@ -977,7 +977,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'admin') {
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -1277,19 +1277,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'admin') {
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      if (!user.shopId) {
-        return res.status(400).json({ message: "Admin not assigned to a shop" });
+      // For super admin, return all employees; for admin, return only their shop's employees
+      let employees;
+      if (user.role === 'super_admin') {
+        const allUsers = await storage.getUsers();
+        employees = allUsers.filter(u => u.role === 'employee');
+      } else {
+        if (!user.shopId) {
+          return res.status(400).json({ message: "Admin not assigned to a shop" });
+        }
+        const shopUsers = await storage.getUsersByShop(user.shopId);
+        employees = shopUsers.filter(u => u.role === 'employee');
       }
-
-      const employees = await storage.getUsersByShop(user.shopId);
-      const employeeUsers = employees.filter(u => u.role === 'employee');
       
       // Remove passwords from response
-      const safeEmployees = employeeUsers.map(emp => ({
+      const safeEmployees = employees.map(emp => ({
         ...emp,
         password: undefined
       }));
@@ -1309,16 +1315,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'admin') {
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      if (!user.shopId) {
-        return res.status(400).json({ message: "Admin not assigned to a shop" });
-      }
+      // For super admin, return aggregate stats; for admin, return their shop's stats
+      if (user.role === 'super_admin') {
+        // Return aggregate stats across all shops
+        const allShops = await storage.getShops();
+        const totalRevenue = allShops.reduce((sum, shop) => sum + parseFloat(shop.totalRevenue || "0"), 0);
+        const totalGames = allShops.reduce((sum, shop) => sum + (shop.totalGames || 0), 0);
+        const totalPlayers = allShops.reduce((sum, shop) => sum + (shop.totalPlayers || 0), 0);
+        
+        res.json({
+          totalRevenue: totalRevenue.toFixed(2),
+          totalGames,
+          totalPlayers
+        });
+      } else {
+        if (!user.shopId) {
+          return res.status(400).json({ message: "Admin not assigned to a shop" });
+        }
 
-      const shopStats = await storage.getShopStats(user.shopId);
-      res.json(shopStats);
+        const shopStats = await storage.getShopStats(user.shopId);
+        res.json(shopStats);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to get shop statistics" });
     }
