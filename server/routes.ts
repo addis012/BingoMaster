@@ -1080,12 +1080,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Super admin: Get pending credit loads
   app.get("/api/admin/credit-loads", async (req, res) => {
     try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(403).json({ message: "Super admin access required" });
-      }
-
-      const user = await storage.getUser(userId);
+      const user = req.session.user;
       if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
@@ -1101,12 +1096,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Super admin: Process credit load
   app.post("/api/admin/credit-loads/:id/process", async (req, res) => {
     try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(403).json({ message: "Super admin access required" });
-      }
-
-      const user = await storage.getUser(userId);
+      const user = req.session.user;
       if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
@@ -1118,7 +1108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid status" });
       }
 
-      const processedLoad = await storage.processCreditLoad(loadId, status, userId);
+      const processedLoad = await storage.processCreditLoad(loadId, status, user.id);
       res.json(processedLoad);
     } catch (error) {
       console.error("Credit load processing error:", error);
@@ -1187,13 +1177,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create admin with account number generation
   app.post("/api/admin/create-admin", async (req, res) => {
     try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(403).json({ message: "Super admin access required" });
-      }
-
-      const currentUser = await storage.getUser(userId);
-      if (!currentUser || currentUser.role !== 'super_admin') {
+      const user = req.session.user;
+      if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
 
