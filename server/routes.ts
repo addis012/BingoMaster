@@ -1091,8 +1091,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create admin with account number generation
   app.post("/api/admin/create-admin", async (req, res) => {
     try {
-      const currentUser = req.session.user;
-      console.log('Session user for admin creation:', currentUser);
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const currentUser = await storage.getUser(userId);
       if (!currentUser || currentUser.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }

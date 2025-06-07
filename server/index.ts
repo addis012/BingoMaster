@@ -25,7 +25,7 @@ app.use(session({
   cookie: { 
     secure: false, 
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    httpOnly: true,
+    httpOnly: false, // Allow JavaScript access for debugging
     sameSite: 'lax'
   }
 }));
