@@ -467,13 +467,46 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getCreditTransfers(adminId: number): Promise<CreditTransfer[]> {
-    return await db.select().from(creditTransfers)
-      .where(or(
-        eq(creditTransfers.fromAdminId, adminId),
-        eq(creditTransfers.toAdminId, adminId)
-      ))
-      .orderBy(desc(creditTransfers.createdAt));
+  async getCreditTransfers(adminId: number): Promise<any[]> {
+    const results = await db.select({
+      id: creditTransfers.id,
+      fromAdminId: creditTransfers.fromAdminId,
+      toAdminId: creditTransfers.toAdminId,
+      amount: creditTransfers.amount,
+      description: creditTransfers.description,
+      status: creditTransfers.status,
+      createdAt: creditTransfers.createdAt,
+    })
+    .from(creditTransfers)
+    .where(or(
+      eq(creditTransfers.fromAdminId, adminId),
+      eq(creditTransfers.toAdminId, adminId)
+    ))
+    .orderBy(desc(creditTransfers.createdAt));
+
+    // Enrich with admin details
+    const enrichedResults = [];
+    for (const transfer of results) {
+      const [fromAdmin] = await db.select({
+        name: users.name,
+        username: users.username,
+        accountNumber: users.accountNumber,
+      }).from(users).where(eq(users.id, transfer.fromAdminId));
+
+      const [toAdmin] = await db.select({
+        name: users.name,
+        username: users.username,
+        accountNumber: users.accountNumber,
+      }).from(users).where(eq(users.id, transfer.toAdminId));
+
+      enrichedResults.push({
+        ...transfer,
+        fromAdmin,
+        toAdmin
+      });
+    }
+
+    return enrichedResults;
   }
 
   async createCreditLoad(load: InsertCreditLoad): Promise<CreditLoad> {

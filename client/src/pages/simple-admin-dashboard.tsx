@@ -15,6 +15,7 @@ import { SystemSettings } from "@/components/system-settings";
 import { FileUpload } from "@/components/file-upload";
 import { AdminCreditLoadHistory } from "@/components/admin-credit-load-history";
 import { AdminReferralCommissions } from "@/components/admin-referral-commissions";
+import { AdminCreditTransferHistory } from "@/components/admin-credit-transfer-history";
 import { EnhancedGameHistory } from "@/components/enhanced-game-history";
 import { ErrorDisplay, LoadingState } from "@/components/error-display";
 import { useAuth } from "@/hooks/use-auth";
@@ -632,6 +633,9 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 </div>
               </CardContent>
             </Card>
+
+            {/* Credit Transfer History */}
+            <AdminCreditTransferHistory adminId={user.id} />
           </TabsContent>
 
           <TabsContent value="credit-history" className="space-y-6">
