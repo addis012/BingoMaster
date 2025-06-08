@@ -52,6 +52,7 @@ export interface IStorage {
   // Game History methods
   createGameHistory(history: InsertGameHistory): Promise<GameHistory>;
   getGameHistory(shopId: number, startDate?: Date, endDate?: Date): Promise<GameHistory[]>;
+  getEmployeeGameHistory(employeeId: number, startDate?: Date, endDate?: Date): Promise<GameHistory[]>;
   
   // Analytics methods
   getShopStats(shopId: number, startDate?: Date, endDate?: Date): Promise<{
@@ -301,6 +302,38 @@ export class DatabaseStorage implements IStorage {
     if (startDate && endDate) {
       query = query.where(and(
         eq(gameHistory.shopId, shopId),
+        gte(gameHistory.completedAt, startDate),
+        lte(gameHistory.completedAt, endDate)
+      ));
+    }
+    
+    return await query.orderBy(desc(gameHistory.completedAt));
+  }
+
+  async getEmployeeGameHistory(employeeId: number, startDate?: Date, endDate?: Date): Promise<any[]> {
+    let query = db.select({
+      id: gameHistory.id,
+      gameId: gameHistory.gameId,
+      shopId: gameHistory.shopId,
+      employeeId: gameHistory.employeeId,
+      totalCollected: gameHistory.totalCollected,
+      prizeAmount: gameHistory.prizeAmount,
+      adminProfit: gameHistory.adminProfit,
+      superAdminCommission: gameHistory.superAdminCommission,
+      playerCount: gameHistory.playerCount,
+      winnerName: gamePlayers.playerName,
+      completedAt: gameHistory.completedAt,
+      winnerId: games.winnerId,
+      winningCartela: gameHistory.winningCartela
+    })
+    .from(gameHistory)
+    .leftJoin(games, eq(gameHistory.gameId, games.id))
+    .leftJoin(gamePlayers, eq(games.winnerId, gamePlayers.id))
+    .where(eq(gameHistory.employeeId, employeeId));
+    
+    if (startDate && endDate) {
+      query = query.where(and(
+        eq(gameHistory.employeeId, employeeId),
         gte(gameHistory.completedAt, startDate),
         lte(gameHistory.completedAt, endDate)
       ));
