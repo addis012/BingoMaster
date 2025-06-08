@@ -84,15 +84,15 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Add player mutation
   const addPlayerMutation = useMutation({
-    mutationFn: async (data: { gameId: number; cartelaNumber: number; playerName: string }) => {
+    mutationFn: async (data: { gameId: number; cartelaNumbers: number[]; playerName: string }) => {
       return await apiRequest("POST", `/api/games/${data.gameId}/players`, {
         playerName: data.playerName,
-        cartelaNumber: data.cartelaNumber,
+        cartelaNumbers: data.cartelaNumbers,
         entryFee: gameAmount
       });
     },
     onSuccess: (player, variables) => {
-      setGamePlayersMap(prev => new Map(prev.set(variables.cartelaNumber, player.id)));
+      setGamePlayersMap(prev => new Map(prev.set(variables.cartelaNumbers[0], player.id)));
       console.log("Player added:", player);
     }
   });
@@ -229,7 +229,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         // Add player to the game
         const player = await addPlayerMutation.mutateAsync({
           gameId: gameId,
-          cartelaNumber: selectedCartela,
+          cartelaNumbers: [selectedCartela],
           playerName: `Player ${selectedCartela}`
         });
 
