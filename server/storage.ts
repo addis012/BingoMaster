@@ -528,6 +528,23 @@ export class DatabaseStorage implements IStorage {
         fromUserId: null,
         toUserId: load.adminId,
       });
+
+      // Check if admin has a referrer and create referral commission
+      if (admin && admin.referredBy) {
+        const commissionRate = "3.00"; // 3% commission
+        const commissionAmount = this.calculateReferralCommission(load.amount, commissionRate);
+        
+        await this.createReferralCommission({
+          referrerId: admin.referredBy,
+          referredId: load.adminId,
+          sourceType: 'credit_load',
+          sourceId: loadId,
+          sourceAmount: load.amount,
+          commissionRate,
+          commissionAmount,
+          status: 'pending'
+        });
+      }
     }
 
     return updatedLoad;

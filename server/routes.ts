@@ -930,6 +930,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Referral commission routes
+  app.get("/api/referral-commissions/:referrerId", async (req: Request, res: Response) => {
+    try {
+      const referrerId = parseInt(req.params.referrerId);
+      const commissions = await storage.getReferralCommissions(referrerId);
+      res.json(commissions);
+    } catch (error) {
+      console.error("Error fetching referral commissions:", error);
+      res.status(500).json({ message: "Failed to fetch referral commissions" });
+    }
+  });
+
+  app.patch("/api/referral-commissions/:id/:action", async (req: Request, res: Response) => {
+    try {
+      const commissionId = parseInt(req.params.id);
+      const action = req.params.action as 'withdraw' | 'convert_to_credit';
+      
+      if (!['withdraw', 'convert_to_credit'].includes(action)) {
+        return res.status(400).json({ message: "Invalid action" });
+      }
+
+      const commission = await storage.processReferralCommission(commissionId, action);
+      res.json(commission);
+    } catch (error) {
+      console.error("Error processing referral commission:", error);
+      res.status(500).json({ message: "Failed to process referral commission" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time game updates

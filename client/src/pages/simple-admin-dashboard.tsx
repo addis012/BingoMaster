@@ -14,11 +14,13 @@ import { EmployeeCreationForm } from "@/components/employee-creation-form";
 import { SystemSettings } from "@/components/system-settings";
 import { FileUpload } from "@/components/file-upload";
 import { AdminCreditLoadHistory } from "@/components/admin-credit-load-history";
+import { AdminReferralCommissions } from "@/components/admin-referral-commissions";
+import { EnhancedGameHistory } from "@/components/enhanced-game-history";
 import { ErrorDisplay, LoadingState } from "@/components/error-display";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle } from "lucide-react";
+import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift } from "lucide-react";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
