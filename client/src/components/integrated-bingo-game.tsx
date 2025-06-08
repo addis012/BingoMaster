@@ -434,19 +434,36 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       return;
     }
     
-    const winnerId = gamePlayersMap.get(cartelaNumber);
+    let winnerId = gamePlayersMap.get(cartelaNumber);
+    
+    // If player ID not found, try to create the player record first
     if (!winnerId) {
-      console.error("❌ Winner ID not found in gamePlayersMap:", { 
-        cartelaNumber, 
-        gamePlayersMap: Array.from(gamePlayersMap.entries()),
-        bookedCartelas: Array.from(bookedCartelas)
-      });
-      toast({
-        title: "Recording Error", 
-        description: `Winner player not found in game records for cartela #${cartelaNumber}`,
-        variant: "destructive"
-      });
-      return;
+      console.log("🔧 Winner ID not found, attempting to create player record for cartela", cartelaNumber);
+      
+      try {
+        const player = await addPlayerMutation.mutateAsync({
+          gameId: activeGameId,
+          cartelaNumbers: [cartelaNumber],
+          playerName: `Player ${cartelaNumber}`
+        });
+        
+        winnerId = player.id;
+        setGamePlayersMap(prev => {
+          const newMap = new Map(prev);
+          newMap.set(cartelaNumber, winnerId);
+          return newMap;
+        });
+        
+        console.log("✅ Created player record for winner:", { cartelaNumber, winnerId });
+      } catch (playerError) {
+        console.error("❌ Failed to create player record:", playerError);
+        toast({
+          title: "Recording Error", 
+          description: `Failed to create player record for cartela #${cartelaNumber}`,
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     try {
@@ -460,7 +477,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       console.log("✅ WINNER SUCCESSFULLY DECLARED IN BACKEND!", result);
       
       toast({
-        title: "🎉 Game Completed Successfully!",
+        title: "Game Completed Successfully!",
         description: `Cartela #${cartelaNumber} wins! Recorded in database with prize ${result.financial?.prizeAmount || 'N/A'} ETB.`,
       });
       
@@ -671,6 +688,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           
           console.log(`Auto-booked cartela #${cartelaNum} with player ID ${player.id}`);
         }
+        
+        setActiveGameId(game.id);
+        console.log("Set activeGameId to:", game.id);
         
         const newTotal = selectedCartelasArray.length * parseInt(gameAmount);
         setTotalCollected(newTotal);
