@@ -313,18 +313,66 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
   };
 
-  // Check for winner (simplified - in real game this would check actual cartela patterns)
+  // Check for winner after each number call - proper bingo pattern validation
   const checkForWinner = () => {
-    if (bookedCartelas.size > 0 && Math.random() < 0.3) { // 30% chance of winner
-      const cartelaNumbers = Array.from(bookedCartelas);
-      const winnerCartela = cartelaNumbers[Math.floor(Math.random() * cartelaNumbers.length)];
+    if (bookedCartelas.size === 0 || calledNumbers.length < 5) return;
+    
+    // Check each booked cartela for winning patterns
+    for (const cartelaNumber of bookedCartelas) {
+      const card = cartelaCards[cartelaNumber];
+      if (!card) continue;
       
-      setWinnerFound(`Cartela #${winnerCartela}`);
-      setWinnerPattern("Full House");
-      setShowWinnerVerification(true);
-      setGameActive(false);
-      stopAutomaticNumberCalling();
+      const winResult = checkForBingo(card, calledNumbers);
+      if (winResult.hasWin) {
+        setWinnerFound(`Cartela #${cartelaNumber}`);
+        setWinnerPattern(winResult.pattern || "BINGO");
+        setShowWinnerVerification(true);
+        setGameActive(false);
+        stopAutomaticNumberCalling();
+        
+        console.log(`Winner found! Cartela #${cartelaNumber} with ${winResult.pattern}`);
+        return; // Stop checking once winner is found
+      }
     }
+  };
+
+  // Check for Bingo winning patterns
+  const checkForBingo = (card: number[][], calledNums: number[]): { hasWin: boolean; pattern?: string; patternCells?: number[][] } => {
+    const isMarked = (row: number, col: number) => {
+      if (row === 2 && col === 2) return true; // Center is free space
+      return calledNums.includes(card[row][col]);
+    };
+
+    // Check horizontal lines
+    for (let row = 0; row < 5; row++) {
+      if (card[row].every((_, col) => isMarked(row, col))) {
+        return { hasWin: true, pattern: `Row ${row + 1}` };
+      }
+    }
+
+    // Check vertical lines
+    for (let col = 0; col < 5; col++) {
+      if (card.every((_, row) => isMarked(row, col))) {
+        return { hasWin: true, pattern: `Column ${col + 1}` };
+      }
+    }
+
+    // Check diagonal (top-left to bottom-right)
+    if (card.every((_, i) => isMarked(i, i))) {
+      return { hasWin: true, pattern: "Diagonal \\" };
+    }
+
+    // Check diagonal (top-right to bottom-left)
+    if (card.every((_, i) => isMarked(i, 4 - i))) {
+      return { hasWin: true, pattern: "Diagonal /" };
+    }
+
+    // Check four corners
+    if (isMarked(0, 0) && isMarked(0, 4) && isMarked(4, 0) && isMarked(4, 4)) {
+      return { hasWin: true, pattern: "Four Corners" };
+    }
+
+    return { hasWin: false };
   };
 
   // Verify and declare winner
