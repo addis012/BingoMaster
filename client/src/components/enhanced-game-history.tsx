@@ -166,7 +166,9 @@ export function EnhancedGameHistory({ shopId }: EnhancedGameHistoryProps) {
                 <TableRow>
                   <TableHead>Game #</TableHead>
                   <TableHead>Winner Cartela</TableHead>
+                  <TableHead>Players</TableHead>
                   <TableHead>Collected Birr</TableHead>
+                  <TableHead>Winner Prize</TableHead>
                   <TableHead>Your Profit</TableHead>
                   <TableHead>Commission Deducted</TableHead>
                   <TableHead>Date/Time</TableHead>
@@ -189,8 +191,24 @@ export function EnhancedGameHistory({ shopId }: EnhancedGameHistoryProps) {
                         <span className="text-muted-foreground text-sm">N/A</span>
                       )}
                     </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium text-blue-600">
+                          {game.playerCount}
+                        </span>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-lg font-bold text-blue-600">
                       {parseFloat(game.totalCollected).toFixed(2)} ETB
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Trophy className="h-4 w-4 text-orange-500" />
+                        <span className="font-medium text-orange-600">
+                          {parseFloat(game.prizeAmount).toFixed(2)} ETB
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-lg font-bold text-green-600">
                       +{parseFloat(game.adminProfit).toFixed(2)} ETB
