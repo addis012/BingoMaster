@@ -525,6 +525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prizeAmount: prizeAmountBirr.toString(),
         adminProfit: adminProfit.toString(),
         superAdminCommission: superAdminCommission.toString(),
+        winnerName: winner?.playerName || null,
         winningCartela: winningCartela ? winningCartela.toString() : null,
         completedAt: new Date(),
       });
