@@ -326,11 +326,16 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       if (winResult.hasWin) {
         setWinnerFound(`Cartela #${cartelaNumber}`);
         setWinnerPattern(winResult.pattern || "BINGO");
-        setShowWinnerVerification(true);
         setGameActive(false);
         stopAutomaticNumberCalling();
         
         console.log(`Winner found! Cartela #${cartelaNumber} with ${winResult.pattern}`);
+        
+        // Show winner announcement for 3 seconds then automatically declare
+        setTimeout(() => {
+          declareWinnerAutomatically(cartelaNumber);
+        }, 3000); // 3 second delay to show winner announcement
+        
         return; // Stop checking once winner is found
       }
     }
@@ -373,6 +378,48 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
 
     return { hasWin: false };
+  };
+
+  // Automatically declare winner in backend
+  const declareWinnerAutomatically = async (cartelaNumber: number) => {
+    if (!activeGameId) {
+      console.error("Cannot declare winner - no active game");
+      return;
+    }
+    
+    const winnerId = gamePlayersMap.get(cartelaNumber);
+    if (!winnerId) {
+      console.error("Winner ID not found in gamePlayersMap:", { cartelaNumber, gamePlayersMap });
+      return;
+    }
+
+    try {
+      console.log("Auto-declaring winner:", { cartelaNumber, winnerId, activeGameId });
+      await declareWinnerMutation.mutateAsync({
+        gameId: activeGameId,
+        winnerId: winnerId
+      });
+      
+      console.log("Winner successfully declared in backend!");
+      
+      // Reset game state
+      setActiveGameId(null);
+      setGamePlayersMap(new Map());
+      setTotalCollected(0);
+      
+      toast({
+        title: "Game Completed!",
+        description: `Cartela #${cartelaNumber} wins! Game recorded successfully.`,
+      });
+      
+    } catch (error) {
+      console.error("Failed to declare winner automatically:", error);
+      toast({
+        title: "Recording Error",
+        description: "Game completed but failed to record in database",
+        variant: "destructive"
+      });
+    }
   };
 
   // Verify and declare winner
