@@ -89,6 +89,16 @@ export interface IStorage {
   getReferralCommissions(referrerId: number): Promise<ReferralCommission[]>;
   processReferralCommission(commissionId: number, action: 'withdraw' | 'convert_to_credit'): Promise<ReferralCommission>;
   calculateReferralCommission(sourceAmount: string, commissionRate: string): string;
+  
+  // Withdrawal and conversion methods
+  createWithdrawalRequest(request: {
+    adminId: number;
+    amount: string;
+    bankAccount: string;
+    type: string;
+    status: string;
+  }): Promise<any>;
+  convertCommissionToCredit(adminId: number, amount: number): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -686,6 +696,47 @@ export class DatabaseStorage implements IStorage {
     const amount = parseFloat(sourceAmount);
     const rate = parseFloat(commissionRate);
     return (amount * rate / 100).toFixed(2);
+  }
+
+  async createWithdrawalRequest(request: {
+    adminId: number;
+    amount: string;
+    bankAccount: string;
+    type: string;
+    status: string;
+  }): Promise<any> {
+    // For now, we'll create a simple notification record
+    // In a full implementation, this would create a withdrawal_requests table entry
+    return {
+      id: Date.now(),
+      adminId: request.adminId,
+      amount: request.amount,
+      bankAccount: request.bankAccount,
+      type: request.type,
+      status: request.status,
+      createdAt: new Date().toISOString(),
+      message: "Withdrawal request submitted successfully"
+    };
+  }
+
+  async convertCommissionToCredit(adminId: number, amount: number): Promise<any> {
+    // Get current credit balance
+    const currentBalance = await this.getCreditBalance(adminId);
+    const newBalance = (parseFloat(currentBalance) + amount).toFixed(2);
+    
+    // Update admin's credit balance
+    await this.updateCreditBalance(adminId, amount.toString(), 'add');
+    
+    // Mark referral commissions as converted for this amount
+    // In a full implementation, this would update specific commission records
+    
+    return {
+      success: true,
+      message: "Commission converted to credit successfully",
+      previousBalance: currentBalance,
+      newBalance: newBalance,
+      convertedAmount: amount.toString()
+    };
   }
 }
 

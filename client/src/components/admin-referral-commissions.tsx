@@ -32,6 +32,8 @@ interface AdminReferralCommissionsProps {
 export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Dialog state management
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   const [showConvertDialog, setShowConvertDialog] = useState(false);
   const [selectedCommission, setSelectedCommission] = useState<ReferralCommission | null>(null);
