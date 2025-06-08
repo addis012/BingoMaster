@@ -288,10 +288,10 @@ export class DatabaseStorage implements IStorage {
       adminProfit: gameHistory.adminProfit,
       superAdminCommission: gameHistory.superAdminCommission,
       playerCount: gameHistory.playerCount,
-      winnerName: gameHistory.winnerName,
+      winnerName: gamePlayers.playerName,
       completedAt: gameHistory.completedAt,
       winnerId: games.winnerId,
-      winningCartela: gamePlayers.cartelaNumbers
+      winningCartela: gameHistory.winningCartela
     })
     .from(gameHistory)
     .leftJoin(games, eq(gameHistory.gameId, games.id))

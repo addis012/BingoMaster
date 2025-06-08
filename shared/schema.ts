@@ -79,6 +79,7 @@ export const gameHistory = pgTable("game_history", {
   superAdminCommission: decimal("super_admin_commission", { precision: 10, scale: 2 }).notNull(),
   playerCount: integer("player_count").notNull(),
   winnerName: text("winner_name"),
+  winningCartela: text("winning_cartela"),
   completedAt: timestamp("completed_at").defaultNow(),
 });
 
