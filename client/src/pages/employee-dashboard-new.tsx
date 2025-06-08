@@ -1,4 +1,4 @@
-import BingoGameFixed from "@/components/bingo-game-fixed";
+import IntegratedBingoGame from "@/components/integrated-bingo-game";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function EmployeeDashboard() {
@@ -9,7 +9,7 @@ export default function EmployeeDashboard() {
   }
 
   return (
-    <BingoGameFixed
+    <IntegratedBingoGame
       employeeName={user.name}
       employeeId={user.id}
       shopId={user.shopId || 1}
