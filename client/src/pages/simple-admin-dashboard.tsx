@@ -139,7 +139,10 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
       loadCreditMutation.mutate({
         amount: loadAmount,
         paymentMethod: paymentMethod,
-        bankAccount: userAccountNumber
+        bankAccount: userAccountNumber,
+        transferScreenshot: base64Screenshot,
+        referenceNumber: referenceNumber || undefined,
+        notes: notes || undefined
       });
     };
     reader.readAsDataURL(screenshotFile);
@@ -191,6 +194,32 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Error handling for overview data */}
+            {(employeesError || statsError || balanceError) && (
+              <div className="space-y-2">
+                {employeesError && (
+                  <ErrorDisplay 
+                    error={employeesError} 
+                    title="Failed to load employees" 
+                    onRetry={refetchEmployees}
+                  />
+                )}
+                {statsError && (
+                  <ErrorDisplay 
+                    error={statsError} 
+                    title="Failed to load shop statistics" 
+                  />
+                )}
+                {balanceError && (
+                  <ErrorDisplay 
+                    error={balanceError} 
+                    title="Failed to load credit balance" 
+                    onRetry={refetchBalance}
+                  />
+                )}
+              </div>
+            )}
+            
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
@@ -199,12 +228,18 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                   <DollarSign className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    ETB {stats.totalRevenue || '0'}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    This month
-                  </p>
+                  {statsLoading ? (
+                    <LoadingState message="Loading revenue..." />
+                  ) : (
+                    <>
+                      <div className="text-2xl font-bold">
+                        ETB {stats.totalRevenue || '0'}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        This month
+                      </p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
 
@@ -214,10 +249,16 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                   <Users className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{employeeList.length || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Active staff members
-                  </p>
+                  {employeesLoading ? (
+                    <LoadingState message="Loading employees..." />
+                  ) : (
+                    <>
+                      <div className="text-2xl font-bold">{employeeList.length || 0}</div>
+                      <p className="text-xs text-muted-foreground">
+                        Active staff members
+                      </p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
 
@@ -240,10 +281,18 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                   <CreditCard className="h-4 w-4 text-orange-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">ETB {balance.balance || '0.00'}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Available credits
-                  </p>
+                  {balanceLoading ? (
+                    <LoadingState message="Loading balance..." />
+                  ) : (
+                    <>
+                      <div className="text-2xl font-bold">
+                        ETB {typeof creditBalance === 'string' ? parseFloat(creditBalance).toLocaleString() : '0.00'}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Available credits
+                      </p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </div>
