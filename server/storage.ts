@@ -121,7 +121,9 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByAccountNumber(accountNumber: string): Promise<User | undefined> {
     try {
+      console.log("Looking up user by account number:", accountNumber);
       const [user] = await db.select().from(users).where(eq(users.accountNumber, accountNumber));
+      console.log("Found user:", user ? `${user.username} (id: ${user.id})` : "none");
       return user || undefined;
     } catch (error) {
       console.error("Database error in getUserByAccountNumber:", error);
