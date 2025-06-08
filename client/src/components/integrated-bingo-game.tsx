@@ -48,14 +48,23 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   // Create game mutation
   const createGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/games", {
-        shopId,
-        employeeId,
-        status: 'waiting',
-        entryFee: gameAmount,
-        prizePool: "0.00"
+      const response = await fetch("/api/games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shopId,
+          employeeId,
+          status: 'waiting',
+          entryFee: gameAmount,
+          prizePool: "0.00"
+        })
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to create game");
+      }
+      
+      return response.json();
     },
     onSuccess: (game) => {
       setActiveGameId(game.id);
@@ -79,7 +88,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       return await apiRequest("POST", `/api/games/${data.gameId}/players`, {
         playerName: data.playerName,
         cartelaNumber: data.cartelaNumber,
-        entryAmount: gameAmount
+        entryFee: gameAmount
       });
     },
     onSuccess: (player, variables) => {
@@ -207,11 +216,19 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Book a cartela for the game
   const bookCartela = async () => {
-    if (selectedCartela !== null && activeGameId) {
+    if (selectedCartela !== null) {
       try {
+        let gameId = activeGameId;
+        
+        // Create game if none exists
+        if (!gameId) {
+          const game = await createGameMutation.mutateAsync();
+          gameId = game.id;
+        }
+        
         // Add player to the game
-        await addPlayerMutation.mutateAsync({
-          gameId: activeGameId,
+        const player = await addPlayerMutation.mutateAsync({
+          gameId: gameId,
           cartelaNumber: selectedCartela,
           playerName: `Player ${selectedCartela}`
         });
@@ -220,11 +237,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         const newTotal = totalCollected + parseInt(gameAmount);
         setTotalCollected(newTotal);
         
-        // Update game prize pool
-        await updateGameMutation.mutateAsync({
-          gameId: activeGameId,
-          prizePool: newTotal.toString()
-        });
+        console.log(`Game ${gameId}: Added player ${player.id} with cartela ${selectedCartela} for ${gameAmount} ETB`);
         
         setShowCartelaSelector(false);
         setSelectedCartela(null);
@@ -234,45 +247,10 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           description: `Cartela #${selectedCartela} booked for ${gameAmount} ETB`,
         });
       } catch (error) {
+        console.error("Failed to book cartela:", error);
         toast({
           title: "Error",
           description: "Failed to book cartela",
-          variant: "destructive",
-        });
-      }
-    } else if (!activeGameId) {
-      // Create game first
-      try {
-        const game = await createGameMutation.mutateAsync();
-        setActiveGameId(game.id);
-        
-        // Then add the player
-        await addPlayerMutation.mutateAsync({
-          gameId: game.id,
-          cartelaNumber: selectedCartela!,
-          playerName: `Player ${selectedCartela}`
-        });
-
-        setBookedCartelas(prev => new Set([...prev, selectedCartela!]));
-        const newTotal = totalCollected + parseInt(gameAmount);
-        setTotalCollected(newTotal);
-        
-        await updateGameMutation.mutateAsync({
-          gameId: game.id,
-          prizePool: newTotal.toString()
-        });
-        
-        setShowCartelaSelector(false);
-        setSelectedCartela(null);
-        
-        toast({
-          title: "Game Created & Cartela Booked!",
-          description: `Cartela #${selectedCartela} booked for ${gameAmount} ETB`,
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to create game and book cartela",
           variant: "destructive",
         });
       }
