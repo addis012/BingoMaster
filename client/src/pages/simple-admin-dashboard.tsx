@@ -14,6 +14,7 @@ import { EmployeeCreationForm } from "@/components/employee-creation-form";
 import { SystemSettings } from "@/components/system-settings";
 import { FileUpload } from "@/components/file-upload";
 import { AdminCreditLoadHistory } from "@/components/admin-credit-load-history";
+import { ErrorDisplay, LoadingState } from "@/components/error-display";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -50,7 +51,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     queryKey: ["/api/admin/shop-stats"],
   });
 
-  const { data: creditBalance, error: balanceError, isLoading: balanceLoading } = useQuery({
+  const { data: creditBalance, error: balanceError, isLoading: balanceLoading, refetch: refetchBalance } = useQuery({
     queryKey: ["/api/credit/balance"],
   });
 
@@ -60,20 +61,8 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
 
   // Credit load mutation
   const loadCreditMutation = useMutation({
-    mutationFn: async (data: { amount: string; paymentMethod: string; bankAccount: string }) => {
-      const response = await fetch("/api/credit/load", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to load credit");
-      }
-      
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/credit/load", data);
       return response.json();
     },
     onSuccess: () => {
@@ -150,10 +139,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
       loadCreditMutation.mutate({
         amount: loadAmount,
         paymentMethod: paymentMethod,
-        referenceNumber: referenceNumber,
-        transferScreenshot: base64Screenshot,
-        adminAccountNumber: userAccountNumber,
-        notes: notes,
+        bankAccount: userAccountNumber
       });
     };
     reader.readAsDataURL(screenshotFile);
