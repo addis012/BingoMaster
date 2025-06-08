@@ -4,8 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { Banknote, CreditCard } from "lucide-react";
 
 interface ReferralCommission {
   id: number;
@@ -28,6 +32,12 @@ interface AdminReferralCommissionsProps {
 export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
+  const [showConvertDialog, setShowConvertDialog] = useState(false);
+  const [selectedCommission, setSelectedCommission] = useState<ReferralCommission | null>(null);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [bankAccount, setBankAccount] = useState("");
+  const [convertAmount, setConvertAmount] = useState("");
 
   const { data: commissions = [], isLoading } = useQuery({
     queryKey: ['referral-commissions', adminId],
@@ -38,28 +48,67 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
     }
   });
 
-  const processCommissionMutation = useMutation({
-    mutationFn: async ({ commissionId, action }: { commissionId: number; action: 'withdraw' | 'convert_to_credit' }) => {
-      const response = await fetch(`/api/referral-commissions/${commissionId}/${action}`, {
-        method: 'PATCH',
+  const withdrawMutation = useMutation({
+    mutationFn: async ({ amount, bankAccount }: { amount: string; bankAccount: string }) => {
+      const response = await fetch(`/api/referral-commissions/withdraw`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          adminId, 
+          amount: parseFloat(amount), 
+          bankAccount 
+        }),
       });
-      if (!response.ok) throw new Error('Failed to process commission');
+      if (!response.ok) throw new Error('Failed to submit withdrawal request');
       return response.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['referral-commissions'] });
+      setShowWithdrawDialog(false);
+      setWithdrawAmount("");
+      setBankAccount("");
       toast({
-        title: "Success",
-        description: variables.action === 'withdraw' 
-          ? "Commission withdrawn successfully" 
-          : "Commission converted to credit successfully"
+        title: "Withdrawal Request Submitted",
+        description: "Your withdrawal request has been sent to super admin for approval",
       });
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to process commission",
-        variant: "destructive"
+        description: "Failed to submit withdrawal request",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const convertMutation = useMutation({
+    mutationFn: async ({ amount }: { amount: string }) => {
+      const response = await fetch(`/api/referral-commissions/convert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          adminId, 
+          amount: parseFloat(amount)
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to convert commission to credit');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['referral-commissions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/credit/balance'] });
+      setShowConvertDialog(false);
+      setConvertAmount("");
+      toast({
+        title: "Commission Converted",
+        description: "Commission successfully converted to credit balance",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to convert commission to credit",
+        variant: "destructive",
       });
     }
   });
@@ -154,27 +203,107 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
                     <TableCell>
                       {commission.status === 'pending' && (
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => processCommissionMutation.mutate({
-                              commissionId: commission.id,
-                              action: 'withdraw'
-                            })}
-                            disabled={processCommissionMutation.isPending}
-                          >
-                            Withdraw
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => processCommissionMutation.mutate({
-                              commissionId: commission.id,
-                              action: 'convert_to_credit'
-                            })}
-                            disabled={processCommissionMutation.isPending}
-                          >
-                            Convert to Credit
-                          </Button>
+                          <Dialog open={showWithdrawDialog && selectedCommission?.id === commission.id} onOpenChange={(open) => {
+                            setShowWithdrawDialog(open);
+                            if (!open) setSelectedCommission(null);
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedCommission(commission)}
+                              >
+                                <Banknote className="w-4 h-4 mr-1" />
+                                Withdraw
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Request Withdrawal</DialogTitle>
+                                <DialogDescription>
+                                  Submit a withdrawal request to super admin for approval
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label htmlFor="withdrawAmount">Amount (ETB)</Label>
+                                  <Input
+                                    id="withdrawAmount"
+                                    type="number"
+                                    placeholder="Enter amount to withdraw"
+                                    value={withdrawAmount}
+                                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                                    max={commission.commissionAmount}
+                                  />
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Available: {commission.commissionAmount} ETB
+                                  </p>
+                                </div>
+                                <div>
+                                  <Label htmlFor="bankAccount">Bank Account</Label>
+                                  <Input
+                                    id="bankAccount"
+                                    placeholder="Enter your bank account details"
+                                    value={bankAccount}
+                                    onChange={(e) => setBankAccount(e.target.value)}
+                                  />
+                                </div>
+                                <Button
+                                  onClick={() => withdrawMutation.mutate({ amount: withdrawAmount, bankAccount })}
+                                  disabled={withdrawMutation.isPending || !withdrawAmount || !bankAccount}
+                                  className="w-full"
+                                >
+                                  {withdrawMutation.isPending ? "Submitting..." : "Submit Withdrawal Request"}
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          <Dialog open={showConvertDialog && selectedCommission?.id === commission.id} onOpenChange={(open) => {
+                            setShowConvertDialog(open);
+                            if (!open) setSelectedCommission(null);
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                onClick={() => setSelectedCommission(commission)}
+                              >
+                                <CreditCard className="w-4 h-4 mr-1" />
+                                Convert to Credit
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Convert to Credit</DialogTitle>
+                                <DialogDescription>
+                                  Convert commission to your account credit balance
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label htmlFor="convertAmount">Amount (ETB)</Label>
+                                  <Input
+                                    id="convertAmount"
+                                    type="number"
+                                    placeholder="Enter amount to convert"
+                                    value={convertAmount}
+                                    onChange={(e) => setConvertAmount(e.target.value)}
+                                    max={commission.commissionAmount}
+                                  />
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Available: {commission.commissionAmount} ETB
+                                  </p>
+                                </div>
+                                <Button
+                                  onClick={() => convertMutation.mutate({ amount: convertAmount })}
+                                  disabled={convertMutation.isPending || !convertAmount}
+                                  className="w-full"
+                                >
+                                  {convertMutation.isPending ? "Converting..." : "Convert to Credit"}
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       )}
                     </TableCell>

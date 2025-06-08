@@ -942,6 +942,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Submit withdrawal request
+  app.post("/api/referral-commissions/withdraw", async (req: Request, res: Response) => {
+    try {
+      const { adminId, amount, bankAccount } = req.body;
+      
+      if (!adminId || !amount || !bankAccount) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const result = await storage.createWithdrawalRequest({
+        adminId,
+        amount: amount.toString(),
+        bankAccount,
+        type: 'referral_commission',
+        status: 'pending'
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Failed to create withdrawal request:", error);
+      res.status(500).json({ message: "Failed to submit withdrawal request" });
+    }
+  });
+
+  // Convert commission to credit
+  app.post("/api/referral-commissions/convert", async (req: Request, res: Response) => {
+    try {
+      const { adminId, amount } = req.body;
+      
+      if (!adminId || !amount) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const result = await storage.convertCommissionToCredit(adminId, amount);
+      res.json(result);
+    } catch (error) {
+      console.error("Failed to convert commission to credit:", error);
+      res.status(500).json({ message: "Failed to convert commission to credit" });
+    }
+  });
+
   app.patch("/api/referral-commissions/:id/:action", async (req: Request, res: Response) => {
     try {
       const commissionId = parseInt(req.params.id);
