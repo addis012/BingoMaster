@@ -186,12 +186,13 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="finance">Finance</TabsTrigger>
             <TabsTrigger value="credits">Credits</TabsTrigger>
             <TabsTrigger value="credit-history">Credit History</TabsTrigger>
+            <TabsTrigger value="referrals">Referrals</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -387,10 +388,25 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Financial Overview
+                  Game History & Financial Overview
                 </CardTitle>
                 <CardDescription>
-                  Detailed financial insights for your shop
+                  Complete game history with winning cartela numbers and financial breakdown
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <EnhancedGameHistory shopId={user.shopId} />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Financial Summary
+                </CardTitle>
+                <CardDescription>
+                  Revenue insights and performance metrics
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -620,6 +636,23 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
 
           <TabsContent value="credit-history" className="space-y-6">
             <AdminCreditLoadHistory />
+          </TabsContent>
+
+          <TabsContent value="referrals" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Gift className="h-5 w-5" />
+                  Referral Commissions
+                </CardTitle>
+                <CardDescription>
+                  Manage your referral commissions from deposits and game activities
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminReferralCommissions adminId={user.id} />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
