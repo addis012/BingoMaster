@@ -27,6 +27,7 @@ export const shops = pgTable("shops", {
   referralCommission: decimal("referral_commission", { precision: 5, scale: 2 }).default("3.00"), // Referral bonus percentage
   isBlocked: boolean("is_blocked").default(false),
   createdAt: timestamp("created_at").defaultNow(),
+  totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0.00"),
 });
 
 export const games = pgTable("games", {

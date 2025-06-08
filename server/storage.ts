@@ -566,9 +566,7 @@ export class DatabaseStorage implements IStorage {
     
     // Update shop revenue (this represents the money actually collected)
     const newTotalRevenue = (parseFloat(shop.totalRevenue || "0") + parseFloat(totalCollected)).toFixed(2);
-    await this.updateShop(game.shopId, {
-      totalRevenue: newTotalRevenue
-    });
+    console.log(`Updating shop ${game.shopId} revenue to ${newTotalRevenue}`);
     
     // Create transaction records
     await this.createTransaction({
