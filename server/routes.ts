@@ -604,6 +604,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin game history route
+  app.get("/api/admin/game-history", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { startDate, endDate } = req.query;
+      const start = startDate ? new Date(startDate as string) : undefined;
+      const end = endDate ? new Date(endDate as string) : undefined;
+      
+      const history = await storage.getGameHistory(user.shopId, start, end);
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get game history" });
+    }
+  });
+
   // Today's stats route for admin dashboard
   app.get("/api/stats/today/:shopId", async (req, res) => {
     try {
