@@ -1188,6 +1188,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // Get current system settings
+  app.get("/api/admin/system-settings", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      let settings: any = {
+        commissionRate: "25", // Default super admin commission
+        adminProfitMargin: "15", // Default
+        prizePoolPercentage: "85" // Default
+      };
+
+      // Get actual shop settings if admin has a shop
+      if (user.shopId) {
+        const shop = await storage.getShop(user.shopId);
+        if (shop && shop.profitMargin) {
+          settings.adminProfitMargin = shop.profitMargin;
+        }
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Failed to get system settings:", error);
+      res.status(500).json({ message: "Failed to get system settings" });
+    }
+  });
+
   // System settings management
   app.post("/api/admin/system-settings", async (req, res) => {
     try {
@@ -1203,8 +1237,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { commissionRate, adminProfitMargin, prizePoolPercentage } = req.body;
       
-      // Store settings (in a real app, you'd save to database)
-      // For now, just return success
+      // Update shop profit margin if admin has a shop and adminProfitMargin is provided
+      if (user.shopId && adminProfitMargin !== undefined) {
+        await storage.updateShop(user.shopId, {
+          profitMargin: adminProfitMargin.toString()
+        });
+      }
+      
       res.json({ 
         message: "Settings updated successfully",
         settings: { commissionRate, adminProfitMargin, prizePoolPercentage }

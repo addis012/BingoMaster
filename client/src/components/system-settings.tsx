@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,20 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
   const { toast } = useToast();
   const [commissionRate, setCommissionRate] = useState("15");
   const [adminProfitMargin, setAdminProfitMargin] = useState("70");
+
+  // Fetch current settings
+  const { data: currentSettings } = useQuery({
+    queryKey: ["/api/admin/system-settings"],
+    enabled: userRole === 'admin' || userRole === 'super_admin',
+  });
+
+  // Update state when settings are loaded
+  useEffect(() => {
+    if (currentSettings) {
+      setCommissionRate(currentSettings.commissionRate || "25");
+      setAdminProfitMargin(currentSettings.adminProfitMargin || "15");
+    }
+  }, [currentSettings]);
 
   const { data: gameHistory = [] } = useQuery({
     queryKey: ["/api/admin/game-history"],
@@ -38,6 +52,8 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate cache to refresh settings display
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/system-settings"] });
       toast({
         title: "Settings Updated",
         description: "System settings have been updated successfully.",
