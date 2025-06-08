@@ -1,11 +1,12 @@
 import { 
   users, shops, games, gamePlayers, transactions, commissionPayments, gameHistory,
-  creditTransfers, creditLoads, referralCommissions,
+  creditTransfers, creditLoads, referralCommissions, withdrawalRequests,
   type User, type InsertUser, type Shop, type InsertShop, 
   type Game, type InsertGame, type GamePlayer, type InsertGamePlayer,
   type Transaction, type InsertTransaction, type CommissionPayment, type InsertCommissionPayment,
   type GameHistory, type InsertGameHistory, type CreditTransfer, type InsertCreditTransfer,
-  type CreditLoad, type InsertCreditLoad, type ReferralCommission, type InsertReferralCommission
+  type CreditLoad, type InsertCreditLoad, type ReferralCommission, type InsertReferralCommission,
+  type WithdrawalRequest, type InsertWithdrawalRequest
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, gte, lte, sum, count } from "drizzle-orm";
@@ -703,12 +704,14 @@ export class DatabaseStorage implements IStorage {
     amount: string;
     bankAccount: string;
     type: string;
+    status: string;
   }): Promise<any> {
     const [created] = await db.insert(withdrawalRequests).values({
       adminId: request.adminId,
       amount: request.amount,
       bankAccount: request.bankAccount,
       type: request.type,
+      status: request.status,
     }).returning();
     return created;
   }
