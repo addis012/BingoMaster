@@ -492,13 +492,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // System already uses Ethiopian Birr (ETB)
       const totalCollectedBirr = parseFloat(game.prizePool || "0");
       
-      // Calculate profit margin and commission
+      // Calculate profit margin and commission correctly
       const profitMargin = parseFloat(shop?.profitMargin || "0");
-      const commissionRate = parseFloat(shop?.commissionRate || "0");
+      const superAdminCommissionRate = parseFloat(shop?.superAdminCommission || "0");
       
       const adminProfit = (totalCollectedBirr * profitMargin) / 100;
       const prizeAmountBirr = totalCollectedBirr - adminProfit;
-      const superAdminCommission = (adminProfit * commissionRate) / 100;
+      const superAdminCommission = (adminProfit * superAdminCommissionRate) / 100;
       
       // Update game status
       const updatedGame = await storage.updateGame(gameId, {
