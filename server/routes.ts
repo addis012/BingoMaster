@@ -564,7 +564,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.processGameProfits(gameId, totalCollectedBirr.toString());
       console.log(`Game profits: admin=${adminProfit}, super admin commission=${superAdminCommission}, deducted from admin credit`);
       
-      // Create game history record
+      // Create game history record with winner cartela number
+      const winnerCartelaNumber = winner?.cartelaNumbers?.[0] || null;
       await storage.createGameHistory({
         gameId,
         shopId: game.shopId,
@@ -575,6 +576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         superAdminCommission: superAdminCommission.toString(),
         playerCount: players.length,
         winnerName: winner?.playerName || 'Unknown',
+        winningCartela: winnerCartelaNumber ? `#${winnerCartelaNumber}` : null,
       });
 
       // Notify WebSocket clients

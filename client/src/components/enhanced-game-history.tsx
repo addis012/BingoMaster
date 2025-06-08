@@ -164,63 +164,49 @@ export function EnhancedGameHistory({ shopId }: EnhancedGameHistoryProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Winner</TableHead>
-                  <TableHead>Winning Cartela</TableHead>
-                  <TableHead>Players</TableHead>
-                  <TableHead>Entry Fees</TableHead>
-                  <TableHead>Prize</TableHead>
+                  <TableHead>Game #</TableHead>
+                  <TableHead>Winner Cartela</TableHead>
+                  <TableHead>Collected Birr</TableHead>
                   <TableHead>Your Profit</TableHead>
-                  <TableHead>Commission</TableHead>
+                  <TableHead>Commission Deducted</TableHead>
+                  <TableHead>Date/Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {gameHistory.map((game: GameHistoryEntry) => (
                   <TableRow key={game.id}>
                     <TableCell>
-                      <div className="flex flex-col">
+                      <Badge variant="outline" className="font-mono">
+                        #{game.gameId}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {game.winningCartela ? (
+                        <Badge variant="secondary" className="text-lg font-bold bg-green-100 text-green-800">
+                          {game.winningCartela}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">N/A</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-lg font-bold text-blue-600">
+                      {parseFloat(game.totalCollected).toFixed(2)} ETB
+                    </TableCell>
+                    <TableCell className="text-lg font-bold text-green-600">
+                      +{parseFloat(game.adminProfit).toFixed(2)} ETB
+                    </TableCell>
+                    <TableCell className="text-lg font-bold text-red-600">
+                      -{parseFloat(game.superAdminCommission).toFixed(2)} ETB
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col text-sm">
                         <span className="font-medium">
                           {format(new Date(game.completedAt), 'MMM dd, yyyy')}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground">
                           {format(new Date(game.completedAt), 'HH:mm')}
                         </span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-yellow-500" />
-                        <span className="font-medium">{game.winnerName}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {game.winningCartela ? (
-                          <Badge variant="secondary" className="text-sm font-medium">
-                            #{game.winningCartela}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">N/A</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span>{game.playerCount}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {parseFloat(game.totalCollected).toFixed(2)} ETB
-                    </TableCell>
-                    <TableCell className="text-green-600 font-medium">
-                      {parseFloat(game.prizeAmount).toFixed(2)} ETB
-                    </TableCell>
-                    <TableCell className="text-blue-600 font-medium">
-                      {parseFloat(game.adminProfit).toFixed(2)} ETB
-                    </TableCell>
-                    <TableCell className="text-purple-600 font-medium">
-                      {parseFloat(game.superAdminCommission).toFixed(2)} ETB
                     </TableCell>
                   </TableRow>
                 ))}
