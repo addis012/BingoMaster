@@ -478,6 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const gameId = parseInt(req.params.id);
       const { winnerId } = req.body;
+      console.log(`Declaring winner for game ${gameId}, winnerId: ${winnerId}`);
       
       // Get game, shop, and winner details
       const game = await storage.getGame(gameId);
@@ -489,8 +490,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const players = await storage.getGamePlayers(gameId);
       const winner = players.find(p => p.id === winnerId);
       
-      // System already uses Ethiopian Birr (ETB)
-      const totalCollectedBirr = parseFloat(game.prizePool || "0");
+      // Calculate total collected from entry fees
+      const entryFeeTransactions = await storage.getTransactionsByShop(game.shopId);
+      const gameEntryFees = entryFeeTransactions.filter(t => t.gameId === gameId && t.type === 'entry_fee');
+      const totalCollectedBirr = gameEntryFees.reduce((sum, t) => sum + parseFloat(t.amount), 0);
       
       // Calculate profit margin and commission correctly
       const profitMargin = parseFloat(shop?.profitMargin || "0");
@@ -584,7 +587,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      res.status(500).json({ message: "Failed to declare winner" });
+      console.error("Error declaring winner:", error);
+      console.error("Stack trace:", error.stack);
+      res.status(500).json({ message: "Failed to declare winner", error: error.message });
     }
   });
 
