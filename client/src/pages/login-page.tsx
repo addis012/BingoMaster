@@ -16,8 +16,11 @@ export default function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
+      console.log("Attempting login with:", { username: credentials.username, password: "***" });
       const response = await apiRequest("POST", "/api/auth/login", credentials);
-      return await response.json();
+      const data = await response.json();
+      console.log("Login response:", data);
+      return data;
     },
     onSuccess: (data: any) => {
       const user = data.user;
@@ -36,9 +39,11 @@ export default function LoginPage() {
       }
     },
     onError: (error: any) => {
+      console.error("Login error details:", error);
+      const errorMessage = error.message || "Invalid username or password";
       toast({
-        title: "Login failed",
-        description: error.message || "Invalid username or password",
+        title: "Login Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     },

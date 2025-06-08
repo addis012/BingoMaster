@@ -42,15 +42,15 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
 
-  const { data: employees = [], refetch: refetchEmployees } = useQuery({
+  const { data: employees = [], refetch: refetchEmployees, error: employeesError, isLoading: employeesLoading } = useQuery({
     queryKey: ["/api/admin/employees"],
   });
 
-  const { data: shopStats } = useQuery({
+  const { data: shopStats, error: statsError, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/admin/shop-stats"],
   });
 
-  const { data: creditBalance } = useQuery({
+  const { data: creditBalance, error: balanceError, isLoading: balanceLoading } = useQuery({
     queryKey: ["/api/credit/balance"],
   });
 
