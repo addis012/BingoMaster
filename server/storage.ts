@@ -269,7 +269,10 @@ export class DatabaseStorage implements IStorage {
   }> {
     let transactionQuery = db.select({
       total: sum(transactions.amount).as('total')
-    }).from(transactions).where(eq(transactions.shopId, shopId));
+    }).from(transactions).where(and(
+      eq(transactions.shopId, shopId),
+      eq(transactions.type, 'entry_fee')
+    ));
 
     let gameQuery = db.select({
       count: count().as('count')
@@ -284,6 +287,7 @@ export class DatabaseStorage implements IStorage {
     if (startDate && endDate) {
       transactionQuery = transactionQuery.where(and(
         eq(transactions.shopId, shopId),
+        eq(transactions.type, 'entry_fee'),
         gte(transactions.createdAt, startDate),
         lte(transactions.createdAt, endDate)
       ));
