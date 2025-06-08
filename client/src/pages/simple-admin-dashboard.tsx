@@ -17,7 +17,7 @@ import { AdminCreditLoadHistory } from "@/components/admin-credit-load-history";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History } from "lucide-react";
+import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle } from "lucide-react";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
