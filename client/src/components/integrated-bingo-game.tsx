@@ -547,18 +547,72 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     stopAutomaticNumberCalling();
   };
 
-  // Start game
+  // Start game - support both pre-booked games and quick play mode
   const startGame = async () => {
+    console.log("🎮 Starting game - checking state:", { 
+      bookedCartelasSize: bookedCartelas.size, 
+      activeGameId, 
+      gameAmount,
+      shopData: shopData?.id 
+    });
+
+    // Quick Play Mode: No cartelas booked yet, create game automatically
     if (bookedCartelas.size === 0) {
-      toast({
-        title: "Cannot Start Game",
-        description: "Please book at least one cartela first",
-        variant: "destructive"
-      });
-      return;
+      console.log("🚀 Quick Play Mode: Creating automatic game with demo cartelas");
+      
+      if (!shopData?.id) {
+        toast({
+          title: "Error",
+          description: "Shop data not loaded. Please refresh the page.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      try {
+        // Create a new game for quick play
+        console.log("Creating new game for quick play...");
+        const game = await createGameMutation.mutateAsync();
+        console.log("Game created:", game);
+        
+        // Auto-book some demo cartelas for quick play (e.g., cartela #57, #78)
+        const demoCartelas = [57, 78];
+        
+        for (const cartelaNum of demoCartelas) {
+          const player = await addPlayerMutation.mutateAsync({
+            gameId: game.id,
+            cartelaNumbers: [cartelaNum],
+            playerName: `Quick Player ${cartelaNum}`
+          });
+          
+          setBookedCartelas(prev => new Set([...prev, cartelaNum]));
+          setGamePlayersMap(prev => new Map(prev.set(cartelaNum, player.id)));
+          
+          console.log(`Auto-booked cartela #${cartelaNum} with player ID ${player.id}`);
+        }
+        
+        const newTotal = demoCartelas.length * parseInt(gameAmount);
+        setTotalCollected(newTotal);
+        
+        toast({
+          title: "Quick Play Game Started!",
+          description: `Auto-booked cartelas ${demoCartelas.join(', ')} for ${newTotal} ETB`,
+        });
+        
+      } catch (error) {
+        console.error("Failed to create quick play game:", error);
+        toast({
+          title: "Error",
+          description: "Failed to create quick play game",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
+    // Regular mode: Cartelas already booked
     if (!activeGameId) {
+      console.error("No active game found after setup");
       toast({
         title: "Error",
         description: "No active game found",
@@ -568,6 +622,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
 
     try {
+      console.log("Starting game with ID:", activeGameId);
       await startGameMutation.mutateAsync(activeGameId);
       
       setGameActive(true);
@@ -578,12 +633,15 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       setWinnerFound(null);
       setLastCalledLetter("");
       
+      console.log("Game started successfully, beginning number calling...");
+      
       // Start automatic number calling
       setTimeout(() => {
         callNumber();
         startAutomaticNumberCalling();
       }, 1000);
     } catch (error) {
+      console.error("Failed to start game:", error);
       toast({
         title: "Error",
         description: "Failed to start game",
