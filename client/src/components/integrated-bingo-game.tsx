@@ -330,9 +330,11 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         stopAutomaticNumberCalling();
         
         console.log(`Winner found! Cartela #${cartelaNumber} with ${winResult.pattern}`);
+        console.log("Current game state:", { activeGameId, gamePlayersMap: Array.from(gamePlayersMap.entries()) });
         
         // Show winner announcement for 3 seconds then automatically declare
         setTimeout(() => {
+          console.log("Attempting automatic winner declaration for cartela:", cartelaNumber);
           declareWinnerAutomatically(cartelaNumber);
         }, 3000); // 3 second delay to show winner announcement
         
@@ -382,30 +384,38 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Automatically declare winner in backend
   const declareWinnerAutomatically = async (cartelaNumber: number) => {
+    console.log("declareWinnerAutomatically called with:", { cartelaNumber, activeGameId, gamePlayersMapSize: gamePlayersMap.size });
+    
     if (!activeGameId) {
       console.error("Cannot declare winner - no active game");
+      toast({
+        title: "Recording Error",
+        description: "No active game found to record winner",
+        variant: "destructive"
+      });
       return;
     }
     
     const winnerId = gamePlayersMap.get(cartelaNumber);
     if (!winnerId) {
-      console.error("Winner ID not found in gamePlayersMap:", { cartelaNumber, gamePlayersMap });
+      console.error("Winner ID not found in gamePlayersMap:", { cartelaNumber, gamePlayersMap: Array.from(gamePlayersMap.entries()) });
+      toast({
+        title: "Recording Error", 
+        description: "Winner player not found in game records",
+        variant: "destructive"
+      });
       return;
     }
 
     try {
       console.log("Auto-declaring winner:", { cartelaNumber, winnerId, activeGameId });
-      await declareWinnerMutation.mutateAsync({
+      
+      const result = await declareWinnerMutation.mutateAsync({
         gameId: activeGameId,
         winnerId: winnerId
       });
       
-      console.log("Winner successfully declared in backend!");
-      
-      // Reset game state
-      setActiveGameId(null);
-      setGamePlayersMap(new Map());
-      setTotalCollected(0);
+      console.log("Winner successfully declared in backend!", result);
       
       toast({
         title: "Game Completed!",
