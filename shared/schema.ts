@@ -250,6 +250,17 @@ export const creditLoadsRelations = relations(creditLoads, ({ one }) => ({
   }),
 }));
 
+export const referralCommissionsRelations = relations(referralCommissions, ({ one }) => ({
+  referrer: one(users, {
+    fields: [referralCommissions.referrerId],
+    references: [users.id],
+  }),
+  referred: one(users, {
+    fields: [referralCommissions.referredId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -313,7 +324,15 @@ export const insertCreditLoadSchema = createInsertSchema(creditLoads, {
   amount: z.string(),
 });
 
+export const insertReferralCommissionSchema = createInsertSchema(referralCommissions, {
+  sourceAmount: z.string(),
+  commissionRate: z.string(),
+  commissionAmount: z.string(),
+});
+
 export type CreditTransfer = typeof creditTransfers.$inferSelect;
 export type InsertCreditTransfer = z.infer<typeof insertCreditTransferSchema>;
 export type CreditLoad = typeof creditLoads.$inferSelect;
 export type InsertCreditLoad = z.infer<typeof insertCreditLoadSchema>;
+export type ReferralCommission = typeof referralCommissions.$inferSelect;
+export type InsertReferralCommission = z.infer<typeof insertReferralCommissionSchema>;

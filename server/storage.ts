@@ -1,11 +1,11 @@
 import { 
   users, shops, games, gamePlayers, transactions, commissionPayments, gameHistory,
-  creditTransfers, creditLoads,
+  creditTransfers, creditLoads, referralCommissions,
   type User, type InsertUser, type Shop, type InsertShop, 
   type Game, type InsertGame, type GamePlayer, type InsertGamePlayer,
   type Transaction, type InsertTransaction, type CommissionPayment, type InsertCommissionPayment,
   type GameHistory, type InsertGameHistory, type CreditTransfer, type InsertCreditTransfer,
-  type CreditLoad, type InsertCreditLoad
+  type CreditLoad, type InsertCreditLoad, type ReferralCommission, type InsertReferralCommission
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, gte, lte, sum, count } from "drizzle-orm";
@@ -83,6 +83,12 @@ export interface IStorage {
   processGameProfits(gameId: number, totalCollected: string): Promise<void>;
   generateAccountNumber(): Promise<string>;
   getAdminsByReferrer(referrerId: number): Promise<User[]>;
+  
+  // Referral commission methods
+  createReferralCommission(commission: InsertReferralCommission): Promise<ReferralCommission>;
+  getReferralCommissions(referrerId: number): Promise<ReferralCommission[]>;
+  processReferralCommission(commissionId: number, action: 'withdraw' | 'convert_to_credit'): Promise<ReferralCommission>;
+  calculateReferralCommission(sourceAmount: string, commissionRate: string): string;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -638,6 +644,31 @@ export class DatabaseStorage implements IStorage {
         eq(users.referredBy, referrerId),
         eq(users.role, 'admin')
       ));
+  }
+
+  // Referral commission methods
+  async createReferralCommission(commission: InsertReferralCommission): Promise<ReferralCommission> {
+    const [created] = await db.insert(referralCommissions).values(commission).returning();
+    return created;
+  }
+
+  async getReferralCommissions(referrerId: number): Promise<ReferralCommission[]> {
+    return await db.select().from(referralCommissions).where(eq(referralCommissions.referrerId, referrerId));
+  }
+
+  async processReferralCommission(commissionId: number, action: 'withdraw' | 'convert_to_credit'): Promise<ReferralCommission> {
+    const status = action === 'withdraw' ? 'paid' : 'converted_to_credit';
+    const [updated] = await db.update(referralCommissions)
+      .set({ status, processedAt: new Date() })
+      .where(eq(referralCommissions.id, commissionId))
+      .returning();
+    return updated;
+  }
+
+  calculateReferralCommission(sourceAmount: string, commissionRate: string): string {
+    const amount = parseFloat(sourceAmount);
+    const rate = parseFloat(commissionRate);
+    return (amount * rate / 100).toFixed(2);
   }
 }
 
