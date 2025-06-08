@@ -843,17 +843,42 @@ export class DatabaseStorage implements IStorage {
     // Update admin's credit balance
     await this.updateCreditBalance(adminId, amount.toString(), 'add');
     
-    // Mark commissions as converted for this amount
+    // Process commissions for conversion (handle partial conversions)
     let remainingAmount = amount;
     for (const commission of commissions) {
       if (remainingAmount <= 0) break;
       
       const commissionValue = parseFloat(commission.commissionAmount);
+      
       if (commissionValue <= remainingAmount) {
+        // Convert entire commission
         await db.update(referralCommissions)
           .set({ status: 'converted_to_credit', processedAt: new Date() })
           .where(eq(referralCommissions.id, commission.id));
         remainingAmount -= commissionValue;
+      } else {
+        // Partial conversion - split the commission
+        // Create a new record for the converted amount
+        await db.insert(referralCommissions).values({
+          referrerId: commission.referrerId,
+          referredId: commission.referredId,
+          sourceType: commission.sourceType,
+          sourceId: commission.sourceId,
+          sourceAmount: commission.sourceAmount,
+          commissionRate: commission.commissionRate,
+          commissionAmount: remainingAmount.toFixed(2),
+          status: 'converted_to_credit',
+          createdAt: commission.createdAt,
+          processedAt: new Date()
+        });
+        
+        // Update the original commission to show remaining amount
+        const remainingCommission = (commissionValue - remainingAmount).toFixed(2);
+        await db.update(referralCommissions)
+          .set({ commissionAmount: remainingCommission })
+          .where(eq(referralCommissions.id, commission.id));
+        
+        remainingAmount = 0;
       }
     }
     
