@@ -565,8 +565,9 @@ export class DatabaseStorage implements IStorage {
     await this.updateCreditBalance(shop.adminId!, profits.superAdminCommission, 'subtract');
     
     // Update shop revenue (this represents the money actually collected)
+    const newTotalRevenue = (parseFloat(shop.totalRevenue || "0") + parseFloat(totalCollected)).toFixed(2);
     await this.updateShop(game.shopId, {
-      totalRevenue: (parseFloat(shop.totalRevenue || "0") + parseFloat(totalCollected)).toFixed(2)
+      totalRevenue: newTotalRevenue
     });
     
     // Create transaction records
