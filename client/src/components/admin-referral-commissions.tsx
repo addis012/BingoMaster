@@ -50,6 +50,15 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
     }
   });
 
+  const { data: withdrawalRequests = [] } = useQuery({
+    queryKey: ['withdrawal-requests', adminId],
+    queryFn: async () => {
+      const response = await fetch(`/api/withdrawal-requests?adminId=${adminId}`);
+      if (!response.ok) throw new Error('Failed to fetch withdrawal requests');
+      return response.json();
+    }
+  });
+
   const withdrawMutation = useMutation({
     mutationFn: async ({ amount, bankAccount }: { amount: string; bankAccount: string }) => {
       const response = await fetch(`/api/referral-commissions/withdraw`, {
@@ -66,6 +75,7 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['referral-commissions'] });
+      queryClient.invalidateQueries({ queryKey: ['withdrawal-requests', adminId] });
       setShowWithdrawDialog(false);
       setWithdrawAmount("");
       setBankAccount("");
@@ -319,6 +329,67 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
                           </Dialog>
                         </div>
                       )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Withdrawal Requests History */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Withdrawal Request History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {withdrawalRequests.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No withdrawal requests yet.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Bank Account</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Processed Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {withdrawalRequests.map((request: any) => (
+                  <TableRow key={request.id}>
+                    <TableCell>
+                      {format(new Date(request.createdAt), 'MMM dd, yyyy HH:mm')}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {parseFloat(request.amount).toFixed(2)} ETB
+                    </TableCell>
+                    <TableCell>{request.bankAccount}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {request.type.replace('_', ' ').toUpperCase()}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={
+                          request.status === 'approved' ? 'default' : 
+                          request.status === 'rejected' ? 'destructive' : 'secondary'
+                        }
+                      >
+                        {request.status.toUpperCase()}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {request.processedAt ? 
+                        format(new Date(request.processedAt), 'MMM dd, yyyy HH:mm') : 
+                        'Pending'
+                      }
                     </TableCell>
                   </TableRow>
                 ))}
