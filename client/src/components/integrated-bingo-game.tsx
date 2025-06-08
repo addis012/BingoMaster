@@ -329,21 +329,38 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Verify and declare winner
   const verifyWinner = async () => {
-    if (!winnerFound || !activeGameId) return;
+    if (!winnerFound || !activeGameId) {
+      console.error("Cannot declare winner - missing data:", { winnerFound, activeGameId });
+      toast({
+        title: "Error",
+        description: "Cannot declare winner - missing game or winner data",
+        variant: "destructive"
+      });
+      return;
+    }
     
     const cartelaNumber = parseInt(winnerFound.replace('Cartela #', ''));
     const winnerId = gamePlayersMap.get(cartelaNumber);
     
+    console.log("Declaring winner:", { 
+      cartelaNumber, 
+      winnerId, 
+      activeGameId, 
+      gamePlayersMap: Array.from(gamePlayersMap.entries()) 
+    });
+    
     if (!winnerId) {
+      console.error("Winner ID not found in gamePlayersMap:", { cartelaNumber, gamePlayersMap });
       toast({
         title: "Error",
-        description: "Winner player not found",
+        description: "Winner player not found in game records",
         variant: "destructive"
       });
       return;
     }
 
     try {
+      console.log("Calling declare winner API for game", activeGameId, "winner", winnerId);
       await declareWinnerMutation.mutateAsync({
         gameId: activeGameId,
         winnerId: winnerId
@@ -353,6 +370,11 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       setWinnerFound(null);
     } catch (error) {
       console.error("Failed to declare winner:", error);
+      toast({
+        title: "Error",
+        description: `Failed to complete game: ${error.message}`,
+        variant: "destructive"
+      });
     }
   };
 
