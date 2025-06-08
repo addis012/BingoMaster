@@ -568,6 +568,43 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       shopData: shopData?.id 
     });
 
+    // If cartelas exist but no backend game, create one automatically
+    if (bookedCartelas.size > 0 && !activeGameId) {
+      console.log("🔄 Found cartelas without backend game - creating backend records...");
+      
+      try {
+        // Create backend game
+        const game = await createGameMutation.mutateAsync();
+        console.log("✅ Backend game created with ID:", game.id);
+        
+        // Create backend player records for all existing cartelas
+        console.log("📝 Creating backend players for existing cartelas...");
+        const cartelaArray = Array.from(bookedCartelas);
+        
+        for (const cartelaNum of cartelaArray) {
+          const player = await addPlayerMutation.mutateAsync({
+            gameId: game.id,
+            cartelaNumbers: [cartelaNum],
+            playerName: `Player ${cartelaNum}`
+          });
+          console.log(`✅ Created backend player ${player.id} for cartela #${cartelaNum}`);
+        }
+        
+        toast({
+          title: "Backend Sync Complete!",
+          description: `Created game record with ${cartelaArray.length} players`,
+        });
+        
+      } catch (error) {
+        console.error("❌ Failed to create backend records:", error);
+        toast({
+          title: "Error",
+          description: "Failed to sync with backend. Game may not be recorded.",
+          variant: "destructive"
+        });
+      }
+    }
+
     // Quick Play Mode: No cartelas booked yet, create game automatically
     if (bookedCartelas.size === 0) {
       console.log("🚀 Quick Play Mode: Creating automatic game with demo cartelas");
@@ -598,7 +635,6 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           });
           
           setBookedCartelas(prev => new Set([...prev, cartelaNum]));
-          setGamePlayersMap(prev => new Map(prev.set(cartelaNum, player.id)));
           
           console.log(`Auto-booked cartela #${cartelaNum} with player ID ${player.id}`);
         }
@@ -646,6 +682,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       setLastCalledLetter("");
       
       console.log("Game started successfully, beginning number calling...");
+      console.log("Final gamePlayersMap before starting:", Array.from(gamePlayersMap.entries()));
       
       // Start automatic number calling
       setTimeout(() => {
