@@ -607,7 +607,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
     // Quick Play Mode: No cartelas booked yet, create game automatically
     if (bookedCartelas.size === 0) {
-      console.log("🚀 Quick Play Mode: Creating automatic game with demo cartelas");
+      console.log("🚀 Quick Play Mode: Creating automatic game with selected cartelas");
       
       if (!shopData?.id) {
         toast({
@@ -618,33 +618,47 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         return;
       }
 
+      // Use actual selected cartelas from the UI
+      const selectedCartelasArray = Array.from(selectedCartelas);
+      if (selectedCartelasArray.length === 0) {
+        toast({
+          title: "Error",
+          description: "Please select at least one cartela before starting the game.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       try {
         // Create a new game for quick play
-        console.log("Creating new game for quick play...");
+        console.log("Creating new game for quick play with cartelas:", selectedCartelasArray);
         const game = await createGameMutation.mutateAsync();
         console.log("Game created:", game);
         
-        // Auto-book some demo cartelas for quick play (e.g., cartela #57, #78)
-        const demoCartelas = [57, 78];
-        
-        for (const cartelaNum of demoCartelas) {
+        // Create backend players for all selected cartelas
+        for (const cartelaNum of selectedCartelasArray) {
           const player = await addPlayerMutation.mutateAsync({
             gameId: game.id,
             cartelaNumbers: [cartelaNum],
-            playerName: `Quick Player ${cartelaNum}`
+            playerName: `Player ${cartelaNum}`
           });
           
           setBookedCartelas(prev => new Set([...prev, cartelaNum]));
+          setGamePlayersMap(prev => {
+            const newMap = new Map(prev);
+            newMap.set(cartelaNum, player.id);
+            return newMap;
+          });
           
           console.log(`Auto-booked cartela #${cartelaNum} with player ID ${player.id}`);
         }
         
-        const newTotal = demoCartelas.length * parseInt(gameAmount);
+        const newTotal = selectedCartelasArray.length * parseInt(gameAmount);
         setTotalCollected(newTotal);
         
         toast({
           title: "Quick Play Game Started!",
-          description: `Auto-booked cartelas ${demoCartelas.join(', ')} for ${newTotal} ETB`,
+          description: `Created game with ${selectedCartelasArray.length} cartelas for ${newTotal} ETB`,
         });
         
       } catch (error) {
