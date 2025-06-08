@@ -32,6 +32,19 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Credit management states - moved before conditional returns
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [loadAmount, setLoadAmount] = useState("");
+  const [loadBankAccount, setLoadBankAccount] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferRecipient, setTransferRecipient] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
+  const [referenceNumber, setReferenceNumber] = useState("");
+  const [transferScreenshot, setTransferScreenshot] = useState("");
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState("");
 
   // Show loading state while authentication is being checked
   if (isLoading) {
@@ -76,19 +89,6 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
       </div>
     );
   }
-  
-  // Credit management states
-  const [showLoadDialog, setShowLoadDialog] = useState(false);
-  const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [loadAmount, setLoadAmount] = useState("");
-  const [loadBankAccount, setLoadBankAccount] = useState("");
-  const [transferAmount, setTransferAmount] = useState("");
-  const [transferRecipient, setTransferRecipient] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
-  const [referenceNumber, setReferenceNumber] = useState("");
-  const [transferScreenshot, setTransferScreenshot] = useState("");
-  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [notes, setNotes] = useState("");
 
   const { data: employees = [], refetch: refetchEmployees, error: employeesError, isLoading: employeesLoading } = useQuery({
     queryKey: ["/api/admin/employees"],

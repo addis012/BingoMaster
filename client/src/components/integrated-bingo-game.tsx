@@ -211,15 +211,18 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     return cartelaNum;
   };
 
-  // Show cartela selector
+  // Show cartela selector with full grid
   const showCartelaSelectorDialog = () => {
-    const cartelaNumber = generateCartelaNumber();
+    setShowCartelaSelector(true);
+  };
+
+  // Select a specific cartela number
+  const selectCartela = (cartelaNumber: number) => {
     setSelectedCartela(cartelaNumber);
     setCartelaCards(prev => ({
       ...prev,
       [cartelaNumber]: generateCartela()
     }));
-    setShowCartelaSelector(true);
   };
 
   // Book a cartela for the game
@@ -619,7 +622,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       }
 
       // Use actual selected cartelas from the UI
-      const selectedCartelasArray = Array.from(selectedCartelas);
+      const selectedCartelasArray = Array.from(bookedCartelas);
       if (selectedCartelasArray.length === 0) {
         toast({
           title: "Error",
