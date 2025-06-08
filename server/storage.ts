@@ -248,8 +248,26 @@ export class DatabaseStorage implements IStorage {
     return history;
   }
 
-  async getGameHistory(shopId: number, startDate?: Date, endDate?: Date): Promise<GameHistory[]> {
-    let query = db.select().from(gameHistory).where(eq(gameHistory.shopId, shopId));
+  async getGameHistory(shopId: number, startDate?: Date, endDate?: Date): Promise<any[]> {
+    let query = db.select({
+      id: gameHistory.id,
+      gameId: gameHistory.gameId,
+      shopId: gameHistory.shopId,
+      employeeId: gameHistory.employeeId,
+      totalCollected: gameHistory.totalCollected,
+      prizeAmount: gameHistory.prizeAmount,
+      adminProfit: gameHistory.adminProfit,
+      superAdminCommission: gameHistory.superAdminCommission,
+      playerCount: gameHistory.playerCount,
+      winnerName: gameHistory.winnerName,
+      completedAt: gameHistory.completedAt,
+      winnerId: games.winnerId,
+      winningCartela: gamePlayers.cartelaNumbers
+    })
+    .from(gameHistory)
+    .leftJoin(games, eq(gameHistory.gameId, games.id))
+    .leftJoin(gamePlayers, eq(games.winnerId, gamePlayers.id))
+    .where(eq(gameHistory.shopId, shopId));
     
     if (startDate && endDate) {
       query = query.where(and(

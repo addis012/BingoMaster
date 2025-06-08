@@ -118,6 +118,21 @@ export const creditLoads = pgTable("credit_loads", {
   processedBy: integer("processed_by").references(() => users.id), // Super admin who processed
 });
 
+// Referral commission tracking
+export const referralCommissions = pgTable("referral_commissions", {
+  id: serial("id").primaryKey(),
+  referrerId: integer("referrer_id").references(() => users.id).notNull(),
+  referredId: integer("referred_id").references(() => users.id).notNull(),
+  sourceType: text("source_type").notNull(), // 'credit_load', 'game_collection'
+  sourceId: integer("source_id").notNull(), // ID of the credit load or transaction
+  sourceAmount: decimal("source_amount", { precision: 10, scale: 2 }).notNull(),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).notNull(),
+  commissionAmount: decimal("commission_amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pending"), // 'pending', 'paid', 'converted_to_credit'
+  createdAt: timestamp("created_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   shop: one(shops, {
