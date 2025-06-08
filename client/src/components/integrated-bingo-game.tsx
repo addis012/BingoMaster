@@ -315,32 +315,50 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Check for winner after each number call - proper bingo pattern validation
   const checkForWinner = () => {
-    if (bookedCartelas.size === 0 || calledNumbers.length < 5) return;
+    console.log("🔍 checkForWinner called", { 
+      bookedCartelasSize: bookedCartelas.size, 
+      calledNumbersLength: calledNumbers.length,
+      activeGameId,
+      gamePlayersMapSize: gamePlayersMap.size 
+    });
+    
+    if (bookedCartelas.size === 0 || calledNumbers.length < 5) {
+      console.log("❌ checkForWinner: Not enough cartelas or numbers");
+      return;
+    }
     
     // Check each booked cartela for winning patterns
     for (const cartelaNumber of bookedCartelas) {
       const card = cartelaCards[cartelaNumber];
-      if (!card) continue;
+      if (!card) {
+        console.log(`⚠️ Card not found for cartela ${cartelaNumber}`);
+        continue;
+      }
       
+      console.log(`🎯 Checking cartela #${cartelaNumber} for bingo patterns`);
       const winResult = checkForBingo(card, calledNumbers);
+      
       if (winResult.hasWin) {
+        console.log(`🎉 WINNER DETECTED! Cartela #${cartelaNumber} with ${winResult.pattern}`);
+        console.log("Game state:", { 
+          activeGameId, 
+          gamePlayersMap: Array.from(gamePlayersMap.entries()),
+          bookedCartelas: Array.from(bookedCartelas)
+        });
+        
         setWinnerFound(`Cartela #${cartelaNumber}`);
         setWinnerPattern(winResult.pattern || "BINGO");
         setGameActive(false);
         stopAutomaticNumberCalling();
         
-        console.log(`Winner found! Cartela #${cartelaNumber} with ${winResult.pattern}`);
-        console.log("Current game state:", { activeGameId, gamePlayersMap: Array.from(gamePlayersMap.entries()) });
-        
-        // Show winner announcement for 3 seconds then automatically declare
-        setTimeout(() => {
-          console.log("Attempting automatic winner declaration for cartela:", cartelaNumber);
-          declareWinnerAutomatically(cartelaNumber);
-        }, 3000); // 3 second delay to show winner announcement
+        // Immediately declare winner automatically (no delay)
+        console.log("🚀 Immediately declaring winner for cartela:", cartelaNumber);
+        declareWinnerAutomatically(cartelaNumber);
         
         return; // Stop checking once winner is found
       }
     }
+    console.log("🔍 No winners found in this check");
   };
 
   // Check for Bingo winning patterns
@@ -384,10 +402,15 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Automatically declare winner in backend
   const declareWinnerAutomatically = async (cartelaNumber: number) => {
-    console.log("declareWinnerAutomatically called with:", { cartelaNumber, activeGameId, gamePlayersMapSize: gamePlayersMap.size });
+    console.log("🎯 AUTO-DECLARE WINNER START:", { 
+      cartelaNumber, 
+      activeGameId, 
+      gamePlayersMapSize: gamePlayersMap.size,
+      gamePlayersMap: Array.from(gamePlayersMap.entries())
+    });
     
     if (!activeGameId) {
-      console.error("Cannot declare winner - no active game");
+      console.error("❌ Cannot declare winner - no active game");
       toast({
         title: "Recording Error",
         description: "No active game found to record winner",
@@ -398,35 +421,40 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     
     const winnerId = gamePlayersMap.get(cartelaNumber);
     if (!winnerId) {
-      console.error("Winner ID not found in gamePlayersMap:", { cartelaNumber, gamePlayersMap: Array.from(gamePlayersMap.entries()) });
+      console.error("❌ Winner ID not found in gamePlayersMap:", { 
+        cartelaNumber, 
+        gamePlayersMap: Array.from(gamePlayersMap.entries()),
+        bookedCartelas: Array.from(bookedCartelas)
+      });
       toast({
         title: "Recording Error", 
-        description: "Winner player not found in game records",
+        description: `Winner player not found in game records for cartela #${cartelaNumber}`,
         variant: "destructive"
       });
       return;
     }
 
     try {
-      console.log("Auto-declaring winner:", { cartelaNumber, winnerId, activeGameId });
+      console.log("🚀 CALLING DECLARE WINNER API:", { cartelaNumber, winnerId, activeGameId });
       
       const result = await declareWinnerMutation.mutateAsync({
         gameId: activeGameId,
         winnerId: winnerId
       });
       
-      console.log("Winner successfully declared in backend!", result);
+      console.log("✅ WINNER SUCCESSFULLY DECLARED IN BACKEND!", result);
       
       toast({
-        title: "Game Completed!",
-        description: `Cartela #${cartelaNumber} wins! Game recorded successfully.`,
+        title: "🎉 Game Completed Successfully!",
+        description: `Cartela #${cartelaNumber} wins! Recorded in database with prize ${result.financial?.prizeAmount || 'N/A'} ETB.`,
       });
       
     } catch (error) {
-      console.error("Failed to declare winner automatically:", error);
+      console.error("❌ FAILED TO DECLARE WINNER AUTOMATICALLY:", error);
+      console.error("Error details:", error.message, error.stack);
       toast({
         title: "Recording Error",
-        description: "Game completed but failed to record in database",
+        description: `Game completed but failed to record in database: ${error.message}`,
         variant: "destructive"
       });
     }
