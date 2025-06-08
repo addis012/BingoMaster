@@ -703,32 +703,132 @@ export class DatabaseStorage implements IStorage {
     amount: string;
     bankAccount: string;
     type: string;
-    status: string;
   }): Promise<any> {
-    // For now, we'll create a simple notification record
-    // In a full implementation, this would create a withdrawal_requests table entry
-    return {
-      id: Date.now(),
+    const [created] = await db.insert(withdrawalRequests).values({
       adminId: request.adminId,
       amount: request.amount,
       bankAccount: request.bankAccount,
       type: request.type,
-      status: request.status,
-      createdAt: new Date().toISOString(),
-      message: "Withdrawal request submitted successfully"
-    };
+    }).returning();
+    return created;
+  }
+
+  async getAllWithdrawalRequests(): Promise<any[]> {
+    return await db.select({
+      id: withdrawalRequests.id,
+      adminId: withdrawalRequests.adminId,
+      amount: withdrawalRequests.amount,
+      bankAccount: withdrawalRequests.bankAccount,
+      type: withdrawalRequests.type,
+      status: withdrawalRequests.status,
+      createdAt: withdrawalRequests.createdAt,
+      processedAt: withdrawalRequests.processedAt,
+      processedBy: withdrawalRequests.processedBy,
+      rejectionReason: withdrawalRequests.rejectionReason,
+      adminName: users.name,
+    })
+    .from(withdrawalRequests)
+    .leftJoin(users, eq(withdrawalRequests.adminId, users.id))
+    .orderBy(desc(withdrawalRequests.createdAt));
+  }
+
+  async getWithdrawalRequestsByAdmin(adminId: number): Promise<any[]> {
+    return await db.select().from(withdrawalRequests)
+      .where(eq(withdrawalRequests.adminId, adminId))
+      .orderBy(desc(withdrawalRequests.createdAt));
+  }
+
+  async approveWithdrawalRequest(requestId: number, processedBy: number): Promise<void> {
+    const [request] = await db.select().from(withdrawalRequests).where(eq(withdrawalRequests.id, requestId));
+    
+    if (!request || request.status !== 'pending') {
+      throw new Error('Invalid withdrawal request');
+    }
+
+    // Update request status
+    await db.update(withdrawalRequests)
+      .set({ 
+        status: 'approved', 
+        processedAt: new Date(), 
+        processedBy 
+      })
+      .where(eq(withdrawalRequests.id, requestId));
+
+    // If it's a credit balance withdrawal, deduct from admin's credit
+    if (request.type === 'credit_balance') {
+      await this.updateCreditBalance(request.adminId, request.amount, 'subtract');
+    } else if (request.type === 'referral_commission') {
+      // Mark corresponding commissions as paid
+      const commissionAmount = parseFloat(request.amount);
+      const commissions = await db.select().from(referralCommissions)
+        .where(and(
+          eq(referralCommissions.referrerId, request.adminId),
+          eq(referralCommissions.status, 'pending')
+        ))
+        .orderBy(referralCommissions.createdAt);
+
+      let remainingAmount = commissionAmount;
+      for (const commission of commissions) {
+        if (remainingAmount <= 0) break;
+        
+        const commissionValue = parseFloat(commission.commissionAmount);
+        if (commissionValue <= remainingAmount) {
+          await db.update(referralCommissions)
+            .set({ status: 'paid', processedAt: new Date() })
+            .where(eq(referralCommissions.id, commission.id));
+          remainingAmount -= commissionValue;
+        }
+      }
+    }
+  }
+
+  async rejectWithdrawalRequest(requestId: number, processedBy: number, rejectionReason: string): Promise<void> {
+    await db.update(withdrawalRequests)
+      .set({ 
+        status: 'rejected', 
+        processedAt: new Date(), 
+        processedBy,
+        rejectionReason 
+      })
+      .where(eq(withdrawalRequests.id, requestId));
   }
 
   async convertCommissionToCredit(adminId: number, amount: number): Promise<any> {
+    // Get pending commissions for validation
+    const commissions = await db.select().from(referralCommissions)
+      .where(and(
+        eq(referralCommissions.referrerId, adminId),
+        eq(referralCommissions.status, 'pending')
+      ))
+      .orderBy(referralCommissions.createdAt);
+
+    const totalPendingCommissions = commissions.reduce((sum, c) => sum + parseFloat(c.commissionAmount), 0);
+    
+    if (amount > totalPendingCommissions) {
+      throw new Error('Insufficient commission balance');
+    }
+
     // Get current credit balance
     const currentBalance = await this.getCreditBalance(adminId);
-    const newBalance = (parseFloat(currentBalance) + amount).toFixed(2);
     
     // Update admin's credit balance
     await this.updateCreditBalance(adminId, amount.toString(), 'add');
     
-    // Mark referral commissions as converted for this amount
-    // In a full implementation, this would update specific commission records
+    // Mark commissions as converted for this amount
+    let remainingAmount = amount;
+    for (const commission of commissions) {
+      if (remainingAmount <= 0) break;
+      
+      const commissionValue = parseFloat(commission.commissionAmount);
+      if (commissionValue <= remainingAmount) {
+        await db.update(referralCommissions)
+          .set({ status: 'converted_to_credit', processedAt: new Date() })
+          .where(eq(referralCommissions.id, commission.id));
+        remainingAmount -= commissionValue;
+      }
+    }
+    
+    const newBalance = (parseFloat(currentBalance) + amount).toFixed(2);
     
     return {
       success: true,

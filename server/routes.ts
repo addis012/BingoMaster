@@ -1000,6 +1000,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Withdrawal requests routes
+  app.get("/api/withdrawal-requests", async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.role === "super_admin") {
+        // Super admin can see all requests
+        const requests = await storage.getAllWithdrawalRequests();
+        res.json(requests);
+      } else if (user.role === "admin") {
+        // Admin can see only their requests
+        const requests = await storage.getWithdrawalRequestsByAdmin(userId);
+        res.json(requests);
+      } else {
+        return res.status(403).json({ message: "Access denied" });
+      }
+    } catch (error) {
+      console.error("Error fetching withdrawal requests:", error);
+      res.status(500).json({ message: "Failed to fetch withdrawal requests" });
+    }
+  });
+
+  app.post("/api/withdrawal-requests", async (req: Request, res: Response) => {
+    try {
+      const { amount, bankAccount, type } = req.body;
+      const userId = req.session?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Validate amount and check available balance
+      const requestAmount = parseFloat(amount);
+      if (isNaN(requestAmount) || requestAmount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      if (type === "credit_balance") {
+        const currentBalance = parseFloat(user.creditBalance);
+        if (requestAmount > currentBalance) {
+          return res.status(400).json({ message: "Insufficient credit balance" });
+        }
+      } else if (type === "referral_commission") {
+        const commissions = await storage.getReferralCommissions(userId);
+        const availableCommissions = commissions
+          .filter(c => c.status === 'pending')
+          .reduce((sum, c) => sum + parseFloat(c.commissionAmount), 0);
+        
+        if (requestAmount > availableCommissions) {
+          return res.status(400).json({ message: "Insufficient commission balance" });
+        }
+      } else {
+        return res.status(400).json({ message: "Invalid withdrawal type" });
+      }
+
+      const request = await storage.createWithdrawalRequest({
+        adminId: userId,
+        amount: amount.toString(),
+        bankAccount,
+        type,
+      });
+
+      res.json(request);
+    } catch (error) {
+      console.error("Error creating withdrawal request:", error);
+      res.status(500).json({ message: "Failed to create withdrawal request" });
+    }
+  });
+
+  app.patch("/api/withdrawal-requests/:id/:action", async (req: Request, res: Response) => {
+    try {
+      const { id, action } = req.params;
+      const { rejectionReason } = req.body;
+      const userId = req.session?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== "super_admin") {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      if (action === "approve") {
+        await storage.approveWithdrawalRequest(parseInt(id), userId);
+      } else if (action === "reject") {
+        if (!rejectionReason) {
+          return res.status(400).json({ message: "Rejection reason required" });
+        }
+        await storage.rejectWithdrawalRequest(parseInt(id), userId, rejectionReason);
+      } else {
+        return res.status(400).json({ message: "Invalid action" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error processing withdrawal request:", error);
+      res.status(500).json({ message: "Failed to process withdrawal request" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time game updates
