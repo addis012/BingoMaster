@@ -621,15 +621,31 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         return;
       }
 
-      // Use actual selected cartelas from the UI
-      const selectedCartelasArray = Array.from(bookedCartelas);
+      // Use actual selected cartelas from the UI, or generate demo cartelas for Quick Play
+      let selectedCartelasArray = Array.from(bookedCartelas);
+      
       if (selectedCartelasArray.length === 0) {
-        toast({
-          title: "Error",
-          description: "Please select at least one cartela before starting the game.",
-          variant: "destructive"
-        });
-        return;
+        console.log("No manual cartelas selected, generating demo cartelas for Quick Play");
+        // Generate 3-5 random cartelas for demo play
+        const demoCount = Math.floor(Math.random() * 3) + 3; // 3-5 cartelas
+        const demoCartelas = [];
+        
+        for (let i = 0; i < demoCount; i++) {
+          let cartelaNum;
+          do {
+            cartelaNum = Math.floor(Math.random() * 100) + 1;
+          } while (demoCartelas.includes(cartelaNum) || bookedCartelas.has(cartelaNum));
+          
+          demoCartelas.push(cartelaNum);
+          // Generate the cartela card for UI display
+          setCartelaCards(prev => ({
+            ...prev,
+            [cartelaNum]: generateCartela()
+          }));
+        }
+        
+        selectedCartelasArray = demoCartelas;
+        console.log("Generated demo cartelas:", selectedCartelasArray);
       }
 
       try {
@@ -835,58 +851,91 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                     Select Cartela
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Select Your Cartela</DialogTitle>
+                    <DialogTitle>Select Cartela Number (1-100)</DialogTitle>
                     <DialogDescription>
-                      Cartela #{selectedCartela}
+                      Choose a cartela number from 1 to 100. Each number generates a unique Bingo card combination.
                     </DialogDescription>
                   </DialogHeader>
+                  
+                  {/* Cartela Number Grid */}
+                  <div className="grid grid-cols-10 gap-2 p-4">
+                    {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                      const isBooked = bookedCartelas.has(num);
+                      const isSelected = selectedCartela === num;
+                      
+                      return (
+                        <Button
+                          key={num}
+                          variant={isSelected ? "default" : "outline"}
+                          className={`h-12 w-12 ${
+                            isBooked && !isSelected 
+                              ? "bg-green-500 text-white hover:bg-green-600" 
+                              : isSelected 
+                                ? "bg-orange-500 hover:bg-orange-600" 
+                                : ""
+                          }`}
+                          onClick={() => selectCartela(num)}
+                          disabled={isBooked && !isSelected}
+                        >
+                          {num}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Preview selected cartela */}
                   {selectedCartela && cartelaCards[selectedCartela] && (
-                    <div className="space-y-4">
-                      {/* BINGO Headers */}
-                      <div className="grid grid-cols-5 gap-1">
-                        {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                          const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
-                          return (
-                            <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold`}>
-                              {letter}
+                    <div className="mt-6 p-4 border-t">
+                      <h3 className="text-lg font-semibold mb-4 text-center">
+                        Cartela #{selectedCartela} - Bingo Card Preview
+                      </h3>
+                      <div className="max-w-sm mx-auto">
+                        {/* BINGO Headers */}
+                        <div className="grid grid-cols-5 gap-1 mb-2">
+                          {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                            const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                            return (
+                              <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-lg`}>
+                                {letter}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        
+                        {/* Numbers Grid */}
+                        <div className="grid grid-cols-5 gap-1">
+                          {cartelaCards[selectedCartela].flat().map((num, index) => (
+                            <div
+                              key={index}
+                              className={`h-8 border border-gray-400 flex items-center justify-center text-sm font-medium ${
+                                num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
+                              }`}
+                            >
+                              {num === 0 ? 'FREE' : num}
                             </div>
-                          );
-                        })}
-                      </div>
-                      
-                      {/* Numbers Grid */}
-                      <div className="grid grid-cols-5 gap-1">
-                        {cartelaCards[selectedCartela].flat().map((num, index) => (
-                          <div
-                            key={index}
-                            className={`h-8 border border-gray-400 flex items-center justify-center text-sm font-medium ${
-                              num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
-                            }`}
+                          ))}
+                        </div>
+                        
+                        <div className="flex gap-2 mt-4 justify-center">
+                          <Button 
+                            className="bg-green-500 hover:bg-green-600"
+                            onClick={bookCartela}
+                            disabled={createGameMutation.isPending || addPlayerMutation.isPending}
                           >
-                            {num === 0 ? 'FREE' : num}
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <div className="flex gap-2 mt-4 justify-center">
-                        <Button 
-                          className="bg-green-500 hover:bg-green-600"
-                          onClick={bookCartela}
-                          disabled={createGameMutation.isPending || addPlayerMutation.isPending}
-                        >
-                          {createGameMutation.isPending || addPlayerMutation.isPending ? "Booking..." : `Book Card (${gameAmount} Birr)`}
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          onClick={() => {
-                            setShowCartelaSelector(false);
-                            setSelectedCartela(null);
-                          }}
-                        >
-                          Cancel
-                        </Button>
+                            {createGameMutation.isPending || addPlayerMutation.isPending ? "Booking..." : `Book Card (${gameAmount} Birr)`}
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              setShowCartelaSelector(false);
+                              setSelectedCartela(null);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
