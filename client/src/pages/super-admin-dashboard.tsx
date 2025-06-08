@@ -10,6 +10,7 @@ import { FinancialDashboard } from "@/components/financial-dashboard";
 import { AdminCreationForm } from "@/components/admin-creation-form";
 import { ShopCreationForm } from "@/components/shop-creation-form";
 import { CreditLoadManagement } from "@/components/credit-load-management";
+import { SuperAdminWithdrawalPanel } from "@/components/super-admin-withdrawal-panel";
 import { useAuth } from "@/hooks/use-auth";
 import { Building2, Users, DollarSign, AlertTriangle, TrendingUp, GamepadIcon, BarChart3, UserPlus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -105,23 +106,23 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
             </CardContent>
           </Card>
 
-          {/* Financial Reports Card */}
+          {/* Withdrawal Management Card */}
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <BarChart3 className="h-8 w-8 text-green-600" />
+              <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                <DollarSign className="h-8 w-8 text-orange-600" />
               </div>
-              <CardTitle className="text-xl">Financial Reports</CardTitle>
+              <CardTitle className="text-xl">Withdrawal Requests</CardTitle>
               <CardDescription className="text-sm">
-                View revenue and commissions
+                Review and approve withdrawals
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
               <Button 
-                className="w-full bg-green-600 hover:bg-green-700"
-                onClick={() => setActiveTab("financial")}
+                className="w-full bg-orange-600 hover:bg-orange-700"
+                onClick={() => setActiveTab("withdrawals")}
               >
-                View Reports
+                Manage Withdrawals
               </Button>
             </CardContent>
           </Card>
@@ -324,6 +325,10 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
         {activeTab === "credit-loads" && (
           <CreditLoadManagement userRole="super_admin" />
+        )}
+
+        {activeTab === "withdrawals" && (
+          <SuperAdminWithdrawalPanel />
         )}
 
         {activeTab === "financial" && (
