@@ -776,10 +776,36 @@ export class DatabaseStorage implements IStorage {
         
         const commissionValue = parseFloat(commission.commissionAmount);
         if (commissionValue <= remainingAmount) {
+          // Full commission can be paid
           await db.update(referralCommissions)
             .set({ status: 'paid', processedAt: new Date() })
             .where(eq(referralCommissions.id, commission.id));
           remainingAmount -= commissionValue;
+        } else if (remainingAmount > 0) {
+          // Partial payment - split the commission
+          // Update original commission to paid amount
+          await db.update(referralCommissions)
+            .set({ 
+              commissionAmount: remainingAmount.toFixed(2),
+              status: 'paid', 
+              processedAt: new Date() 
+            })
+            .where(eq(referralCommissions.id, commission.id));
+          
+          // Create new commission record for remaining amount
+          const remainingCommission = commissionValue - remainingAmount;
+          await db.insert(referralCommissions).values({
+            referrerId: commission.referrerId,
+            referredId: commission.referredId,
+            sourceType: commission.sourceType,
+            sourceId: commission.sourceId,
+            sourceAmount: commission.sourceAmount,
+            commissionRate: commission.commissionRate,
+            commissionAmount: remainingCommission.toFixed(2),
+            status: 'pending'
+          });
+          
+          remainingAmount = 0;
         }
       }
     }
