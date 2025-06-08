@@ -92,8 +92,16 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       });
     },
     onSuccess: (player, variables) => {
-      setGamePlayersMap(prev => new Map(prev.set(variables.cartelaNumbers[0], player.id)));
-      console.log("Player added:", player);
+      // Map ALL cartela numbers to this player ID, not just the first one
+      setGamePlayersMap(prev => {
+        const newMap = new Map(prev);
+        variables.cartelaNumbers.forEach(cartelaNum => {
+          newMap.set(cartelaNum, player.id);
+          console.log(`Mapped cartela #${cartelaNum} to player ID ${player.id}`);
+        });
+        return newMap;
+      });
+      console.log("Player added:", player, "for cartelas:", variables.cartelaNumbers);
     }
   });
 
@@ -222,11 +230,14 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         
         // Create game if none exists
         if (!gameId) {
+          console.log("🎮 Creating new backend game for cartela booking");
           const game = await createGameMutation.mutateAsync();
           gameId = game.id;
+          console.log("✅ Backend game created with ID:", gameId);
         }
         
         // Add player to the game
+        console.log(`📝 Adding player for cartela #${selectedCartela} to game ${gameId}`);
         const player = await addPlayerMutation.mutateAsync({
           gameId: gameId,
           cartelaNumbers: [selectedCartela],
@@ -237,7 +248,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         const newTotal = totalCollected + parseInt(gameAmount);
         setTotalCollected(newTotal);
         
-        console.log(`Game ${gameId}: Added player ${player.id} with cartela ${selectedCartela} for ${gameAmount} ETB`);
+        console.log(`✅ Game ${gameId}: Added player ${player.id} with cartela ${selectedCartela} for ${gameAmount} ETB`);
+        console.log("Current gamePlayersMap after booking:", Array.from(gamePlayersMap.entries()));
         
         setShowCartelaSelector(false);
         setSelectedCartela(null);
@@ -247,7 +259,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           description: `Cartela #${selectedCartela} booked for ${gameAmount} ETB`,
         });
       } catch (error) {
-        console.error("Failed to book cartela:", error);
+        console.error("❌ Failed to book cartela:", error);
         toast({
           title: "Error",
           description: "Failed to book cartela",
