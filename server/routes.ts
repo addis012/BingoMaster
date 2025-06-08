@@ -560,8 +560,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Process game profits with credit deduction (skip for now to fix core functionality)
-      // await storage.processGameProfits(gameId, totalCollectedBirr.toString());
+      // Process game profits with credit deduction
+      await storage.processGameProfits(gameId, totalCollectedBirr.toString());
       console.log(`Game profits: admin=${adminProfit}, super admin commission=${superAdminCommission}, deducted from admin credit`);
       
       // Create game history record
