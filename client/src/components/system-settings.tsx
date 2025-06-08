@@ -14,6 +14,7 @@ interface SystemSettingsProps {
 
 export function SystemSettings({ userRole }: SystemSettingsProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [commissionRate, setCommissionRate] = useState("15");
   const [adminProfitMargin, setAdminProfitMargin] = useState("70");
 
@@ -26,8 +27,8 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
   // Update state when settings are loaded
   useEffect(() => {
     if (currentSettings) {
-      setCommissionRate(currentSettings.commissionRate || "25");
-      setAdminProfitMargin(currentSettings.adminProfitMargin || "15");
+      setCommissionRate((currentSettings as any).commissionRate || "25");
+      setAdminProfitMargin((currentSettings as any).adminProfitMargin || "15");
     }
   }, [currentSettings]);
 
@@ -54,6 +55,7 @@ export function SystemSettings({ userRole }: SystemSettingsProps) {
     onSuccess: () => {
       // Invalidate cache to refresh settings display
       queryClient.invalidateQueries({ queryKey: ["/api/admin/system-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shops"] });
       toast({
         title: "Settings Updated",
         description: "System settings have been updated successfully.",
