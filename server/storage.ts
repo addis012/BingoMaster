@@ -119,6 +119,16 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getUserByAccountNumber(accountNumber: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.accountNumber, accountNumber));
+      return user || undefined;
+    } catch (error) {
+      console.error("Database error in getUserByAccountNumber:", error);
+      throw error;
+    }
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;

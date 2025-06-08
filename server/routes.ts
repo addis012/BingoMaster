@@ -1239,16 +1239,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const { toAdminId, amount, description } = req.body;
+      const { toAdminId, toAccountNumber, amount, description } = req.body;
       
-      if (!toAdminId || !amount || parseFloat(amount) <= 0) {
-        return res.status(400).json({ message: "Invalid transfer data" });
+      if (!amount || parseFloat(amount) <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
       }
 
-      // Check if recipient exists and is an admin
-      const recipient = await storage.getUser(parseInt(toAdminId));
+      if (!toAdminId && !toAccountNumber) {
+        return res.status(400).json({ message: "Please provide either admin ID or account number" });
+      }
+
+      let recipient;
+      
+      // Look up recipient by account number or admin ID
+      if (toAccountNumber) {
+        recipient = await storage.getUserByAccountNumber(toAccountNumber);
+      } else if (toAdminId) {
+        recipient = await storage.getUser(parseInt(toAdminId));
+      }
+
       if (!recipient || recipient.role !== 'admin') {
-        return res.status(400).json({ message: "Invalid recipient - user not found or not an admin" });
+        return res.status(400).json({ message: "Invalid recipient - admin not found or account number invalid" });
+      }
+
+      // Prevent self-transfer
+      if (recipient.id === user.id) {
+        return res.status(400).json({ message: "Cannot transfer to yourself" });
       }
 
       // Check if sender has sufficient balance
@@ -1259,12 +1275,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const transfer = await storage.createCreditTransfer({
         fromAdminId: user.id,
-        toAdminId: parseInt(toAdminId),
+        toAdminId: recipient.id,
         amount,
         description,
       });
 
-      res.json(transfer);
+      res.json({
+        ...transfer,
+        recipientName: recipient.name,
+        recipientAccountNumber: recipient.accountNumber
+      });
     } catch (error) {
       console.error("Credit transfer error details:", error);
       res.status(500).json({ message: "Failed to process credit transfer", error: error.message });

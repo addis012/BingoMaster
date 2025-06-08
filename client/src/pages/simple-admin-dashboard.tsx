@@ -88,7 +88,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
 
   // Credit transfer mutation
   const transferCreditMutation = useMutation({
-    mutationFn: async (data: { amount: string; toAdminId: number }) => {
+    mutationFn: async (data: { amount: string; toAccountNumber: string }) => {
       const response = await fetch("/api/credit/transfer", {
         method: "POST",
         headers: {
@@ -162,7 +162,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     
     transferCreditMutation.mutate({
       amount: transferAmount,
-      toAdminId: parseInt(transferRecipient),
+      toAccountNumber: transferRecipient,
     });
   };
 
@@ -584,11 +584,11 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                             />
                           </div>
                           <div>
-                            <Label htmlFor="recipient">Recipient Admin ID</Label>
+                            <Label htmlFor="recipient">Recipient Account Number</Label>
                             <Input
                               id="recipient"
-                              type="number"
-                              placeholder="Enter admin ID"
+                              type="text"
+                              placeholder="Enter account number (e.g. BGO123456789)"
                               value={transferRecipient}
                               onChange={(e) => setTransferRecipient(e.target.value)}
                             />
