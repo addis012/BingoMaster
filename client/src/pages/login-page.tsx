@@ -109,20 +109,15 @@ export default function LoginPage() {
               <div className="bg-purple-50 p-2 rounded">
                 <p className="font-medium text-purple-800">Super Admin Account:</p>
                 <p className="text-purple-600">Username: superadmin</p>
-                <p className="text-purple-600">Password: password</p>
+                <p className="text-purple-600">Password: 123456</p>
               </div>
               <div className="bg-blue-50 p-2 rounded">
                 <p className="font-medium text-blue-800">Admin Account:</p>
-                <p className="text-blue-600">Username: admin1</p>
-                <p className="text-blue-600">Password: password</p>
-              </div>
-              <div className="bg-green-50 p-2 rounded">
-                <p className="font-medium text-green-800">Employee Accounts:</p>
-                <p className="text-green-600">Username: emp1, emp2</p>
-                <p className="text-green-600">Password: password</p>
+                <p className="text-blue-600">Username: admin</p>
+                <p className="text-blue-600">Password: 123456</p>
               </div>
               <div className="bg-gray-50 p-2 rounded">
-                <p className="font-medium text-gray-800">Or create new employees in admin dashboard</p>
+                <p className="font-medium text-gray-800">Employee accounts can be created in admin dashboard</p>
               </div>
             </div>
             <div className="space-y-2 mt-4">
