@@ -28,10 +28,54 @@ interface SimpleAdminDashboardProps {
 }
 
 export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardProps) {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Show loading state while authentication is being checked
+  if (isLoading) {
+    return <LoadingState message="Checking authentication..." />;
+  }
+
+  // Redirect non-admin users
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-96">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              Access Denied
+            </CardTitle>
+            <CardDescription>
+              You don't have permission to access the admin dashboard.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-600">
+              This page is restricted to admin users only. Please contact your administrator if you believe this is an error.
+            </p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => window.location.href = '/dashboard/employee'} 
+                variant="outline" 
+                className="flex-1"
+              >
+                Go to Employee Dashboard
+              </Button>
+              <Button 
+                onClick={() => window.location.href = '/'} 
+                className="flex-1"
+              >
+                Return to Login
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   // Credit management states
   const [showLoadDialog, setShowLoadDialog] = useState(false);
