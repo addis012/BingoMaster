@@ -252,7 +252,13 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
                                 </div>
                                 <Button
                                   onClick={() => withdrawMutation.mutate({ amount: withdrawAmount, bankAccount })}
-                                  disabled={withdrawMutation.isPending || !withdrawAmount || !bankAccount}
+                                  disabled={
+                                    withdrawMutation.isPending || 
+                                    !withdrawAmount || 
+                                    !bankAccount || 
+                                    parseFloat(withdrawAmount) > totalPendingCommissions ||
+                                    parseFloat(withdrawAmount) <= 0
+                                  }
                                   className="w-full"
                                 >
                                   {withdrawMutation.isPending ? "Submitting..." : "Submit Withdrawal Request"}
@@ -298,7 +304,12 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
                                 </div>
                                 <Button
                                   onClick={() => convertMutation.mutate({ amount: convertAmount })}
-                                  disabled={convertMutation.isPending || !convertAmount}
+                                  disabled={
+                                    convertMutation.isPending || 
+                                    !convertAmount || 
+                                    parseFloat(convertAmount) > totalPendingCommissions ||
+                                    parseFloat(convertAmount) <= 0
+                                  }
                                   className="w-full"
                                 >
                                   {convertMutation.isPending ? "Converting..." : "Convert to Credit"}

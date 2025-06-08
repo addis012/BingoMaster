@@ -133,6 +133,19 @@ export const referralCommissions = pgTable("referral_commissions", {
   processedAt: timestamp("processed_at"),
 });
 
+export const withdrawalRequests = pgTable("withdrawal_requests", {
+  id: serial("id").primaryKey(),
+  adminId: integer("admin_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  bankAccount: text("bank_account").notNull(),
+  type: text("type").notNull(), // 'referral_commission', 'credit_balance'
+  status: text("status").notNull().default("pending"), // 'pending', 'approved', 'rejected'
+  createdAt: timestamp("created_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
+  processedBy: integer("processed_by").references(() => users.id),
+  rejectionReason: text("rejection_reason"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   shop: one(shops, {
@@ -330,9 +343,21 @@ export const insertReferralCommissionSchema = createInsertSchema(referralCommiss
   commissionAmount: z.string(),
 });
 
+export const insertWithdrawalRequestSchema = createInsertSchema(withdrawalRequests, {
+  amount: z.string(),
+}).omit({
+  id: true,
+  createdAt: true,
+  processedAt: true,
+  processedBy: true,
+  rejectionReason: true,
+});
+
 export type CreditTransfer = typeof creditTransfers.$inferSelect;
 export type InsertCreditTransfer = z.infer<typeof insertCreditTransferSchema>;
 export type CreditLoad = typeof creditLoads.$inferSelect;
 export type InsertCreditLoad = z.infer<typeof insertCreditLoadSchema>;
 export type ReferralCommission = typeof referralCommissions.$inferSelect;
 export type InsertReferralCommission = z.infer<typeof insertReferralCommissionSchema>;
+export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
+export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
