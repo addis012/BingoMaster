@@ -22,7 +22,7 @@ interface GameHistoryEntry {
   winnerName: string;
   completedAt: string;
   winnerId: number;
-  winningCartela: number[];
+  winningCartela: string;
 }
 
 interface EnhancedGameHistoryProps {
@@ -194,13 +194,11 @@ export function EnhancedGameHistory({ shopId }: EnhancedGameHistoryProps) {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {game.winningCartela && game.winningCartela.length > 0 ? (
-                          game.winningCartela.map((number, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {number}
-                            </Badge>
-                          ))
+                      <div className="flex items-center gap-2">
+                        {game.winningCartela ? (
+                          <Badge variant="secondary" className="text-sm font-medium">
+                            #{game.winningCartela}
+                          </Badge>
                         ) : (
                           <span className="text-muted-foreground text-sm">N/A</span>
                         )}

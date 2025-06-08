@@ -511,6 +511,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prizePool: prizeAmountBirr.toString(),
       });
 
+      // Get winner's cartela number
+      const winnerCartelaNumbers = JSON.parse(winner?.cartelaNumbers || "[]");
+      const winningCartela = winnerCartelaNumbers[0] || null;
+
+      // Create comprehensive game history record
+      await storage.createGameHistory({
+        gameId: gameId,
+        shopId: game.shopId,
+        employeeId: game.employeeId,
+        playerCount: players.length,
+        totalCollected: totalCollectedBirr.toString(),
+        prizeAmount: prizeAmountBirr.toString(),
+        adminProfit: adminProfit.toString(),
+        superAdminCommission: superAdminCommission.toString(),
+        winningCartela: winningCartela ? winningCartela.toString() : null,
+        completedAt: new Date(),
+      });
+
       // Create transactions in Birr
       await storage.createTransaction({
         gameId,
