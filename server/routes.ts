@@ -623,6 +623,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin system settings update
+  app.post("/api/admin/system-settings", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { adminProfitMargin } = req.body;
+      
+      if (adminProfitMargin !== undefined) {
+        const updatedShop = await storage.updateShop(user.shopId, {
+          profitMargin: adminProfitMargin.toString()
+        });
+        
+        if (!updatedShop) {
+          return res.status(404).json({ message: "Shop not found" });
+        }
+        
+        res.json({ message: "Settings updated successfully", shop: updatedShop });
+      } else {
+        res.status(400).json({ message: "No settings provided" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update settings" });
+    }
+  });
+
   // Today's stats route for admin dashboard
   app.get("/api/stats/today/:shopId", async (req, res) => {
     try {

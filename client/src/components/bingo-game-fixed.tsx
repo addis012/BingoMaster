@@ -39,10 +39,53 @@ export default function BingoGameFixed({ employeeName, employeeId, shopId, onLog
   
   const { toast } = useToast();
   
+  // State for active game record
+  const [activeGameId, setActiveGameId] = useState<number | null>(null);
+  
   // Fetch shop data for profit margin calculation
   const { data: shopData } = useQuery({
     queryKey: ["/api/shops", shopId],
     enabled: !!shopId,
+  });
+
+  // Create game mutation
+  const createGameMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/games", {
+        shopId,
+        employeeId,
+        status: 'waiting',
+        entryFee: gameAmount,
+        prizePool: totalCollected.toString()
+      });
+      return response;
+    },
+    onSuccess: (game) => {
+      setActiveGameId(game.id);
+    }
+  });
+
+  // Start game mutation
+  const startGameMutation = useMutation({
+    mutationFn: async (gameId: number) => {
+      return await apiRequest("POST", `/api/games/${gameId}/start`);
+    }
+  });
+
+  // Declare winner mutation
+  const declareWinnerMutation = useMutation({
+    mutationFn: async (data: { gameId: number; winnerId: number; winnerName: string }) => {
+      return await apiRequest("POST", `/api/games/${data.gameId}/declare-winner`, {
+        winnerId: data.winnerId,
+        winnerName: data.winnerName
+      });
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Game Completed",
+        description: `Winner declared! Prize: ${result.financial.prizeAmount} ETB`,
+      });
+    }
   });
 
   // Get letter for BINGO number
