@@ -170,6 +170,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     return '';
   };
 
+  // Alias for backward compatibility
+  const getLetter = getLetterForNumber;
+
   // Generate a random cartela
   const generateCartela = () => {
     const cartela: number[][] = [];
@@ -966,6 +969,22 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           <div className="bg-white p-4 rounded-lg shadow">
             <h3 className="font-bold text-lg mb-4">Game Settings</h3>
             
+            {/* Current Number Display at Top */}
+            {(gameActive || gameFinished) && (
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center mb-4">
+                <div className="text-sm text-blue-600 font-medium mb-2">Current Number</div>
+                <div className="text-4xl font-bold text-blue-800">
+                  {currentNumber ? `${getLetterForNumber(currentNumber)}${currentNumber}` : '---'}
+                </div>
+                {gameActive && !gamePaused && (
+                  <div className="text-xs text-blue-500 mt-2">Auto-calling every {autoplaySpeed / 1000} seconds</div>
+                )}
+                {gamePaused && (
+                  <div className="text-xs text-red-500 mt-2">Game Paused</div>
+                )}
+              </div>
+            )}
+            
             {/* Game Amount */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1216,18 +1235,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                 <div className="text-2xl font-bold">BINGO!</div>
               </div>
               
-              {gameActive && (
-                <Button 
-                  onClick={() => {
-                    console.log("Manual number call triggered");
-                    callNumber();
-                  }}
-                  className="bg-gray-600 hover:bg-gray-700"
-                  disabled={gameFinished}
-                >
-                  Generate Number
-                </Button>
-              )}
+
             </div>
           </div>
         </div>
