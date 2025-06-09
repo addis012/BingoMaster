@@ -213,8 +213,15 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   // Alias for backward compatibility
   const getLetter = getLetterForNumber;
 
-  // Generate a random cartela
-  const generateCartela = () => {
+  // Generate a fixed cartela based on cartela number (1-100)
+  const generateFixedCartela = (cartelaNumber: number) => {
+    // Use cartela number as seed for consistent generation
+    const seed = cartelaNumber;
+    const seededRandom = (min: number, max: number, offset: number) => {
+      const x = Math.sin(seed + offset) * 10000;
+      return Math.floor((x - Math.floor(x)) * (max - min + 1)) + min;
+    };
+
     const cartela: number[][] = [];
     const ranges = [
       [1, 15],   // B column
@@ -234,9 +241,12 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           column.push(0); // FREE space
         } else {
           let num;
+          let attempts = 0;
           do {
-            num = Math.floor(Math.random() * (max - min + 1)) + min;
-          } while (usedNumbers.has(num));
+            num = seededRandom(min, max, col * 5 + row + attempts * 25);
+            attempts++;
+          } while (usedNumbers.has(num) && attempts < 50);
+          
           usedNumbers.add(num);
           column.push(num);
         }
@@ -255,6 +265,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     
     return transposed;
   };
+
+  // Backward compatibility wrapper - generates random cartela
+  const generateCartela = () => generateFixedCartela(Math.floor(Math.random() * 100) + 1);
 
   // Generate random cartela number
   const generateCartelaNumber = () => {
@@ -766,25 +779,21 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       setActiveGameId(game.id);
       console.log("🎮 Set activeGameId to:", game.id);
       
-      // Generate demo cartelas for recording
-      const cartelaArray = [];
-      console.log("📝 Generating demo cartelas for comprehensive recording");
-      for (let i = 0; i < 4; i++) {
-        let cartelaNum;
-        do {
-          cartelaNum = Math.floor(Math.random() * 100) + 1;
-        } while (cartelaArray.includes(cartelaNum));
-        
-        cartelaArray.push(cartelaNum);
-        setCartelaCards(prev => ({
-          ...prev,
-          [cartelaNum]: generateCartela()
-        }));
+      // Use your actual selected cartelas
+      const cartelaArray = Array.from(bookedCartelas);
+      console.log("📝 Using your selected cartelas:", cartelaArray);
+      
+      // If no cartelas selected, don't start the game
+      if (cartelaArray.length === 0) {
+        toast({
+          title: "No Cartelas Selected",
+          description: "Please select cartelas before starting the game",
+          variant: "destructive"
+        });
+        return;
       }
       
-      // Clear and reset booked cartelas
-      setBookedCartelas(new Set(cartelaArray));
-      console.log("Generated cartelas for recording:", cartelaArray);
+      console.log("Selected cartelas for game:", cartelaArray);
       
       // Create backend player records for all cartelas
       console.log("📝 Creating comprehensive backend players...");
@@ -1260,8 +1269,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                                 description: `Cartela #${num} removed from selection`,
                               });
                             } else {
-                              // Book cartela instantly
-                              const newCard = generateCartela();
+                              // Book cartela instantly with fixed card based on cartela number
+                              const newCard = generateFixedCartela(num);
                               setCartelaCards(prev => ({
                                 ...prev,
                                 [num]: newCard
@@ -1282,8 +1291,62 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                     })}
                   </div>
                   
-                  {/* Preview selected cartela */}
-                  {selectedCartela && cartelaCards[selectedCartela] && (
+                  {/* Preview any booked cartela */}
+                  {bookedCartelas.size > 0 && (
+                    <div className="mt-6 p-4 border-t">
+                      <h3 className="text-lg font-semibold mb-4 text-center">
+                        Selected Cartelas Preview
+                      </h3>
+                      <div className="grid gap-4 max-h-96 overflow-y-auto">
+                        {Array.from(bookedCartelas).map((cartelaNum: number) => {
+                          // Ensure card is stored and use fixed generation
+                          if (!cartelaCards[cartelaNum]) {
+                            const fixedCard = generateFixedCartela(cartelaNum);
+                            setCartelaCards(prev => ({
+                              ...prev,
+                              [cartelaNum]: fixedCard
+                            }));
+                          }
+                          const card = cartelaCards[cartelaNum] || generateFixedCartela(cartelaNum);
+                          return (
+                            <div key={cartelaNum} className="border rounded p-3">
+                              <h4 className="font-medium mb-2 text-center">Cartela #{cartelaNum}</h4>
+                              <div className="max-w-48 mx-auto">
+                                {/* BINGO Headers */}
+                                <div className="grid grid-cols-5 gap-0.5 mb-1">
+                                  {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                                    const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                                    return (
+                                      <div key={letter} className={`h-6 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
+                                        {letter}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                
+                                {/* Numbers Grid */}
+                                <div className="grid grid-cols-5 gap-0.5">
+                                  {card.flat().map((num, index) => (
+                                    <div
+                                      key={index}
+                                      className={`h-6 border border-gray-400 flex items-center justify-center text-xs font-medium ${
+                                        num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
+                                      }`}
+                                    >
+                                      {num === 0 ? 'FREE' : num}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Old preview for backward compatibility */}
+                  {selectedCartela && cartelaCards[selectedCartela] && bookedCartelas.size === 0 && (
                     <div className="mt-6 p-4 border-t">
                       <h3 className="text-lg font-semibold mb-4 text-center">
                         Cartela #{selectedCartela} - Bingo Card Preview
