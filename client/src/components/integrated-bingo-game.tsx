@@ -45,6 +45,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const gameFinishedRef = useRef(false);
   const winnerFoundRef = useRef(false);
   const automaticCallTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const calledNumbersRef = useRef<number[]>([]);
+  const activeGameIdRef = useRef<number | null>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -442,6 +444,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     setCurrentNumber(number);
     setCalledNumbers(prev => {
       const updated = [...prev, number];
+      calledNumbersRef.current = updated; // Keep ref in sync
       console.log(`📝 Updated called numbers count: ${updated.length}`);
       
       // Immediate winner check after number is added
@@ -481,12 +484,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const checkForWinner = () => {
     console.log("🔍 checkForWinner called", { 
       bookedCartelasSize: bookedCartelas.size, 
-      calledNumbersLength: calledNumbers.length,
-      activeGameId,
+      calledNumbersLength: calledNumbersRef.current.length,
+      stateCalledNumbers: calledNumbers.length,
+      activeGameId: activeGameIdRef.current,
       gamePlayersMapSize: gamePlayersMap.size 
     });
     
-    if (bookedCartelas.size === 0 || calledNumbers.length < 5) {
+    if (bookedCartelas.size === 0 || calledNumbersRef.current.length < 5) {
       console.log("❌ checkForWinner: Not enough cartelas or numbers");
       return;
     }
@@ -500,7 +504,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       }
       
       console.log(`🎯 Checking cartela #${cartelaNumber} for bingo patterns`);
-      const winResult = checkForBingo(card, calledNumbers);
+      const winResult = checkForBingo(card, calledNumbersRef.current);
       
       if (winResult.hasWin) {
         console.log(`🎉 WINNER DETECTED! Cartela #${cartelaNumber} with ${winResult.pattern}`);
@@ -942,6 +946,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       gameActiveRef.current = true;
       gamePausedRef.current = false;
       gameFinishedRef.current = false;
+      winnerFoundRef.current = false;
+      calledNumbersRef.current = [];
+      activeGameIdRef.current = activeGameId;
       
       console.log("Game started successfully, beginning number calling...");
       console.log("Final gamePlayersMap before starting:", Array.from(gamePlayersMap.entries()));
