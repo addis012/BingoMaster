@@ -842,6 +842,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     gamePausedRef.current = false;
     gameFinishedRef.current = false;
     winnerFoundRef.current = false;
+    calledNumbersRef.current = [];
+    activeGameIdRef.current = null;
     
     stopAutomaticNumberCalling();
   };
