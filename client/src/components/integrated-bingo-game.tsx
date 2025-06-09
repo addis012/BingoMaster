@@ -723,23 +723,12 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       return;
     }
 
-    // Backend game should already be created above, but verify
+    // Verify backend game was created and activeGameId is set
     if (!activeGameId) {
       console.error("Critical error: No backend game exists after comprehensive setup");
       toast({
         title: "Error",
         description: "Failed to create backend game record",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Regular mode: Cartelas already booked
-    if (!activeGameId) {
-      console.error("No active game found after setup");
-      toast({
-        title: "Error",
-        description: "No active game found",
         variant: "destructive"
       });
       return;
