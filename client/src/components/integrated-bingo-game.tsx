@@ -42,6 +42,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const gameActiveRef = useRef(false);
   const gamePausedRef = useRef(false);
   const gameFinishedRef = useRef(false);
+  const winnerFoundRef = useRef(false);
+  const automaticCallTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -347,11 +349,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       gamePaused,
       gameFinished,
       calledNumbersLength: calledNumbers.length,
-      activeGameId: activeGameId
+      activeGameId: activeGameId,
+      winnerFound
     });
 
-    if (gameFinished) {
-      console.log("❌ Game is finished, stopping number calling");
+    // CRITICAL: Stop all number calling if winner is found or game is finished
+    if (gameFinished || winnerFound || gameFinishedRef.current || winnerFoundRef.current) {
+      console.log("❌ Game is finished or winner found, stopping number calling");
       return;
     }
 
@@ -484,7 +488,22 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         setWinnerFound(`Cartela #${cartelaNumber}`);
         setWinnerPattern(winResult.pattern || "BINGO");
         setGameActive(false);
+        setGameFinished(true); // Critical: Mark game as finished immediately
+        
+        // Update refs immediately to stop any pending calls
+        gameActiveRef.current = false;
+        gameFinishedRef.current = true;
+        winnerFoundRef.current = true;
+        
         stopAutomaticNumberCalling();
+        console.log("🛑 Stopping automatic calling");
+        
+        // Clear any pending timeouts to prevent further number calling
+        if (automaticCallTimeoutRef.current) {
+          clearTimeout(automaticCallTimeoutRef.current);
+          automaticCallTimeoutRef.current = null;
+          console.log("🧹 Cleared pending automatic call timeout");
+        }
         
         // Immediately declare winner automatically (no delay)
         console.log("🚀 Immediately declaring winner for cartela:", cartelaNumber);
@@ -694,17 +713,37 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
   };
 
-  // Start automatic number calling
+  // Start automatic number calling with proper timeout handling
   const startAutomaticNumberCalling = () => {
     if (autoCallInterval) {
       clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
     }
     
-    const interval = setInterval(() => {
-      callNumber();
-    }, autoplaySpeed);
+    // Clear any existing timeout
+    if (automaticCallTimeoutRef.current) {
+      clearTimeout(automaticCallTimeoutRef.current);
+      automaticCallTimeoutRef.current = null;
+    }
     
-    setAutoCallInterval(interval);
+    const scheduleNextCall = () => {
+      if (gameFinishedRef.current || winnerFoundRef.current || !gameActiveRef.current) {
+        console.log("🛑 Stopping scheduled call due to game state");
+        return;
+      }
+      
+      automaticCallTimeoutRef.current = setTimeout(() => {
+        if (gameFinishedRef.current || winnerFoundRef.current || !gameActiveRef.current) {
+          console.log("🛑 Aborting scheduled call due to game state");
+          return;
+        }
+        
+        callNumber();
+        scheduleNextCall(); // Schedule the next call
+      }, autoplaySpeed);
+    };
+    
+    scheduleNextCall();
   };
 
   const stopAutomaticNumberCalling = () => {
