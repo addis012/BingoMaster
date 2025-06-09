@@ -293,8 +293,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       activeGameId: activeGameId
     });
 
-    if (!gameActive || gamePaused || gameFinished) {
-      console.log("❌ Game not in correct state for calling numbers");
+    if (gameFinished) {
+      console.log("❌ Game is finished, stopping number calling");
+      return;
+    }
+
+    if (!gameActive && !gamePaused) {
+      console.log("❌ Game not active, stopping number calling");
       return;
     }
 
@@ -909,13 +914,15 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   if (cartelaNum >= 1 && cartelaNum <= 100) {
                     const card = cartelaCards[cartelaNum];
                     if (card) {
-                      const result = checkForWinner(card, calledNumbers);
+                      const result = checkForBingo(card, calledNumbers);
                       if (result.hasWin) {
                         setWinnerFound(`Cartela #${cartelaNum}`);
+                        setWinnerPattern(result.pattern || "Bingo");
                         setShowWinnerDialog(false);
                         setGameActive(false);
                         setGameFinished(true);
                         stopAutomaticNumberCalling();
+                        declareWinnerAutomatically(cartelaNum);
                       } else {
                         toast({
                           title: "No Winner",
