@@ -703,9 +703,26 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
   };
 
-  // Reset game
-  const resetGame = () => {
+  // Reset game - properly handle games ending without winners
+  const resetGame = async () => {
     console.log("🔄 Resetting game");
+    
+    // If there's an active game and no winner was found, end it without recording revenue
+    if (activeGameId && !winnerFound) {
+      console.log("🎯 Ending game without winner - no revenue will be recorded");
+      try {
+        await endGameWithoutWinnerMutation.mutateAsync(activeGameId);
+      } catch (error) {
+        console.error("Failed to end game without winner:", error);
+        toast({
+          title: "Warning",
+          description: "Failed to properly end game in backend",
+          variant: "destructive"
+        });
+      }
+    }
+    
+    // Reset frontend state
     setCalledNumbers([]);
     setCurrentNumber(null);
     setGameActive(false);
@@ -714,6 +731,10 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     setWinnerFound(null);
     setWinnerPattern(null);
     setLastCalledLetter("");
+    setActiveGameId(null);
+    setGamePlayersMap(new Map());
+    setBookedCartelas(new Set());
+    setTotalCollected(0);
     
     // Update refs
     gameActiveRef.current = false;
