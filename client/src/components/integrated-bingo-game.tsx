@@ -36,6 +36,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const [totalCollected, setTotalCollected] = useState(0);
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
   const [gamePlayersMap, setGamePlayersMap] = useState<Map<number, number>>(new Map());
+  const [autoplaySpeed, setAutoplaySpeed] = useState(3000); // 3 seconds default
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -644,7 +645,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     
     const interval = setInterval(() => {
       callNumber();
-    }, 3000);
+    }, autoplaySpeed);
     
     setAutoCallInterval(interval);
   };
@@ -960,56 +961,95 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       </Dialog>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Panel - Game Controls */}
+        {/* Left Panel - Game Settings */}
         <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Game Management</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Game Amount */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Entry Amount per Cartela (ETB)
-                </label>
-                <Input
-                  type="number"
-                  value={gameAmount}
-                  onChange={(e) => setGameAmount(e.target.value)}
-                  disabled={gameActive || bookedCartelas.size > 0}
-                  className="w-full"
-                />
-              </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <h3 className="font-bold text-lg mb-4">Game Settings</h3>
+            
+            {/* Game Amount */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Game Amount (Birr)
+              </label>
+              <Input
+                type="number"
+                value={gameAmount}
+                onChange={(e) => setGameAmount(e.target.value)}
+                disabled={gameActive || bookedCartelas.size > 0}
+                className="w-full text-center"
+              />
+              <p className="text-sm text-gray-600 mt-1">Current: {gameAmount} Birr per card</p>
+            </div>
 
-              {/* Total Collected */}
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="font-medium text-blue-900">Total Collected</h3>
-                <p className="text-2xl font-bold text-blue-600">{totalCollected.toFixed(2)} Birr</p>
-                <p className="text-sm text-blue-700">{bookedCartelas.size} cards × {gameAmount} Birr</p>
-              </div>
+            {/* Autoplay Speed Control */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Autoplay Speed (seconds)
+              </label>
+              <select
+                value={autoplaySpeed / 1000}
+                onChange={(e) => setAutoplaySpeed(parseInt(e.target.value) * 1000)}
+                className="w-full p-2 border border-gray-300 rounded"
+                disabled={gameActive}
+              >
+                <option value="1">1 second</option>
+                <option value="2">2 seconds</option>
+                <option value="3">3 seconds</option>
+                <option value="4">4 seconds</option>
+                <option value="5">5 seconds</option>
+              </select>
+            </div>
 
-
-
-              {/* Winner Announcement */}
-              {winnerFound && (
-                <div className="bg-green-100 border-2 border-green-300 p-4 rounded-lg text-center">
-                  <div className="text-2xl mb-2">🎉 BINGO! 🎉</div>
-                  <div className="font-bold text-green-800">{winnerFound} WINS!</div>
-                  <div className="text-green-700">Prize: {calculateWinnerPayout(totalCollected).toFixed(2)} Birr</div>
+            {/* Selected Cartelas */}
+            {bookedCartelas.size > 0 && (
+              <div className="mb-4">
+                <h4 className="font-medium mb-2">Selected Cartelas ({bookedCartelas.size})</h4>
+                <div className="flex flex-wrap gap-1">
+                  {[...bookedCartelas].map(num => (
+                    <span key={num} className="inline-block bg-green-500 text-white px-2 py-1 rounded text-xs font-medium">
+                      #{num}
+                    </span>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Cartela Selector */}
-              <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
-                <DialogTrigger asChild>
-                  <Button 
-                    onClick={showCartelaSelectorDialog}
-                    className="w-full bg-blue-500 hover:bg-blue-600"
-                    disabled={gameActive}
-                  >
-                    Select Cartela
-                  </Button>
-                </DialogTrigger>
+            {/* Total Collected */}
+            <div className="bg-blue-50 p-4 rounded-lg mb-4">
+              <h3 className="font-medium text-blue-900">Total Collected</h3>
+              <p className="text-2xl font-bold text-blue-600">{totalCollected.toFixed(2)} Birr</p>
+              <p className="text-sm text-blue-700">{bookedCartelas.size} cards × {gameAmount} Birr</p>
+            </div>
+
+            {/* Winner Announcement */}
+            {winnerFound && (
+              <div className="bg-green-100 border-2 border-green-300 p-4 rounded-lg text-center mb-4">
+                <div className="text-2xl mb-2">🎉 BINGO! 🎉</div>
+                <div className="font-bold text-green-800">{winnerFound} WINS!</div>
+                <div className="text-green-700">Prize: {calculateWinnerPayout(totalCollected).toFixed(2)} Birr</div>
+              </div>
+            )}
+
+            {/* Start Game Button */}
+            <Button 
+              onClick={startGame}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 mb-4"
+              disabled={bookedCartelas.size === 0 || gameActive || startGameMutation.isPending}
+            >
+              {startGameMutation.isPending ? "Starting..." : gameActive ? "Game Running..." : "Start Game"}
+            </Button>
+
+            {/* Cartela Selector */}
+            <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={showCartelaSelectorDialog}
+                  className="w-full bg-blue-500 hover:bg-blue-600 mb-2"
+                  disabled={gameActive}
+                >
+                  Select Cartela
+                </Button>
+              </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Select Cartela Number (1-100)</DialogTitle>
@@ -1101,88 +1141,47 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                 </DialogContent>
               </Dialog>
 
-              <Button 
-                onClick={startGame}
-                className="w-full bg-green-500 hover:bg-green-600"
-                disabled={gameActive || startGameMutation.isPending}
-              >
-                {startGameMutation.isPending ? "Starting..." : gameActive ? "Game Running..." : "Start Game"}
-              </Button>
+              {/* Additional Control Buttons */}
+              <div className="space-y-2">
+                <Button 
+                  onClick={resetGame}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Reset Game
+                </Button>
 
+                <Button 
+                  onClick={resetGame}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Restart Game
+                </Button>
+
+                <Button 
+                  onClick={() => window.location.href = '/dashboard/employee'}
+                  className="w-full bg-green-400 hover:bg-green-500"
+                >
+                  Start Autoplay
+                </Button>
+              </div>
+
+              {/* Check Bingo Button - Only show during active game */}
               {gameActive && (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => {
-                        setGamePaused(!gamePaused);
-                        if (gamePaused) {
-                          startAutomaticNumberCalling();
-                        } else {
-                          stopAutomaticNumberCalling();
-                        }
-                      }}
-                      className="flex-1 bg-yellow-500 hover:bg-yellow-600"
-                    >
-                      {gamePaused ? "Resume Game" : "Pause Game"}
-                    </Button>
-                    
-                    <Button 
-                      onClick={() => {
-                        setGameActive(false);
-                        setGameFinished(true);
-                        stopAutomaticNumberCalling();
-                      }}
-                      className="flex-1 bg-red-500 hover:bg-red-600"
-                    >
-                      End Game
-                    </Button>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => {
-                        if (!gamePaused) {
-                          setGamePaused(true);
-                          stopAutomaticNumberCalling();
-                        }
-                        setShowWinnerDialog(true);
-                      }}
-                      className="flex-1 bg-purple-500 hover:bg-purple-600"
-                    >
-                      Check Winner
-                    </Button>
-                    
-                    <Button 
-                      onClick={() => {
-                        console.log("🎯 Manual number call triggered");
-                        callNumber();
-                      }}
-                      className="flex-1 bg-orange-500 hover:bg-orange-600"
-                      disabled={gameFinished}
-                    >
-                      Call Number
-                    </Button>
-                  </div>
-                </div>
+                <Button 
+                  onClick={() => {
+                    // Pause game immediately
+                    setGamePaused(true);
+                    stopAutomaticNumberCalling();
+                    setShowWinnerDialog(true);
+                  }}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 mt-4"
+                >
+                  Check Bingo
+                </Button>
               )}
-
-              <Button 
-                onClick={resetGame}
-                variant="outline"
-                className="w-full"
-              >
-                Reset Game
-              </Button>
-
-              <Button 
-                onClick={() => window.location.href = '/dashboard/employee'}
-                variant="outline"
-                className="w-full"
-              >
-                Start Autoplay
-              </Button>
-            </CardContent>
-          </Card>
+          </div>
         </div>
 
         {/* Middle Section - Current Number Display */}
@@ -1220,7 +1219,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
               {gameActive && (
                 <Button 
                   onClick={() => {
-                    console.log("🎯 Manual number call triggered");
+                    console.log("Manual number call triggered");
                     callNumber();
                   }}
                   className="bg-gray-600 hover:bg-gray-700"
