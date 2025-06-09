@@ -653,6 +653,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Start game - support both pre-booked games and quick play mode
   const startGame = async () => {
+    console.log("🔥 START GAME FUNCTION CALLED! This message should appear in browser console.");
     console.log("🎮 FORCING BACKEND GAME CREATION - current state:", { 
       bookedCartelasSize: bookedCartelas.size, 
       activeGameId, 
