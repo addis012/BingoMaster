@@ -1185,112 +1185,52 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           </Card>
         </div>
 
-        {/* Middle Section - Main Bingo Board */}
+        {/* Middle Section - Current Number Display */}
         <div className="flex-1 flex justify-center items-center p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <CardTitle className="text-xl">BINGO Board</CardTitle>
-              <p className="text-sm text-gray-600">Traditional 5x5 Bingo Grid</p>
-            </CardHeader>
-            <CardContent>
-              {/* Current Number Display */}
-              {currentNumber && (
-                <div className="text-center mb-6">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">{lastCalledLetter}{currentNumber}</div>
-                  <p className="text-sm text-gray-600">Latest Called Number</p>
-                </div>
-              )}
-
-              {/* BINGO Letters Header */}
-              <div className="grid grid-cols-5 gap-1 mb-2">
-                {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                  const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
-                  return (
-                    <div key={letter} className={`h-10 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-lg`}>
-                      {letter}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Numbers Grid (5x5) */}
-              <div className="grid grid-cols-5 gap-1 mb-4">
-                {[
-                  // B column: 1-15
-                  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-                  // I column: 16-30
-                  [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
-                  // N column: 31-45 (with FREE in center)
-                  [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45],
-                  // G column: 46-60
-                  [46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60],
-                  // O column: 61-75
-                  [61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75]
-                ].map((column, colIndex) => 
-                  column.slice(0, 5).map((number, rowIndex) => {
-                    // Center cell is FREE space
-                    if (colIndex === 2 && rowIndex === 2) {
-                      return (
-                        <div
-                          key={`free-${colIndex}-${rowIndex}`}
-                          className="h-10 bg-yellow-200 border border-gray-400 rounded flex items-center justify-center text-xs font-bold text-yellow-800"
-                        >
-                          FREE
-                        </div>
-                      );
-                    }
-                    
-                    const adjustedNumber = colIndex * 15 + rowIndex + 1;
-                    const isCalled = calledNumbers.includes(adjustedNumber);
-                    
-                    return (
-                      <div
-                        key={`${colIndex}-${rowIndex}`}
-                        className={`h-10 border border-gray-400 rounded flex items-center justify-center text-sm font-medium ${
-                          isCalled ? 'bg-green-500 text-white' : 'bg-white'
-                        }`}
-                      >
-                        {adjustedNumber}
-                      </div>
-                    );
-                  })
-                ).flat()}
-              </div>
-
-              {/* Called Numbers History */}
-              <div className="mb-4">
-                <h4 className="font-medium text-sm mb-2">Recently Called Numbers</h4>
-                <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                  {calledNumbers.slice(-15).map(number => (
-                    <div
-                      key={number}
-                      className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium"
-                    >
-                      {number}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-4 text-center text-sm text-gray-600">
-                {calledNumbers.length} / 75 numbers called
-              </div>
-
-              {/* Booked Cartelas */}
-              {bookedCartelas.size > 0 && (
-                <div className="mt-6">
-                  <h3 className="font-medium mb-2">Booked Cartelas ({bookedCartelas.size})</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {[...bookedCartelas].map(num => (
-                      <Badge key={num} variant="outline" className="text-xs">
-                        #{num}
-                      </Badge>
-                    ))}
+          <div className="text-center space-y-6">
+            {/* Current Number Display */}
+            {currentNumber && (
+              <div className="space-y-4">
+                <div className="flex justify-center gap-4">
+                  <div className="w-20 h-20 bg-red-500 text-white rounded-lg flex items-center justify-center font-bold text-2xl">
+                    {lastCalledLetter}
+                  </div>
+                  <div className="w-20 h-20 bg-gray-700 text-white rounded-lg flex items-center justify-center font-bold text-2xl">
+                    {currentNumber}
                   </div>
                 </div>
+                <div className="text-xl font-bold text-gray-700">
+                  {lastCalledLetter}-{currentNumber}
+                </div>
+              </div>
+            )}
+
+            {/* Main Game Button */}
+            <div className="space-y-4">
+              <div className="w-40 h-40 rounded-full bg-blue-500 text-white flex flex-col items-center justify-center cursor-pointer hover:bg-blue-600 transition-colors"
+                   onClick={() => {
+                     if (gameActive && !gamePaused) {
+                       callNumber();
+                     }
+                   }}>
+                <div className="text-lg font-bold">Let's Play</div>
+                <div className="text-2xl font-bold">BINGO!</div>
+              </div>
+              
+              {gameActive && (
+                <Button 
+                  onClick={() => {
+                    console.log("🎯 Manual number call triggered");
+                    callNumber();
+                  }}
+                  className="bg-gray-600 hover:bg-gray-700"
+                  disabled={gameFinished}
+                >
+                  Generate Number
+                </Button>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Right Panel - Called Numbers Board */}
