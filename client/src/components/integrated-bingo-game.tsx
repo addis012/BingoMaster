@@ -357,7 +357,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       gameFinished,
       calledNumbersLength: calledNumbers.length,
       activeGameId: activeGameId,
-      winnerFound
+      winnerFound,
+      refsState: {
+        gameActiveRef: gameActiveRef.current,
+        gamePausedRef: gamePausedRef.current,
+        gameFinishedRef: gameFinishedRef.current,
+        winnerFoundRef: winnerFoundRef.current
+      }
     });
 
     // CRITICAL: Double-check to stop all number calling if winner is found or game is finished
@@ -436,6 +442,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     setCurrentNumber(number);
     setCalledNumbers(prev => {
       const updated = [...prev, number];
+      console.log(`📝 Updated called numbers count: ${updated.length}`);
       
       // Immediate winner check after number is added
       setTimeout(() => {
@@ -749,22 +756,30 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
     
     const scheduleNextCall = () => {
+      // Check both state and refs for maximum safety
       if (gameFinishedRef.current || winnerFoundRef.current || !gameActiveRef.current) {
-        console.log("🛑 Stopping scheduled call due to game state");
+        console.log("🛑 Stopping scheduled call due to game state - refs check");
         return;
       }
       
       automaticCallTimeoutRef.current = setTimeout(() => {
+        // Double check before calling
         if (gameFinishedRef.current || winnerFoundRef.current || !gameActiveRef.current) {
-          console.log("🛑 Aborting scheduled call due to game state");
+          console.log("🛑 Aborting scheduled call due to game state - timeout check");
           return;
         }
         
+        console.log("⏰ Automatic timeout triggered - calling number");
         callNumber();
-        scheduleNextCall(); // Schedule the next call
+        
+        // Only schedule next call if game is still active
+        if (gameActiveRef.current && !gameFinishedRef.current && !winnerFoundRef.current) {
+          scheduleNextCall();
+        }
       }, autoplaySpeed);
     };
     
+    console.log("🚀 Starting automatic calling system");
     scheduleNextCall();
   };
 
@@ -933,14 +948,21 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       
       // Start automatic number calling immediately after game state is set
       setTimeout(() => {
-        console.log("🔄 Starting automatic calling - refs:", {
+        console.log("🔄 Starting automatic calling - state check:", {
+          gameActive,
           gameActiveRef: gameActiveRef.current,
           gamePausedRef: gamePausedRef.current,
-          gameFinishedRef: gameFinishedRef.current
+          gameFinishedRef: gameFinishedRef.current,
+          activeGameId
         });
+        
+        // Call first number manually to start the game
+        console.log("🎯 Calling initial number to start game");
         callNumber();
+        
+        // Start the automatic calling system
         startAutomaticNumberCalling();
-      }, 1000);
+      }, 500);
     } catch (error) {
       console.error("Failed to start game:", error);
       toast({
