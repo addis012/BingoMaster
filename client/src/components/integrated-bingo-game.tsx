@@ -46,10 +46,12 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Fetch shop data for profit margin calculation
+  // Fetch shop data for profit margin calculation with frequent refresh
   const { data: shopData } = useQuery({
     queryKey: ["/api/shops", shopId],
     enabled: !!shopId,
+    refetchInterval: 2000, // Refresh every 2 seconds to catch admin changes
+    refetchIntervalInBackground: true,
   });
 
   // Create game mutation
@@ -949,11 +951,24 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                         stopAutomaticNumberCalling();
                         declareWinnerAutomatically(cartelaNum);
                       } else {
+                        // No winner - resume game immediately
                         toast({
-                          title: "No Winner",
-                          description: `Cartela #${cartelaNum} has not won yet.`,
-                          variant: "default"
+                          title: "No Bingo",
+                          description: `Cartela #${cartelaNum} has not won yet. Game resumed.`,
                         });
+                        setShowWinnerDialog(false);
+                        
+                        // Resume game
+                        setGamePaused(false);
+                        gamePausedRef.current = false;
+                        
+                        // Restart automatic calling after a brief delay
+                        setTimeout(() => {
+                          if (gameActiveRef.current && !gamePausedRef.current) {
+                            callNumber();
+                            startAutomaticNumberCalling();
+                          }
+                        }, 1000);
                       }
                     } else {
                       toast({
@@ -974,10 +989,23 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                 onClick={() => {
                   setShowWinnerDialog(false);
                   setVerificationCartela("");
+                  
+                  // Resume game if it was paused
+                  if (gameActive && gamePaused) {
+                    setGamePaused(false);
+                    gamePausedRef.current = false;
+                    
+                    setTimeout(() => {
+                      if (gameActiveRef.current && !gamePausedRef.current) {
+                        callNumber();
+                        startAutomaticNumberCalling();
+                      }
+                    }, 1000);
+                  }
                 }}
                 className="flex-1"
               >
-                Cancel
+                Cancel & Resume
               </Button>
             </div>
           </div>
@@ -1257,6 +1285,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   onClick={() => {
                     // Pause game immediately
                     setGamePaused(true);
+                    gamePausedRef.current = true;
                     stopAutomaticNumberCalling();
                     setShowWinnerDialog(true);
                   }}
