@@ -1,0 +1,118 @@
+client:536 WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=CT9i4luWAU0x' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=CT9i4luWAU0x' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-RPCDYKBN.js?v=366a4312:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+use-auth.ts:86 Auth state updated: {id: 11, username: 'addis02', role: 'employee', name: 'telegrambingo', email: null, …}
+login-page.tsx:19 Attempting login with: {username: 'addis02', password: '***'}
+login-page.tsx:22 Login response: {user: {…}}
+integrated-bingo-game.tsx:245 🎮 Creating new backend game for cartela booking
+integrated-bingo-game.tsx:51 🌐 Creating backend game with data: {shopId: 5, employeeId: 11, status: 'waiting', entryFee: '30', prizePool: '0.00'}
+integrated-bingo-game.tsx:66 ✅ Backend game created successfully: {id: 22, shopId: 5, employeeId: 11, status: 'waiting', prizePool: '0.00', …}
+integrated-bingo-game.tsx:71 🎮 Set activeGameId to: 22
+integrated-bingo-game.tsx:249 ✅ Backend game created with ID: 22
+integrated-bingo-game.tsx:253 📝 Adding player for cartela #37 to game 22
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 22, cartelaNumbers: Array(1), playerName: 'Player 37'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: null
+integrated-bingo-game.tsx:107 Mapped cartela #37 to player ID 26
+integrated-bingo-game.tsx:111 Player added: {id: 26, gameId: 22, playerName: 'Player 37', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [37]
+integrated-bingo-game.tsx:264 ✅ Game 22: Added player 26 with cartela 37 for 30 ETB
+integrated-bingo-game.tsx:265 Current gamePlayersMap after booking: []
+integrated-bingo-game.tsx:253 📝 Adding player for cartela #68 to game 22
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 22, cartelaNumbers: Array(1), playerName: 'Player 68'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 22
+integrated-bingo-game.tsx:107 Mapped cartela #68 to player ID 27
+integrated-bingo-game.tsx:111 Player added: {id: 27, gameId: 22, playerName: 'Player 68', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [68]
+integrated-bingo-game.tsx:264 ✅ Game 22: Added player 27 with cartela 68 for 30 ETB
+integrated-bingo-game.tsx:265 Current gamePlayersMap after booking: [Array(2)]
+integrated-bingo-game.tsx:253 📝 Adding player for cartela #77 to game 22
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 22, cartelaNumbers: Array(1), playerName: 'Player 77'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 22
+integrated-bingo-game.tsx:107 Mapped cartela #77 to player ID 28
+integrated-bingo-game.tsx:111 Player added: {id: 28, gameId: 22, playerName: 'Player 77', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [77]
+integrated-bingo-game.tsx:264 ✅ Game 22: Added player 28 with cartela 77 for 30 ETB
+integrated-bingo-game.tsx:265 Current gamePlayersMap after booking: (2) [Array(2), Array(2)]
+integrated-bingo-game.tsx:253 📝 Adding player for cartela #76 to game 22
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 22, cartelaNumbers: Array(1), playerName: 'Player 76'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 22
+integrated-bingo-game.tsx:107 Mapped cartela #76 to player ID 29
+integrated-bingo-game.tsx:111 Player added: {id: 29, gameId: 22, playerName: 'Player 76', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [76]
+integrated-bingo-game.tsx:264 ✅ Game 22: Added player 29 with cartela 76 for 30 ETB
+integrated-bingo-game.tsx:265 Current gamePlayersMap after booking: (3) [Array(2), Array(2), Array(2)]
+integrated-bingo-game.tsx:253 📝 Adding player for cartela #88 to game 22
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 22, cartelaNumbers: Array(1), playerName: 'Player 88'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 22
+integrated-bingo-game.tsx:107 Mapped cartela #88 to player ID 30
+integrated-bingo-game.tsx:111 Player added: {id: 30, gameId: 22, playerName: 'Player 88', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [88]
+integrated-bingo-game.tsx:264 ✅ Game 22: Added player 30 with cartela 88 for 30 ETB
+integrated-bingo-game.tsx:265 Current gamePlayersMap after booking: (4) [Array(2), Array(2), Array(2), Array(2)]
+integrated-bingo-game.tsx:253 📝 Adding player for cartela #86 to game 22
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 22, cartelaNumbers: Array(1), playerName: 'Player 86'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 22
+integrated-bingo-game.tsx:107 Mapped cartela #86 to player ID 31
+integrated-bingo-game.tsx:111 Player added: {id: 31, gameId: 22, playerName: 'Player 86', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [86]
+integrated-bingo-game.tsx:264 ✅ Game 22: Added player 31 with cartela 86 for 30 ETB
+integrated-bingo-game.tsx:265 Current gamePlayersMap after booking: (5) [Array(2), Array(2), Array(2), Array(2), Array(2)]
+integrated-bingo-game.tsx:671 🔥 START GAME FUNCTION CALLED! This message should appear in browser console.
+integrated-bingo-game.tsx:672 🎮 FORCING BACKEND GAME CREATION - current state: {bookedCartelasSize: 6, activeGameId: 22, gameAmount: '30', shopData: undefined}
+integrated-bingo-game.tsx:680 🔄 FORCING comprehensive backend game creation...
+integrated-bingo-game.tsx:51 🌐 Creating backend game with data: {shopId: 5, employeeId: 11, status: 'waiting', entryFee: '30', prizePool: '0.00'}
+integrated-bingo-game.tsx:66 ✅ Backend game created successfully: {id: 23, shopId: 5, employeeId: 11, status: 'waiting', prizePool: '0.00', …}
+integrated-bingo-game.tsx:71 🎮 Set activeGameId to: 23
+integrated-bingo-game.tsx:685 ✅ FORCED backend game created with ID: 23
+integrated-bingo-game.tsx:689 🎮 Set activeGameId to: 23
+integrated-bingo-game.tsx:693 📝 Generating demo cartelas for comprehensive recording
+integrated-bingo-game.tsx:709 Generated cartelas for recording: (4) [41, 29, 1, 87]
+integrated-bingo-game.tsx:712 📝 Creating comprehensive backend players...
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 23, cartelaNumbers: Array(1), playerName: 'Player 41'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 22
+integrated-bingo-game.tsx:107 Mapped cartela #41 to player ID 32
+integrated-bingo-game.tsx:111 Player added: {id: 32, gameId: 23, playerName: 'Player 41', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [41]
+integrated-bingo-game.tsx:722 ✅ Created backend player 32 for cartela #41
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 23, cartelaNumbers: Array(1), playerName: 'Player 29'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 23
+integrated-bingo-game.tsx:107 Mapped cartela #29 to player ID 33
+integrated-bingo-game.tsx:111 Player added: {id: 33, gameId: 23, playerName: 'Player 29', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [29]
+integrated-bingo-game.tsx:722 ✅ Created backend player 33 for cartela #29
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 23, cartelaNumbers: Array(1), playerName: 'Player 1'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 23
+integrated-bingo-game.tsx:107 Mapped cartela #1 to player ID 34
+integrated-bingo-game.tsx:111 Player added: {id: 34, gameId: 23, playerName: 'Player 1', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [1]
+integrated-bingo-game.tsx:722 ✅ Created backend player 34 for cartela #1
+integrated-bingo-game.tsx:88 🔍 Player mutation called with: {gameId: 23, cartelaNumbers: Array(1), playerName: 'Player 87'}
+integrated-bingo-game.tsx:89 🔍 Current activeGameId state: 23
+integrated-bingo-game.tsx:107 Mapped cartela #87 to player ID 35
+integrated-bingo-game.tsx:111 Player added: {id: 35, gameId: 23, playerName: 'Player 87', cartelaNumbers: Array(1), entryFee: '30.00', …} for cartelas: [87]
+integrated-bingo-game.tsx:722 ✅ Created backend player 35 for cartela #87
+integrated-bingo-game.tsx:758 Starting game with ID: 22
+integrated-bingo-game.tsx:81 Game started successfully
+integrated-bingo-game.tsx:769 Game started successfully, beginning number calling...
+integrated-bingo-game.tsx:770 Final gamePlayersMap before starting: (6) [Array(2), Array(2), Array(2), Array(2), Array(2), Array(2)]
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: false, gamePaused: false, gameFinished: false, calledNumbersLength: 0, activeGameId: 22}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: false, gamePaused: false, gameFinished: false, calledNumbersLength: 0, activeGameId: 22}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: false, gamePaused: false, gameFinished: false, calledNumbersLength: 0, activeGameId: 22}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: false, gamePaused: false, gameFinished: false, calledNumbersLength: 0, activeGameId: 22}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: false, gamePaused: false, gameFinished: false, calledNumbersLength: 0, activeGameId: 22}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: false, gamePaused: false, gameFinished: false, calledNumbersLength: 0, activeGameId: 22}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: false, gamePaused: false, gameFinished: false, calledNumbersLength: 0, activeGameId: 22}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:647 🛑 Stopping automatic calling
+integrated-bingo-game.tsx:651 ✅ Interval cleared
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: true, gamePaused: true, gameFinished: false, calledNumbersLength: 0, activeGameId: 23}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: true, gamePaused: true, gameFinished: false, calledNumbersLength: 0, activeGameId: 23}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers
+integrated-bingo-game.tsx:287 🎯 callNumber invoked {gameActive: true, gamePaused: true, gameFinished: false, calledNumbersLength: 0, activeGameId: 23}
+integrated-bingo-game.tsx:296 ❌ Game not in correct state for calling numbers

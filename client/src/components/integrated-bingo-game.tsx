@@ -769,11 +769,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       console.log("Game started successfully, beginning number calling...");
       console.log("Final gamePlayersMap before starting:", Array.from(gamePlayersMap.entries()));
       
-      // Start automatic number calling
+      // Start automatic number calling immediately after game state is set
       setTimeout(() => {
-        callNumber();
-        startAutomaticNumberCalling();
-      }, 1000);
+        if (gameActive && !gamePaused) {
+          callNumber();
+          startAutomaticNumberCalling();
+        }
+      }, 500);
     } catch (error) {
       console.error("Failed to start game:", error);
       toast({
@@ -882,6 +884,20 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                 <p className="text-2xl font-bold text-blue-600">{totalCollected.toFixed(2)} Birr</p>
                 <p className="text-sm text-blue-700">{bookedCartelas.size} cards × {gameAmount} Birr</p>
               </div>
+
+              {/* Selected Cartelas */}
+              {bookedCartelas.size > 0 && (
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-green-900 mb-2">Selected Cartelas ({bookedCartelas.size})</h3>
+                  <div className="flex flex-wrap gap-1">
+                    {[...bookedCartelas].map(num => (
+                      <Badge key={num} className="bg-green-500 hover:bg-green-600 text-white">
+                        #{num}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Winner Announcement */}
               {winnerFound && (
