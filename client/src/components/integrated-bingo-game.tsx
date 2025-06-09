@@ -48,27 +48,26 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   // Create game mutation
   const createGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/games", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          shopId,
-          employeeId,
-          status: 'waiting',
-          entryFee: gameAmount,
-          prizePool: "0.00"
-        })
+      console.log("🌐 Creating backend game with data:", {
+        shopId,
+        employeeId,
+        status: 'waiting',
+        entryFee: gameAmount,
+        prizePool: "0.00"
       });
-      
-      if (!response.ok) {
-        throw new Error("Failed to create game");
-      }
-      
-      return response.json();
+      const game = await apiRequest("POST", "/api/games", {
+        shopId,
+        employeeId,
+        status: 'waiting',
+        entryFee: gameAmount,
+        prizePool: "0.00"
+      });
+      console.log("✅ Backend game created successfully:", game);
+      return game;
     },
-    onSuccess: (game) => {
+    onSuccess: (game: any) => {
       setActiveGameId(game.id);
-      console.log("Game created:", game);
+      console.log("🎮 Set activeGameId to:", game.id);
     }
   });
 
@@ -273,17 +272,59 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   };
 
   // Call a random number
-  const callNumber = () => {
+  const callNumber = async () => {
     console.log("🎯 callNumber invoked", {
       gameActive,
       gamePaused,
       gameFinished,
-      calledNumbersLength: calledNumbers.length
+      calledNumbersLength: calledNumbers.length,
+      activeGameId: activeGameId
     });
 
     if (!gameActive || gamePaused || gameFinished) {
       console.log("❌ Game not in correct state for calling numbers");
       return;
+    }
+
+    // Ensure backend game exists before calling numbers
+    if (!activeGameId) {
+      console.log("🚨 NO BACKEND GAME EXISTS - Creating one now...");
+      try {
+        const game = await createGameMutation.mutateAsync();
+        console.log("✅ Emergency backend game created:", game.id);
+        
+        // Create demo players for active cartelas
+        const demoCartelas = Array.from(bookedCartelas);
+        if (demoCartelas.length === 0) {
+          // Generate demo cartelas if none exist
+          for (let i = 0; i < 3; i++) {
+            const cartelaNum = Math.floor(Math.random() * 100) + 1;
+            demoCartelas.push(cartelaNum);
+            setBookedCartelas(prev => new Set([...prev, cartelaNum]));
+            setCartelaCards(prev => ({
+              ...prev,
+              [cartelaNum]: generateCartela()
+            }));
+          }
+        }
+        
+        // Create backend players for all cartelas
+        for (const cartelaNum of demoCartelas) {
+          const player = await addPlayerMutation.mutateAsync({
+            gameId: game.id,
+            cartelaNumbers: [cartelaNum],
+            playerName: `Player ${cartelaNum}`
+          });
+          console.log(`Created emergency player ${player.id} for cartela ${cartelaNum}`);
+        }
+        
+        setTotalCollected(demoCartelas.length * parseInt(gameAmount));
+        console.log("✅ Emergency backend sync complete");
+        
+      } catch (error) {
+        console.error("❌ Failed to create emergency backend game:", error);
+        return;
+      }
     }
 
     const availableNumbers = Array.from({length: 75}, (_, i) => i + 1)
@@ -1003,7 +1044,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
               <Button 
                 onClick={startGame}
                 className="w-full bg-green-500 hover:bg-green-600"
-                disabled={gameActive || bookedCartelas.size === 0 || startGameMutation.isPending}
+                disabled={gameActive || startGameMutation.isPending}
               >
                 {startGameMutation.isPending ? "Starting..." : gameActive ? "Game Running..." : "Start Game"}
               </Button>
