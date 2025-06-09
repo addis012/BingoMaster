@@ -28,6 +28,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const [winnerFound, setWinnerFound] = useState<string | null>(null);
   const [winnerPattern, setWinnerPattern] = useState<string | null>(null);
   const [showWinnerVerification, setShowWinnerVerification] = useState(false);
+  const [showWinnerDialog, setShowWinnerDialog] = useState(false);
   const [verificationCartela, setVerificationCartela] = useState("");
   const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
   const [gameFinished, setGameFinished] = useState(false);
@@ -771,11 +772,10 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       
       // Start automatic number calling immediately after game state is set
       setTimeout(() => {
-        if (gameActive && !gamePaused) {
-          callNumber();
-          startAutomaticNumberCalling();
-        }
-      }, 500);
+        console.log("🔄 Checking game state for number calling:", { gameActive, gamePaused, gameFinished });
+        callNumber();
+        startAutomaticNumberCalling();
+      }, 1000);
     } catch (error) {
       console.error("Failed to start game:", error);
       toast({
@@ -850,6 +850,102 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                 className="flex-1"
               >
                 Continue Game
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Winner Checking Dialog */}
+      <Dialog open={showWinnerDialog} onOpenChange={setShowWinnerDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Check Winner</DialogTitle>
+            <DialogDescription>
+              Enter the cartela number to verify if it has won with the current called numbers.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cartela Number (1-100)
+              </label>
+              <Input
+                type="number"
+                min="1"
+                max="100"
+                value={verificationCartela}
+                onChange={(e) => setVerificationCartela(e.target.value)}
+                placeholder="Enter cartela number"
+                className="w-full"
+              />
+            </div>
+
+            {/* Show available cartelas */}
+            {bookedCartelas.size > 0 && (
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Available cartelas in this game:</p>
+                <div className="flex flex-wrap gap-1">
+                  {[...bookedCartelas].map(num => (
+                    <Button
+                      key={num}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setVerificationCartela(num.toString())}
+                      className="text-xs"
+                    >
+                      #{num}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  const cartelaNum = parseInt(verificationCartela);
+                  if (cartelaNum >= 1 && cartelaNum <= 100) {
+                    const card = cartelaCards[cartelaNum];
+                    if (card) {
+                      const result = checkForWinner(card, calledNumbers);
+                      if (result.hasWin) {
+                        setWinnerFound(`Cartela #${cartelaNum}`);
+                        setShowWinnerDialog(false);
+                        setGameActive(false);
+                        setGameFinished(true);
+                        stopAutomaticNumberCalling();
+                      } else {
+                        toast({
+                          title: "No Winner",
+                          description: `Cartela #${cartelaNum} has not won yet.`,
+                          variant: "default"
+                        });
+                      }
+                    } else {
+                      toast({
+                        title: "Invalid Cartela",
+                        description: "This cartela is not registered in the game.",
+                        variant: "destructive"
+                      });
+                    }
+                  }
+                }}
+                disabled={!verificationCartela || parseInt(verificationCartela) < 1 || parseInt(verificationCartela) > 100}
+                className="flex-1 bg-green-500 hover:bg-green-600"
+              >
+                Check Winner
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowWinnerDialog(false);
+                  setVerificationCartela("");
+                }}
+                className="flex-1"
+              >
+                Cancel
               </Button>
             </div>
           </div>
@@ -1019,31 +1115,59 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
               </Button>
 
               {gameActive && (
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={() => {
-                      setGamePaused(!gamePaused);
-                      if (gamePaused) {
-                        startAutomaticNumberCalling();
-                      } else {
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => {
+                        setGamePaused(!gamePaused);
+                        if (gamePaused) {
+                          startAutomaticNumberCalling();
+                        } else {
+                          stopAutomaticNumberCalling();
+                        }
+                      }}
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600"
+                    >
+                      {gamePaused ? "Resume Game" : "Pause Game"}
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => {
+                        setGameActive(false);
+                        setGameFinished(true);
                         stopAutomaticNumberCalling();
-                      }
-                    }}
-                    className="flex-1 bg-yellow-500 hover:bg-yellow-600"
-                  >
-                    {gamePaused ? "Resume Game" : "Pause Game"}
-                  </Button>
+                      }}
+                      className="flex-1 bg-red-500 hover:bg-red-600"
+                    >
+                      End Game
+                    </Button>
+                  </div>
                   
-                  <Button 
-                    onClick={() => {
-                      setGameActive(false);
-                      setGameFinished(true);
-                      stopAutomaticNumberCalling();
-                    }}
-                    className="flex-1 bg-red-500 hover:bg-red-600"
-                  >
-                    End Game
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => {
+                        if (!gamePaused) {
+                          setGamePaused(true);
+                          stopAutomaticNumberCalling();
+                        }
+                        setShowWinnerDialog(true);
+                      }}
+                      className="flex-1 bg-purple-500 hover:bg-purple-600"
+                    >
+                      Check Winner
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => {
+                        console.log("🎯 Manual number call triggered");
+                        callNumber();
+                      }}
+                      className="flex-1 bg-orange-500 hover:bg-orange-600"
+                      disabled={gameFinished}
+                    >
+                      Call Number
+                    </Button>
+                  </div>
                 </div>
               )}
 
