@@ -753,6 +753,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       setAutoCallInterval(null);
       console.log("✅ Interval cleared");
     }
+    
+    // Also clear timeout reference
+    if (automaticCallTimeoutRef.current) {
+      clearTimeout(automaticCallTimeoutRef.current);
+      automaticCallTimeoutRef.current = null;
+      console.log("✅ Timeout cleared");
+    }
   };
 
   // Reset game - properly handle games ending without winners
