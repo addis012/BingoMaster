@@ -38,6 +38,11 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const [gamePlayersMap, setGamePlayersMap] = useState<Map<number, number>>(new Map());
   const [autoplaySpeed, setAutoplaySpeed] = useState(3000); // 3 seconds default
   
+  // Refs to track real-time state for closures
+  const gameActiveRef = useRef(false);
+  const gamePausedRef = useRef(false);
+  const gameFinishedRef = useRef(false);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -302,8 +307,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       return;
     }
 
-    if (!gameActive && !gamePaused) {
-      console.log("❌ Game not active, stopping number calling");
+    // Use refs for real-time state checking
+    if (!gameActiveRef.current || gamePausedRef.current) {
+      console.log("❌ Game not active or paused, stopping number calling");
       return;
     }
 
@@ -673,6 +679,12 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     setWinnerFound(null);
     setWinnerPattern(null);
     setLastCalledLetter("");
+    
+    // Update refs
+    gameActiveRef.current = false;
+    gamePausedRef.current = false;
+    gameFinishedRef.current = false;
+    
     stopAutomaticNumberCalling();
   };
 
@@ -776,12 +788,17 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       setWinnerFound(null);
       setLastCalledLetter("");
       
+      // Update refs for real-time state tracking
+      gameActiveRef.current = true;
+      gamePausedRef.current = false;
+      gameFinishedRef.current = false;
+      
       console.log("Game started successfully, beginning number calling...");
       console.log("Final gamePlayersMap before starting:", Array.from(gamePlayersMap.entries()));
       
       // Start automatic number calling immediately after game state is set
       setTimeout(() => {
-        console.log("🔄 Checking game state for number calling:", { gameActive, gamePaused, gameFinished });
+        console.log("🔄 Starting automatic calling - game is now active");
         callNumber();
         startAutomaticNumberCalling();
       }, 1000);
