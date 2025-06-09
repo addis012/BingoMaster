@@ -55,13 +55,14 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         entryFee: gameAmount,
         prizePool: "0.00"
       });
-      const game = await apiRequest("POST", "/api/games", {
+      const response = await apiRequest("POST", "/api/games", {
         shopId,
         employeeId,
         status: 'waiting',
         entryFee: gameAmount,
         prizePool: "0.00"
       });
+      const game = await response.json();
       console.log("✅ Backend game created successfully:", game);
       return game;
     },
@@ -89,11 +90,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       if (!data.gameId || data.gameId === undefined || isNaN(data.gameId)) {
         throw new Error(`Invalid gameId: ${data.gameId}`);
       }
-      return await apiRequest("POST", `/api/games/${data.gameId}/players`, {
+      const response = await apiRequest("POST", `/api/games/${data.gameId}/players`, {
         playerName: data.playerName,
         cartelaNumbers: data.cartelaNumbers,
         entryFee: gameAmount
       });
+      const player = await response.json();
+      return player;
     },
     onSuccess: (player, variables) => {
       // Map ALL cartela numbers to this player ID, not just the first one
@@ -121,9 +124,11 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   // Declare winner mutation
   const declareWinnerMutation = useMutation({
     mutationFn: async (data: { gameId: number; winnerId: number }) => {
-      return await apiRequest("POST", `/api/games/${data.gameId}/declare-winner`, {
+      const response = await apiRequest("POST", `/api/games/${data.gameId}/declare-winner`, {
         winnerId: data.winnerId
       });
+      const result = await response.json();
+      return result;
     },
     onSuccess: (result) => {
       toast({
