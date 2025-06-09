@@ -272,7 +272,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           playerName: `Player ${selectedCartela}`
         });
 
-        setBookedCartelas(prev => new Set([...prev, selectedCartela]));
+        setBookedCartelas(prev => new Set([...Array.from(prev), selectedCartela]));
         const newTotal = totalCollected + parseInt(gameAmount);
         setTotalCollected(newTotal);
         
@@ -333,7 +333,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           for (let i = 0; i < 3; i++) {
             const cartelaNum = Math.floor(Math.random() * 100) + 1;
             demoCartelas.push(cartelaNum);
-            setBookedCartelas(prev => new Set([...prev, cartelaNum]));
+            setBookedCartelas(prev => new Set([...Array.from(prev), cartelaNum]));
             setCartelaCards(prev => ({
               ...prev,
               [cartelaNum]: generateCartela()
@@ -420,7 +420,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
     
     // Check each booked cartela for winning patterns
-    for (const cartelaNumber of bookedCartelas) {
+    for (const cartelaNumber of Array.from(bookedCartelas)) {
       const card = cartelaCards[cartelaNumber];
       if (!card) {
         console.log(`⚠️ Card not found for cartela ${cartelaNumber}`);
@@ -1210,12 +1210,12 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                               });
                             } else {
                               // Book cartela instantly
-                              setSelectedCartela(num);
+                              const newCard = generateCartela();
                               setCartelaCards(prev => ({
                                 ...prev,
-                                [num]: generateCartela()
+                                [num]: newCard
                               }));
-                              setBookedCartelas(prev => new Set([...prev, num]));
+                              setBookedCartelas(prev => new Set([...Array.from(prev), num]));
                               setTotalCollected(prev => prev + parseInt(gameAmount));
                               
                               toast({
