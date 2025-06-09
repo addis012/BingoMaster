@@ -816,11 +816,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     setGamePlayersMap(new Map());
     setBookedCartelas(new Set());
     setTotalCollected(0);
+    setFinalPrizeAmount(null);
     
     // Update refs
     gameActiveRef.current = false;
     gamePausedRef.current = false;
     gameFinishedRef.current = false;
+    winnerFoundRef.current = false;
     
     stopAutomaticNumberCalling();
   };
