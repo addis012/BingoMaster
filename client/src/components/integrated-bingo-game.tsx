@@ -668,6 +668,10 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       const game = await createGameMutation.mutateAsync();
       console.log("✅ FORCED backend game created with ID:", game.id);
       
+      // CRITICAL: Set activeGameId immediately after game creation
+      setActiveGameId(game.id);
+      console.log("🎮 Set activeGameId to:", game.id);
+      
       // Generate demo cartelas for recording
       const cartelaArray = [];
       console.log("📝 Generating demo cartelas for comprehensive recording");
