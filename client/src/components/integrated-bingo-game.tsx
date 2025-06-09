@@ -798,7 +798,11 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       
       // Start automatic number calling immediately after game state is set
       setTimeout(() => {
-        console.log("🔄 Starting automatic calling - game is now active");
+        console.log("🔄 Starting automatic calling - refs:", {
+          gameActiveRef: gameActiveRef.current,
+          gamePausedRef: gamePausedRef.current,
+          gameFinishedRef: gameFinishedRef.current
+        });
         callNumber();
         startAutomaticNumberCalling();
       }, 1000);
@@ -1050,11 +1054,28 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
               </div>
             )}
 
-            {/* Total Collected */}
+            {/* Total Collected & Win Amount */}
             <div className="bg-blue-50 p-4 rounded-lg mb-4">
               <h3 className="font-medium text-blue-900">Total Collected</h3>
               <p className="text-2xl font-bold text-blue-600">{totalCollected.toFixed(2)} Birr</p>
               <p className="text-sm text-blue-700">{bookedCartelas.size} cards × {gameAmount} Birr</p>
+              
+              {/* Profit Margin Based Win Amount */}
+              {totalCollected > 0 && (
+                <div className="mt-3 pt-3 border-t border-blue-200">
+                  <h4 className="font-medium text-yellow-800">Possible Win Amount</h4>
+                  <p className="text-xl font-bold text-yellow-700">
+                    {(() => {
+                      const profitMargin = (shopData as any)?.profitMargin || 20;
+                      const winAmount = Math.floor(totalCollected * (100 - profitMargin) / 100);
+                      return `${winAmount} ETB`;
+                    })()}
+                  </p>
+                  <p className="text-xs text-yellow-600">
+                    Based on {(shopData as any)?.profitMargin || 20}% profit margin
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Winner Announcement */}
@@ -1068,12 +1089,39 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
             {/* Start Game Button */}
             <Button 
-              onClick={startGame}
+              onClick={() => {
+                console.log("🚀 Start Game button clicked");
+                startGame();
+              }}
               className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 mb-4"
-              disabled={bookedCartelas.size === 0 || gameActive || startGameMutation.isPending}
+              disabled={gameActive || startGameMutation.isPending}
             >
               {startGameMutation.isPending ? "Starting..." : gameActive ? "Game Running..." : "Start Game"}
             </Button>
+
+            {/* Quick Test Auto Calling */}
+            {!gameActive && (
+              <Button 
+                onClick={() => {
+                  console.log("🧪 Quick test auto calling");
+                  setGameActive(true);
+                  gameActiveRef.current = true;
+                  gamePausedRef.current = false;
+                  gameFinishedRef.current = false;
+                  setCalledNumbers([]);
+                  setCurrentNumber(null);
+                  
+                  setTimeout(() => {
+                    console.log("Starting auto calling test");
+                    callNumber();
+                    startAutomaticNumberCalling();
+                  }, 500);
+                }}
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 mb-4"
+              >
+                Test Auto Calling
+              </Button>
+            )}
 
             {/* Cartela Selector */}
             <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
