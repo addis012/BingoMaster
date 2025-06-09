@@ -34,6 +34,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const [gameFinished, setGameFinished] = useState(false);
   const [gamePaused, setGamePaused] = useState(false);
   const [totalCollected, setTotalCollected] = useState(0);
+  const [finalPrizeAmount, setFinalPrizeAmount] = useState<number | null>(null);
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
   const [gamePlayersMap, setGamePlayersMap] = useState<Map<number, number>>(new Map());
   const [autoplaySpeed, setAutoplaySpeed] = useState(3000); // 3 seconds default
@@ -344,6 +345,12 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Call a random number
   const callNumber = async () => {
+    // IMMEDIATE CHECK: Stop all number calling if winner is found or game is finished
+    if (gameFinished || winnerFound || gameFinishedRef.current || winnerFoundRef.current) {
+      console.log("❌ IMMEDIATE STOP: Game is finished or winner found, aborting number calling");
+      return;
+    }
+
     console.log("🎯 callNumber invoked", {
       gameActive,
       gamePaused,
@@ -353,7 +360,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       winnerFound
     });
 
-    // CRITICAL: Stop all number calling if winner is found or game is finished
+    // CRITICAL: Double-check to stop all number calling if winner is found or game is finished
     if (gameFinished || winnerFound || gameFinishedRef.current || winnerFoundRef.current) {
       console.log("❌ Game is finished or winner found, stopping number calling");
       return;
@@ -427,7 +434,18 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     console.log("🔊 Calling number:", number, "Letter:", letter);
 
     setCurrentNumber(number);
-    setCalledNumbers(prev => [...prev, number]);
+    setCalledNumbers(prev => {
+      const updated = [...prev, number];
+      
+      // Immediate winner check after number is added
+      setTimeout(() => {
+        if (!gameFinishedRef.current && !winnerFoundRef.current && gameActiveRef.current) {
+          checkForWinner();
+        }
+      }, 50);
+      
+      return updated;
+    });
     setLastCalledLetter(letter);
 
     // Play audio
@@ -484,6 +502,10 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           gamePlayersMap: Array.from(gamePlayersMap.entries()),
           bookedCartelas: Array.from(bookedCartelas)
         });
+        
+        // Calculate and preserve the final prize amount immediately
+        const currentPrizeAmount = calculateWinnerPayout(totalCollected);
+        setFinalPrizeAmount(currentPrizeAmount);
         
         setWinnerFound(`Cartela #${cartelaNumber}`);
         setWinnerPattern(winResult.pattern || "BINGO");
@@ -1220,7 +1242,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
               <div className="bg-green-100 border-2 border-green-300 p-4 rounded-lg text-center mb-4">
                 <div className="text-2xl mb-2">🎉 BINGO! 🎉</div>
                 <div className="font-bold text-green-800">{winnerFound} WINS!</div>
-                <div className="text-green-700">Prize: {calculateWinnerPayout(totalCollected).toFixed(2)} Birr</div>
+                <div className="text-green-700">Prize: {(finalPrizeAmount ?? calculateWinnerPayout(totalCollected)).toFixed(2)} Birr</div>
               </div>
             )}
 
