@@ -478,22 +478,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const gameId = parseInt(req.params.id);
       const { winnerId } = req.body;
-      console.log(`Declaring winner for game ${gameId}, winnerId: ${winnerId}`);
+      console.log(`🎯 COMPREHENSIVE GAME RECORDING - Game ${gameId}, Winner ${winnerId}`);
       
       // Get game, shop, and winner details
       const game = await storage.getGame(gameId);
       if (!game) {
+        console.error(`❌ Game ${gameId} not found`);
         return res.status(404).json({ message: "Game not found" });
       }
       
       const shop = await storage.getShop(game.shopId);
       const players = await storage.getGamePlayers(gameId);
       const winner = players.find(p => p.id === winnerId);
+      const employee = await storage.getUser(game.employeeId);
       
-      // Calculate total collected from entry fees
+      console.log(`📊 GAME DATA COLLECTION:`, {
+        gameId,
+        shopId: game.shopId,
+        employeeId: game.employeeId,
+        employeeName: employee?.name || 'Unknown',
+        totalPlayers: players.length,
+        winnerId,
+        winnerName: winner?.playerName || 'Unknown'
+      });
+      
+      // Calculate total collected from entry fees - use fallback if no transactions exist
       const entryFeeTransactions = await storage.getTransactionsByShop(game.shopId);
       const gameEntryFees = entryFeeTransactions.filter(t => t.gameId === gameId && t.type === 'entry_fee');
-      const totalCollectedBirr = gameEntryFees.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      let totalCollectedBirr = gameEntryFees.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      // If no entry fee transactions found, calculate from players and entry fee
+      if (totalCollectedBirr === 0 && players.length > 0) {
+        const entryFee = parseFloat(game.entryFee || "0");
+        totalCollectedBirr = players.length * entryFee;
+        console.log(`📊 Calculated total from players: ${players.length} × ${entryFee} = ${totalCollectedBirr} ETB`);
+      }
+      
+      // Log all player cartelas for comprehensive record
+      const playerDetails = players.map(p => ({
+        playerId: p.id,
+        playerName: p.playerName,
+        cartelaNumbers: JSON.parse(p.cartelaNumbers || "[]"),
+        amount: parseFloat(game.entryFee || "0")
+      }));
+      
+      console.log(`💰 FINANCIAL CALCULATION:`, {
+        totalCollected: totalCollectedBirr,
+        playerCount: players.length,
+        entryFeePerPlayer: game.entryFee,
+        allPlayerDetails: playerDetails
+      });
       
       // Calculate profit margin and commission correctly
       const profitMargin = parseFloat(shop?.profitMargin || "0");
@@ -503,7 +537,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prizeAmountBirr = totalCollectedBirr - adminProfit;
       const superAdminCommission = (adminProfit * superAdminCommissionRate) / 100;
       
-      // Update game status
+      console.log(`🧮 PROFIT CALCULATIONS:`, {
+        totalCollected: totalCollectedBirr,
+        profitMargin: `${profitMargin}%`,
+        adminProfit: adminProfit,
+        prizeAmount: prizeAmountBirr,
+        superAdminCommissionRate: `${superAdminCommissionRate}%`,
+        superAdminCommission: superAdminCommission
+      });
+      
+      // Update game status with comprehensive data
       const updatedGame = await storage.updateGame(gameId, {
         status: 'completed',
         winnerId,
@@ -514,9 +557,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get winner's cartela number
       const winnerCartelaNumbers = JSON.parse(winner?.cartelaNumbers || "[]");
       const winningCartela = winnerCartelaNumbers[0] || null;
+      
+      console.log(`🏆 WINNER DETAILS:`, {
+        winnerId,
+        winnerName: winner?.playerName,
+        winningCartela: winningCartela,
+        cartelaNumbers: winnerCartelaNumbers
+      });
 
-      // Create comprehensive game history record
-      await storage.createGameHistory({
+      // Create comprehensive employee activity record in game history
+      console.log(`💾 CREATING COMPREHENSIVE GAME HISTORY RECORD...`);
+      const gameHistory = await storage.createGameHistory({
         gameId: gameId,
         shopId: game.shopId,
         employeeId: game.employeeId,
@@ -525,9 +576,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prizeAmount: prizeAmountBirr.toString(),
         adminProfit: adminProfit.toString(),
         superAdminCommission: superAdminCommission.toString(),
-        winnerName: winner?.playerName || null,
-        winningCartela: winningCartela ? winningCartela.toString() : null,
+        winnerName: winner?.playerName || 'Unknown Player',
+        winningCartela: winningCartela ? `#${winningCartela}` : null,
         completedAt: new Date(),
+      });
+      
+      console.log(`✅ GAME HISTORY CREATED:`, {
+        historyId: gameHistory.id,
+        recordedAt: new Date().toISOString(),
+        employeeName: employee?.name,
+        totalCollected: totalCollectedBirr,
+        adminProfit: adminProfit,
+        superAdminCommission: superAdminCommission
       });
 
       // Create transactions in Birr

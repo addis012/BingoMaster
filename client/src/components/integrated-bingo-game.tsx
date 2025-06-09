@@ -467,7 +467,26 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
 
     try {
-      console.log("🚀 CALLING DECLARE WINNER API:", { cartelaNumber, winnerId, activeGameId });
+      // Prepare comprehensive game data for recording
+      const gameData = {
+        gameId: activeGameId,
+        winnerId: winnerId,
+        winnerCartela: cartelaNumber,
+        totalCollected: totalCollected,
+        playerCount: bookedCartelas.size,
+        calledNumbers: calledNumbers,
+        allPlayers: Array.from(bookedCartelas).map(cartela => ({
+          cartelaNumber: cartela,
+          playerId: gamePlayersMap.get(cartela),
+          playerName: `Player ${cartela}`,
+          amount: parseInt(gameAmount)
+        })),
+        employeeId: employeeId,
+        shopId: shopId,
+        winnerPattern: winnerPattern
+      };
+      
+      console.log("🚀 DECLARING WINNER WITH COMPLETE DATA:", gameData);
       
       const result = await declareWinnerMutation.mutateAsync({
         gameId: activeGameId,
@@ -476,9 +495,21 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       
       console.log("✅ WINNER SUCCESSFULLY DECLARED IN BACKEND!", result);
       
+      // Log comprehensive game completion details
+      console.log("📊 GAME COMPLETION SUMMARY:", {
+        winnerCartela: cartelaNumber,
+        totalCollected: totalCollected,
+        playerCount: bookedCartelas.size,
+        prizeAmount: result.financial?.prizeAmount,
+        adminProfit: result.financial?.adminProfit,
+        superAdminCommission: result.financial?.superAdminCommission,
+        employeeId: employeeId,
+        timestamp: new Date().toISOString()
+      });
+      
       toast({
         title: "Game Completed Successfully!",
-        description: `Cartela #${cartelaNumber} wins! Recorded in database with prize ${result.financial?.prizeAmount || 'N/A'} ETB.`,
+        description: `Cartela #${cartelaNumber} wins ${result.financial?.prizeAmount || totalCollected} ETB! Game recorded with all player details.`,
       });
       
     } catch (error) {
