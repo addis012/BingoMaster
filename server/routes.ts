@@ -293,10 +293,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/games", async (req, res) => {
     try {
+      console.log("🎮 BACKEND GAME CREATION REQUEST:", {
+        body: req.body,
+        userId: req.session?.userId,
+        timestamp: new Date().toISOString()
+      });
+      
       const gameData = insertGameSchema.parse(req.body);
+      console.log("✅ Game data validated:", gameData);
+      
       const game = await storage.createGame(gameData);
+      console.log("🎯 BACKEND GAME CREATED SUCCESSFULLY:", {
+        gameId: game.id,
+        shopId: game.shopId,
+        employeeId: game.employeeId,
+        entryFee: game.entryFee
+      });
+      
       res.json(game);
     } catch (error) {
+      console.error("❌ BACKEND GAME CREATION FAILED:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
       }
@@ -342,12 +358,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/games/:id/players", async (req, res) => {
     try {
       const gameId = parseInt(req.params.id);
+      console.log("📝 BACKEND PLAYER CREATION REQUEST:", {
+        gameId,
+        body: req.body,
+        timestamp: new Date().toISOString()
+      });
+      
       const playerData = insertGamePlayerSchema.parse({
         ...req.body,
         gameId,
       });
+      console.log("✅ Player data validated:", playerData);
       
       const player = await storage.createGamePlayer(playerData);
+      console.log("🎯 BACKEND PLAYER CREATED SUCCESSFULLY:", {
+        playerId: player.id,
+        gameId: gameId,
+        playerName: player.playerName,
+        cartelaNumbers: player.cartelaNumbers
+      });
 
       // Create entry fee transaction
       const game = await storage.getGame(gameId);

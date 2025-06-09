@@ -653,73 +653,74 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Start game - support both pre-booked games and quick play mode
   const startGame = async () => {
-    console.log("🎮 COMPREHENSIVE GAME START - checking state:", { 
+    console.log("🎮 FORCING BACKEND GAME CREATION - current state:", { 
       bookedCartelasSize: bookedCartelas.size, 
       activeGameId, 
       gameAmount,
       shopData: shopData?.id 
     });
 
-    // ALWAYS ensure backend game exists before starting
-    if (!activeGameId) {
-      console.log("🔄 No backend game exists - creating comprehensive backend records...");
+    // FORCE backend game creation regardless of current state
+    console.log("🔄 FORCING comprehensive backend game creation...");
+    
+    try {
+      // Create backend game first
+      const game = await createGameMutation.mutateAsync();
+      console.log("✅ FORCED backend game created with ID:", game.id);
       
-      try {
-        // Create backend game first
-        const game = await createGameMutation.mutateAsync();
-        console.log("✅ Backend game created with ID:", game.id);
+      // Generate demo cartelas for recording
+      const cartelaArray = [];
+      console.log("📝 Generating demo cartelas for comprehensive recording");
+      for (let i = 0; i < 4; i++) {
+        let cartelaNum;
+        do {
+          cartelaNum = Math.floor(Math.random() * 100) + 1;
+        } while (cartelaArray.includes(cartelaNum));
         
-        // Determine cartelas to use
-        let cartelaArray = Array.from(bookedCartelas);
-        
-        // If no cartelas booked, create demo cartelas for the game
-        if (cartelaArray.length === 0) {
-          console.log("📝 No cartelas booked - creating demo cartelas for comprehensive recording");
-          for (let i = 0; i < 3; i++) {
-            let cartelaNum;
-            do {
-              cartelaNum = Math.floor(Math.random() * 100) + 1;
-            } while (cartelaArray.includes(cartelaNum));
-            
-            cartelaArray.push(cartelaNum);
-            setBookedCartelas(prev => new Set([...prev, cartelaNum]));
-            setCartelaCards(prev => ({
-              ...prev,
-              [cartelaNum]: generateCartela()
-            }));
-          }
-          console.log("Generated cartelas for recording:", cartelaArray);
-        }
-        
-        // Create backend player records for all cartelas
-        console.log("📝 Creating comprehensive backend players...");
-        for (const cartelaNum of cartelaArray) {
-          const player = await addPlayerMutation.mutateAsync({
-            gameId: game.id,
-            cartelaNumbers: [cartelaNum],
-            playerName: `Player ${cartelaNum}`
-          });
-          console.log(`✅ Created backend player ${player.id} for cartela #${cartelaNum}`);
-        }
-        
-        // Update total collected
-        const newTotal = cartelaArray.length * parseInt(gameAmount);
-        setTotalCollected(newTotal);
-        
-        toast({
-          title: "Comprehensive Backend Game Created!",
-          description: `Game ${game.id} with ${cartelaArray.length} players (${newTotal} ETB)`,
-        });
-        
-      } catch (error) {
-        console.error("❌ Failed to create comprehensive backend records:", error);
-        toast({
-          title: "Error",
-          description: "Failed to create backend game. Recording will fail.",
-          variant: "destructive"
-        });
-        return;
+        cartelaArray.push(cartelaNum);
+        setCartelaCards(prev => ({
+          ...prev,
+          [cartelaNum]: generateCartela()
+        }));
       }
+      
+      // Clear and reset booked cartelas
+      setBookedCartelas(new Set(cartelaArray));
+      console.log("Generated cartelas for recording:", cartelaArray);
+      
+      // Create backend player records for all cartelas
+      console.log("📝 Creating comprehensive backend players...");
+      const newGamePlayersMap = new Map();
+      
+      for (const cartelaNum of cartelaArray) {
+        const player = await addPlayerMutation.mutateAsync({
+          gameId: game.id,
+          cartelaNumbers: [cartelaNum],
+          playerName: `Player ${cartelaNum}`
+        });
+        newGamePlayersMap.set(cartelaNum, player.id);
+        console.log(`✅ Created backend player ${player.id} for cartela #${cartelaNum}`);
+      }
+      
+      setGamePlayersMap(newGamePlayersMap);
+      
+      // Update total collected
+      const newTotal = cartelaArray.length * parseInt(gameAmount);
+      setTotalCollected(newTotal);
+      
+      toast({
+        title: "Backend Game Created!",
+        description: `Game ${game.id} with ${cartelaArray.length} players (${newTotal} ETB)`,
+      });
+      
+    } catch (error) {
+      console.error("❌ Failed to create backend records:", error);
+      toast({
+        title: "Critical Error",
+        description: "Backend game creation failed. No recording will occur.",
+        variant: "destructive"
+      });
+      return;
     }
 
     // Backend game should already be created above, but verify
