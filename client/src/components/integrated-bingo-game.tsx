@@ -698,9 +698,16 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
       try {
         // Create a new game for quick play
-        console.log("Creating new game for quick play with cartelas:", selectedCartelasArray);
+        console.log("🎮 BACKEND GAME CREATION: Creating new game for quick play with cartelas:", selectedCartelasArray);
+        console.log("🌐 Making API call to /api/games with:", {
+          shopId,
+          employeeId,
+          status: 'waiting',
+          entryFee: gameAmount,
+          prizePool: "0.00"
+        });
         const game = await createGameMutation.mutateAsync();
-        console.log("Game created:", game);
+        console.log("✅ BACKEND GAME CREATED:", game);
         
         // Create backend players for all selected cartelas
         for (const cartelaNum of selectedCartelasArray) {
