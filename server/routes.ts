@@ -503,11 +503,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // End game without winner - no revenue recording
+  app.post("/api/games/:id/end-without-winner", async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      console.log(`🎯 ENDING GAME WITHOUT WINNER - Game ${gameId}`);
+      
+      const game = await storage.getGame(gameId);
+      if (!game) {
+        console.error(`❌ Game ${gameId} not found`);
+        return res.status(404).json({ message: "Game not found" });
+      }
+      
+      // Simply update game status to completed without recording any financial data
+      const updatedGame = await storage.updateGame(gameId, {
+        status: 'completed',
+        completedAt: new Date(),
+      });
+
+      console.log(`✅ Game ${gameId} ended without winner - no revenue recorded`);
+      
+      res.json({
+        game: updatedGame,
+        message: "Game ended without winner",
+        revenueRecorded: false
+      });
+    } catch (error) {
+      console.error("Error ending game without winner:", error);
+      res.status(500).json({ message: "Failed to end game" });
+    }
+  });
+
   app.post("/api/games/:id/declare-winner", async (req, res) => {
     try {
       const gameId = parseInt(req.params.id);
       const { winnerId } = req.body;
       console.log(`🎯 COMPREHENSIVE GAME RECORDING - Game ${gameId}, Winner ${winnerId}`);
+      
+      // Validate that winnerId is provided
+      if (!winnerId) {
+        console.error(`❌ No winnerId provided for game ${gameId}`);
+        return res.status(400).json({ message: "Winner ID is required" });
+      }
       
       // Get game, shop, and winner details
       const game = await storage.getGame(gameId);
@@ -520,6 +557,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const players = await storage.getGamePlayers(gameId);
       const winner = players.find(p => p.id === winnerId);
       const employee = await storage.getUser(game.employeeId);
+      
+      // Validate that winner exists in the game
+      if (!winner) {
+        console.error(`❌ Winner ${winnerId} not found in game ${gameId} players`);
+        return res.status(400).json({ message: "Winner not found in game players" });
+      }
       
       console.log(`📊 GAME DATA COLLECTION:`, {
         gameId,

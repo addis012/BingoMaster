@@ -133,6 +133,36 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
   });
 
+  // End game without winner mutation
+  const endGameWithoutWinnerMutation = useMutation({
+    mutationFn: async (gameId: number) => {
+      const response = await apiRequest("POST", `/api/games/${gameId}/end-without-winner`);
+      const result = await response.json();
+      return result;
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Game Ended",
+        description: "Game ended without winner - no revenue recorded",
+      });
+      
+      // Reset game state
+      setActiveGameId(null);
+      setGamePlayersMap(new Map());
+      setBookedCartelas(new Set());
+      setTotalCollected(0);
+      setGameActive(false);
+      setGameFinished(true);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to end game: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
+
   // Declare winner mutation
   const declareWinnerMutation = useMutation({
     mutationFn: async (data: { gameId: number; winnerId: number }) => {
