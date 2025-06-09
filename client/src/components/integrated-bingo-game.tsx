@@ -922,7 +922,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
               <div>
                 <p className="text-sm text-gray-600 mb-2">Available cartelas in this game:</p>
                 <div className="flex flex-wrap gap-1">
-                  {[...bookedCartelas].map(num => (
+                  {Array.from(bookedCartelas).map(num => (
                     <Button
                       key={num}
                       variant="outline"
@@ -1076,7 +1076,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
               <div className="mb-4">
                 <h4 className="font-medium mb-2">Selected Cartelas ({bookedCartelas.size})</h4>
                 <div className="flex flex-wrap gap-1">
-                  {[...bookedCartelas].map(num => (
+                  {Array.from(bookedCartelas).map((num: number) => (
                     <span key={num} className="inline-block bg-green-500 text-white px-2 py-1 rounded text-xs font-medium">
                       #{num}
                     </span>
