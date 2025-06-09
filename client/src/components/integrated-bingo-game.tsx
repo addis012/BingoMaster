@@ -46,13 +46,16 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Fetch shop data for profit margin calculation with frequent refresh
-  const { data: shopData } = useQuery({
-    queryKey: ["/api/shops", shopId],
-    enabled: !!shopId,
-    refetchInterval: 2000, // Refresh every 2 seconds to catch admin changes
+  // Fetch ALL shops and find the employee's shop for real-time profit margin
+  const { data: allShops } = useQuery({
+    queryKey: ["/api/shops"],
+    refetchInterval: 1000,
     refetchIntervalInBackground: true,
+    staleTime: 0,
   });
+
+  // Find the specific shop data for this employee
+  const shopData = Array.isArray(allShops) ? allShops.find((shop: any) => shop.id === shopId) : null;
 
   // Create game mutation
   const createGameMutation = useMutation({
@@ -1170,25 +1173,57 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                     </DialogDescription>
                   </DialogHeader>
                   
-                  {/* Cartela Number Grid */}
+                  {/* Cartela Number Grid - One Click Book/Unbook */}
                   <div className="grid grid-cols-10 gap-2 p-4">
                     {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
                       const isBooked = bookedCartelas.has(num);
-                      const isSelected = selectedCartela === num;
                       
                       return (
                         <Button
                           key={num}
-                          variant={isSelected ? "default" : "outline"}
+                          variant={isBooked ? "default" : "outline"}
                           className={`h-12 w-12 ${
-                            isBooked && !isSelected 
-                              ? "bg-green-500 text-white hover:bg-green-600" 
-                              : isSelected 
-                                ? "bg-orange-500 hover:bg-orange-600" 
-                                : ""
+                            isBooked 
+                              ? "bg-green-500 text-white hover:bg-red-500" 
+                              : "hover:bg-blue-500 hover:text-white"
                           }`}
-                          onClick={() => selectCartela(num)}
-                          disabled={isBooked && !isSelected}
+                          onClick={async () => {
+                            if (isBooked) {
+                              // Unbook cartela
+                              setBookedCartelas(prev => {
+                                const newSet = new Set(prev);
+                                newSet.delete(num);
+                                return newSet;
+                              });
+                              setTotalCollected(prev => prev - parseInt(gameAmount));
+                              
+                              // Remove from cartela cards
+                              setCartelaCards(prev => {
+                                const newCards = { ...prev };
+                                delete newCards[num];
+                                return newCards;
+                              });
+                              
+                              toast({
+                                title: "Unbooked",
+                                description: `Cartela #${num} removed from selection`,
+                              });
+                            } else {
+                              // Book cartela instantly
+                              setSelectedCartela(num);
+                              setCartelaCards(prev => ({
+                                ...prev,
+                                [num]: generateCartela()
+                              }));
+                              setBookedCartelas(prev => new Set([...prev, num]));
+                              setTotalCollected(prev => prev + parseInt(gameAmount));
+                              
+                              toast({
+                                title: "Booked",
+                                description: `Cartela #${num} added to selection`,
+                              });
+                            }
+                          }}
                         >
                           {num}
                         </Button>
@@ -1229,22 +1264,19 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                           ))}
                         </div>
                         
+                        {/* Save Selection Button */}
                         <div className="flex gap-2 mt-4 justify-center">
                           <Button 
-                            className="bg-green-500 hover:bg-green-600"
-                            onClick={bookCartela}
-                            disabled={createGameMutation.isPending || addPlayerMutation.isPending}
-                          >
-                            {createGameMutation.isPending || addPlayerMutation.isPending ? "Booking..." : `Book Card (${gameAmount} Birr)`}
-                          </Button>
-                          <Button 
-                            variant="outline"
+                            className="bg-blue-500 hover:bg-blue-600"
                             onClick={() => {
                               setShowCartelaSelector(false);
-                              setSelectedCartela(null);
+                              toast({
+                                title: "Selection Saved",
+                                description: `${bookedCartelas.size} cartela(s) selected for ${totalCollected} ETB`,
+                              });
                             }}
                           >
-                            Cancel
+                            Save Selection ({bookedCartelas.size} cards)
                           </Button>
                         </div>
                       </div>
