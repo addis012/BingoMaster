@@ -1121,20 +1121,6 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
               <div className="mt-4 text-center text-sm text-gray-600">
                 {calledNumbers.length} / 75 numbers called
               </div>
-
-              {/* Booked Cartelas */}
-              {bookedCartelas.size > 0 && (
-                <div className="mt-6">
-                  <h3 className="font-medium mb-2">Booked Cartelas ({bookedCartelas.size})</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {[...bookedCartelas].map(num => (
-                      <Badge key={num} variant="outline" className="text-xs">
-                        #{num}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>
