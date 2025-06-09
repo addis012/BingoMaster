@@ -84,6 +84,11 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   // Add player mutation
   const addPlayerMutation = useMutation({
     mutationFn: async (data: { gameId: number; cartelaNumbers: number[]; playerName: string }) => {
+      console.log("🔍 Player mutation called with:", data);
+      console.log("🔍 Current activeGameId state:", activeGameId);
+      if (!data.gameId || data.gameId === undefined || isNaN(data.gameId)) {
+        throw new Error(`Invalid gameId: ${data.gameId}`);
+      }
       return await apiRequest("POST", `/api/games/${data.gameId}/players`, {
         playerName: data.playerName,
         cartelaNumbers: data.cartelaNumbers,
@@ -235,6 +240,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           console.log("🎮 Creating new backend game for cartela booking");
           const game = await createGameMutation.mutateAsync();
           gameId = game.id;
+          setActiveGameId(game.id);
           console.log("✅ Backend game created with ID:", gameId);
         }
         
@@ -291,6 +297,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       console.log("🚨 NO BACKEND GAME EXISTS - Creating one now...");
       try {
         const game = await createGameMutation.mutateAsync();
+        setActiveGameId(game.id);
         console.log("✅ Emergency backend game created:", game.id);
         
         // Create demo players for active cartelas
@@ -309,14 +316,17 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         }
         
         // Create backend players for all cartelas
+        const newGamePlayersMap = new Map();
         for (const cartelaNum of demoCartelas) {
           const player = await addPlayerMutation.mutateAsync({
             gameId: game.id,
             cartelaNumbers: [cartelaNum],
             playerName: `Player ${cartelaNum}`
           });
+          newGamePlayersMap.set(cartelaNum, player.id);
           console.log(`Created emergency player ${player.id} for cartela ${cartelaNum}`);
         }
+        setGamePlayersMap(newGamePlayersMap);
         
         setTotalCollected(demoCartelas.length * parseInt(gameAmount));
         console.log("✅ Emergency backend sync complete");
