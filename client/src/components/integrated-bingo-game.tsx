@@ -170,9 +170,10 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Declare winner mutation
   const declareWinnerMutation = useMutation({
-    mutationFn: async (data: { gameId: number; winnerId: number }) => {
+    mutationFn: async (data: { gameId: number; winnerId: number; winnerCartela?: number }) => {
       const response = await apiRequest("POST", `/api/games/${data.gameId}/declare-winner`, {
-        winnerId: data.winnerId
+        winnerId: data.winnerId,
+        winnerCartela: data.winnerCartela
       });
       const result = await response.json();
       return result;
