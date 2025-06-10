@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, RefreshCw, DollarSign, TrendingUp, Users, GamepadIcon, Clock, LogOut } from "lucide-react";
+import { Calendar, RefreshCw, DollarSign, TrendingUp, Users, GamepadIcon, Clock, LogOut, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -30,6 +30,32 @@ interface DailyRevenueSummary {
   totalPlayersRegistered: number;
   createdAt: string;
   updatedAt: string;
+}
+
+interface CreditLoad {
+  id: number;
+  adminId: number;
+  amount: string;
+  paymentMethod: string;
+  status: string;
+  processedBy?: number;
+  processedAt?: string;
+  createdAt: string;
+  adminName?: string;
+}
+
+interface WithdrawalRequest {
+  id: number;
+  adminId: number;
+  amount: string;
+  bankAccount: string;
+  type: string;
+  status: string;
+  processedBy?: number;
+  processedAt?: string;
+  rejectionReason?: string;
+  createdAt: string;
+  adminName?: string;
 }
 
 interface SuperAdminDashboardProps {
@@ -89,6 +115,26 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     },
   });
 
+  // Get pending credit requests
+  const { data: creditRequests = [], isLoading: creditRequestsLoading, refetch: refetchCreditRequests } = useQuery({
+    queryKey: ["/api/credit-loads"],
+    queryFn: async () => {
+      const response = await fetch("/api/credit-loads");
+      if (!response.ok) throw new Error("Failed to fetch credit requests");
+      return response.json() as CreditLoad[];
+    },
+  });
+
+  // Get withdrawal requests
+  const { data: withdrawalRequests = [], isLoading: withdrawalsLoading, refetch: refetchWithdrawals } = useQuery({
+    queryKey: ["/api/withdrawal-requests"],
+    queryFn: async () => {
+      const response = await fetch("/api/withdrawal-requests");
+      if (!response.ok) throw new Error("Failed to fetch withdrawal requests");
+      return response.json() as WithdrawalRequest[];
+    },
+  });
+
   // Daily reset mutation
   const dailyResetMutation = useMutation({
     mutationFn: async () => {
@@ -108,6 +154,62 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     onError: (error) => {
       toast({
         title: "Reset Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Credit request approval/rejection mutation
+  const creditRequestMutation = useMutation({
+    mutationFn: async ({ requestId, action }: { requestId: number; action: 'approve' | 'reject' }) => {
+      const response = await fetch(`/api/credit-loads/${requestId}/${action}`, {
+        method: "PATCH",
+      });
+      if (!response.ok) throw new Error(`Failed to ${action} credit request`);
+      return response.json();
+    },
+    onSuccess: (_, variables) => {
+      toast({
+        title: `Credit Request ${variables.action === 'approve' ? 'Approved' : 'Rejected'}`,
+        description: `Credit request has been ${variables.action === 'approve' ? 'approved' : 'rejected'} successfully.`,
+      });
+      refetchCreditRequests();
+    },
+    onError: (error) => {
+      toast({
+        title: "Action Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Withdrawal request approval/rejection mutation
+  const withdrawalRequestMutation = useMutation({
+    mutationFn: async ({ requestId, action, rejectionReason }: { 
+      requestId: number; 
+      action: 'approve' | 'reject';
+      rejectionReason?: string;
+    }) => {
+      const response = await fetch(`/api/withdrawal-requests/${requestId}/${action}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rejectionReason }),
+      });
+      if (!response.ok) throw new Error(`Failed to ${action} withdrawal request`);
+      return response.json();
+    },
+    onSuccess: (_, variables) => {
+      toast({
+        title: `Withdrawal Request ${variables.action === 'approve' ? 'Approved' : 'Rejected'}`,
+        description: `Withdrawal request has been ${variables.action === 'approve' ? 'approved' : 'rejected'} successfully.`,
+      });
+      refetchWithdrawals();
+    },
+    onError: (error) => {
+      toast({
+        title: "Action Failed",
         description: error.message,
         variant: "destructive",
       });
@@ -310,9 +412,11 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="revenues" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="revenues">Revenue Details</TabsTrigger>
             <TabsTrigger value="summaries">Daily Summaries</TabsTrigger>
+            <TabsTrigger value="credit-requests">Credit Requests</TabsTrigger>
+            <TabsTrigger value="withdrawals">Withdrawal Requests</TabsTrigger>
           </TabsList>
 
           <TabsContent value="revenues" className="space-y-6">
@@ -418,6 +522,211 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                         <div className="text-xs text-gray-400 dark:text-gray-500">
                           Last updated: {formatDate(summary.updatedAt)}
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="credit-requests" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Credit Load Requests</CardTitle>
+                <CardDescription>
+                  Pending and processed credit load requests from admins
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {creditRequestsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin text-purple-600" />
+                    <span className="ml-2">Loading credit requests...</span>
+                  </div>
+                ) : creditRequests.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No credit requests found
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {creditRequests.map((request) => (
+                      <div
+                        key={request.id}
+                        className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border"
+                      >
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900 dark:text-white">
+                              {request.adminName || `Admin ID: ${request.adminId}`}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              Amount: {formatCurrency(request.amount)} • Method: {request.paymentMethod}
+                            </div>
+                            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                              Requested: {formatDate(request.createdAt)}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                            <Badge 
+                              className={
+                                request.status === 'pending' 
+                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                  : request.status === 'confirmed'
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                              }
+                            >
+                              {request.status === 'pending' && <AlertCircle className="w-3 h-3 mr-1" />}
+                              {request.status === 'confirmed' && <CheckCircle className="w-3 h-3 mr-1" />}
+                              {request.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
+                              {request.status}
+                            </Badge>
+                            
+                            {request.status === 'pending' && (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  onClick={() => creditRequestMutation.mutate({ 
+                                    requestId: request.id, 
+                                    action: 'approve' 
+                                  })}
+                                  disabled={creditRequestMutation.isPending}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => creditRequestMutation.mutate({ 
+                                    requestId: request.id, 
+                                    action: 'reject' 
+                                  })}
+                                  disabled={creditRequestMutation.isPending}
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Reject
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {request.processedAt && (
+                          <div className="text-xs text-gray-400 dark:text-gray-500 border-t pt-2 mt-2">
+                            Processed: {formatDate(request.processedAt)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="withdrawals" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Withdrawal Requests</CardTitle>
+                <CardDescription>
+                  Pending and processed withdrawal requests from admins
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {withdrawalsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin text-purple-600" />
+                    <span className="ml-2">Loading withdrawal requests...</span>
+                  </div>
+                ) : withdrawalRequests.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No withdrawal requests found
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {withdrawalRequests.map((request) => (
+                      <div
+                        key={request.id}
+                        className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border"
+                      >
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900 dark:text-white">
+                              {request.adminName || `Admin ID: ${request.adminId}`}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              Amount: {formatCurrency(request.amount)} • Type: {request.type}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              Bank Account: {request.bankAccount}
+                            </div>
+                            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                              Requested: {formatDate(request.createdAt)}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                            <Badge 
+                              className={
+                                request.status === 'pending' 
+                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                  : request.status === 'approved'
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                              }
+                            >
+                              {request.status === 'pending' && <AlertCircle className="w-3 h-3 mr-1" />}
+                              {request.status === 'approved' && <CheckCircle className="w-3 h-3 mr-1" />}
+                              {request.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
+                              {request.status}
+                            </Badge>
+                            
+                            {request.status === 'pending' && (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  onClick={() => withdrawalRequestMutation.mutate({ 
+                                    requestId: request.id, 
+                                    action: 'approve' 
+                                  })}
+                                  disabled={withdrawalRequestMutation.isPending}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => withdrawalRequestMutation.mutate({ 
+                                    requestId: request.id, 
+                                    action: 'reject' 
+                                  })}
+                                  disabled={withdrawalRequestMutation.isPending}
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Reject
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {request.rejectionReason && (
+                          <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded mt-2">
+                            Rejection reason: {request.rejectionReason}
+                          </div>
+                        )}
+                        
+                        {request.processedAt && (
+                          <div className="text-xs text-gray-400 dark:text-gray-500 border-t pt-2 mt-2">
+                            Processed: {formatDate(request.processedAt)}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
