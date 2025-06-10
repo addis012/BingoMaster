@@ -2179,10 +2179,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Super admin access required" });
       }
 
-      const adminData = req.body;
+      const { name, username, password, shopName, commissionRate, referredBy } = req.body;
+      
+      if (!name || !username || !password || !shopName) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Hash password before storing
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const adminData = {
+        name,
+        username,
+        password: hashedPassword,
+        shopName,
+        commissionRate: commissionRate || "15",
+        referredBy: referredBy ? parseInt(referredBy) : null
+      };
+
       const newAdmin = await storage.createAdminUser(adminData);
       res.json(newAdmin);
     } catch (error) {
+      console.error("Admin creation error:", error);
       res.status(500).json({ message: "Failed to create admin user" });
     }
   });
