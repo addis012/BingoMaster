@@ -700,24 +700,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Process game profits with credit deduction
+      // Process game profits with credit deduction and Super Admin revenue logging
       await storage.processGameProfits(gameId, totalCollectedBirr.toString());
-      console.log(`Game profits: admin=${adminProfit}, super admin commission=${superAdminCommission}, deducted from admin credit`);
-      
-      // Create game history record with winner cartela number
-      const winnerCartelaNumber = winner?.cartelaNumbers?.[0] || null;
-      await storage.createGameHistory({
-        gameId,
-        shopId: game.shopId,
-        employeeId: game.employeeId,
-        totalCollected: totalCollectedBirr.toString(),
-        prizeAmount: prizeAmountBirr.toString(),
-        adminProfit: adminProfit.toString(),
-        superAdminCommission: superAdminCommission.toString(),
-        playerCount: players.length,
-        winnerName: winner?.playerName || 'Unknown',
-        winningCartela: winnerCartelaNumber ? `#${winnerCartelaNumber}` : null,
-      });
+      console.log(`✅ Super Admin revenue logged from game ${gameId}: ${superAdminCommission} ETB`);
 
       // Notify WebSocket clients
       const clients = gameClients.get(gameId);
