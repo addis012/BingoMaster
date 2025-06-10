@@ -409,6 +409,16 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     );
   };
 
+  // Get admins for referral dropdown
+  const { data: allAdmins = [] } = useQuery({
+    queryKey: ["/api/super-admin/admins"],
+    queryFn: async () => {
+      const response = await fetch("/api/super-admin/admins");
+      if (!response.ok) throw new Error("Failed to fetch admins");
+      return response.json();
+    },
+  });
+
   // Admin Form Component
   const AdminForm = ({ admin, onSubmit, onCancel, isSubmitting }: {
     admin?: any;
@@ -419,21 +429,21 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     const [formData, setFormData] = useState({
       name: admin?.name || '',
       username: admin?.username || '',
-      email: admin?.email || '',
       password: '',
-      shopId: admin?.shopId || '',
-      commissionRate: admin?.commissionRate || '10',
-      adminProfitMargin: admin?.adminProfitMargin || '50',
+      shopName: admin?.shopName || '',
+      commissionRate: admin?.commissionRate || '15',
+      referredBy: admin?.referredBy || '',
     });
 
     return (
-      <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label>Name</Label>
+          <Label>Admin Name</Label>
           <Input
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Admin Name"
+            placeholder="Full Name"
+            className="h-9"
           />
         </div>
         
@@ -442,75 +452,73 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
           <Input
             value={formData.username}
             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-            placeholder="Username"
+            placeholder="Login Username"
             disabled={!!admin}
+            className="h-9"
           />
         </div>
-        
+
         <div>
-          <Label>Email</Label>
+          <Label>Password</Label>
           <Input
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="Email"
+            type="password"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            placeholder={admin ? "Leave blank to keep current" : "New Password"}
+            className="h-9"
           />
         </div>
-        
-        {!admin && (
-          <div>
-            <Label>Password</Label>
-            <Input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="Password"
-            />
-          </div>
-        )}
-        
+
         <div>
-          <Label>Shop ID</Label>
+          <Label>Shop Name</Label>
           <Input
-            value={formData.shopId}
-            onChange={(e) => setFormData({ ...formData, shopId: e.target.value })}
-            placeholder="Shop ID"
+            value={formData.shopName}
+            onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
+            placeholder="Shop/Branch Name"
+            className="h-9"
           />
         </div>
-        
+
         <div>
           <Label>Commission Rate (%)</Label>
           <Input
             type="number"
             value={formData.commissionRate}
             onChange={(e) => setFormData({ ...formData, commissionRate: e.target.value })}
-            placeholder="10"
+            placeholder="15"
+            min="0"
+            max="100"
+            className="h-9"
           />
         </div>
-        
+
         <div>
-          <Label>Admin Profit Margin (%)</Label>
-          <Input
-            type="number"
-            value={formData.adminProfitMargin}
-            onChange={(e) => setFormData({ ...formData, adminProfitMargin: e.target.value })}
-            placeholder="50"
-          />
+          <Label>Referred By (Optional)</Label>
+          <select 
+            value={formData.referredBy}
+            onChange={(e) => setFormData({ ...formData, referredBy: e.target.value })}
+            className="w-full h-9 px-3 border border-gray-300 rounded-md text-sm"
+          >
+            <option value="">No Referrer</option>
+            {allAdmins.map((a: any) => (
+              <option key={a.id} value={a.id}>{a.name} ({a.username})</option>
+            ))}
+          </select>
         </div>
-        
-        <div className="flex gap-2 pt-4">
+
+        <div className="col-span-2 flex gap-2 pt-2">
           <Button
             onClick={() => onSubmit(formData)}
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 h-9"
           >
-            {isSubmitting ? 'Saving...' : (admin ? 'Update' : 'Create')}
+            {isSubmitting ? "Saving..." : admin ? "Update Admin" : "Create Admin"}
           </Button>
           <Button
-            variant="outline"
             onClick={onCancel}
+            variant="outline"
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 h-9"
           >
             Cancel
           </Button>
