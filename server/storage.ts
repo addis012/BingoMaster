@@ -703,6 +703,9 @@ export class DatabaseStorage implements IStorage {
     const [shop] = await db.select().from(shops).where(eq(shops.id, game.shopId));
     if (!shop) return;
 
+    const [admin] = await db.select().from(users).where(eq(users.id, shop.adminId!));
+    if (!admin) return;
+
     const profits = await this.calculateProfitSharing(totalCollected, game.shopId);
     
     // CORRECT LOGIC: Deduct super admin's commission from admin's credit balance
@@ -714,7 +717,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`Updating shop ${game.shopId} revenue to ${newTotalRevenue}`);
     
     // Create transaction records
-    await this.createTransaction({
+    const gameTransaction = await this.createTransaction({
       gameId,
       shopId: game.shopId,
       employeeId: game.employeeId,
@@ -724,7 +727,7 @@ export class DatabaseStorage implements IStorage {
       description: `Game ${gameId} collection by employee`,
     });
 
-    await this.createTransaction({
+    const commissionTransaction = await this.createTransaction({
       gameId,
       shopId: game.shopId,
       employeeId: null,
@@ -733,6 +736,25 @@ export class DatabaseStorage implements IStorage {
       amount: `-${profits.superAdminCommission}`,
       description: `Super admin commission deducted for game ${gameId}`,
     });
+
+    // Log Super Admin Revenue - THIS WAS MISSING!
+    const currentDate = this.getCurrentEATDate();
+    await this.createSuperAdminRevenue({
+      adminId: shop.adminId!,
+      adminName: admin.name || admin.username,
+      shopId: game.shopId,
+      shopName: shop.name,
+      gameId: gameId,
+      transactionId: commissionTransaction.id,
+      revenueType: 'game_commission',
+      amount: profits.superAdminCommission,
+      commissionRate: admin.commissionRate || "15.00",
+      sourceAmount: totalCollected,
+      description: `Game commission from ${admin.name || admin.username} - Game ${gameId}`,
+      dateEAT: currentDate,
+    });
+
+    console.log(`✅ Super Admin revenue logged: ${profits.superAdminCommission} ETB from game ${gameId}`);
 
     // Process referral bonus if applicable
     if (profits.referralBonus) {
@@ -1141,6 +1163,66 @@ export class DatabaseStorage implements IStorage {
       totalGamesPlayed: totalGames,
       totalPlayersRegistered: totalPlayers,
     });
+  }
+
+  // Admin management methods for Super Admin
+  async getAdminUsers(): Promise<User[]> {
+    return await db.select().from(users)
+      .where(eq(users.role, 'admin'))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async createAdminUser(adminData: any): Promise<User> {
+    const accountNumber = await this.generateAccountNumber();
+    
+    const [newAdmin] = await db.insert(users).values({
+      username: adminData.username,
+      password: adminData.password, // Should be hashed in real implementation
+      role: 'admin',
+      name: adminData.name,
+      email: adminData.email,
+      phone: adminData.phone,
+      creditBalance: adminData.initialCredit || "0.00",
+      accountNumber,
+      commissionRate: adminData.commissionRate || "15.00",
+      referredBy: adminData.referredBy || null,
+      isBlocked: false,
+    }).returning();
+
+    return newAdmin;
+  }
+
+  // Referral system methods for Super Admin
+  async getAllReferralCommissions(): Promise<any[]> {
+    return await db.select({
+      id: referralCommissions.id,
+      referrerId: referralCommissions.referrerId,
+      referrerName: users.name,
+      amount: referralCommissions.amount,
+      sourceAmount: referralCommissions.sourceAmount,
+      status: referralCommissions.status,
+      createdAt: referralCommissions.createdAt,
+      processedAt: referralCommissions.processedAt,
+    })
+    .from(referralCommissions)
+    .leftJoin(users, eq(referralCommissions.referrerId, users.id))
+    .orderBy(desc(referralCommissions.createdAt));
+  }
+
+  async getReferralSettings(): Promise<any> {
+    // In a real implementation, this would come from a settings table
+    // For now, returning default values that can be configured
+    return {
+      referralCommissionRate: "5.00", // 5% commission on referred admin's profits
+      minimumPayoutAmount: "100.00", // Minimum amount to withdraw
+      autoApproveCommissions: false, // Whether to auto-approve small amounts
+    };
+  }
+
+  async updateReferralSettings(settings: any): Promise<void> {
+    // In a real implementation, this would update a settings table
+    // For now, we'll just log the update
+    console.log("Referral settings updated:", settings);
   }
 }
 

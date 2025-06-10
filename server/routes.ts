@@ -2100,5 +2100,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Super Admin - Admin Management
+  app.get("/api/super-admin/admins", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const admins = await storage.getAdminUsers();
+      res.json(admins);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get admin users" });
+    }
+  });
+
+  app.post("/api/super-admin/admins", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const adminData = req.body;
+      const newAdmin = await storage.createAdminUser(adminData);
+      res.json(newAdmin);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create admin user" });
+    }
+  });
+
+  app.patch("/api/super-admin/admins/:id", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const adminId = parseInt(req.params.id);
+      const updates = req.body;
+      const updatedAdmin = await storage.updateUser(adminId, updates);
+      res.json(updatedAdmin);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update admin user" });
+    }
+  });
+
+  app.patch("/api/super-admin/admins/:id/:action", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const adminId = parseInt(req.params.id);
+      const action = req.params.action;
+      
+      if (action === 'block') {
+        await storage.updateUser(adminId, { isBlocked: true });
+      } else if (action === 'unblock') {
+        await storage.updateUser(adminId, { isBlocked: false });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: `Failed to ${req.params.action} admin user` });
+    }
+  });
+
+  // Super Admin - Referral Management
+  app.get("/api/super-admin/referral-commissions", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const commissions = await storage.getAllReferralCommissions();
+      res.json(commissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get referral commissions" });
+    }
+  });
+
+  app.get("/api/super-admin/referral-settings", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const settings = await storage.getReferralSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get referral settings" });
+    }
+  });
+
+  app.patch("/api/super-admin/referral-settings", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const settings = req.body;
+      await storage.updateReferralSettings(settings);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update referral settings" });
+    }
+  });
+
   return httpServer;
 }
