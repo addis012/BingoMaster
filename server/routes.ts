@@ -627,9 +627,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Use the provided cartela number from frontend, or fallback to winner's cartela data
+      const winnerCartelaNumbers = JSON.parse(winner?.cartelaNumbers || "[]");
       let winningCartela = winnerCartela || null;
       if (!winningCartela) {
-        const winnerCartelaNumbers = JSON.parse(winner?.cartelaNumbers || "[]");
         winningCartela = winnerCartelaNumbers[0] || null;
       }
       

@@ -186,13 +186,18 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         description: `Winner gets ${result.financial.prizeAmount} ETB. Admin profit: ${result.financial.adminProfit} ETB. Commission: ${result.financial.superAdminCommission} ETB deducted.`,
       });
       
-      // Reset game state
-      setActiveGameId(null);
-      setGamePlayersMap(new Map());
-      setBookedCartelas(new Set());
-      setTotalCollected(0);
+      // End game properly - keep cartelas but mark as finished
       setGameActive(false);
       setGameFinished(true);
+      setShowWinnerVerification(false);
+      
+      // Update refs to stop all processes
+      gameActiveRef.current = false;
+      gameFinishedRef.current = true;
+      isCallingNumberRef.current = false;
+      
+      // Stop any automatic calling
+      stopAutomaticNumberCalling();
       
       // Refresh admin dashboard data
       queryClient.invalidateQueries({ queryKey: ["/api/admin/shop-stats"] });
