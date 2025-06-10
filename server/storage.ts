@@ -347,12 +347,10 @@ export class DatabaseStorage implements IStorage {
     totalGames: number;
     totalPlayers: number;
   }> {
-    let transactionQuery = db.select({
-      total: sum(transactions.amount).as('total')
-    }).from(transactions).where(and(
-      eq(transactions.shopId, shopId),
-      eq(transactions.type, 'entry_fee')
-    ));
+    // Use game history for revenue calculation to avoid duplicates
+    let revenueQuery = db.select({
+      total: sum(gameHistory.totalCollected).as('total')
+    }).from(gameHistory).where(eq(gameHistory.shopId, shopId));
 
     let gameQuery = db.select({
       count: count().as('count')
@@ -365,11 +363,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(games.shopId, shopId));
 
     if (startDate && endDate) {
-      transactionQuery = transactionQuery.where(and(
-        eq(transactions.shopId, shopId),
-        eq(transactions.type, 'entry_fee'),
-        gte(transactions.createdAt, startDate),
-        lte(transactions.createdAt, endDate)
+      revenueQuery = revenueQuery.where(and(
+        eq(gameHistory.shopId, shopId),
+        gte(gameHistory.completedAt, startDate),
+        lte(gameHistory.completedAt, endDate)
       ));
 
       gameQuery = gameQuery.where(and(
@@ -385,7 +382,7 @@ export class DatabaseStorage implements IStorage {
       ));
     }
 
-    const [revenueResult] = await transactionQuery;
+    const [revenueResult] = await revenueQuery;
     const [gamesResult] = await gameQuery;
     const [playersResult] = await playerQuery;
 

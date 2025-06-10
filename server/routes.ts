@@ -637,30 +637,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cartelaNumbers: winnerCartelaNumbers
       });
 
-      // Create comprehensive employee activity record in game history
-      console.log(`💾 CREATING COMPREHENSIVE GAME HISTORY RECORD...`);
-      const gameHistory = await storage.createGameHistory({
-        gameId: gameId,
-        shopId: game.shopId,
-        employeeId: game.employeeId,
-        playerCount: players.length,
-        totalCollected: totalCollectedBirr.toString(),
-        prizeAmount: prizeAmountBirr.toString(),
-        adminProfit: adminProfit.toString(),
-        superAdminCommission: superAdminCommission.toString(),
-        winnerName: winner?.playerName || 'Unknown Player',
-        winningCartela: winningCartela ? `#${winningCartela}` : null,
-        completedAt: new Date(),
-      });
+      // Check if game history already exists to prevent duplicates
+      const existingHistory = await storage.getGameHistory(game.shopId);
+      const gameAlreadyRecorded = existingHistory.some(h => h.gameId === gameId);
       
-      console.log(`✅ GAME HISTORY CREATED:`, {
-        historyId: gameHistory.id,
-        recordedAt: new Date().toISOString(),
-        employeeName: employee?.name,
-        totalCollected: totalCollectedBirr,
-        adminProfit: adminProfit,
-        superAdminCommission: superAdminCommission
-      });
+      if (gameAlreadyRecorded) {
+        console.log(`⚠️ Game ${gameId} already has history record, skipping duplicate creation`);
+      } else {
+        // Create comprehensive employee activity record in game history
+        console.log(`💾 CREATING COMPREHENSIVE GAME HISTORY RECORD...`);
+        const gameHistory = await storage.createGameHistory({
+          gameId: gameId,
+          shopId: game.shopId,
+          employeeId: game.employeeId,
+          playerCount: players.length,
+          totalCollected: totalCollectedBirr.toString(),
+          prizeAmount: prizeAmountBirr.toString(),
+          adminProfit: adminProfit.toString(),
+          superAdminCommission: superAdminCommission.toString(),
+          winnerName: winner?.playerName || 'Unknown Player',
+          winningCartela: winningCartela ? `#${winningCartela}` : null,
+          completedAt: new Date(),
+        });
+        
+        console.log(`✅ GAME HISTORY CREATED:`, {
+          historyId: gameHistory.id,
+          gameId: gameId,
+          uniqueRecord: true
+        });
+      }
 
       // Create transactions in Birr
       await storage.createTransaction({
