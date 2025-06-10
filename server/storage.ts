@@ -1008,6 +1008,62 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Credit load approval with referral commission (3%)
+  async approveCreditLoadRequest(requestId: number, processedBy: number): Promise<void> {
+    const [request] = await db.select().from(creditLoadRequests)
+      .where(eq(creditLoadRequests.id, requestId));
+    
+    if (!request) {
+      throw new Error("Credit load request not found");
+    }
+
+    // Get admin details to check for referrer
+    const [admin] = await db.select().from(users)
+      .where(eq(users.id, request.adminId));
+
+    // Update admin's credit balance
+    await db.update(users)
+      .set({ 
+        creditBalance: sql`${users.creditBalance} + ${request.amount}` 
+      })
+      .where(eq(users.id, request.adminId));
+
+    // Create referral commission if admin has a referrer (3% of credit load)
+    if (admin?.referredBy) {
+      const commissionAmount = this.calculateReferralCommission(request.amount, "3.00");
+      await this.createReferralCommission({
+        referrerId: admin.referredBy,
+        referredId: admin.id,
+        sourceType: 'credit_load',
+        sourceId: requestId,
+        sourceAmount: request.amount,
+        commissionRate: "3.00",
+        commissionAmount,
+        status: 'pending'
+      });
+    }
+
+    // Mark request as approved
+    await db.update(creditLoadRequests)
+      .set({ 
+        status: 'approved', 
+        processedAt: new Date(), 
+        processedBy 
+      })
+      .where(eq(creditLoadRequests.id, requestId));
+  }
+
+  async rejectCreditLoadRequest(requestId: number, processedBy: number, rejectionReason: string): Promise<void> {
+    await db.update(creditLoadRequests)
+      .set({ 
+        status: 'rejected', 
+        processedAt: new Date(), 
+        processedBy,
+        rejectionReason 
+      })
+      .where(eq(creditLoadRequests.id, requestId));
+  }
+
   // Super Admin revenue tracking methods
   async createSuperAdminRevenue(revenue: InsertSuperAdminRevenue): Promise<SuperAdminRevenue> {
     const [createdRevenue] = await db
@@ -1175,21 +1231,36 @@ export class DatabaseStorage implements IStorage {
   async createAdminUser(adminData: any): Promise<User> {
     const accountNumber = await this.generateAccountNumber();
     
+    // Create shop first with auto-generated ID
+    const [newShop] = await db.insert(shops).values({
+      name: adminData.shopName,
+      profitMargin: "20.00",
+      superAdminCommission: adminData.commissionRate || "15.00",
+      referralCommission: "3.00", // Fixed 3% for referral system
+      isBlocked: false,
+      totalRevenue: "0.00"
+    }).returning();
+
+    // Create admin and link to shop
     const [newAdmin] = await db.insert(users).values({
       username: adminData.username,
       password: adminData.password, // Should be hashed in real implementation
       role: 'admin',
       name: adminData.name,
-      email: adminData.email,
-      phone: adminData.phone,
+      email: adminData.email || `${adminData.username}@shop.local`,
+      shopId: newShop.id,
       creditBalance: adminData.initialCredit || "0.00",
       accountNumber,
-      commissionRate: adminData.commissionRate || "15.00",
-      referredBy: adminData.referredBy || null,
+      referredBy: adminData.referredBy ? parseInt(adminData.referredBy) : null,
       isBlocked: false,
     }).returning();
 
-    return newAdmin;
+    // Update shop to link back to admin
+    await db.update(shops)
+      .set({ adminId: newAdmin.id })
+      .where(eq(shops.id, newShop.id));
+
+    return { ...newAdmin, shopName: newShop.name };
   }
 
   // Referral system methods for Super Admin
