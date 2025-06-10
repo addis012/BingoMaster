@@ -38,6 +38,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
   const [gamePlayersMap, setGamePlayersMap] = useState<Map<number, number>>(new Map());
   const [autoplaySpeed, setAutoplaySpeed] = useState(3000); // 3 seconds default
+  const [isCallingNumber, setIsCallingNumber] = useState(false); // Mutex to prevent overlapping calls
   
   // Refs to track real-time state for closures
   const gameActiveRef = useRef(false);
@@ -47,6 +48,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const automaticCallTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const calledNumbersRef = useRef<number[]>([]);
   const activeGameIdRef = useRef<number | null>(null);
+  const isCallingNumberRef = useRef(false); // Ref for mutex
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -348,11 +350,21 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
   // Call a random number
   const callNumber = async () => {
+    // MUTEX CHECK: Prevent overlapping calls
+    if (isCallingNumberRef.current) {
+      console.log("🚫 MUTEX: Already calling a number, skipping this call");
+      return;
+    }
+
     // IMMEDIATE CHECK: Stop all number calling if winner is found or game is finished
     if (gameFinished || winnerFound || gameFinishedRef.current || winnerFoundRef.current) {
       console.log("❌ IMMEDIATE STOP: Game is finished or winner found, aborting number calling");
       return;
     }
+
+    // Set mutex lock
+    isCallingNumberRef.current = true;
+    setIsCallingNumber(true);
 
     console.log("🎯 callNumber invoked", {
       gameActive,
@@ -372,12 +384,18 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     // CRITICAL: Double-check to stop all number calling if winner is found or game is finished
     if (gameFinished || winnerFound || gameFinishedRef.current || winnerFoundRef.current) {
       console.log("❌ Game is finished or winner found, stopping number calling");
+      // Release mutex before returning
+      isCallingNumberRef.current = false;
+      setIsCallingNumber(false);
       return;
     }
 
     // Use refs for real-time state checking
     if (!gameActiveRef.current || gamePausedRef.current) {
       console.log("❌ Game not active or paused, stopping number calling");
+      // Release mutex before returning
+      isCallingNumberRef.current = false;
+      setIsCallingNumber(false);
       return;
     }
 
@@ -539,9 +557,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
           console.log("🧹 Cleared pending automatic call timeout");
         }
         
-        // Immediately declare winner automatically (no delay)
-        console.log("🚀 Immediately declaring winner for cartela:", cartelaNumber);
-        declareWinnerAutomatically(cartelaNumber);
+        // Show winner verification dialog instead of auto-declaring
+        console.log("🎉 Winner detected - showing verification dialog for cartela:", cartelaNumber);
+        setShowWinnerVerification(true);
         
         return; // Stop checking once winner is found
       }
@@ -806,9 +824,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     }
   };
 
-  // Reset game - properly handle games ending without winners
+  // Complete reset game - clears everything including cartelas
   const resetGame = async () => {
-    console.log("🔄 Resetting game");
+    console.log("🔄 Complete game reset");
     
     // If there's an active game and no winner was found, end it without recording revenue
     if (activeGameId && !winnerFound) {
@@ -825,7 +843,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       }
     }
     
-    // Reset frontend state
+    // Reset frontend state completely
     setCalledNumbers([]);
     setCurrentNumber(null);
     setGameActive(false);
@@ -849,6 +867,57 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     activeGameIdRef.current = null;
     
     stopAutomaticNumberCalling();
+  };
+
+  // Restart game - preserves cartela selections for new game
+  const restartGame = async () => {
+    console.log("🔄 Restarting game with same cartelas");
+    
+    // Store current cartela selections
+    const previousCartelas = new Set(bookedCartelas);
+    const previousTotalCollected = totalCollected;
+    
+    // If there's an active game and no winner was found, end it without recording revenue
+    if (activeGameId && !winnerFound) {
+      console.log("🎯 Ending game without winner - no revenue will be recorded");
+      try {
+        await endGameWithoutWinnerMutation.mutateAsync(activeGameId);
+      } catch (error) {
+        console.error("Failed to end game without winner:", error);
+        toast({
+          title: "Warning",
+          description: "Failed to properly end game in backend",
+          variant: "destructive"
+        });
+      }
+    }
+    
+    // Reset game state but preserve cartela selections
+    setCalledNumbers([]);
+    setCurrentNumber(null);
+    setGameActive(false);
+    setGameFinished(false);
+    setGamePaused(false);
+    setWinnerFound(null);
+    setWinnerPattern(null);
+    setLastCalledLetter("");
+    setActiveGameId(null);
+    setGamePlayersMap(new Map());
+    // Keep bookedCartelas and totalCollected for restart
+    setShowWinnerVerification(false);
+    setFinalPrizeAmount(null);
+    
+    // Update refs
+    gameActiveRef.current = false;
+    gamePausedRef.current = false;
+    gameFinishedRef.current = false;
+    winnerFoundRef.current = false;
+    calledNumbersRef.current = [];
+    activeGameIdRef.current = null;
+    
+    stopAutomaticNumberCalling();
+    
+    console.log("🔄 Game restarted with preserved cartelas:", Array.from(previousCartelas));
   };
 
   // Start game - support both pre-booked games and quick play mode
@@ -1514,7 +1583,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                 </Button>
 
                 <Button 
-                  onClick={resetGame}
+                  onClick={restartGame}
                   variant="outline"
                   className="w-full"
                 >
