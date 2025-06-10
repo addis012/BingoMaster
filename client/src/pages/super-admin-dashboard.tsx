@@ -252,6 +252,457 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     }
   };
 
+  // Admin Management Component
+  const AdminManagementSection = () => {
+    const [showAddAdmin, setShowAddAdmin] = useState(false);
+    const [editingAdmin, setEditingAdmin] = useState<any>(null);
+
+    const { data: admins = [], refetch: refetchAdmins } = useQuery({
+      queryKey: ["/api/super-admin/admins"],
+    });
+
+    const createAdminMutation = useMutation({
+      mutationFn: async (adminData: any) => {
+        const response = await fetch("/api/super-admin/admins", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(adminData),
+        });
+        if (!response.ok) throw new Error("Failed to create admin");
+        return response.json();
+      },
+      onSuccess: () => {
+        toast({ title: "Admin Created", description: "New admin account created successfully." });
+        refetchAdmins();
+        setShowAddAdmin(false);
+      },
+      onError: (error) => {
+        toast({ title: "Creation Failed", description: error.message, variant: "destructive" });
+      },
+    });
+
+    const updateAdminMutation = useMutation({
+      mutationFn: async ({ adminId, data }: { adminId: number; data: any }) => {
+        const response = await fetch(`/api/super-admin/admins/${adminId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error("Failed to update admin");
+        return response.json();
+      },
+      onSuccess: () => {
+        toast({ title: "Admin Updated", description: "Admin account updated successfully." });
+        refetchAdmins();
+        setEditingAdmin(null);
+      },
+      onError: (error) => {
+        toast({ title: "Update Failed", description: error.message, variant: "destructive" });
+      },
+    });
+
+    const toggleAdminStatusMutation = useMutation({
+      mutationFn: async ({ adminId, action }: { adminId: number; action: 'block' | 'unblock' }) => {
+        const response = await fetch(`/api/super-admin/admins/${adminId}/${action}`, {
+          method: "PATCH",
+        });
+        if (!response.ok) throw new Error(`Failed to ${action} admin`);
+        return response.json();
+      },
+      onSuccess: (_, variables) => {
+        toast({ 
+          title: `Admin ${variables.action === 'block' ? 'Blocked' : 'Unblocked'}`, 
+          description: `Admin has been ${variables.action === 'block' ? 'blocked' : 'unblocked'} successfully.` 
+        });
+        refetchAdmins();
+      },
+      onError: (error) => {
+        toast({ title: "Action Failed", description: error.message, variant: "destructive" });
+      },
+    });
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">Admin Accounts</h3>
+          <Button onClick={() => setShowAddAdmin(true)}>
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add New Admin
+          </Button>
+        </div>
+
+        <div className="space-y-4">
+          {admins.map((admin: any) => (
+            <div key={admin.id} className="border rounded-lg p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="font-medium">{admin.name}</div>
+                    <Badge variant={admin.isBlocked ? "destructive" : "default"}>
+                      {admin.isBlocked ? "Blocked" : "Active"}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    Username: {admin.username} • Account: {admin.accountNumber}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Credit Balance: {formatCurrency(admin.creditBalance)}
+                  </div>
+                  {admin.email && (
+                    <div className="text-sm text-gray-500">Email: {admin.email}</div>
+                  )}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditingAdmin(admin)}
+                  >
+                    <Settings className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={admin.isBlocked ? "default" : "destructive"}
+                    onClick={() => toggleAdminStatusMutation.mutate({
+                      adminId: admin.id,
+                      action: admin.isBlocked ? 'unblock' : 'block'
+                    })}
+                    disabled={toggleAdminStatusMutation.isPending}
+                  >
+                    {admin.isBlocked ? 'Unblock' : 'Block'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {(showAddAdmin || editingAdmin) && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4">
+                  {editingAdmin ? 'Edit Admin' : 'Add New Admin'}
+                </h3>
+                <AdminForm
+                  admin={editingAdmin}
+                  onSubmit={(data) => {
+                    if (editingAdmin) {
+                      updateAdminMutation.mutate({ adminId: editingAdmin.id, data });
+                    } else {
+                      createAdminMutation.mutate(data);
+                    }
+                  }}
+                  onCancel={() => {
+                    setShowAddAdmin(false);
+                    setEditingAdmin(null);
+                  }}
+                  isSubmitting={createAdminMutation.isPending || updateAdminMutation.isPending}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Admin Form Component
+  const AdminForm = ({ admin, onSubmit, onCancel, isSubmitting }: {
+    admin?: any;
+    onSubmit: (data: any) => void;
+    onCancel: () => void;
+    isSubmitting: boolean;
+  }) => {
+    const [formData, setFormData] = useState({
+      name: admin?.name || '',
+      username: admin?.username || '',
+      email: admin?.email || '',
+      password: '',
+      shopId: admin?.shopId || '',
+      commissionRate: admin?.commissionRate || '10',
+      adminProfitMargin: admin?.adminProfitMargin || '50',
+    });
+
+    return (
+      <div className="space-y-4">
+        <div>
+          <Label>Name</Label>
+          <Input
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Admin Name"
+          />
+        </div>
+        
+        <div>
+          <Label>Username</Label>
+          <Input
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            placeholder="Username"
+            disabled={!!admin}
+          />
+        </div>
+        
+        <div>
+          <Label>Email</Label>
+          <Input
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="Email"
+          />
+        </div>
+        
+        {!admin && (
+          <div>
+            <Label>Password</Label>
+            <Input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="Password"
+            />
+          </div>
+        )}
+        
+        <div>
+          <Label>Shop ID</Label>
+          <Input
+            value={formData.shopId}
+            onChange={(e) => setFormData({ ...formData, shopId: e.target.value })}
+            placeholder="Shop ID"
+          />
+        </div>
+        
+        <div>
+          <Label>Commission Rate (%)</Label>
+          <Input
+            type="number"
+            value={formData.commissionRate}
+            onChange={(e) => setFormData({ ...formData, commissionRate: e.target.value })}
+            placeholder="10"
+          />
+        </div>
+        
+        <div>
+          <Label>Admin Profit Margin (%)</Label>
+          <Input
+            type="number"
+            value={formData.adminProfitMargin}
+            onChange={(e) => setFormData({ ...formData, adminProfitMargin: e.target.value })}
+            placeholder="50"
+          />
+        </div>
+        
+        <div className="flex gap-2 pt-4">
+          <Button
+            onClick={() => onSubmit(formData)}
+            disabled={isSubmitting}
+            className="flex-1"
+          >
+            {isSubmitting ? 'Saving...' : (admin ? 'Update' : 'Create')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  // Referral Management Component
+  const ReferralManagementSection = () => {
+    const { data: referralCommissions = [], refetch: refetchReferrals } = useQuery({
+      queryKey: ["/api/super-admin/referral-commissions"],
+    });
+
+    const { data: referralSettings = {}, refetch: refetchSettings } = useQuery({
+      queryKey: ["/api/super-admin/referral-settings"],
+    });
+
+    const approveReferralMutation = useMutation({
+      mutationFn: async ({ commissionId, action }: { commissionId: number; action: 'approve' | 'reject' }) => {
+        const response = await fetch(`/api/referral-commissions/${commissionId}/${action}`, {
+          method: "PATCH",
+        });
+        if (!response.ok) throw new Error(`Failed to ${action} referral commission`);
+        return response.json();
+      },
+      onSuccess: (_, variables) => {
+        toast({
+          title: `Referral Commission ${variables.action === 'approve' ? 'Approved' : 'Rejected'}`,
+          description: `Referral commission has been ${variables.action === 'approve' ? 'approved' : 'rejected'} successfully.`,
+        });
+        refetchReferrals();
+      },
+      onError: (error) => {
+        toast({
+          title: "Action Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+
+    const updateSettingsMutation = useMutation({
+      mutationFn: async (settings: any) => {
+        const response = await fetch("/api/super-admin/referral-settings", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(settings),
+        });
+        if (!response.ok) throw new Error("Failed to update referral settings");
+        return response.json();
+      },
+      onSuccess: () => {
+        toast({
+          title: "Settings Updated",
+          description: "Referral system settings updated successfully.",
+        });
+        refetchSettings();
+      },
+      onError: (error) => {
+        toast({
+          title: "Update Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+
+    const [settingsForm, setSettingsForm] = useState({
+      referralCommissionRate: referralSettings.referralCommissionRate || '5',
+      minimumPayoutAmount: referralSettings.minimumPayoutAmount || '100',
+      autoApproveCommissions: referralSettings.autoApproveCommissions || false,
+    });
+
+    return (
+      <div className="space-y-6">
+        {/* Referral Settings */}
+        <div className="border rounded-lg p-4">
+          <h3 className="text-lg font-semibold mb-4">Referral System Settings</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>Commission Rate (%)</Label>
+              <Input
+                type="number"
+                value={settingsForm.referralCommissionRate}
+                onChange={(e) => setSettingsForm({ ...settingsForm, referralCommissionRate: e.target.value })}
+                placeholder="5"
+              />
+            </div>
+            <div>
+              <Label>Minimum Payout (ETB)</Label>
+              <Input
+                type="number"
+                value={settingsForm.minimumPayoutAmount}
+                onChange={(e) => setSettingsForm({ ...settingsForm, minimumPayoutAmount: e.target.value })}
+                placeholder="100"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="autoApprove"
+                checked={settingsForm.autoApproveCommissions}
+                onChange={(e) => setSettingsForm({ ...settingsForm, autoApproveCommissions: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="autoApprove">Auto-approve commissions</Label>
+            </div>
+          </div>
+          <Button
+            onClick={() => updateSettingsMutation.mutate(settingsForm)}
+            disabled={updateSettingsMutation.isPending}
+            className="mt-4"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            {updateSettingsMutation.isPending ? 'Saving...' : 'Save Settings'}
+          </Button>
+        </div>
+
+        {/* Referral Commissions */}
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Referral Commissions</h3>
+          <div className="space-y-4">
+            {referralCommissions.map((commission: any) => (
+              <div key={commission.id} className="border rounded-lg p-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="font-medium">
+                        {commission.referrer?.name || `User ${commission.referrerId}`}
+                      </div>
+                      <Badge variant={commission.status === 'approved' ? 'default' : commission.status === 'pending' ? 'secondary' : 'destructive'}>
+                        {commission.status}
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      Amount: {formatCurrency(commission.amount)} • 
+                      From: {commission.referred?.name || `User ${commission.referredUserId}`}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Date: {formatDate(commission.createdAt)}
+                    </div>
+                    {commission.notes && (
+                      <div className="text-xs text-gray-600 mt-2 bg-gray-100 p-2 rounded">
+                        Notes: {commission.notes}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {commission.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => approveReferralMutation.mutate({
+                          commissionId: commission.id,
+                          action: 'approve'
+                        })}
+                        disabled={approveReferralMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => approveReferralMutation.mutate({
+                          commissionId: commission.id,
+                          action: 'reject'
+                        })}
+                        disabled={approveReferralMutation.isPending}
+                      >
+                        <XCircle className="w-3 h-3 mr-1" />
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            
+            {referralCommissions.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No referral commissions found
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Calculate summary statistics
   const totalRevenueAmount = totalRevenue?.total || "0.00";
   const totalGames = dailySummaries.reduce((sum, day) => sum + day.totalGamesPlayed, 0);
@@ -798,9 +1249,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  Admin management features will be restored here
-                </div>
+                <AdminManagementSection />
               </CardContent>
             </Card>
           </TabsContent>
@@ -817,9 +1266,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  Referral management features will be restored here
-                </div>
+                <ReferralManagementSection />
               </CardContent>
             </Card>
           </TabsContent>
