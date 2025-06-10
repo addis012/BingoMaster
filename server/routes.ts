@@ -1559,6 +1559,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Super admin: Confirm credit load
+  app.patch("/api/admin/credit-loads/:id/confirm", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const loadId = parseInt(req.params.id);
+      const processedLoad = await storage.processCreditLoad(loadId, 'confirmed', user.id);
+      res.json(processedLoad);
+    } catch (error) {
+      console.error("Credit load confirmation error:", error);
+      res.status(500).json({ message: "Failed to confirm credit load" });
+    }
+  });
+
+  // Super admin: Reject credit load
+  app.patch("/api/admin/credit-loads/:id/reject", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const loadId = parseInt(req.params.id);
+      const processedLoad = await storage.processCreditLoad(loadId, 'rejected', user.id);
+      res.json(processedLoad);
+    } catch (error) {
+      console.error("Credit load rejection error:", error);
+      res.status(500).json({ message: "Failed to reject credit load" });
+    }
+  });
+
 
   // Get current system settings
   app.get("/api/admin/system-settings", async (req, res) => {

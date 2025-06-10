@@ -40,8 +40,13 @@ interface CreditLoad {
   status: string;
   processedBy?: number;
   processedAt?: string;
-  createdAt: string;
-  adminName?: string;
+  requestedAt: string;
+  admin?: {
+    id: number;
+    name: string;
+    username: string;
+    accountNumber: string;
+  };
 }
 
 interface WithdrawalRequest {
@@ -117,9 +122,9 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
   // Get pending credit requests
   const { data: creditRequests = [], isLoading: creditRequestsLoading, refetch: refetchCreditRequests } = useQuery({
-    queryKey: ["/api/credit-loads"],
+    queryKey: ["/api/admin/credit-loads"],
     queryFn: async () => {
-      const response = await fetch("/api/credit-loads");
+      const response = await fetch("/api/admin/credit-loads");
       if (!response.ok) throw new Error("Failed to fetch credit requests");
       return response.json() as CreditLoad[];
     },
@@ -163,7 +168,8 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   // Credit request approval/rejection mutation
   const creditRequestMutation = useMutation({
     mutationFn: async ({ requestId, action }: { requestId: number; action: 'approve' | 'reject' }) => {
-      const response = await fetch(`/api/credit-loads/${requestId}/${action}`, {
+      const endpoint = action === 'approve' ? 'confirm' : 'reject';
+      const response = await fetch(`/api/admin/credit-loads/${requestId}/${endpoint}`, {
         method: "PATCH",
       });
       if (!response.ok) throw new Error(`Failed to ${action} credit request`);
@@ -558,13 +564,18 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
                           <div className="flex-1">
                             <div className="font-medium text-gray-900 dark:text-white">
-                              {request.adminName || `Admin ID: ${request.adminId}`}
+                              {request.admin?.name || request.admin?.username || `Admin ID: ${request.adminId}`}
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
                               Amount: {formatCurrency(request.amount)} • Method: {request.paymentMethod}
                             </div>
+                            {request.admin?.accountNumber && (
+                              <div className="text-xs text-gray-400 dark:text-gray-500">
+                                Account: {request.admin.accountNumber}
+                              </div>
+                            )}
                             <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              Requested: {formatDate(request.createdAt)}
+                              Requested: {formatDate(request.requestedAt)}
                             </div>
                           </div>
                           
