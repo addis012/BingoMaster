@@ -147,6 +147,36 @@ export const withdrawalRequests = pgTable("withdrawal_requests", {
   rejectionReason: text("rejection_reason"),
 });
 
+// Super Admin revenue tracking
+export const superAdminRevenues = pgTable("super_admin_revenues", {
+  id: serial("id").primaryKey(),
+  adminId: integer("admin_id").references(() => users.id).notNull(),
+  adminName: text("admin_name").notNull(),
+  shopId: integer("shop_id").references(() => shops.id).notNull(),
+  shopName: text("shop_name").notNull(),
+  gameId: integer("game_id").references(() => games.id),
+  transactionId: integer("transaction_id").references(() => transactions.id),
+  revenueType: text("revenue_type").notNull(), // 'game_commission', 'credit_load_fee', 'referral_bonus'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).notNull(),
+  sourceAmount: decimal("source_amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  dateEAT: text("date_eat").notNull(), // Date in EAT format (YYYY-MM-DD) for filtering
+});
+
+// Daily revenue summary for performance tracking
+export const dailyRevenueSummary = pgTable("daily_revenue_summary", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull().unique(), // YYYY-MM-DD format in EAT
+  totalSuperAdminRevenue: decimal("total_super_admin_revenue", { precision: 12, scale: 2 }).default("0.00"),
+  totalAdminRevenue: decimal("total_admin_revenue", { precision: 12, scale: 2 }).default("0.00"),
+  totalGamesPlayed: integer("total_games_played").default(0),
+  totalPlayersRegistered: integer("total_players_registered").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   shop: one(shops, {
@@ -362,3 +392,27 @@ export type ReferralCommission = typeof referralCommissions.$inferSelect;
 export type InsertReferralCommission = z.infer<typeof insertReferralCommissionSchema>;
 export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
 export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
+
+// Super Admin revenue tracking schemas and types
+export const insertSuperAdminRevenueSchema = createInsertSchema(superAdminRevenues, {
+  amount: z.string(),
+  commissionRate: z.string(),
+  sourceAmount: z.string(),
+}).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDailyRevenueSummarySchema = createInsertSchema(dailyRevenueSummary, {
+  totalSuperAdminRevenue: z.string(),
+  totalAdminRevenue: z.string(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type SuperAdminRevenue = typeof superAdminRevenues.$inferSelect;
+export type InsertSuperAdminRevenue = z.infer<typeof insertSuperAdminRevenueSchema>;
+export type DailyRevenueSummary = typeof dailyRevenueSummary.$inferSelect;
+export type InsertDailyRevenueSummary = z.infer<typeof insertDailyRevenueSummarySchema>;
