@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, RefreshCw, DollarSign, TrendingUp, Users, GamepadIcon, Clock, LogOut, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Calendar, RefreshCw, DollarSign, TrendingUp, Users, GamepadIcon, Clock, LogOut, CheckCircle, XCircle, AlertCircle, Image, Eye, UserPlus, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -37,6 +37,10 @@ interface CreditLoad {
   adminId: number;
   amount: string;
   paymentMethod: string;
+  referenceNumber?: string;
+  transferScreenshot?: string;
+  adminAccountNumber?: string;
+  notes?: string;
   status: string;
   processedBy?: number;
   processedAt?: string;
@@ -70,6 +74,8 @@ interface SuperAdminDashboardProps {
 export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardProps) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
+  const [showScreenshotModal, setShowScreenshotModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -418,11 +424,13 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="revenues" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="revenues">Revenue Details</TabsTrigger>
             <TabsTrigger value="summaries">Daily Summaries</TabsTrigger>
             <TabsTrigger value="credit-requests">Credit Requests</TabsTrigger>
-            <TabsTrigger value="withdrawals">Withdrawal Requests</TabsTrigger>
+            <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+            <TabsTrigger value="admin-management">Admin Management</TabsTrigger>
+            <TabsTrigger value="referrals">Referral System</TabsTrigger>
           </TabsList>
 
           <TabsContent value="revenues" className="space-y-6">
@@ -569,9 +577,24 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                             <div className="text-sm text-gray-500 dark:text-gray-400">
                               Amount: {formatCurrency(request.amount)} • Method: {request.paymentMethod}
                             </div>
+                            {request.referenceNumber && (
+                              <div className="text-xs text-gray-400 dark:text-gray-500">
+                                Reference: {request.referenceNumber}
+                              </div>
+                            )}
+                            {request.adminAccountNumber && (
+                              <div className="text-xs text-gray-400 dark:text-gray-500">
+                                Admin Account: {request.adminAccountNumber}
+                              </div>
+                            )}
                             {request.admin?.accountNumber && (
                               <div className="text-xs text-gray-400 dark:text-gray-500">
-                                Account: {request.admin.accountNumber}
+                                System Account: {request.admin.accountNumber}
+                              </div>
+                            )}
+                            {request.notes && (
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mt-1 bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                Notes: {request.notes}
                               </div>
                             )}
                             <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
@@ -595,34 +618,51 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                               {request.status}
                             </Badge>
                             
-                            {request.status === 'pending' && (
-                              <div className="flex gap-1">
+                            <div className="flex gap-1 flex-wrap">
+                              {request.transferScreenshot && (
                                 <Button
                                   size="sm"
-                                  onClick={() => creditRequestMutation.mutate({ 
-                                    requestId: request.id, 
-                                    action: 'approve' 
-                                  })}
-                                  disabled={creditRequestMutation.isPending}
-                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedScreenshot(request.transferScreenshot!);
+                                    setShowScreenshotModal(true);
+                                  }}
+                                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
                                 >
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  Approve
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  View Screenshot
                                 </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => creditRequestMutation.mutate({ 
-                                    requestId: request.id, 
-                                    action: 'reject' 
-                                  })}
-                                  disabled={creditRequestMutation.isPending}
-                                >
-                                  <XCircle className="w-3 h-3 mr-1" />
-                                  Reject
-                                </Button>
-                              </div>
-                            )}
+                              )}
+                              
+                              {request.status === 'pending' && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => creditRequestMutation.mutate({ 
+                                      requestId: request.id, 
+                                      action: 'approve' 
+                                    })}
+                                    disabled={creditRequestMutation.isPending}
+                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                  >
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => creditRequestMutation.mutate({ 
+                                      requestId: request.id, 
+                                      action: 'reject' 
+                                    })}
+                                    disabled={creditRequestMutation.isPending}
+                                  >
+                                    <XCircle className="w-3 h-3 mr-1" />
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                         
@@ -745,7 +785,78 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="admin-management" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5" />
+                  Admin Management
+                </CardTitle>
+                <CardDescription>
+                  Manage admin accounts, commissions, and system settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  Admin management features will be restored here
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="referrals" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-5 h-5" />
+                  Referral System
+                </CardTitle>
+                <CardDescription>
+                  Manage referral commissions and tracking
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  Referral management features will be restored here
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
+
+        {/* Screenshot Modal */}
+        {showScreenshotModal && selectedScreenshot && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl max-h-[90vh] overflow-auto">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Transfer Screenshot</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowScreenshotModal(false);
+                    setSelectedScreenshot(null);
+                  }}
+                >
+                  <XCircle className="w-4 h-4" />
+                  Close
+                </Button>
+              </div>
+              <div className="p-4">
+                <img
+                  src={selectedScreenshot}
+                  alt="Transfer Screenshot"
+                  className="max-w-full h-auto rounded-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwTDE3NSAxMjVIMTUwVjE3NUgxNzVMMjAwIDE1MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHR5cGUgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNkI3Mjg0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIyMDAiIHk9IjIwMCI+SW1hZ2UgTm90IEF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+';
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
