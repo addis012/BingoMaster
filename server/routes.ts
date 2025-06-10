@@ -1955,7 +1955,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Super Admin revenue tracking routes
+  app.get("/api/super-admin/revenues", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
 
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const { dateFrom, dateTo } = req.query;
+      const revenues = await storage.getSuperAdminRevenues(
+        dateFrom as string,
+        dateTo as string
+      );
+
+      res.json(revenues);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get super admin revenues" });
+    }
+  });
+
+  app.get("/api/super-admin/revenue-total", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const { dateFrom, dateTo } = req.query;
+      const total = await storage.getTotalSuperAdminRevenue(
+        dateFrom as string,
+        dateTo as string
+      );
+
+      res.json({ total });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get total super admin revenue" });
+    }
+  });
+
+  app.get("/api/super-admin/daily-summaries", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const { dateFrom, dateTo } = req.query;
+      const summaries = await storage.getDailyRevenueSummaries(
+        dateFrom as string,
+        dateTo as string
+      );
+
+      res.json(summaries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get daily summaries" });
+    }
+  });
+
+  app.post("/api/super-admin/daily-reset", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      await storage.performDailyReset();
+      res.json({ message: "Daily reset completed successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to perform daily reset" });
+    }
+  });
+
+  app.get("/api/super-admin/current-eat-date", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const currentDate = storage.getCurrentEATDate();
+      res.json({ date: currentDate });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get current EAT date" });
+    }
+  });
 
   return httpServer;
 }

@@ -104,6 +104,21 @@ export interface IStorage {
     status: string;
   }): Promise<any>;
   convertCommissionToCredit(adminId: number, amount: number): Promise<any>;
+  
+  // Super Admin revenue tracking methods
+  createSuperAdminRevenue(revenue: InsertSuperAdminRevenue): Promise<SuperAdminRevenue>;
+  getSuperAdminRevenues(dateFrom?: string, dateTo?: string): Promise<SuperAdminRevenue[]>;
+  getSuperAdminRevenuesByDate(date: string): Promise<SuperAdminRevenue[]>;
+  getTotalSuperAdminRevenue(dateFrom?: string, dateTo?: string): Promise<string>;
+  
+  // Daily revenue summary methods
+  createOrUpdateDailyRevenueSummary(summary: InsertDailyRevenueSummary): Promise<DailyRevenueSummary>;
+  getDailyRevenueSummary(date: string): Promise<DailyRevenueSummary | undefined>;
+  getDailyRevenueSummaries(dateFrom?: string, dateTo?: string): Promise<DailyRevenueSummary[]>;
+  
+  // EAT time zone utility methods
+  getCurrentEATDate(): string;
+  performDailyReset(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -969,6 +984,163 @@ export class DatabaseStorage implements IStorage {
       newBalance: newBalance,
       convertedAmount: amount.toString()
     };
+  }
+
+  // Super Admin revenue tracking methods
+  async createSuperAdminRevenue(revenue: InsertSuperAdminRevenue): Promise<SuperAdminRevenue> {
+    const [createdRevenue] = await db
+      .insert(superAdminRevenues)
+      .values(revenue)
+      .returning();
+    return createdRevenue;
+  }
+
+  async getSuperAdminRevenues(dateFrom?: string, dateTo?: string): Promise<SuperAdminRevenue[]> {
+    let query = db.select().from(superAdminRevenues);
+
+    if (dateFrom && dateTo) {
+      query = query.where(
+        and(
+          gte(superAdminRevenues.dateEAT, dateFrom),
+          lte(superAdminRevenues.dateEAT, dateTo)
+        )
+      );
+    } else if (dateFrom) {
+      query = query.where(gte(superAdminRevenues.dateEAT, dateFrom));
+    } else if (dateTo) {
+      query = query.where(lte(superAdminRevenues.dateEAT, dateTo));
+    }
+
+    return await query.orderBy(desc(superAdminRevenues.createdAt));
+  }
+
+  async getSuperAdminRevenuesByDate(date: string): Promise<SuperAdminRevenue[]> {
+    return await db
+      .select()
+      .from(superAdminRevenues)
+      .where(eq(superAdminRevenues.dateEAT, date))
+      .orderBy(desc(superAdminRevenues.createdAt));
+  }
+
+  async getTotalSuperAdminRevenue(dateFrom?: string, dateTo?: string): Promise<string> {
+    let query = db
+      .select({ total: sum(superAdminRevenues.amount) })
+      .from(superAdminRevenues);
+
+    if (dateFrom && dateTo) {
+      query = query.where(
+        and(
+          gte(superAdminRevenues.dateEAT, dateFrom),
+          lte(superAdminRevenues.dateEAT, dateTo)
+        )
+      );
+    } else if (dateFrom) {
+      query = query.where(gte(superAdminRevenues.dateEAT, dateFrom));
+    } else if (dateTo) {
+      query = query.where(lte(superAdminRevenues.dateEAT, dateTo));
+    }
+
+    const [result] = await query;
+    return result?.total || "0.00";
+  }
+
+  // Daily revenue summary methods
+  async createOrUpdateDailyRevenueSummary(summary: InsertDailyRevenueSummary): Promise<DailyRevenueSummary> {
+    const existing = await this.getDailyRevenueSummary(summary.date);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(dailyRevenueSummary)
+        .set({
+          ...summary,
+          updatedAt: new Date(),
+        })
+        .where(eq(dailyRevenueSummary.date, summary.date))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(dailyRevenueSummary)
+        .values(summary)
+        .returning();
+      return created;
+    }
+  }
+
+  async getDailyRevenueSummary(date: string): Promise<DailyRevenueSummary | undefined> {
+    const [summary] = await db
+      .select()
+      .from(dailyRevenueSummary)
+      .where(eq(dailyRevenueSummary.date, date));
+    return summary || undefined;
+  }
+
+  async getDailyRevenueSummaries(dateFrom?: string, dateTo?: string): Promise<DailyRevenueSummary[]> {
+    let query = db.select().from(dailyRevenueSummary);
+
+    if (dateFrom && dateTo) {
+      query = query.where(
+        and(
+          gte(dailyRevenueSummary.date, dateFrom),
+          lte(dailyRevenueSummary.date, dateTo)
+        )
+      );
+    } else if (dateFrom) {
+      query = query.where(gte(dailyRevenueSummary.date, dateFrom));
+    } else if (dateTo) {
+      query = query.where(lte(dailyRevenueSummary.date, dateTo));
+    }
+
+    return await query.orderBy(desc(dailyRevenueSummary.date));
+  }
+
+  // EAT time zone utility methods
+  getCurrentEATDate(): string {
+    const now = new Date();
+    const eatTime = new Date(now.getTime() + (3 * 60 * 60 * 1000)); // UTC+3
+    return eatTime.toISOString().split('T')[0]; // YYYY-MM-DD format
+  }
+
+  async performDailyReset(): Promise<void> {
+    const today = this.getCurrentEATDate();
+    
+    // Get today's total revenue for super admin
+    const totalSuperAdminRevenue = await this.getTotalSuperAdminRevenue(today, today);
+    
+    // Get total games played today
+    const gamesQuery = await db
+      .select({ count: count() })
+      .from(gameHistory)
+      .where(
+        eq(
+          db.select({ date: "DATE(completed_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Addis_Ababa')" }).from(gameHistory),
+          today
+        )
+      );
+    
+    const totalGames = gamesQuery[0]?.count || 0;
+    
+    // Calculate total players from today's games
+    const playersQuery = await db
+      .select({ total: sum(gameHistory.playerCount) })
+      .from(gameHistory)
+      .where(
+        eq(
+          db.select({ date: "DATE(completed_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Addis_Ababa')" }).from(gameHistory),
+          today
+        )
+      );
+    
+    const totalPlayers = parseInt(playersQuery[0]?.total || "0");
+    
+    // Create or update daily summary
+    await this.createOrUpdateDailyRevenueSummary({
+      date: today,
+      totalSuperAdminRevenue,
+      totalAdminRevenue: "0.00", // Calculate from admin profits
+      totalGamesPlayed: totalGames,
+      totalPlayersRegistered: totalPlayers,
+    });
   }
 }
 
