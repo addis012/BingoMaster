@@ -498,82 +498,17 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
     console.log("📝 Updated called numbers count:", calledNumbers.length + 1);
 
-    // Check for winner after 20 numbers
-    if (calledNumbers.length >= 19) {
-      checkForWinner();
-    }
+    // Removed automatic winner checking - only manual verification allowed
     
     // Release mutex lock
     isCallingNumberRef.current = false;
     setIsCallingNumber(false);
   };
 
-  // Check for winner after each number call - proper bingo pattern validation
+  // Automatic winner detection completely disabled - manual verification only
   const checkForWinner = () => {
-    console.log("🔍 checkForWinner called", { 
-      bookedCartelasSize: bookedCartelas.size, 
-      calledNumbersLength: calledNumbersRef.current.length,
-      stateCalledNumbers: calledNumbers.length,
-      activeGameId: activeGameIdRef.current,
-      gamePlayersMapSize: gamePlayersMap.size 
-    });
-    
-    if (bookedCartelas.size === 0 || calledNumbersRef.current.length < 5) {
-      console.log("❌ checkForWinner: Not enough cartelas or numbers");
-      return;
-    }
-    
-    // Check each booked cartela for winning patterns
-    for (const cartelaNumber of Array.from(bookedCartelas)) {
-      const card = cartelaCards[cartelaNumber];
-      if (!card) {
-        console.log(`⚠️ Card not found for cartela ${cartelaNumber}`);
-        continue;
-      }
-      
-      console.log(`🎯 Checking cartela #${cartelaNumber} for bingo patterns`);
-      const winResult = checkForBingo(card, calledNumbersRef.current);
-      
-      if (winResult.hasWin) {
-        console.log(`🎉 WINNER DETECTED! Cartela #${cartelaNumber} with ${winResult.pattern}`);
-        console.log("Game state:", { 
-          activeGameId, 
-          gamePlayersMap: Array.from(gamePlayersMap.entries()),
-          bookedCartelas: Array.from(bookedCartelas)
-        });
-        
-        // Calculate and preserve the final prize amount immediately
-        const currentPrizeAmount = calculateWinnerPayout(totalCollected);
-        setFinalPrizeAmount(currentPrizeAmount);
-        
-        setWinnerFound(`Cartela #${cartelaNumber}`);
-        setWinnerPattern(winResult.pattern || "BINGO");
-        setGameActive(false);
-        setGameFinished(true); // Critical: Mark game as finished immediately
-        
-        // Update refs immediately to stop any pending calls
-        gameActiveRef.current = false;
-        gameFinishedRef.current = true;
-        winnerFoundRef.current = true;
-        
-        stopAutomaticNumberCalling();
-        console.log("🛑 Stopping automatic calling");
-        
-        // Clear any pending timeouts to prevent further number calling
-        if (automaticCallTimeoutRef.current) {
-          clearTimeout(automaticCallTimeoutRef.current);
-          automaticCallTimeoutRef.current = null;
-          console.log("🧹 Cleared pending automatic call timeout");
-        }
-        
-        // Show winner verification dialog instead of auto-declaring
-        console.log("🎉 Winner detected - showing verification dialog for cartela:", cartelaNumber);
-        setShowWinnerVerification(true);
-        
-        return; // Stop checking once winner is found
-      }
-    }
-    console.log("🔍 No winners found in this check");
+    console.log("🚫 Automatic winner detection disabled - only manual verification allowed");
+    return;
   };
 
   // Check for Bingo winning patterns
