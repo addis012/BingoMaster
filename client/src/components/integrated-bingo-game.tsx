@@ -497,6 +497,10 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     if (calledNumbers.length >= 19) {
       checkForWinner();
     }
+    
+    // Release mutex lock
+    isCallingNumberRef.current = false;
+    setIsCallingNumber(false);
   };
 
   // Check for winner after each number call - proper bingo pattern validation
@@ -865,7 +869,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     winnerFoundRef.current = false;
     calledNumbersRef.current = [];
     activeGameIdRef.current = null;
+    isCallingNumberRef.current = false; // Reset mutex
     
+    setIsCallingNumber(false); // Reset mutex state
     stopAutomaticNumberCalling();
   };
 
@@ -914,7 +920,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     winnerFoundRef.current = false;
     calledNumbersRef.current = [];
     activeGameIdRef.current = null;
+    isCallingNumberRef.current = false; // Reset mutex
     
+    setIsCallingNumber(false); // Reset mutex state
     stopAutomaticNumberCalling();
     
     console.log("🔄 Game restarted with preserved cartelas:", Array.from(previousCartelas));
