@@ -662,7 +662,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       
       const result = await declareWinnerMutation.mutateAsync({
         gameId: activeGameId,
-        winnerId: winnerId
+        winnerId: winnerId,
+        winnerCartela: cartelaNumber
       });
       
       console.log("✅ WINNER SUCCESSFULLY DECLARED IN BACKEND!", result);
@@ -731,7 +732,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       console.log("Calling declare winner API for game", activeGameId, "winner", winnerId);
       await declareWinnerMutation.mutateAsync({
         gameId: activeGameId,
-        winnerId: winnerId
+        winnerId: winnerId,
+        winnerCartela: cartelaNumber
       });
       
       setShowWinnerVerification(false);

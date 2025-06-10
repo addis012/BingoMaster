@@ -537,8 +537,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/games/:id/declare-winner", async (req, res) => {
     try {
       const gameId = parseInt(req.params.id);
-      const { winnerId } = req.body;
-      console.log(`🎯 COMPREHENSIVE GAME RECORDING - Game ${gameId}, Winner ${winnerId}`);
+      const { winnerId, winnerCartela } = req.body;
+      console.log(`🎯 COMPREHENSIVE GAME RECORDING - Game ${gameId}, Winner ${winnerId}, Cartela ${winnerCartela}`);
       
       // Validate that winnerId is provided
       if (!winnerId) {
@@ -626,9 +626,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prizePool: prizeAmountBirr.toString(),
       });
 
-      // Get winner's cartela number
-      const winnerCartelaNumbers = JSON.parse(winner?.cartelaNumbers || "[]");
-      const winningCartela = winnerCartelaNumbers[0] || null;
+      // Use the provided cartela number from frontend, or fallback to winner's cartela data
+      let winningCartela = winnerCartela || null;
+      if (!winningCartela) {
+        const winnerCartelaNumbers = JSON.parse(winner?.cartelaNumbers || "[]");
+        winningCartela = winnerCartelaNumbers[0] || null;
+      }
       
       console.log(`🏆 WINNER DETAILS:`, {
         winnerId,
