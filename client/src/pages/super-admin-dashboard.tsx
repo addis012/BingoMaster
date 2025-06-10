@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, RefreshCw, DollarSign, TrendingUp, Users, GamepadIcon, Clock } from "lucide-react";
+import { Calendar, RefreshCw, DollarSign, TrendingUp, Users, GamepadIcon, Clock, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -165,18 +165,31 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
             )}
           </div>
           
-          <Button
-            onClick={() => dailyResetMutation.mutate()}
-            disabled={dailyResetMutation.isPending}
-            className="bg-red-600 hover:bg-red-700 text-white"
-          >
-            {dailyResetMutation.isPending ? (
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Clock className="w-4 h-4 mr-2" />
+          <div className="flex gap-2">
+            <Button
+              onClick={() => dailyResetMutation.mutate()}
+              disabled={dailyResetMutation.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {dailyResetMutation.isPending ? (
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Clock className="w-4 h-4 mr-2" />
+              )}
+              Daily Reset (EAT Midnight)
+            </Button>
+            
+            {onLogout && (
+              <Button
+                onClick={onLogout}
+                variant="outline"
+                className="border-gray-300 hover:bg-gray-50"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
             )}
-            Daily Reset (EAT Midnight)
-          </Button>
+          </div>
         </div>
 
         {/* Date Filter */}
