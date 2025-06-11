@@ -449,12 +449,16 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       }
     }
 
+    // Use both state and ref for double validation to prevent duplicates
+    const currentCalledNumbers = calledNumbersRef.current;
     const availableNumbers = Array.from({length: 75}, (_, i) => i + 1)
-      .filter(num => !calledNumbers.includes(num));
+      .filter(num => !currentCalledNumbers.includes(num) && !calledNumbers.includes(num));
       
     console.log("📊 Available numbers:", availableNumbers.length, "out of 75");
+    console.log("🔍 Current called numbers count:", currentCalledNumbers.length);
+    console.log("🔍 Called numbers from state:", calledNumbers.length);
 
-    if (availableNumbers.length === 0) {
+    if (availableNumbers.length === 0 || currentCalledNumbers.length >= 75) {
       console.log("🏁 All 75 numbers have been called - ending game automatically");
       stopAutomaticNumberCalling();
       setGameActive(false);
@@ -484,14 +488,30 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
     const randomIndex = Math.floor(Math.random() * availableNumbers.length);
     const number = availableNumbers[randomIndex];
+    
+    // STRICT VALIDATION: Double check number hasn't been called
+    if (currentCalledNumbers.includes(number) || calledNumbers.includes(number)) {
+      console.log("🚫 DUPLICATE DETECTED - Number", number, "already called. Skipping.");
+      return;
+    }
+    
     const letter = getLetterForNumber(number);
     
     console.log("🔊 Calling number:", number, "Letter:", letter);
 
+    // CRITICAL: Update ref IMMEDIATELY before state to prevent race conditions
+    calledNumbersRef.current = [...calledNumbersRef.current, number];
+    console.log(`🔒 LOCKED: Number ${number} added to ref immediately. Count: ${calledNumbersRef.current.length}`);
+    
     setCurrentNumber(number);
     setCalledNumbers(prev => {
+      // Verify number isn't already in previous state (extra safety)
+      if (prev.includes(number)) {
+        console.log("🚨 CRITICAL: Number", number, "already in state! Preventing duplicate.");
+        return prev; // Don't add duplicate
+      }
+      
       const updated = [...prev, number];
-      calledNumbersRef.current = updated; // Keep ref in sync
       console.log(`📝 Updated called numbers count: ${updated.length}`);
       
       // Immediate winner check after number is added
