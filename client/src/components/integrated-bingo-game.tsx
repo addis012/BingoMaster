@@ -1457,8 +1457,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                     })}
                   </div>
                   
-                  {/* Preview any booked cartela */}
-                  {bookedCartelas.size > 0 && (
+                  {/* Preview any booked cartela - Hide when selector is open */}
+                  {bookedCartelas.size > 0 && !showCartelaSelector && (
                     <div className="mt-6 p-4 border-t">
                       <h3 className="text-lg font-semibold mb-4 text-center">
                         Selected Cartelas Preview
@@ -1512,7 +1512,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   )}
                   
                   {/* Old preview for backward compatibility */}
-                  {selectedCartela && cartelaCards[selectedCartela] && bookedCartelas.size === 0 && (
+                  {selectedCartela && cartelaCards[selectedCartela] && bookedCartelas.size === 0 && !showCartelaSelector && (
                     <div className="mt-6 p-4 border-t">
                       <h3 className="text-lg font-semibold mb-4 text-center">
                         Cartela #{selectedCartela} - Bingo Card Preview
