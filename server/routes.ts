@@ -2968,5 +2968,348 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advanced Analytics and Reporting API Endpoints
+
+  // Get comprehensive shop analytics
+  app.get("/api/analytics/shop/:shopId", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const shopId = parseInt(req.params.shopId);
+      const { startDate, endDate } = req.query;
+
+      // Get basic shop stats
+      const shopStats = await storage.getShopStats(shopId, 
+        startDate ? new Date(startDate as string) : undefined,
+        endDate ? new Date(endDate as string) : undefined
+      );
+
+      // Get game history with profit breakdown
+      const gameHistory = await storage.getGameHistory(shopId,
+        startDate ? new Date(startDate as string) : undefined,
+        endDate ? new Date(endDate as string) : undefined
+      );
+
+      // Calculate detailed profit breakdown
+      const totalRevenue = gameHistory.reduce((sum, game) => sum + parseFloat(game.totalCollected || "0"), 0);
+      const totalPrizes = gameHistory.reduce((sum, game) => sum + parseFloat(game.prizeAmount || "0"), 0);
+      const adminProfit = gameHistory.reduce((sum, game) => sum + parseFloat(game.adminProfit || "0"), 0);
+      const superAdminCommission = gameHistory.reduce((sum, game) => sum + parseFloat(game.superAdminCommission || "0"), 0);
+
+      // Get employee performance
+      const employees = await storage.getUsersByShop(shopId);
+      const employeeStats = await Promise.all(
+        employees.filter(emp => emp.role === 'employee').map(async (emp) => {
+          const empStats = await storage.getEmployeeStats(emp.id,
+            startDate ? new Date(startDate as string) : undefined,
+            endDate ? new Date(endDate as string) : undefined
+          );
+          const empHistory = await storage.getEmployeeGameHistory(emp.id,
+            startDate ? new Date(startDate as string) : undefined,
+            endDate ? new Date(endDate as string) : undefined
+          );
+          return {
+            employee: emp,
+            stats: empStats,
+            games: empHistory.length,
+            totalCollected: empHistory.reduce((sum, game) => sum + parseFloat(game.totalCollected || "0"), 0)
+          };
+        })
+      );
+
+      // Calculate profit margins
+      const profitMargin = totalRevenue > 0 ? ((adminProfit / totalRevenue) * 100) : 0;
+      const prizePercentage = totalRevenue > 0 ? ((totalPrizes / totalRevenue) * 100) : 0;
+
+      res.json({
+        basicStats: shopStats,
+        profitBreakdown: {
+          totalRevenue: totalRevenue.toFixed(2),
+          totalPrizes: totalPrizes.toFixed(2),
+          adminProfit: adminProfit.toFixed(2),
+          superAdminCommission: superAdminCommission.toFixed(2),
+          profitMargin: profitMargin.toFixed(2),
+          prizePercentage: prizePercentage.toFixed(2)
+        },
+        employeePerformance: employeeStats,
+        gameHistory: gameHistory.slice(0, 20), // Latest 20 games
+        totalGames: gameHistory.length
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get shop analytics" });
+    }
+  });
+
+  // Get profit distribution analytics
+  app.get("/api/analytics/profit-distribution", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const { startDate, endDate } = req.query;
+
+      // Get all shops
+      const shops = await storage.getShops();
+      
+      const shopAnalytics = await Promise.all(
+        shops.map(async (shop) => {
+          const gameHistory = await storage.getGameHistory(shop.id,
+            startDate ? new Date(startDate as string) : undefined,
+            endDate ? new Date(endDate as string) : undefined
+          );
+
+          const totalRevenue = gameHistory.reduce((sum, game) => sum + parseFloat(game.totalCollected || "0"), 0);
+          const adminProfit = gameHistory.reduce((sum, game) => sum + parseFloat(game.adminProfit || "0"), 0);
+          const superAdminCommission = gameHistory.reduce((sum, game) => sum + parseFloat(game.superAdminCommission || "0"), 0);
+
+          return {
+            shop,
+            totalRevenue: totalRevenue.toFixed(2),
+            adminProfit: adminProfit.toFixed(2),
+            superAdminCommission: superAdminCommission.toFixed(2),
+            gameCount: gameHistory.length
+          };
+        })
+      );
+
+      // Calculate totals
+      const totalSystemRevenue = shopAnalytics.reduce((sum, shop) => sum + parseFloat(shop.totalRevenue), 0);
+      const totalAdminProfits = shopAnalytics.reduce((sum, shop) => sum + parseFloat(shop.adminProfit), 0);
+      const totalSuperAdminCommissions = shopAnalytics.reduce((sum, shop) => sum + parseFloat(shop.superAdminCommission), 0);
+
+      res.json({
+        shopAnalytics,
+        systemTotals: {
+          totalRevenue: totalSystemRevenue.toFixed(2),
+          totalAdminProfits: totalAdminProfits.toFixed(2),
+          totalSuperAdminCommissions: totalSuperAdminCommissions.toFixed(2),
+          totalGames: shopAnalytics.reduce((sum, shop) => sum + shop.gameCount, 0)
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get profit distribution analytics" });
+    }
+  });
+
+  // Get financial trends
+  app.get("/api/analytics/trends", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { shopId, period = 'week' } = req.query;
+
+      // Calculate date range based on period
+      const endDate = new Date();
+      const startDate = new Date();
+      
+      switch (period) {
+        case 'week':
+          startDate.setDate(endDate.getDate() - 7);
+          break;
+        case 'month':
+          startDate.setMonth(endDate.getMonth() - 1);
+          break;
+        case 'quarter':
+          startDate.setMonth(endDate.getMonth() - 3);
+          break;
+        case 'year':
+          startDate.setFullYear(endDate.getFullYear() - 1);
+          break;
+      }
+
+      let gameHistory;
+      if (user.role === 'super_admin' && !shopId) {
+        // Get all games for super admin
+        const shops = await storage.getShops();
+        gameHistory = [];
+        for (const shop of shops) {
+          const shopGames = await storage.getGameHistory(shop.id, startDate, endDate);
+          gameHistory.push(...shopGames);
+        }
+      } else {
+        // Get games for specific shop
+        const targetShopId = shopId ? parseInt(shopId as string) : user.shopId!;
+        gameHistory = await storage.getGameHistory(targetShopId, startDate, endDate);
+      }
+
+      // Group by day for trends
+      const dailyData = new Map();
+      gameHistory.forEach(game => {
+        const date = new Date(game.completedAt).toISOString().split('T')[0];
+        if (!dailyData.has(date)) {
+          dailyData.set(date, {
+            date,
+            revenue: 0,
+            games: 0,
+            prizes: 0,
+            profit: 0
+          });
+        }
+        const day = dailyData.get(date);
+        day.revenue += parseFloat(game.totalCollected || "0");
+        day.games += 1;
+        day.prizes += parseFloat(game.prizeAmount || "0");
+        day.profit += parseFloat(game.adminProfit || "0");
+      });
+
+      const trends = Array.from(dailyData.values()).sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+
+      res.json({
+        trends,
+        summary: {
+          totalRevenue: trends.reduce((sum, day) => sum + day.revenue, 0).toFixed(2),
+          totalGames: trends.reduce((sum, day) => sum + day.games, 0),
+          totalPrizes: trends.reduce((sum, day) => sum + day.prizes, 0).toFixed(2),
+          totalProfit: trends.reduce((sum, day) => sum + day.profit, 0).toFixed(2),
+          averageDailyRevenue: trends.length > 0 ? (trends.reduce((sum, day) => sum + day.revenue, 0) / trends.length).toFixed(2) : "0.00"
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get financial trends" });
+    }
+  });
+
+  // Get employee performance analytics
+  app.get("/api/analytics/employee-performance", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { shopId, startDate, endDate } = req.query;
+
+      let employees;
+      if (user.role === 'super_admin' && !shopId) {
+        // Get all employees for super admin
+        const allUsers = await storage.getUsers();
+        employees = allUsers.filter(u => u.role === 'employee');
+      } else {
+        // Get employees for specific shop
+        const targetShopId = shopId ? parseInt(shopId as string) : user.shopId!;
+        employees = await storage.getUsersByShop(targetShopId);
+        employees = employees.filter(emp => emp.role === 'employee');
+      }
+
+      const performanceData = await Promise.all(
+        employees.map(async (emp) => {
+          const empStats = await storage.getEmployeeStats(emp.id,
+            startDate ? new Date(startDate as string) : undefined,
+            endDate ? new Date(endDate as string) : undefined
+          );
+          
+          const empHistory = await storage.getEmployeeGameHistory(emp.id,
+            startDate ? new Date(startDate as string) : undefined,
+            endDate ? new Date(endDate as string) : undefined
+          );
+
+          const totalRevenue = empHistory.reduce((sum, game) => sum + parseFloat(game.totalCollected || "0"), 0);
+          const totalPrizes = empHistory.reduce((sum, game) => sum + parseFloat(game.prizeAmount || "0"), 0);
+          const avgGameValue = empHistory.length > 0 ? totalRevenue / empHistory.length : 0;
+
+          return {
+            employee: {
+              id: emp.id,
+              name: emp.name,
+              username: emp.username,
+              shopId: emp.shopId
+            },
+            stats: empStats,
+            performance: {
+              totalGames: empHistory.length,
+              totalRevenue: totalRevenue.toFixed(2),
+              totalPrizes: totalPrizes.toFixed(2),
+              averageGameValue: avgGameValue.toFixed(2),
+              efficiency: empHistory.length > 0 ? ((totalRevenue - totalPrizes) / totalRevenue * 100).toFixed(2) : "0.00"
+            }
+          };
+        })
+      );
+
+      // Sort by total revenue
+      performanceData.sort((a, b) => parseFloat(b.performance.totalRevenue) - parseFloat(a.performance.totalRevenue));
+
+      res.json(performanceData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get employee performance analytics" });
+    }
+  });
+
+  // Export analytics data
+  app.get("/api/analytics/export", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { shopId, startDate, endDate, type = 'games' } = req.query;
+
+      let data;
+      if (type === 'games') {
+        if (user.role === 'super_admin' && !shopId) {
+          const shops = await storage.getShops();
+          data = [];
+          for (const shop of shops) {
+            const shopGames = await storage.getGameHistory(shop.id,
+              startDate ? new Date(startDate as string) : undefined,
+              endDate ? new Date(endDate as string) : undefined
+            );
+            data.push(...shopGames.map(game => ({ ...game, shopName: shop.name })));
+          }
+        } else {
+          const targetShopId = shopId ? parseInt(shopId as string) : user.shopId!;
+          data = await storage.getGameHistory(targetShopId,
+            startDate ? new Date(startDate as string) : undefined,
+            endDate ? new Date(endDate as string) : undefined
+          );
+        }
+      }
+
+      res.json({
+        data,
+        exportedAt: new Date().toISOString(),
+        filters: { shopId, startDate, endDate, type }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to export analytics data" });
+    }
+  });
+
   return httpServer;
 }

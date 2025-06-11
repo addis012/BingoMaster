@@ -383,6 +383,11 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     setShowCartelaSelector(false);
   };
 
+  // Clear selected cartelas
+  const clearSelectedCartelas = () => {
+    setSelectedCartelas(new Set());
+  };
+
   // Check winner cartela
   const checkWinnerCartela = () => {
     const cartelaNum = parseInt(winnerCartelaNumber);
@@ -487,6 +492,38 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                   </Select>
                 </div>
 
+                {/* Selected Cartelas Display */}
+                {selectedCartelas.size > 0 && (
+                  <div className="pt-4 border-t">
+                    <div className="flex justify-between items-center mb-2">
+                      <p className="text-sm font-medium text-gray-700">Selected Cartelas ({selectedCartelas.size})</p>
+                      <Button 
+                        onClick={clearSelectedCartelas}
+                        variant="ghost" 
+                        size="sm"
+                        className="text-xs h-6 px-2"
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                      {Array.from(selectedCartelas).sort((a, b) => a - b).map(num => (
+                        <Badge 
+                          key={num} 
+                          variant="secondary" 
+                          className="text-xs cursor-pointer hover:bg-red-100"
+                          onClick={() => toggleCartelaSelection(num)}
+                        >
+                          #{num}
+                        </Badge>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Total: {(selectedCartelas.size * parseFloat(gameAmount || "0")).toFixed(2)} Birr
+                    </p>
+                  </div>
+                )}
+
                 <div className="pt-4 border-t">
                   <div className="text-center">
                     <p className="text-sm font-medium text-gray-700">Total Collected</p>
@@ -560,7 +597,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                   
                   <div className="flex justify-between p-4">
                     <Button variant="outline" onClick={() => setShowCartelaSelector(false)}>
-                      Cancel
+                      Close
                     </Button>
                     <Button 
                       onClick={bookSelectedCartelas}
