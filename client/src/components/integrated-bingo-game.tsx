@@ -245,73 +245,6 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Called Numbers Board */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Called Numbers ({calledNumbers.length}/75)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-5 gap-1 text-center text-xs">
-                {['B', 'I', 'N', 'G', 'O'].map((letter, colIndex) => (
-                  <div key={letter} className="font-bold text-lg mb-2">{letter}</div>
-                ))}
-                
-                {Array.from({ length: 15 }, (_, rowIndex) => (
-                  ['B', 'I', 'N', 'G', 'O'].map((letter, colIndex) => {
-                    const number = colIndex * 15 + rowIndex + 1;
-                    const isCalled = calledNumbers.includes(number);
-                    const isCurrent = currentNumber === number;
-                    
-                    return (
-                      <div
-                        key={`${letter}-${number}`}
-                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
-                          isCurrent 
-                            ? 'bg-yellow-400 text-black border-2 border-yellow-600'
-                            : isCalled 
-                              ? `${getNumberColor(number)} text-white`
-                              : 'bg-gray-100 text-gray-400'
-                        }`}
-                      >
-                        {number}
-                      </div>
-                    );
-                  })
-                )).flat()}
-              </div>
-              
-              <div className="mt-4 text-center text-sm text-gray-600">
-                {calledNumbers.length} / 75 numbers called
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Current Number Display */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Current Number</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              {currentNumber ? (
-                <div className="space-y-4">
-                  <div className={`mx-auto w-32 h-32 ${getNumberColor(currentNumber)} text-white rounded-full flex items-center justify-center`}>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold">{getNumberLetter(currentNumber)}</div>
-                      <div className="text-4xl font-bold">{currentNumber}</div>
-                    </div>
-                  </div>
-                  <p className="text-xl font-semibold">{getNumberLetter(currentNumber)}{currentNumber}</p>
-                </div>
-              ) : (
-                <div className="text-gray-400">
-                  <div className="mx-auto w-32 h-32 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center">
-                    <span>No number called</span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Game Controls */}
           <Card className="lg:col-span-1">
             <CardHeader>
@@ -433,6 +366,73 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                 <div className="text-sm">
                   <strong>Game State:</strong> {gameState}
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Current Number Display */}
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle>Current Number</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              {currentNumber ? (
+                <div className="space-y-4">
+                  <div className={`mx-auto w-32 h-32 ${getNumberColor(currentNumber)} text-white rounded-full flex items-center justify-center`}>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{getNumberLetter(currentNumber)}</div>
+                      <div className="text-4xl font-bold">{currentNumber}</div>
+                    </div>
+                  </div>
+                  <p className="text-xl font-semibold">{getNumberLetter(currentNumber)}{currentNumber}</p>
+                </div>
+              ) : (
+                <div className="text-gray-400">
+                  <div className="mx-auto w-32 h-32 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center">
+                    <span>No number called</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Called Numbers Board */}
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle>Called Numbers ({calledNumbers.length}/75)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-5 gap-1 text-center text-xs">
+                {['B', 'I', 'N', 'G', 'O'].map((letter, colIndex) => (
+                  <div key={letter} className="font-bold text-lg mb-2">{letter}</div>
+                ))}
+                
+                {Array.from({ length: 15 }, (_, rowIndex) => (
+                  ['B', 'I', 'N', 'G', 'O'].map((letter, colIndex) => {
+                    const number = colIndex * 15 + rowIndex + 1;
+                    const isCalled = calledNumbers.includes(number);
+                    const isCurrent = currentNumber === number;
+                    
+                    return (
+                      <div
+                        key={`${letter}-${number}`}
+                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
+                          isCurrent 
+                            ? 'bg-yellow-400 text-black border-2 border-yellow-600'
+                            : isCalled 
+                              ? `${getNumberColor(number)} text-white`
+                              : 'bg-gray-100 text-gray-400'
+                        }`}
+                      >
+                        {number}
+                      </div>
+                    );
+                  })
+                )).flat()}
+              </div>
+              
+              <div className="mt-4 text-center text-sm text-gray-600">
+                {calledNumbers.length} / 75 numbers called
               </div>
             </CardContent>
           </Card>
