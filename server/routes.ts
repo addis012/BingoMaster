@@ -2229,23 +2229,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const adminId = parseInt(req.params.id);
       const updates = req.body;
       
+      console.log(`Updating admin ${adminId} with data:`, updates);
+      
       // If commission rate is being updated, update the shop as well
       if (updates.commissionRate !== undefined) {
         const adminUser = await storage.getUser(adminId);
+        console.log(`Found admin user:`, adminUser);
+        
         if (adminUser && adminUser.shopId) {
-          await storage.updateShop(adminUser.shopId, {
+          console.log(`Updating shop ${adminUser.shopId} with commission: ${updates.commissionRate}`);
+          const shopUpdate = await storage.updateShop(adminUser.shopId, {
             superAdminCommission: updates.commissionRate.toString()
           });
+          console.log(`Shop update result:`, shopUpdate);
+        } else {
+          console.log(`Admin user not found or no shopId:`, { adminUser, shopId: adminUser?.shopId });
         }
         // Remove commissionRate from user updates since it's stored in shop
         delete updates.commissionRate;
       }
       
-      const updatedAdmin = await storage.updateUser(adminId, updates);
+      // Only update user if there are remaining fields to update
+      let updatedAdmin = null;
+      if (Object.keys(updates).length > 0) {
+        console.log(`Updating user with remaining fields:`, updates);
+        updatedAdmin = await storage.updateUser(adminId, updates);
+      } else {
+        // If no user fields to update, just get the current user
+        updatedAdmin = await storage.getUser(adminId);
+      }
+      
+      console.log(`Final result:`, updatedAdmin);
       res.json(updatedAdmin);
     } catch (error) {
       console.error("Admin update error:", error);
-      res.status(500).json({ message: "Failed to update admin user" });
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ message: "Failed to update admin user", error: error.message });
     }
   });
 
