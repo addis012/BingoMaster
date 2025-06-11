@@ -1400,7 +1400,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   </DialogHeader>
                   
                   {/* Cartela Number Grid - One Click Book/Unbook - FULLSCREEN */}
-                  <div className="grid grid-cols-10 gap-1 mb-4 content-start justify-items-center items-start">
+                  <div className="flex flex-col h-full">
+                    <div className="grid grid-cols-10 gap-1 mb-4 content-start justify-items-center items-start">
                     {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
                       const isBooked = bookedCartelas.has(num);
                       
@@ -1617,27 +1618,28 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                         </div>
                       </div>
                     </div>
-                  )}
-                </DialogContent>
-              </Dialog>
+                )}
+                </div>
+              </DialogContent>
+            </Dialog>
 
-              {/* Additional Control Buttons */}
-              <div className="space-y-2">
-                <Button 
-                  onClick={resetGame}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Reset Game
-                </Button>
+            {/* Additional Control Buttons */}
+            <div className="space-y-2">
+              <Button 
+                onClick={resetGame}
+                variant="outline"
+                className="w-full"
+              >
+                Reset Game
+              </Button>
 
-                <Button 
-                  onClick={restartGame}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Restart Game
-                </Button>
+              <Button 
+                onClick={restartGame}
+                variant="outline"
+                className="w-full"
+              >
+                Restart Game
+              </Button>
 
                 {gameActive && (
                   <Button 
