@@ -2252,8 +2252,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only update user if there are remaining fields to update
       let updatedAdmin = null;
       if (Object.keys(updates).length > 0) {
-        console.log(`Updating user with remaining fields:`, updates);
-        updatedAdmin = await storage.updateUser(adminId, updates);
+        // Clean up empty strings and convert them to appropriate values
+        const cleanedUpdates = { ...updates };
+        
+        // Remove empty strings and set null for integer fields
+        if (cleanedUpdates.referredBy === '') {
+          cleanedUpdates.referredBy = null;
+        }
+        
+        // Remove empty password field (don't update if empty)
+        if (cleanedUpdates.password === '') {
+          delete cleanedUpdates.password;
+        }
+        
+        // Remove shopName field (not a user field)
+        if (cleanedUpdates.shopName !== undefined) {
+          delete cleanedUpdates.shopName;
+        }
+        
+        console.log(`Updating user with cleaned fields:`, cleanedUpdates);
+        
+        if (Object.keys(cleanedUpdates).length > 0) {
+          updatedAdmin = await storage.updateUser(adminId, cleanedUpdates);
+        } else {
+          updatedAdmin = await storage.getUser(adminId);
+        }
       } else {
         // If no user fields to update, just get the current user
         updatedAdmin = await storage.getUser(adminId);
