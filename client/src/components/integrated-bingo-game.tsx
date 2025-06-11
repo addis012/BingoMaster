@@ -819,6 +819,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
   const restartGame = async () => {
     console.log("🔄 Restarting game with same cartelas and starting immediately");
     
+    // Store current cartelas before any reset
+    const preservedCartelas = new Set(bookedCartelas);
+    const preservedCartelaCards = { ...cartelaCards };
+    const preservedTotalCollected = totalCollected;
+    
+    console.log("🔄 Preserving cartelas for restart:", Array.from(preservedCartelas));
+    
     // If there's an active game and no winner was found, end it without recording revenue
     if (activeGameId && !winnerFound) {
       console.log("🎯 Ending game without winner - no revenue will be recorded");
@@ -845,9 +852,13 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     setLastCalledLetter("");
     setActiveGameId(null);
     setGamePlayersMap(new Map());
-    // Keep bookedCartelas and totalCollected for restart
     setShowWinnerVerification(false);
     setFinalPrizeAmount(null);
+    
+    // Restore preserved cartelas
+    setBookedCartelas(preservedCartelas);
+    setCartelaCards(preservedCartelaCards);
+    setTotalCollected(preservedTotalCollected);
     
     // Update refs
     gameActiveRef.current = false;
@@ -895,22 +906,14 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       const cartelaArray = Array.from(bookedCartelas);
       console.log("📝 Using your selected cartelas:", cartelaArray);
       
-      // If no cartelas selected, show warning but allow restart to proceed (for restart scenario)
+      // If no cartelas selected, don't start the game
       if (cartelaArray.length === 0) {
-        console.log("⚠️ No cartelas found - this might be a restart scenario");
-        // For restart, we'll generate some demo cartelas to allow the game to proceed
-        const demoCartelas = [1, 2, 3]; // Default cartelas for restart
-        for (const cartelaNum of demoCartelas) {
-          setBookedCartelas(prev => new Set([...Array.from(prev), cartelaNum]));
-          setCartelaCards(prev => ({
-            ...prev,
-            [cartelaNum]: generateCartela()
-          }));
-        }
-        setTotalCollected(demoCartelas.length * parseInt(gameAmount));
-        console.log("🔄 Generated demo cartelas for restart:", demoCartelas);
-        // Update cartelaArray for the rest of the function
-        cartelaArray.push(...demoCartelas);
+        toast({
+          title: "No Cartelas Selected",
+          description: "Please select cartelas before starting the game",
+          variant: "destructive"
+        });
+        return;
       }
       
       console.log("Selected cartelas for game:", cartelaArray);
