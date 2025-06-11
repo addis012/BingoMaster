@@ -34,10 +34,6 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   
-  // Calculate total collected and prize amount
-  const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
-  const prizeAmount = totalCollected * 0.7; // 70% goes to winner
-  
   // Use ref to track game state for reliable interval access
   const gameStateRef = useRef({
     active: false,
@@ -50,6 +46,17 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     queryKey: ['/api/games/active'],
     enabled: !!user
   });
+
+  // Get system settings to get the correct profit margin
+  const { data: systemSettings } = useQuery({
+    queryKey: ['/api/admin/system-settings'],
+    enabled: !!user
+  });
+
+  // Calculate total collected and prize amount based on actual profit margin
+  const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
+  const adminProfitMargin = systemSettings ? parseFloat((systemSettings as any).commissionRate) : 30; // Default 30% if not loaded
+  const prizeAmount = totalCollected * (1 - adminProfitMargin / 100); // Prize = Total - Admin Profit
 
   // Get game players
   const { data: gamePlayers, refetch: refetchPlayers } = useQuery({
@@ -556,7 +563,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                       <div className="pt-2 border-t">
                         <p className="text-sm font-medium text-gray-700">Winner Gets</p>
                         <p className="text-xl font-bold text-green-600">{prizeAmount.toFixed(2)} Birr</p>
-                        <p className="text-xs text-gray-500">70% of total collected</p>
+                        <p className="text-xs text-gray-500">{(100 - adminProfitMargin).toFixed(0)}% of total collected</p>
                       </div>
                     )}
                   </div>
