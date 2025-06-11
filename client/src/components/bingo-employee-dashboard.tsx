@@ -101,6 +101,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Start game
   const startGame = () => {
+    if (bookedCartelas.size === 0) {
+      alert("Please select at least one cartela before starting the game");
+      return;
+    }
+
     if (autoCallInterval) {
       clearInterval(autoCallInterval);
       setAutoCallInterval(null);
@@ -320,7 +325,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             <div className="space-y-3">
               <Button 
                 onClick={startGame}
-                disabled={gameActive || bookedCartelas.size === 0}
+                disabled={gameActive}
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
                 size="lg"
               >
@@ -443,6 +448,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <p className="text-lg font-semibold">{calledNumbers.length} / 75 numbers called</p>
               {gameActive && (
                 <p className="text-green-600 font-medium">Game Active</p>
+              )}
+              {gameFinished && (
+                <p className="text-red-600 font-medium">Game Finished</p>
               )}
             </div>
           </div>

@@ -6,7 +6,7 @@ import LoginPage from "./pages/login-page";
 import TestLogin from "./pages/test-login";
 import SimpleAdminDashboard from "./pages/simple-admin-dashboard";
 import SuperAdminDashboard from "./pages/super-admin-dashboard";
-import IntegratedBingoGame from "./components/integrated-bingo-game";
+import EmployeeDashboard from "./pages/employee-dashboard";
 
 function AppRouter() {
   const { user } = useAuth();
@@ -30,12 +30,7 @@ function AppRouter() {
         <SimpleAdminDashboard onLogout={handleLogout} />
       </Route>
       <Route path="/dashboard/employee">
-        <IntegratedBingoGame 
-          employeeName={user?.name || "Employee"} 
-          employeeId={user?.id || 0} 
-          shopId={user?.shopId || 0} 
-          onLogout={handleLogout} 
-        />
+        <EmployeeDashboard />
       </Route>
       
       {/* Legacy Routes for backward compatibility */}
@@ -43,12 +38,10 @@ function AppRouter() {
         <SimpleAdminDashboard onLogout={handleLogout} />
       </Route>
       <Route path="/employee">
-        <IntegratedBingoGame 
-          employeeName={user?.name || "Employee"} 
-          employeeId={user?.id || 0} 
-          shopId={user?.shopId || 0} 
-          onLogout={handleLogout} 
-        />
+        <EmployeeDashboard />
+      </Route>
+      <Route path="/employee-dashboard">
+        <EmployeeDashboard />
       </Route>
     </Router>
   );
