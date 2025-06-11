@@ -1,4 +1,4 @@
-import IntegratedBingoGame from "@/components/integrated-bingo-game";
+import BingoEmployeeDashboard from "@/components/bingo-employee-dashboard";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function EmployeeDashboard() {
@@ -9,10 +9,7 @@ export default function EmployeeDashboard() {
   }
 
   return (
-    <IntegratedBingoGame
-      employeeName={user.name}
-      employeeId={user.id}
-      shopId={user.shopId || 1}
+    <BingoEmployeeDashboard
       onLogout={logout}
     />
   );
