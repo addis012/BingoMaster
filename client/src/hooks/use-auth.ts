@@ -17,6 +17,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   isLoading: boolean;
+  refetch: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,7 +26,7 @@ export function AuthProvider(props: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const { data: userData = null, isLoading } = useQuery({
+  const { data: userData = null, isLoading, refetch } = useQuery({
     queryKey: ["/api/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: 1,
@@ -78,6 +79,7 @@ export function AuthProvider(props: { children: ReactNode }) {
     login,
     logout,
     isLoading: !isInitialized || loginMutation.isPending || logoutMutation.isPending,
+    refetch,
   };
 
   // Debug authentication state
