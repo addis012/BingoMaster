@@ -1381,11 +1381,11 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   Select Cartela
                 </Button>
               </DialogTrigger>
-                <DialogContent className="max-w-full max-h-full w-screen h-screen p-6 overflow-y-auto">
-                  <DialogHeader className="flex flex-row items-center justify-between">
+                <DialogContent className="max-w-full max-h-full w-screen h-screen p-4 flex flex-col">
+                  <DialogHeader className="flex flex-row items-center justify-between flex-shrink-0 mb-4">
                     <div>
-                      <DialogTitle className="text-2xl font-bold">Select Cartela Numbers (1-100)</DialogTitle>
-                      <DialogDescription className="text-lg">
+                      <DialogTitle className="text-xl font-bold">Select Cartela Numbers (1-100)</DialogTitle>
+                      <DialogDescription className="text-sm">
                         Choose cartela numbers from 1 to 100. Each number generates a unique Bingo card combination.
                       </DialogDescription>
                     </div>
@@ -1400,7 +1400,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   </DialogHeader>
                   
                   {/* Cartela Number Grid - One Click Book/Unbook - FULLSCREEN */}
-                  <div className="grid grid-cols-10 gap-3 p-4">
+                  <div className="grid grid-cols-10 gap-1 flex-1 content-start justify-items-center items-start overflow-hidden">
                     {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
                       const isBooked = bookedCartelas.has(num);
                       
@@ -1408,7 +1408,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                         <Button
                           key={num}
                           variant={isBooked ? "default" : "outline"}
-                          className={`h-16 w-16 text-xl font-bold ${
+                          className={`h-12 w-12 text-lg font-bold flex-shrink-0 ${
                             isBooked 
                               ? "bg-green-500 text-white hover:bg-red-500" 
                               : "hover:bg-blue-500 hover:text-white"
