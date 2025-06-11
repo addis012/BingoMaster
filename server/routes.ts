@@ -3311,5 +3311,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get admin shop stats with commission rate for live updates
+  app.get("/api/admin/shop-stats", async (req: Request, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || (user.role !== 'admin' && user.role !== 'employee')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Get shop information with commission rate
+      const shop = user.shopId ? await storage.getShop(user.shopId) : null;
+      const commissionRate = shop?.superAdminCommission || "30";
+
+      const shopStats = {
+        commissionRate,
+        shopId: user.shopId,
+        shopName: shop?.name || "Unknown Shop",
+        lastUpdated: new Date().toISOString()
+      };
+
+      res.json(shopStats);
+    } catch (error) {
+      console.error('Error fetching shop stats:', error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   return httpServer;
 }

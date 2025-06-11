@@ -47,9 +47,16 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     enabled: !!user
   });
 
-  // Calculate total collected and prize amount (using 30% default admin margin)
+  // Get admin commission rate from user profile or system settings
+  const { data: adminSettings } = useQuery({
+    queryKey: ['/api/admin/shop-stats'],
+    enabled: !!user,
+    refetchInterval: 5000 // Update every 5 seconds
+  });
+
+  // Calculate total collected and prize amount with live admin margin
   const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
-  const adminProfitMargin = 30; // Default admin profit margin
+  const adminProfitMargin = adminSettings?.commissionRate ? parseFloat((adminSettings as any).commissionRate) : 30;
   const prizeAmount = totalCollected * (1 - adminProfitMargin / 100); // Prize = Total - Admin Profit
 
   // Get game players
@@ -379,6 +386,9 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
 
   // Book selected cartelas
   const bookSelectedCartelas = () => {
+    console.log(`Booking cartelas, selected count: ${selectedCartelas.size}`);
+    console.log(`Selected cartelas:`, Array.from(selectedCartelas));
+    
     if (selectedCartelas.size === 0) {
       toast({
         title: "No Cartelas Selected",
@@ -403,8 +413,13 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     });
 
     // Update booked cartelas
-    setBookedCartelas(prev => new Set([...Array.from(prev), ...Array.from(selectedCartelas)]));
-    setSelectedCartelas(new Set());
+    setBookedCartelas(prev => {
+      const newBooked = new Set([...Array.from(prev), ...Array.from(selectedCartelas)]);
+      console.log(`Updated booked cartelas:`, Array.from(newBooked));
+      return newBooked;
+    });
+    
+    // Don't clear selected cartelas - keep them visible in the display
     setShowCartelaSelector(false);
   };
 
@@ -638,18 +653,12 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                       const isBooked = bookedCartelas.has(num);
                       const isSelected = selectedCartelas.has(num);
                       return (
-                        <div key={num} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`cartela-${num}`}
-                            checked={isSelected}
-                            disabled={isBooked}
-                            onCheckedChange={() => toggleCartelaSelection(num)}
-                          />
+                        <div key={num} className="flex flex-col items-center space-y-1">
                           <Button
                             variant={isSelected ? "default" : "outline"}
                             size="sm"
                             disabled={isBooked}
-                            className={`h-12 ${
+                            className={`h-12 w-12 ${
                               isBooked 
                                 ? 'bg-red-500 text-white opacity-50' 
                                 : isSelected 
@@ -660,6 +669,13 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                           >
                             {num}
                           </Button>
+                          <Checkbox
+                            id={`cartela-${num}`}
+                            checked={isSelected}
+                            disabled={isBooked}
+                            onCheckedChange={() => toggleCartelaSelection(num)}
+                            className="h-3 w-3"
+                          />
                         </div>
                       );
                     })}
