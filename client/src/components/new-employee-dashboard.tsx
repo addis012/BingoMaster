@@ -139,16 +139,19 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
         })
       }),
     onSuccess: (result) => {
+      setShowWinnerChecker(false);
+      setWinnerCartelaNumber("");
+      
       if (result.isWinner) {
         toast({
-          title: "BINGO! Winner Found!",
-          description: `Cartela #${result.cartelaNumber} is a valid winner!`,
+          title: "🎉 WINNER CONFIRMED!",
+          description: `Cartela #${result.cartelaNumber} won! This cartela is a valid winner.`,
           variant: "default"
         });
       } else {
         toast({
-          title: "Not a Winner",
-          description: `Cartela #${result.cartelaNumber} is not a valid winner yet`,
+          title: "❌ No Win Yet",
+          description: `Cartela #${result.cartelaNumber} didn't won. This cartela is not a winner yet.`,
           variant: "destructive"
         });
       }
@@ -440,10 +443,29 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     }
 
     const cartelaNum = parseInt(winnerCartelaNumber);
-    if (!cartelaNum || !currentGame?.id) {
+    if (!cartelaNum || cartelaNum < 1 || cartelaNum > 100) {
       toast({
-        title: "Invalid Input",
-        description: "Please enter a valid cartela number",
+        title: "Invalid Cartela",
+        description: "Please enter a valid cartela number between 1-100",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if cartela is in booked cartelas
+    if (!bookedCartelas.has(cartelaNum)) {
+      toast({
+        title: "Invalid Cartela",
+        description: `Cartela #${cartelaNum} is not selected/booked in this game`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!currentGame?.id) {
+      toast({
+        title: "No Active Game",
+        description: "Please start a game first",
         variant: "destructive"
       });
       return;

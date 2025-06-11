@@ -3314,7 +3314,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get admin shop stats with commission rate for live updates
   app.get("/api/admin/shop-stats", async (req: Request, res) => {
     try {
-      const user = req.session.user;
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
       if (!user || (user.role !== 'admin' && user.role !== 'employee')) {
         return res.status(403).json({ message: "Access denied" });
       }
