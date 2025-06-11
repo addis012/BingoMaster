@@ -28,7 +28,7 @@ interface SimpleAdminDashboardProps {
 }
 
 export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refetch: refetchAuth } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
@@ -269,7 +269,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
             )}
             
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Shop Revenue</CardTitle>
@@ -288,6 +288,21 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                       </p>
                     </>
                   )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Commission Rate</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-amber-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {(user as any).commissionRate || '15'}%
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Super Admin commission
+                  </p>
                 </CardContent>
               </Card>
 

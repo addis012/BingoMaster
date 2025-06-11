@@ -84,7 +84,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "User not found" });
       }
 
-      const { password: _, ...userWithoutPassword } = user;
+      // For admins, include their shop's commission rate
+      let userWithCommission = { ...user } as any;
+      if (user.role === 'admin' && user.shopId) {
+        const shop = await storage.getShop(user.shopId);
+        if (shop) {
+          userWithCommission.commissionRate = shop.superAdminCommission;
+        }
+      }
+
+      const { password: _, ...userWithoutPassword } = userWithCommission;
       res.json({ user: userWithoutPassword });
     } catch (error) {
       res.status(500).json({ message: "Failed to get user" });
