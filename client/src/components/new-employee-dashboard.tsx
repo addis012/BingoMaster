@@ -365,13 +365,16 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
 
   // Toggle cartela selection (multiple selection)
   const toggleCartelaSelection = (cartelaNum: number) => {
-    const newSelection = new Set(selectedCartelas);
-    if (newSelection.has(cartelaNum)) {
-      newSelection.delete(cartelaNum);
-    } else {
-      newSelection.add(cartelaNum);
-    }
-    setSelectedCartelas(newSelection);
+    setSelectedCartelas(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(cartelaNum)) {
+        newSelection.delete(cartelaNum);
+      } else {
+        newSelection.add(cartelaNum);
+      }
+      console.log(`Toggled cartela ${cartelaNum}, total selected: ${newSelection.size}`);
+      return newSelection;
+    });
   };
 
   // Book selected cartelas
