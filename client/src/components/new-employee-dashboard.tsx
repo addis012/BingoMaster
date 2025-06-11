@@ -558,26 +558,43 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                       </Button>
                     )}
                   </div>
-                  {selectedCartelas.size > 0 ? (
+                  {bookedCartelas.size > 0 ? (
                     <>
                       <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                        {Array.from(selectedCartelas).sort((a, b) => a - b).map(num => (
+                        {Array.from(bookedCartelas).sort((a, b) => a - b).map(num => (
                           <Badge 
                             key={num} 
-                            variant="secondary" 
-                            className="text-xs cursor-pointer hover:bg-red-100"
-                            onClick={() => toggleCartelaSelection(num)}
+                            variant="default" 
+                            className="text-xs bg-green-600 text-white"
                           >
                             #{num}
                           </Badge>
                         ))}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        Total: {(selectedCartelas.size * parseFloat(gameAmount || "0")).toFixed(2)} Birr
+                        Total: {(bookedCartelas.size * parseFloat(gameAmount || "0")).toFixed(2)} Birr
                       </p>
                     </>
                   ) : (
-                    <p className="text-xs text-gray-500">No cartelas selected yet</p>
+                    <p className="text-xs text-gray-500">No cartelas booked yet</p>
+                  )}
+                  
+                  {selectedCartelas.size > 0 && (
+                    <div className="mt-2 pt-2 border-t border-gray-200">
+                      <p className="text-xs text-blue-600 font-medium mb-1">Ready to book:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {Array.from(selectedCartelas).sort((a, b) => a - b).map(num => (
+                          <Badge 
+                            key={num} 
+                            variant="outline" 
+                            className="text-xs cursor-pointer hover:bg-blue-100 border-blue-300"
+                            onClick={() => toggleCartelaSelection(num)}
+                          >
+                            #{num}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
 
