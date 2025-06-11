@@ -1381,7 +1381,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   Select Cartela
                 </Button>
               </DialogTrigger>
-                <DialogContent className="max-w-full max-h-full w-screen h-screen p-4 flex flex-col">
+                <DialogContent className="max-w-full max-h-full w-screen h-screen p-4 flex flex-col overflow-y-auto">
                   <DialogHeader className="flex flex-row items-center justify-between flex-shrink-0 mb-4">
                     <div>
                       <DialogTitle className="text-xl font-bold">Select Cartela Numbers (1-100)</DialogTitle>
@@ -1400,7 +1400,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   </DialogHeader>
                   
                   {/* Cartela Number Grid - One Click Book/Unbook - FULLSCREEN */}
-                  <div className="grid grid-cols-10 gap-1 flex-1 content-start justify-items-center items-start overflow-hidden">
+                  <div className="grid grid-cols-10 gap-1 mb-4 content-start justify-items-center items-start">
                     {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
                       const isBooked = bookedCartelas.has(num);
                       
@@ -1457,12 +1457,68 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                     })}
                   </div>
                   
-                  {/* Preview any booked cartela - Hide when selector is open */}
-                  {bookedCartelas.size > 0 && !showCartelaSelector && (
+                  {/* Preview selected cartelas inside the dialog */}
+                  {bookedCartelas.size > 0 && (
                     <div className="mt-6 p-4 border-t">
                       <h3 className="text-lg font-semibold mb-4 text-center">
                         Selected Cartelas Preview
                       </h3>
+                      <div className="grid gap-4 max-h-96 overflow-y-auto">
+                        {Array.from(bookedCartelas).map((cartelaNum: number) => {
+                          // Ensure card is stored and use fixed generation
+                          if (!cartelaCards[cartelaNum]) {
+                            const fixedCard = generateFixedCartela(cartelaNum);
+                            setCartelaCards(prev => ({
+                              ...prev,
+                              [cartelaNum]: fixedCard
+                            }));
+                          }
+                          const card = cartelaCards[cartelaNum] || generateFixedCartela(cartelaNum);
+                          return (
+                            <div key={cartelaNum} className="border rounded p-3">
+                              <h4 className="font-medium mb-2 text-center">Cartela #{cartelaNum}</h4>
+                              <div className="max-w-48 mx-auto">
+                                {/* BINGO Headers */}
+                                <div className="grid grid-cols-5 gap-0.5 mb-1">
+                                  {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                                    const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                                    return (
+                                      <div key={letter} className={`h-6 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
+                                        {letter}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                
+                                {/* Numbers Grid */}
+                                <div className="grid grid-cols-5 gap-0.5">
+                                  {card.flat().map((num, index) => (
+                                    <div
+                                      key={index}
+                                      className={`h-6 border border-gray-400 flex items-center justify-center text-xs font-medium ${
+                                        num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
+                                      }`}
+                                    >
+                                      {num === 0 ? 'FREE' : num}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+
+              {/* Preview any booked cartela - Hide when selector is open */}
+              {bookedCartelas.size > 0 && !showCartelaSelector && (
+                <div className="mt-6 p-4 border-t">
+                  <h3 className="text-lg font-semibold mb-4 text-center">
+                    Selected Cartelas Preview
+                  </h3>
                       <div className="grid gap-4 max-h-96 overflow-y-auto">
                         {Array.from(bookedCartelas).map((cartelaNum: number) => {
                           // Ensure card is stored and use fixed generation
@@ -1627,6 +1683,97 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                 >
                   Check Bingo
                 </Button>
+              )}
+            </div>
+
+              {/* Preview any booked cartela - Hide when selector is open */}
+              {bookedCartelas.size > 0 && !showCartelaSelector && (
+                <div className="mt-6 p-4 border-t">
+                  <h3 className="text-lg font-semibold mb-4 text-center">
+                    Selected Cartelas Preview
+                  </h3>
+                  <div className="grid gap-4 max-h-96 overflow-y-auto">
+                    {Array.from(bookedCartelas).map((cartelaNum: number) => {
+                      // Ensure card is stored and use fixed generation
+                      if (!cartelaCards[cartelaNum]) {
+                        const fixedCard = generateFixedCartela(cartelaNum);
+                        setCartelaCards(prev => ({
+                          ...prev,
+                          [cartelaNum]: fixedCard
+                        }));
+                      }
+                      const card = cartelaCards[cartelaNum] || generateFixedCartela(cartelaNum);
+                      return (
+                        <div key={cartelaNum} className="border rounded p-3">
+                          <h4 className="font-medium mb-2 text-center">Cartela #{cartelaNum}</h4>
+                          <div className="max-w-48 mx-auto">
+                            {/* BINGO Headers */}
+                            <div className="grid grid-cols-5 gap-0.5 mb-1">
+                              {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                                const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                                return (
+                                  <div key={letter} className={`h-6 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
+                                    {letter}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            
+                            {/* Numbers Grid */}
+                            <div className="grid grid-cols-5 gap-0.5">
+                              {card.flat().map((num, index) => (
+                                <div
+                                  key={index}
+                                  className={`h-6 border border-gray-400 flex items-center justify-center text-xs font-medium ${
+                                    num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
+                                  }`}
+                                >
+                                  {num === 0 ? 'FREE' : num}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Old preview for backward compatibility */}
+              {selectedCartela && cartelaCards[selectedCartela] && bookedCartelas.size === 0 && !showCartelaSelector && (
+                <div className="mt-6 p-4 border-t">
+                  <h3 className="text-lg font-semibold mb-4 text-center">
+                    Cartela #{selectedCartela} - Bingo Card Preview
+                  </h3>
+                  <div className="max-w-48 mx-auto">
+                    {/* BINGO Headers */}
+                    <div className="grid grid-cols-5 gap-1 mb-2">
+                      {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                        const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                        return (
+                          <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-lg`}>
+                            {letter}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Numbers Grid */}
+                    <div className="grid grid-cols-5 gap-1">
+                      {cartelaCards[selectedCartela].flat().map((num, index) => (
+                        <div
+                          key={index}
+                          className={`h-8 border border-gray-400 flex items-center justify-center text-sm font-medium ${
+                            num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
+                          }`}
+                        >
+                          {num === 0 ? 'FREE' : num}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
           </div>
         </div>
