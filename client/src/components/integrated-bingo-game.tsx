@@ -815,13 +815,9 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     stopAutomaticNumberCalling();
   };
 
-  // Restart game - preserves cartela selections for new game
+  // Restart game - preserves cartela selections for new game and starts immediately
   const restartGame = async () => {
-    console.log("🔄 Restarting game with same cartelas");
-    
-    // Store current cartela selections
-    const previousCartelas = new Set(bookedCartelas);
-    const previousTotalCollected = totalCollected;
+    console.log("🔄 Restarting game with same cartelas and starting immediately");
     
     // If there's an active game and no winner was found, end it without recording revenue
     if (activeGameId && !winnerFound) {
@@ -865,7 +861,12 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     setIsCallingNumber(false); // Reset mutex state
     stopAutomaticNumberCalling();
     
-    console.log("🔄 Game restarted with preserved cartelas:", Array.from(previousCartelas));
+    console.log("🔄 Game reset complete, starting new game with preserved cartelas");
+    
+    // Immediately start a new game with the preserved cartelas
+    setTimeout(() => {
+      startGame();
+    }, 100);
   };
 
   // Start game - support both pre-booked games and quick play mode
@@ -975,23 +976,15 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       console.log("Game started successfully, beginning number calling...");
       console.log("Final gamePlayersMap before starting:", Array.from(gamePlayersMap.entries()));
       
-      // Start automatic number calling immediately after game state is set
+      // Start the game immediately - no delay
+      console.log("🎯 Starting game immediately with automatic calling");
+      
+      // Call first number to start the game
       setTimeout(() => {
-        console.log("🔄 Starting automatic calling - state check:", {
-          gameActive,
-          gameActiveRef: gameActiveRef.current,
-          gamePausedRef: gamePausedRef.current,
-          gameFinishedRef: gameFinishedRef.current,
-          activeGameId
-        });
-        
-        // Call first number manually to start the game
-        console.log("🎯 Calling initial number to start game");
         callNumber();
-        
         // Start the automatic calling system
         startAutomaticNumberCalling();
-      }, 500);
+      }, 100);
     } catch (error) {
       console.error("Failed to start game:", error);
       toast({
@@ -1538,12 +1531,34 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   Restart Game
                 </Button>
 
-                <Button 
-                  onClick={() => window.location.href = '/dashboard/employee'}
-                  className="w-full bg-green-400 hover:bg-green-500"
-                >
-                  Start Autoplay
-                </Button>
+                {gameActive && (
+                  <Button 
+                    onClick={() => {
+                      if (gamePaused) {
+                        // Resume game
+                        setGamePaused(false);
+                        gamePausedRef.current = false;
+                        startAutomaticNumberCalling();
+                        toast({
+                          title: "Game Resumed",
+                          description: "Automatic number calling resumed",
+                        });
+                      } else {
+                        // Pause game
+                        setGamePaused(true);
+                        gamePausedRef.current = true;
+                        stopAutomaticNumberCalling();
+                        toast({
+                          title: "Game Paused",
+                          description: "Automatic number calling paused",
+                        });
+                      }
+                    }}
+                    className={`w-full ${gamePaused ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-500 hover:bg-orange-600'}`}
+                  >
+                    {gamePaused ? 'Resume Game' : 'Pause Game'}
+                  </Button>
+                )}
               </div>
 
               {/* Check Bingo Button - Only show during active game */}
