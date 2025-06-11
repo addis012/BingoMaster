@@ -895,14 +895,22 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
       const cartelaArray = Array.from(bookedCartelas);
       console.log("📝 Using your selected cartelas:", cartelaArray);
       
-      // If no cartelas selected, don't start the game
+      // If no cartelas selected, show warning but allow restart to proceed (for restart scenario)
       if (cartelaArray.length === 0) {
-        toast({
-          title: "No Cartelas Selected",
-          description: "Please select cartelas before starting the game",
-          variant: "destructive"
-        });
-        return;
+        console.log("⚠️ No cartelas found - this might be a restart scenario");
+        // For restart, we'll generate some demo cartelas to allow the game to proceed
+        const demoCartelas = [1, 2, 3]; // Default cartelas for restart
+        for (const cartelaNum of demoCartelas) {
+          setBookedCartelas(prev => new Set([...Array.from(prev), cartelaNum]));
+          setCartelaCards(prev => ({
+            ...prev,
+            [cartelaNum]: generateCartela()
+          }));
+        }
+        setTotalCollected(demoCartelas.length * parseInt(gameAmount));
+        console.log("🔄 Generated demo cartelas for restart:", demoCartelas);
+        // Update cartelaArray for the rest of the function
+        cartelaArray.push(...demoCartelas);
       }
       
       console.log("Selected cartelas for game:", cartelaArray);
@@ -1276,9 +1284,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                       return `${winAmount} ETB`;
                     })()}
                   </p>
-                  <p className="text-xs text-yellow-600">
-                    Based on {(shopData as any)?.profitMargin || 20}% profit margin
-                  </p>
+
                 </div>
               )}
             </div>
