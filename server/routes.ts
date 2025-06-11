@@ -1664,7 +1664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       let settings: any = {
-        commissionRate: "25", // Default super admin commission
+        commissionRate: "15", // Default super admin commission
         adminProfitMargin: "15", // Default
         prizePoolPercentage: "85" // Default
       };
@@ -1672,8 +1672,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get actual shop settings if admin has a shop
       if (user.shopId) {
         const shop = await storage.getShop(user.shopId);
-        if (shop && shop.profitMargin) {
-          settings.adminProfitMargin = shop.profitMargin;
+        if (shop) {
+          if (shop.profitMargin) {
+            settings.adminProfitMargin = shop.profitMargin;
+          }
+          if (shop.superAdminCommission) {
+            settings.commissionRate = shop.superAdminCommission;
+          }
         }
       }
       
