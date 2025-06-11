@@ -2170,7 +2170,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const admins = await storage.getAdminUsers();
-      res.json(admins);
+      
+      // Enrich admin data with commission rates from their shops
+      const enrichedAdmins = await Promise.all(
+        admins.map(async (admin: any) => {
+          if (admin.shopId) {
+            const shop = await storage.getShop(admin.shopId);
+            return {
+              ...admin,
+              commissionRate: shop?.superAdminCommission || '15'
+            };
+          }
+          return { ...admin, commissionRate: '15' };
+        })
+      );
+      
+      res.json(enrichedAdmins);
     } catch (error) {
       res.status(500).json({ message: "Failed to get admin users" });
     }

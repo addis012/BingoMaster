@@ -348,6 +348,9 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                   <div className="text-sm text-gray-500">
                     Credit Balance: {formatCurrency(admin.creditBalance)}
                   </div>
+                  <div className="text-sm text-gray-500">
+                    Commission Rate: {admin.commissionRate || '15'}%
+                  </div>
                   {admin.email && (
                     <div className="text-sm text-gray-500">Email: {admin.email}</div>
                   )}
