@@ -2228,9 +2228,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const adminId = parseInt(req.params.id);
       const updates = req.body;
+      
+      // If commission rate is being updated, update the shop as well
+      if (updates.commissionRate !== undefined) {
+        const adminUser = await storage.getUser(adminId);
+        if (adminUser && adminUser.shopId) {
+          await storage.updateShop(adminUser.shopId, {
+            superAdminCommission: updates.commissionRate.toString()
+          });
+        }
+        // Remove commissionRate from user updates since it's stored in shop
+        delete updates.commissionRate;
+      }
+      
       const updatedAdmin = await storage.updateUser(adminId, updates);
       res.json(updatedAdmin);
     } catch (error) {
+      console.error("Admin update error:", error);
       res.status(500).json({ message: "Failed to update admin user" });
     }
   });
