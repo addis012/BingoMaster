@@ -354,6 +354,10 @@ export class DatabaseStorage implements IStorage {
     return history;
   }
 
+  async recordGameHistory(insertHistory: InsertGameHistory): Promise<GameHistory> {
+    return this.createGameHistory(insertHistory);
+  }
+
   async getGameHistory(shopId: number, startDate?: Date, endDate?: Date): Promise<any[]> {
     let query = db.select({
       id: gameHistory.id,
