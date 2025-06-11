@@ -1519,7 +1519,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   <h3 className="text-lg font-semibold mb-4 text-center">
                     Selected Cartelas Preview
                   </h3>
-                      <div className="grid gap-4 max-h-96 overflow-y-auto">
+                  <div className="grid gap-4 max-h-96 overflow-y-auto">
                         {Array.from(bookedCartelas).map((cartelaNum: number) => {
                           // Ensure card is stored and use fixed generation
                           if (!cartelaCards[cartelaNum]) {
@@ -1684,99 +1684,97 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   Check Bingo
                 </Button>
               )}
-            </div>
-
-              {/* Preview any booked cartela - Hide when selector is open */}
-              {bookedCartelas.size > 0 && !showCartelaSelector && (
-                <div className="mt-6 p-4 border-t">
-                  <h3 className="text-lg font-semibold mb-4 text-center">
-                    Selected Cartelas Preview
-                  </h3>
-                  <div className="grid gap-4 max-h-96 overflow-y-auto">
-                    {Array.from(bookedCartelas).map((cartelaNum: number) => {
-                      // Ensure card is stored and use fixed generation
-                      if (!cartelaCards[cartelaNum]) {
-                        const fixedCard = generateFixedCartela(cartelaNum);
-                        setCartelaCards(prev => ({
-                          ...prev,
-                          [cartelaNum]: fixedCard
-                        }));
-                      }
-                      const card = cartelaCards[cartelaNum] || generateFixedCartela(cartelaNum);
-                      return (
-                        <div key={cartelaNum} className="border rounded p-3">
-                          <h4 className="font-medium mb-2 text-center">Cartela #{cartelaNum}</h4>
-                          <div className="max-w-48 mx-auto">
-                            {/* BINGO Headers */}
-                            <div className="grid grid-cols-5 gap-0.5 mb-1">
-                              {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                                const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
-                                return (
-                                  <div key={letter} className={`h-6 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
-                                    {letter}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            
-                            {/* Numbers Grid */}
-                            <div className="grid grid-cols-5 gap-0.5">
-                              {card.flat().map((num, index) => (
-                                <div
-                                  key={index}
-                                  className={`h-6 border border-gray-400 flex items-center justify-center text-xs font-medium ${
-                                    num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
-                                  }`}
-                                >
-                                  {num === 0 ? 'FREE' : num}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Old preview for backward compatibility */}
-              {selectedCartela && cartelaCards[selectedCartela] && bookedCartelas.size === 0 && !showCartelaSelector && (
-                <div className="mt-6 p-4 border-t">
-                  <h3 className="text-lg font-semibold mb-4 text-center">
-                    Cartela #{selectedCartela} - Bingo Card Preview
-                  </h3>
-                  <div className="max-w-48 mx-auto">
-                    {/* BINGO Headers */}
-                    <div className="grid grid-cols-5 gap-1 mb-2">
-                      {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                        const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
-                        return (
-                          <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-lg`}>
-                            {letter}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    
-                    {/* Numbers Grid */}
-                    <div className="grid grid-cols-5 gap-1">
-                      {cartelaCards[selectedCartela].flat().map((num, index) => (
-                        <div
-                          key={index}
-                          className={`h-8 border border-gray-400 flex items-center justify-center text-sm font-medium ${
-                            num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
-                          }`}
-                        >
-                          {num === 0 ? 'FREE' : num}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
           </div>
-        </div>
+
+          {/* Preview any booked cartela - Hide when selector is open */}
+          {bookedCartelas.size > 0 && !showCartelaSelector && (
+            <div className="mt-6 p-4 border-t">
+              <h3 className="text-lg font-semibold mb-4 text-center">
+                Selected Cartelas Preview
+              </h3>
+              <div className="grid gap-4 max-h-96 overflow-y-auto">
+                {Array.from(bookedCartelas).map((cartelaNum: number) => {
+                  // Ensure card is stored and use fixed generation
+                  if (!cartelaCards[cartelaNum]) {
+                    const fixedCard = generateFixedCartela(cartelaNum);
+                    setCartelaCards(prev => ({
+                      ...prev,
+                      [cartelaNum]: fixedCard
+                    }));
+                  }
+                  const card = cartelaCards[cartelaNum] || generateFixedCartela(cartelaNum);
+                  return (
+                    <div key={cartelaNum} className="border rounded p-3">
+                      <h4 className="font-medium mb-2 text-center">Cartela #{cartelaNum}</h4>
+                      <div className="max-w-48 mx-auto">
+                        {/* BINGO Headers */}
+                        <div className="grid grid-cols-5 gap-0.5 mb-1">
+                          {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                            const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                            return (
+                              <div key={letter} className={`h-6 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
+                                {letter}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        
+                        {/* Numbers Grid */}
+                        <div className="grid grid-cols-5 gap-0.5">
+                          {card.flat().map((num, index) => (
+                            <div
+                              key={index}
+                              className={`h-6 border border-gray-400 flex items-center justify-center text-xs font-medium ${
+                                num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
+                              }`}
+                            >
+                              {num === 0 ? 'FREE' : num}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Old preview for backward compatibility */}
+          {selectedCartela && cartelaCards[selectedCartela] && bookedCartelas.size === 0 && !showCartelaSelector && (
+            <div className="mt-6 p-4 border-t">
+              <h3 className="text-lg font-semibold mb-4 text-center">
+                Cartela #{selectedCartela} - Bingo Card Preview
+              </h3>
+              <div className="max-w-48 mx-auto">
+                {/* BINGO Headers */}
+                <div className="grid grid-cols-5 gap-1 mb-2">
+                  {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                    const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                    return (
+                      <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-lg`}>
+                        {letter}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Numbers Grid */}
+                <div className="grid grid-cols-5 gap-1">
+                  {cartelaCards[selectedCartela].flat().map((num, index) => (
+                    <div
+                      key={index}
+                      className={`h-8 border border-gray-400 flex items-center justify-center text-sm font-medium ${
+                        num === 0 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'
+                      }`}
+                    >
+                      {num === 0 ? 'FREE' : num}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
         {/* Middle Section - Current Number Display */}
         <div className="flex-1 flex justify-center items-center p-4">
