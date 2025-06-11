@@ -455,7 +455,30 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     console.log("📊 Available numbers:", availableNumbers.length, "out of 75");
 
     if (availableNumbers.length === 0) {
-      console.log("🏁 No more numbers to call");
+      console.log("🏁 All 75 numbers have been called - ending game automatically");
+      stopAutomaticNumberCalling();
+      setGameActive(false);
+      setGameFinished(true);
+      setGamePaused(false);
+      
+      // Update refs
+      gameActiveRef.current = false;
+      gameFinishedRef.current = true;
+      gamePausedRef.current = false;
+      
+      // End the game in backend without winner since all numbers were called
+      if (activeGameId && !winnerFound) {
+        console.log("🎯 Ending game without winner - all numbers called");
+        try {
+          await endGameWithoutWinnerMutation.mutateAsync(activeGameId);
+          toast({
+            title: "Game Completed",
+            description: "All 75 numbers have been called. Game ended without winner.",
+          });
+        } catch (error) {
+          console.error("Failed to end game:", error);
+        }
+      }
       return;
     }
 
