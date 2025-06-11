@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { Pause, Play, Square, Volume2 } from "lucide-react";
 
@@ -21,27 +25,143 @@ type CartelaGrid = number[][];
 
 export default function IntegratedBingoGame({ employeeName, employeeId, shopId, onLogout }: IntegratedBingoGameProps) {
   // Game State
-  const [gameState, setGameState] = useState<'idle' | 'active' | 'paused' | 'completed'>('idle');
   const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
   const [currentNumber, setCurrentNumber] = useState<number | null>(null);
-  const [gameAmount, setGameAmount] = useState<string>("10");
-  const [winAmount, setWinAmount] = useState<string>("500");
-  
-  // Cartela Management
+  const [gameActive, setGameActive] = useState(false);
+  const [lastCalledLetter, setLastCalledLetter] = useState<string>("");
+  const [showCartelaSelector, setShowCartelaSelector] = useState(false);
+  const [selectedCartela, setSelectedCartela] = useState<number | null>(null);
+  const [cartelaCards, setCartelaCards] = useState<{[key: number]: number[][]}>({});
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
-  const [cartelaCards, setCartelaCards] = useState<Record<number, CartelaGrid>>({});
-  const [totalCollected, setTotalCollected] = useState<number>(0);
-  const [showCartelaSelector, setShowCartelaSelector] = useState<boolean>(false);
+  const [gameAmount, setGameAmount] = useState("30");
+  const [winnerFound, setWinnerFound] = useState<string | null>(null);
+  const [winnerPattern, setWinnerPattern] = useState<string | null>(null);
+  const [showWinnerVerification, setShowWinnerVerification] = useState(false);
+  const [showWinnerDialog, setShowWinnerDialog] = useState(false);
+  const [verificationCartela, setVerificationCartela] = useState("");
+  const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
+  const [gameFinished, setGameFinished] = useState(false);
+  const [gamePaused, setGamePaused] = useState(false);
+  const [totalCollected, setTotalCollected] = useState(0);
+  const [finalPrizeAmount, setFinalPrizeAmount] = useState<number | null>(null);
+  const [activeGameId, setActiveGameId] = useState<number | null>(null);
+  const [gamePlayersMap, setGamePlayersMap] = useState<Map<number, number>>(new Map());
+  const [autoplaySpeed, setAutoplaySpeed] = useState(3000);
+  const [isCallingNumber, setIsCallingNumber] = useState(false);
   
-  // Game Controls
-  const [autoMode, setAutoMode] = useState<boolean>(false);
-  const [callInterval, setCallInterval] = useState<number>(3000);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastCalledNumberRef = useRef<number | null>(null);
+  // Refs to track real-time state for closures
+  const gameActiveRef = useRef(false);
+  const gamePausedRef = useRef(false);
+  const gameFinishedRef = useRef(false);
+  const winnerFoundRef = useRef(false);
+  const automaticCallTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const calledNumbersRef = useRef<number[]>([]);
+  const activeGameIdRef = useRef<number | null>(null);
+  const isCallingNumberRef = useRef(false);
   
-  // Audio Management
-  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Query client for cache invalidation
+  const queryClient = useQueryClient();
+
+  // Create game mutation
+  const createGameMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/games", {
+        employeeId: employeeId,
+        shopId: shopId,
+        gameAmount: gameAmount,
+        prizePool: "0"
+      });
+      const game = await response.json();
+      return game;
+    },
+    onSuccess: (game) => {
+      setActiveGameId(game.id);
+      activeGameIdRef.current = game.id;
+      console.log("Game created successfully");
+    }
+  });
+
+  // Add player mutation
+  const addPlayerMutation = useMutation({
+    mutationFn: async (data: { gameId: number; cartelaNumbers: number[]; playerName: string }) => {
+      if (!data.gameId || data.gameId === undefined || isNaN(data.gameId)) {
+        throw new Error(`Invalid gameId: ${data.gameId}`);
+      }
+      const response = await apiRequest("POST", `/api/games/${data.gameId}/players`, {
+        playerName: data.playerName,
+        cartelaNumbers: data.cartelaNumbers,
+        entryFee: gameAmount
+      });
+      const player = await response.json();
+      return player;
+    },
+    onSuccess: (player, variables) => {
+      setGamePlayersMap(prev => {
+        const newMap = new Map(prev);
+        variables.cartelaNumbers.forEach(cartelaNum => {
+          newMap.set(cartelaNum, player.id);
+        });
+        return newMap;
+      });
+    }
+  });
+
+  // Declare winner mutation
+  const declareWinnerMutation = useMutation({
+    mutationFn: async (data: { gameId: number; winnerId: number; winnerCartela?: number }) => {
+      const response = await apiRequest("POST", `/api/games/${data.gameId}/declare-winner`, {
+        winnerId: data.winnerId,
+        winnerCartela: data.winnerCartela
+      });
+      const result = await response.json();
+      return result;
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Game Completed Successfully!",
+        description: `Winner gets ${result.financial.prizeAmount} ETB. Admin profit: ${result.financial.adminProfit} ETB.`,
+      });
+      
+      setGameActive(false);
+      setGameFinished(true);
+      setShowWinnerVerification(false);
+      
+      gameActiveRef.current = false;
+      gameFinishedRef.current = true;
+      isCallingNumberRef.current = false;
+      
+      stopAutomaticNumberCalling();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to declare winner: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // End game without winner mutation
+  const endGameWithoutWinnerMutation = useMutation({
+    mutationFn: async (gameId: number) => {
+      const response = await apiRequest("POST", `/api/games/${gameId}/end-without-winner`);
+      const result = await response.json();
+      return result;
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Game Ended",
+        description: "Game ended without winner - no revenue recorded",
+      });
+      
+      setActiveGameId(null);
+      setGamePlayersMap(new Map());
+      setBookedCartelas(new Set());
+      setTotalCollected(0);
+      setGameActive(false);
+      setGameFinished(true);
+    }
+  });
 
   // Generate fixed cartela based on number
   const generateFixedCartela = useCallback((cartelaNumber: number): CartelaGrid => {
