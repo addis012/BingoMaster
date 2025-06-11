@@ -1339,11 +1339,8 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
 
             {/* Start Game Button */}
             <Button 
-              onClick={() => {
-                console.log("🚀 Start Game button clicked");
-                startGame();
-              }}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 mb-4"
+              onClick={startGame}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 mb-4 transition-all duration-150"
               disabled={gameActive || startGameMutation.isPending}
             >
               {startGameMutation.isPending ? "Starting..." : gameActive ? "Game Running..." : "Start Game"}
@@ -1384,16 +1381,26 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                   Select Cartela
                 </Button>
               </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Select Cartela Number (1-100)</DialogTitle>
-                    <DialogDescription>
-                      Choose a cartela number from 1 to 100. Each number generates a unique Bingo card combination.
-                    </DialogDescription>
+                <DialogContent className="max-w-full max-h-full w-screen h-screen p-6 overflow-y-auto">
+                  <DialogHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <DialogTitle className="text-2xl font-bold">Select Cartela Numbers (1-100)</DialogTitle>
+                      <DialogDescription className="text-lg">
+                        Choose cartela numbers from 1 to 100. Each number generates a unique Bingo card combination.
+                      </DialogDescription>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCartelaSelector(false)}
+                      className="ml-4"
+                    >
+                      Close
+                    </Button>
                   </DialogHeader>
                   
-                  {/* Cartela Number Grid - One Click Book/Unbook */}
-                  <div className="grid grid-cols-10 gap-2 p-4">
+                  {/* Cartela Number Grid - One Click Book/Unbook - FULLSCREEN */}
+                  <div className="grid grid-cols-10 gap-3 p-4">
                     {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
                       const isBooked = bookedCartelas.has(num);
                       
@@ -1401,7 +1408,7 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
                         <Button
                           key={num}
                           variant={isBooked ? "default" : "outline"}
-                          className={`h-12 w-12 ${
+                          className={`h-16 w-16 text-xl font-bold ${
                             isBooked 
                               ? "bg-green-500 text-white hover:bg-red-500" 
                               : "hover:bg-blue-500 hover:text-white"
