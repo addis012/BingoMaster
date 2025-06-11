@@ -47,15 +47,9 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     enabled: !!user
   });
 
-  // Get system settings to get the correct profit margin
-  const { data: systemSettings } = useQuery({
-    queryKey: ['/api/admin/system-settings'],
-    enabled: !!user
-  });
-
-  // Calculate total collected and prize amount based on actual profit margin
+  // Calculate total collected and prize amount (using 30% default admin margin)
   const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
-  const adminProfitMargin = systemSettings ? parseFloat((systemSettings as any).commissionRate) : 30; // Default 30% if not loaded
+  const adminProfitMargin = 30; // Default admin profit margin
   const prizeAmount = totalCollected * (1 - adminProfitMargin / 100); // Prize = Total - Admin Profit
 
   // Get game players
@@ -418,6 +412,15 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
 
   // Check winner cartela
   const checkWinnerCartela = () => {
+    // Pause the game immediately when checking for winner
+    if (gameActive) {
+      pauseGame();
+      toast({
+        title: "Game Paused",
+        description: "Game paused for winner verification",
+      });
+    }
+
     const cartelaNum = parseInt(winnerCartelaNumber);
     if (!cartelaNum || !currentGame?.id) {
       toast({
@@ -573,7 +576,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
 
             {/* Control Buttons */}
             <div className="space-y-3">
-              {!gameActive ? (
+              {!gameActive && !gameFinished ? (
                 <Button 
                   onClick={startGame}
                   disabled={createGameMutation.isPending || bookedCartelas.size === 0}
@@ -582,23 +585,23 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                 >
                   {createGameMutation.isPending ? "Creating Game..." : "Start Game"}
                 </Button>
+              ) : gameActive ? (
+                <Button
+                  onClick={pauseGame}
+                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                  size="lg"
+                >
+                  Pause Game
+                </Button>
               ) : (
-                <div className="flex gap-2">
-                  <Button
-                    onClick={pauseGame}
-                    className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white"
-                    size="lg"
-                  >
-                    Pause Game
-                  </Button>
-                  <Button
-                    onClick={resumeGame}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                    size="lg"
-                  >
-                    Resume Game
-                  </Button>
-                </div>
+                <Button
+                  onClick={resumeGame}
+                  disabled={gameFinished}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  size="lg"
+                >
+                  Resume Game
+                </Button>
               )}
               
               <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
