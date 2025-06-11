@@ -566,14 +566,33 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
 
             {/* Control Buttons */}
             <div className="space-y-3">
-              <Button 
-                onClick={startGame}
-                disabled={gameActive || createGameMutation.isPending}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                size="lg"
-              >
-                {createGameMutation.isPending ? "Creating Game..." : "Start Game"}
-              </Button>
+              {!gameActive ? (
+                <Button 
+                  onClick={startGame}
+                  disabled={createGameMutation.isPending || bookedCartelas.size === 0}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  size="lg"
+                >
+                  {createGameMutation.isPending ? "Creating Game..." : "Start Game"}
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={pauseGame}
+                    className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white"
+                    size="lg"
+                  >
+                    Pause Game
+                  </Button>
+                  <Button
+                    onClick={resumeGame}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    size="lg"
+                  >
+                    Resume Game
+                  </Button>
+                </div>
+              )}
               
               <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
                 <DialogTrigger asChild>
