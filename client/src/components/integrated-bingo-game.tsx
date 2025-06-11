@@ -459,30 +459,23 @@ export default function IntegratedBingoGame({ employeeName, employeeId, shopId, 
     console.log("🔍 Called numbers from state:", calledNumbers.length);
 
     if (availableNumbers.length === 0 || currentCalledNumbers.length >= 75) {
-      console.log("🏁 All 75 numbers have been called - ending game automatically");
+      console.log("🏁 All 75 numbers have been called - pausing game (keeping cartelas and win amount)");
       stopAutomaticNumberCalling();
       setGameActive(false);
-      setGameFinished(true);
-      setGamePaused(false);
+      setGamePaused(true);
+      setGameFinished(false);
       
       // Update refs
       gameActiveRef.current = false;
-      gameFinishedRef.current = true;
-      gamePausedRef.current = false;
+      gamePausedRef.current = true;
+      gameFinishedRef.current = false;
       
-      // End the game in backend without winner since all numbers were called
-      if (activeGameId && !winnerFound) {
-        console.log("🎯 Ending game without winner - all numbers called");
-        try {
-          await endGameWithoutWinnerMutation.mutateAsync(activeGameId);
-          toast({
-            title: "Game Completed",
-            description: "All 75 numbers have been called. Game ended without winner.",
-          });
-        } catch (error) {
-          console.error("Failed to end game:", error);
-        }
-      }
+      // Keep selected cartelas and win amount intact - just pause
+      toast({
+        title: "All Numbers Called",
+        description: "All 75 numbers have been called. Game is paused. Your cartelas and win amount are preserved.",
+      });
+      
       return;
     }
 
