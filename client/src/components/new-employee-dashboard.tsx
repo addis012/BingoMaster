@@ -524,10 +524,12 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                 </div>
 
                 {/* Selected Cartelas Display */}
-                {selectedCartelas.size > 0 && (
-                  <div className="pt-4 border-t">
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="text-sm font-medium text-gray-700">Selected Cartelas ({selectedCartelas.size})</p>
+                <div className="pt-4 border-t">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm font-medium text-gray-700">
+                      Selected Cartelas ({selectedCartelas.size})
+                    </p>
+                    {selectedCartelas.size > 0 && (
                       <Button 
                         onClick={clearSelectedCartelas}
                         variant="ghost" 
@@ -536,24 +538,30 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                       >
                         Clear All
                       </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                      {Array.from(selectedCartelas).sort((a, b) => a - b).map(num => (
-                        <Badge 
-                          key={num} 
-                          variant="secondary" 
-                          className="text-xs cursor-pointer hover:bg-red-100"
-                          onClick={() => toggleCartelaSelection(num)}
-                        >
-                          #{num}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Total: {(selectedCartelas.size * parseFloat(gameAmount || "0")).toFixed(2)} Birr
-                    </p>
+                    )}
                   </div>
-                )}
+                  {selectedCartelas.size > 0 ? (
+                    <>
+                      <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                        {Array.from(selectedCartelas).sort((a, b) => a - b).map(num => (
+                          <Badge 
+                            key={num} 
+                            variant="secondary" 
+                            className="text-xs cursor-pointer hover:bg-red-100"
+                            onClick={() => toggleCartelaSelection(num)}
+                          >
+                            #{num}
+                          </Badge>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Total: {(selectedCartelas.size * parseFloat(gameAmount || "0")).toFixed(2)} Birr
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-gray-500">No cartelas selected yet</p>
+                  )}
+                </div>
 
                 <div className="pt-4 border-t">
                   <div className="text-center space-y-2">
