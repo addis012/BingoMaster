@@ -34,8 +34,9 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   
-  // Calculate total collected
+  // Calculate total collected and prize amount
   const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
+  const prizeAmount = totalCollected * 0.7; // 70% goes to winner
   
   // Use ref to track game state for reliable interval access
   const gameStateRef = useRef({
@@ -237,6 +238,26 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     }
   };
 
+  // Start automatic calling
+  const startAutoCalling = () => {
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+    }
+    
+    const interval = setInterval(() => {
+      callNumber();
+    }, parseInt(autoplaySpeed) * 1000);
+    setAutoCallInterval(interval);
+  };
+
+  // Stop automatic calling
+  const stopAutoCalling = () => {
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+  };
+
   // Create new game
   const createNewGame = () => {
     createGameMutation.mutate({ entryFee: gameAmount });
@@ -246,8 +267,8 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
   const startGame = () => {
     if (bookedCartelas.size === 0) {
       toast({
-        title: "No Cartelas Selected",
-        description: "Please select at least one cartela before starting the game",
+        title: "No Cartelas Booked",
+        description: "Please book at least one cartela before starting the game",
         variant: "destructive"
       });
       return;
@@ -266,25 +287,25 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
     setCalledNumbers([]);
     setCurrentNumber(null);
     setGameFinished(false);
+    setGameActive(true);
     
     // Start the game in backend
     startGameMutation.mutate(currentGame.id);
     
-    setTimeout(() => {
-      callNumber();
-      const interval = setInterval(() => {
-        callNumber();
-      }, parseInt(autoplaySpeed) * 1000);
-      setAutoCallInterval(interval);
-    }, 100);
+    // Start auto calling
+    startAutoCalling();
   };
 
-  // Stop automatic calling
-  const stopAutoCalling = () => {
-    if (autoCallInterval) {
-      clearInterval(autoCallInterval);
-      setAutoCallInterval(null);
-    }
+  // Pause game function
+  const pauseGame = () => {
+    setGameActive(false);
+    stopAutoCalling();
+  };
+
+  // Resume game function  
+  const resumeGame = () => {
+    setGameActive(true);
+    startAutoCalling();
   };
 
   // Reset game
@@ -525,10 +546,19 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
                 )}
 
                 <div className="pt-4 border-t">
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-700">Total Collected</p>
-                    <p className="text-2xl font-bold text-blue-600">{totalCollected.toFixed(2)} Birr</p>
-                    <p className="text-sm text-gray-500">{bookedCartelas.size} cards × {gameAmount} Birr</p>
+                  <div className="text-center space-y-2">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Total Collected</p>
+                      <p className="text-2xl font-bold text-blue-600">{totalCollected.toFixed(2)} Birr</p>
+                      <p className="text-sm text-gray-500">{bookedCartelas.size} cards × {gameAmount} Birr</p>
+                    </div>
+                    {totalCollected > 0 && (
+                      <div className="pt-2 border-t">
+                        <p className="text-sm font-medium text-gray-700">Winner Gets</p>
+                        <p className="text-xl font-bold text-green-600">{prizeAmount.toFixed(2)} Birr</p>
+                        <p className="text-xs text-gray-500">70% of total collected</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
