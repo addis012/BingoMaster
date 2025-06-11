@@ -2900,6 +2900,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameId = parseInt(req.params.gameId);
       const { cartelaNumber, calledNumbers } = req.body;
 
+      console.log('Check winner request:', { gameId, cartelaNumber, calledNumbers });
+
       if (!cartelaNumber || !Array.isArray(calledNumbers)) {
         return res.status(400).json({ message: "Cartela number and called numbers are required" });
       }
@@ -2908,12 +2910,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cartelaPattern = getFixedCartelaPattern(cartelaNumber);
       const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
 
+      console.log('Winner check result:', { cartelaNumber, isWinner });
+
       res.json({
         cartelaNumber,
         isWinner,
         pattern: cartelaPattern
       });
     } catch (error) {
+      console.error('Check winner error:', error);
       res.status(500).json({ message: "Failed to check winner" });
     }
   });

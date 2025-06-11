@@ -130,14 +130,30 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
 
   // Check winner mutation
   const checkWinnerMutation = useMutation({
-    mutationFn: (data: { gameId: number; cartelaNumber: number; calledNumbers: number[] }) => 
-      apiRequest(`/api/games/${data.gameId}/check-winner`, {
+    mutationFn: async (data: { gameId: number; cartelaNumber: number; calledNumbers: number[] }) => {
+      console.log('Sending check winner request:', data);
+      const response = await fetch(`/api/games/${data.gameId}/check-winner`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           cartelaNumber: data.cartelaNumber,
           calledNumbers: data.calledNumbers
-        })
-      }),
+        }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Check winner error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Check winner success response:', result);
+      return result;
+    },
     onSuccess: (result) => {
       setShowWinnerChecker(false);
       setWinnerCartelaNumber("");
@@ -155,6 +171,14 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
           variant: "destructive"
         });
       }
+    },
+    onError: (error) => {
+      console.error('Check winner mutation error:', error);
+      toast({
+        title: "Error Checking Winner",
+        description: `Failed to check winner: ${error.message}`,
+        variant: "destructive"
+      });
     }
   });
 
