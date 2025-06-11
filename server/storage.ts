@@ -36,10 +36,16 @@ export interface IStorage {
   getActiveGameByEmployee(employeeId: number): Promise<Game | undefined>;
   createGame(game: InsertGame): Promise<Game>;
   updateGame(id: number, updates: Partial<InsertGame>): Promise<Game | undefined>;
+  updateGameStatus(gameId: number, status: string): Promise<Game>;
+  updateGameNumbers(gameId: number, calledNumbers: string[]): Promise<Game>;
+  updateGamePrizePool(gameId: number, additionalAmount: number): Promise<Game>;
+  completeGame(gameId: number, winnerId: number, prizeAmount: string): Promise<Game>;
   
   // Game Player methods
   getGamePlayers(gameId: number): Promise<GamePlayer[]>;
+  getGamePlayerCount(gameId: number): Promise<number>;
   createGamePlayer(player: InsertGamePlayer): Promise<GamePlayer>;
+  addGamePlayer(player: InsertGamePlayer): Promise<GamePlayer>;
   updateGamePlayer(id: number, updates: Partial<InsertGamePlayer>): Promise<GamePlayer | undefined>;
   removeGamePlayer(id: number): Promise<boolean>;
   
@@ -54,6 +60,7 @@ export interface IStorage {
   
   // Game History methods
   createGameHistory(history: InsertGameHistory): Promise<GameHistory>;
+  recordGameHistory(history: InsertGameHistory): Promise<GameHistory>;
   getGameHistory(shopId: number, startDate?: Date, endDate?: Date): Promise<GameHistory[]>;
   getEmployeeGameHistory(employeeId: number, startDate?: Date, endDate?: Date): Promise<GameHistory[]>;
   
@@ -226,6 +233,46 @@ export class DatabaseStorage implements IStorage {
     return game || undefined;
   }
 
+  async updateGameStatus(gameId: number, status: string): Promise<Game> {
+    const [game] = await db.update(games)
+      .set({ status, startedAt: status === 'active' ? new Date() : undefined })
+      .where(eq(games.id, gameId))
+      .returning();
+    return game;
+  }
+
+  async updateGameNumbers(gameId: number, calledNumbers: string[]): Promise<Game> {
+    const [game] = await db.update(games)
+      .set({ calledNumbers })
+      .where(eq(games.id, gameId))
+      .returning();
+    return game;
+  }
+
+  async updateGamePrizePool(gameId: number, additionalAmount: number): Promise<Game> {
+    const currentGame = await this.getGame(gameId);
+    if (!currentGame) throw new Error('Game not found');
+    
+    const newPrizePool = (parseFloat(currentGame.prizePool) + additionalAmount).toString();
+    const [game] = await db.update(games)
+      .set({ prizePool: newPrizePool })
+      .where(eq(games.id, gameId))
+      .returning();
+    return game;
+  }
+
+  async completeGame(gameId: number, winnerId: number, prizeAmount: string): Promise<Game> {
+    const [game] = await db.update(games)
+      .set({ 
+        status: 'completed',
+        winnerId,
+        completedAt: new Date()
+      })
+      .where(eq(games.id, gameId))
+      .returning();
+    return game;
+  }
+
   async getGamePlayers(gameId: number): Promise<GamePlayer[]> {
     return await db.select().from(gamePlayers)
       .where(eq(gamePlayers.gameId, gameId))
@@ -235,6 +282,17 @@ export class DatabaseStorage implements IStorage {
   async createGamePlayer(insertPlayer: InsertGamePlayer): Promise<GamePlayer> {
     const [player] = await db.insert(gamePlayers).values(insertPlayer).returning();
     return player;
+  }
+
+  async addGamePlayer(insertPlayer: InsertGamePlayer): Promise<GamePlayer> {
+    return this.createGamePlayer(insertPlayer);
+  }
+
+  async getGamePlayerCount(gameId: number): Promise<number> {
+    const result = await db.select({ count: count() })
+      .from(gamePlayers)
+      .where(eq(gamePlayers.gameId, gameId));
+    return result[0]?.count || 0;
   }
 
   async updateGamePlayer(id: number, updates: Partial<InsertGamePlayer>): Promise<GamePlayer | undefined> {

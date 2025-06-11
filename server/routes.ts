@@ -18,6 +18,94 @@ declare module 'express-serve-static-core' {
 // WebSocket clients by game ID
 const gameClients = new Map<number, Set<WebSocket>>();
 
+// Helper function to generate fixed cartela pattern
+function getFixedCartelaPattern(cartelaNum: number): number[][] {
+  let seed = cartelaNum * 12345;
+  const seededRandom = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  
+  const card: number[][] = [[], [], [], [], []];
+  const ranges = [
+    [1, 15],   // B column
+    [16, 30],  // I column  
+    [31, 45],  // N column
+    [46, 60],  // G column
+    [61, 75]   // O column
+  ];
+
+  for (let col = 0; col < 5; col++) {
+    const [min, max] = ranges[col];
+    const columnNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+    
+    for (let i = columnNumbers.length - 1; i > 0; i--) {
+      const j = Math.floor(seededRandom() * (i + 1));
+      [columnNumbers[i], columnNumbers[j]] = [columnNumbers[j], columnNumbers[i]];
+    }
+    
+    for (let row = 0; row < 5; row++) {
+      if (col === 2 && row === 2) {
+        card[row].push(0); // FREE space in center
+      } else {
+        const numberIndex = row < 2 ? row : row - 1;
+        card[row].push(columnNumbers[numberIndex]);
+      }
+    }
+  }
+  
+  return card;
+}
+
+// Helper function to check if cartela has bingo
+function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): boolean {
+  const calledSet = new Set(calledNumbers);
+  
+  // Check rows
+  for (let row = 0; row < 5; row++) {
+    let rowComplete = true;
+    for (let col = 0; col < 5; col++) {
+      const num = cartelaPattern[row][col];
+      if (num !== 0 && !calledSet.has(num)) {
+        rowComplete = false;
+        break;
+      }
+    }
+    if (rowComplete) return true;
+  }
+  
+  // Check columns
+  for (let col = 0; col < 5; col++) {
+    let colComplete = true;
+    for (let row = 0; row < 5; row++) {
+      const num = cartelaPattern[row][col];
+      if (num !== 0 && !calledSet.has(num)) {
+        colComplete = false;
+        break;
+      }
+    }
+    if (colComplete) return true;
+  }
+  
+  // Check diagonals
+  let diag1Complete = true;
+  let diag2Complete = true;
+  
+  for (let i = 0; i < 5; i++) {
+    const num1 = cartelaPattern[i][i];
+    const num2 = cartelaPattern[i][4 - i];
+    
+    if (num1 !== 0 && !calledSet.has(num1)) {
+      diag1Complete = false;
+    }
+    if (num2 !== 0 && !calledSet.has(num2)) {
+      diag2Complete = false;
+    }
+  }
+  
+  return diag1Complete || diag2Complete;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static('attached_assets'));
@@ -2394,6 +2482,250 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Failed to update referral settings" });
+    }
+  });
+
+  // Game Management API for Employee Dashboard
+  
+  // Create a new game
+  app.post("/api/games", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const { entryFee } = req.body;
+      
+      const game = await storage.createGame({
+        shopId: user.shopId!,
+        employeeId: user.id,
+        status: 'waiting',
+        entryFee: entryFee.toString(),
+        prizePool: "0.00"
+      });
+
+      res.json(game);
+    } catch (error) {
+      console.error("Create game error:", error);
+      res.status(500).json({ message: "Failed to create game" });
+    }
+  });
+
+  // Get active game for employee
+  app.get("/api/games/active", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const activeGame = await storage.getActiveGameByEmployee(user.id);
+      res.json(activeGame);
+    } catch (error) {
+      console.error("Get active game error:", error);
+      res.status(500).json({ message: "Failed to get active game" });
+    }
+  });
+
+  // Add player to game with multiple cartelas
+  app.post("/api/games/:gameId/players", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const gameId = parseInt(req.params.gameId);
+      const { playerName, cartelas, entryFee } = req.body;
+
+      // Add multiple cartelas for the same player
+      const players = [];
+      for (const cartelaNumber of cartelas) {
+        const player = await storage.addGamePlayer({
+          gameId,
+          playerName: `${playerName} (Card ${cartelaNumber})`,
+          cartelaNumbers: [cartelaNumber],
+          entryFee: entryFee.toString()
+        });
+        players.push(player);
+      }
+
+      // Update game prize pool
+      const totalAmount = cartelas.length * parseFloat(entryFee);
+      await storage.updateGamePrizePool(gameId, totalAmount);
+
+      res.json(players);
+    } catch (error) {
+      console.error("Add players error:", error);
+      res.status(500).json({ message: "Failed to add players" });
+    }
+  });
+
+  // Start game
+  app.patch("/api/games/:gameId/start", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const gameId = parseInt(req.params.gameId);
+      
+      const game = await storage.updateGameStatus(gameId, 'active');
+      res.json(game);
+    } catch (error) {
+      console.error("Start game error:", error);
+      res.status(500).json({ message: "Failed to start game" });
+    }
+  });
+
+  // Update called numbers
+  app.patch("/api/games/:gameId/numbers", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const gameId = parseInt(req.params.gameId);
+      const { calledNumbers } = req.body;
+      
+      const game = await storage.updateGameNumbers(gameId, calledNumbers);
+      
+      // Broadcast to WebSocket clients
+      const clients = gameClients.get(gameId);
+      if (clients) {
+        const message = JSON.stringify({
+          type: 'number_called',
+          gameId,
+          calledNumbers,
+          latestNumber: calledNumbers[calledNumbers.length - 1]
+        });
+        clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
+      }
+
+      res.json(game);
+    } catch (error) {
+      console.error("Update numbers error:", error);
+      res.status(500).json({ message: "Failed to update called numbers" });
+    }
+  });
+
+  // Get game players
+  app.get("/api/games/:gameId/players", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const gameId = parseInt(req.params.gameId);
+      const players = await storage.getGamePlayers(gameId);
+      res.json(players);
+    } catch (error) {
+      console.error("Get players error:", error);
+      res.status(500).json({ message: "Failed to get game players" });
+    }
+  });
+
+  // Check winner cartela
+  app.post("/api/games/:gameId/check-winner", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const gameId = parseInt(req.params.gameId);
+      const { cartelaNumber, calledNumbers } = req.body;
+
+      // Get the cartela pattern for checking
+      const cartelaPattern = getFixedCartelaPattern(cartelaNumber);
+      const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
+      
+      res.json({ 
+        cartelaNumber,
+        isWinner,
+        pattern: cartelaPattern
+      });
+    } catch (error) {
+      console.error("Check winner error:", error);
+      res.status(500).json({ message: "Failed to check winner" });
+    }
+  });
+
+  // Complete game with winner
+  app.patch("/api/games/:gameId/complete", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const gameId = parseInt(req.params.gameId);
+      const { winnerId, winnerName, winningCartela, prizeAmount } = req.body;
+      
+      // Complete the game
+      const game = await storage.completeGame(gameId, winnerId, prizeAmount);
+      
+      // Record game history
+      await storage.recordGameHistory({
+        gameId,
+        shopId: user.shopId!,
+        employeeId: user.id,
+        totalCollected: game.prizePool,
+        prizeAmount,
+        adminProfit: (parseFloat(game.prizePool) - parseFloat(prizeAmount)).toString(),
+        superAdminCommission: "0.00",
+        playerCount: await storage.getGamePlayerCount(gameId),
+        winnerName,
+        winningCartela
+      });
+
+      res.json(game);
+    } catch (error) {
+      console.error("Complete game error:", error);
+      res.status(500).json({ message: "Failed to complete game" });
     }
   });
 
