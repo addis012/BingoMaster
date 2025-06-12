@@ -46,56 +46,15 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
 
-  // Show loading state while authentication is being checked
-  if (isLoading) {
-    return <LoadingState message="Checking authentication..." />;
-  }
-
-  // Redirect non-admin users
-  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="w-96">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-600">
-              <AlertCircle className="h-5 w-5" />
-              Access Denied
-            </CardTitle>
-            <CardDescription>
-              You don't have permission to access the admin dashboard.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600">
-              This page is restricted to admin users only. Please contact your administrator if you believe this is an error.
-            </p>
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => window.location.href = '/dashboard/employee'} 
-                variant="outline" 
-                className="flex-1"
-              >
-                Go to Employee Dashboard
-              </Button>
-              <Button 
-                onClick={() => window.location.href = '/'} 
-                className="flex-1"
-              >
-                Return to Login
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
+  // Move all hooks before conditional returns to avoid hooks error
   const { data: employees = [], refetch: refetchEmployees, error: employeesError, isLoading: employeesLoading } = useQuery({
     queryKey: ["/api/admin/employees"],
+    enabled: !!user && (user.role === 'admin' || user.role === 'super_admin')
   });
 
   const { data: shopStats, error: statsError, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/admin/shop-stats"],
+    enabled: !!user && (user.role === 'admin' || user.role === 'super_admin')
   });
 
   const { data: creditBalance, error: balanceError, isLoading: balanceLoading, refetch: refetchBalance } = useQuery({
