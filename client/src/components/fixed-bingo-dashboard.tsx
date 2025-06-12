@@ -67,35 +67,25 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     setBookedCartelas(new Set([...Array.from(bookedCartelas), ...Array.from(selectedCartelas)]));
     setSelectedCartelas(new Set());
     setShowCartelaSelector(false);
-    toast({
-      title: "Cartelas Booked",
-      description: `Successfully booked ${selectedCartelas.size} cartelas`,
-    });
   };
 
   const startGame = () => {
     if (bookedCartelas.size === 0) {
-      toast({
-        title: "No Cartelas Selected",
-        description: "Please select cartelas before starting the game",
-        variant: "destructive"
-      });
       return;
     }
 
     setGameActive(true);
     setGameFinished(false);
-    setCalledNumbers([]);
-    setLastCalledNumber(null);
-    gameStateRef.current = { calledNumbers: [], finished: false };
+    
+    // Only clear numbers if starting fresh game (no called numbers yet)
+    if (calledNumbers.length === 0) {
+      setCalledNumbers([]);
+      setLastCalledNumber(null);
+      gameStateRef.current = { calledNumbers: [], finished: false };
+    }
     
     // Start auto-calling
     startAutoCalling();
-    
-    toast({
-      title: "Game Started",
-      description: `Game started with ${bookedCartelas.size} cartelas`,
-    });
   };
 
   const startAutoCalling = () => {
@@ -160,7 +150,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   };
 
   const resumeGame = () => {
-    if (!gameFinished) {
+    if (!gameFinished && bookedCartelas.size > 0) {
       setGameActive(true);
       startAutoCalling();
     }
@@ -176,20 +166,12 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     setLastCalledNumber(null);
     setBookedCartelas(new Set());
     gameStateRef.current = { calledNumbers: [], finished: false };
-    toast({
-      title: "Game Reset",
-      description: "Game has been reset successfully",
-    });
   };
 
   const shuffleNumbers = () => {
     setIsShuffling(true);
     setTimeout(() => {
       setIsShuffling(false);
-      toast({
-        title: "Numbers Shuffled",
-        description: "BINGO board has been shuffled",
-      });
     }, 1000);
   };
 
@@ -197,27 +179,11 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     const cartelaNum = parseInt(winnerCartelaNumber);
     
     if (!cartelaNum || cartelaNum < 1 || cartelaNum > 100) {
-      toast({
-        title: "Invalid Cartela",
-        description: "Please enter a valid cartela number (1-100)",
-        variant: "destructive"
-      });
       return;
     }
 
     if (!bookedCartelas.has(cartelaNum)) {
-      toast({
-        title: "Cartela Not Booked",
-        description: `Cartela #${cartelaNum} is not booked in this game`,
-        variant: "destructive"
-      });
       return;
-    }
-
-    // Pause game immediately when checking winner
-    setWasGameActiveBeforeCheck(gameActive);
-    if (gameActive) {
-      pauseGame();
     }
 
     // For demo purposes, random winner check
@@ -422,28 +388,27 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                     Reset
                   </Button>
 
-                  {!gameActive && !gameFinished ? (
-                    <Button
-                      onClick={startGame}
-                      disabled={bookedCartelas.size === 0}
-                      className="bg-green-600 hover:bg-green-700 text-white py-1 text-xs"
-                    >
-                      Start
-                    </Button>
-                  ) : gameActive ? (
+                  {gameActive ? (
                     <Button
                       onClick={pauseGame}
                       className="bg-orange-600 hover:bg-orange-700 text-white py-1 text-xs"
                     >
                       Pause
                     </Button>
-                  ) : (
+                  ) : calledNumbers.length > 0 && !gameFinished ? (
                     <Button
                       onClick={resumeGame}
-                      disabled={gameFinished}
                       className="bg-green-600 hover:bg-green-700 text-white py-1 text-xs"
                     >
                       Resume
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={startGame}
+                      disabled={bookedCartelas.size === 0}
+                      className="bg-green-600 hover:bg-green-700 text-white py-1 text-xs"
+                    >
+                      Start
                     </Button>
                   )}
 
@@ -581,15 +546,22 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
 
                 {/* Winner Check Button - Only button under the board */}
                 <div className="flex justify-center mt-4">
+                  <Button 
+                    className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-6"
+                    disabled={!gameActive}
+                    onClick={() => {
+                      // Pause game immediately when check winner is clicked
+                      setWasGameActiveBeforeCheck(gameActive);
+                      if (gameActive) {
+                        pauseGame();
+                      }
+                      setShowWinnerChecker(true);
+                    }}
+                  >
+                    Check Winner
+                  </Button>
+                  
                   <Dialog open={showWinnerChecker} onOpenChange={setShowWinnerChecker}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-6"
-                        disabled={!gameActive}
-                      >
-                        Check Winner
-                      </Button>
-                    </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Check Winner Cartela</DialogTitle>
