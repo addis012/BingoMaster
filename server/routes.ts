@@ -655,31 +655,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let winner = players.find(p => p.id === winnerId);
       const employee = await storage.getUser(game.employeeId);
       
-      // If winner doesn't exist, create a player record for the winner
+      // If winner doesn't exist, check if cartela already exists before creating new record
       if (!winner && winnerCartela) {
-        console.log(`🔧 Creating player record for winner cartela #${winnerCartela} in game ${gameId}`);
-        try {
-          const newPlayer = await storage.createGamePlayer({
-            gameId,
-            playerName: `Player ${winnerCartela}`,
-            cartelaNumbers: JSON.stringify([winnerCartela]),
-            entryFee: game.entryFee || "20.00",
-            isWinner: false
-          });
-          players.push(newPlayer);
-          winner = newPlayer;
-          // Update winnerId to match the newly created player
-          winnerId = newPlayer.id;
-          console.log(`✅ Player record created: ID ${newPlayer.id} for cartela #${winnerCartela}, winnerId updated to ${winnerId}`);
-        } catch (playerError) {
-          console.log(`⚠️ Could not create player record, proceeding with simplified logging for cartela #${winnerCartela}`);
-          // Create a minimal winner object for logging purposes
-          winner = {
-            id: winnerId,
-            playerName: `Player ${winnerCartela}`,
-            cartelaNumbers: JSON.stringify([winnerCartela]),
-            entryFee: game.entryFee || "20.00"
-          };
+        // First check if any existing player has this cartela
+        const existingPlayerWithCartela = players.find(p => 
+          p.cartelaNumbers && p.cartelaNumbers.includes(winnerCartela)
+        );
+        
+        if (existingPlayerWithCartela) {
+          console.log(`✅ Winning cartela #${winnerCartela} found in existing player ${existingPlayerWithCartela.id} (${existingPlayerWithCartela.playerName})`);
+          winner = existingPlayerWithCartela;
+          winnerId = existingPlayerWithCartela.id;
+        } else {
+          console.log(`🔧 Creating player record for winner cartela #${winnerCartela} in game ${gameId}`);
+          try {
+            const newPlayer = await storage.createGamePlayer({
+              gameId,
+              playerName: `Player ${winnerCartela}`,
+              cartelaNumbers: JSON.stringify([winnerCartela]),
+              entryFee: game.entryFee || "20.00",
+              isWinner: false
+            });
+            players.push(newPlayer);
+            winner = newPlayer;
+            winnerId = newPlayer.id;
+            console.log(`✅ Player record created: ID ${newPlayer.id} for cartela #${winnerCartela}, winnerId updated to ${winnerId}`);
+          } catch (playerError) {
+            console.log(`⚠️ Could not create player record, proceeding with simplified logging for cartela #${winnerCartela}`);
+            winner = {
+              id: winnerId,
+              playerName: `Player ${winnerCartela}`,
+              cartelaNumbers: JSON.stringify([winnerCartela]),
+              entryFee: game.entryFee || "20.00"
+            };
+          }
         }
       }
       
