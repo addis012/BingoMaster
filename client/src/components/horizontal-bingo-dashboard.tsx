@@ -176,17 +176,35 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   // Check winner mutation
   const checkWinnerMutation = useMutation({
     mutationFn: async (data: { gameId: number; cartelaNumber: number; calledNumbers: number[] }) => {
-      // Use preserved game start data for accurate financial calculations
-      const actualCartelaCount = gameStartCartelaCount || bookedCartelas.size;
-      const actualEntryFee = parseFloat(gameStartEntryFee || gameAmount || "20");
-      const totalCollectedAmount = actualCartelaCount * actualEntryFee;
+      // Get game players to determine actual player count
+      console.log('🔍 Fetching game players for accurate count...');
+      const playersResponse = await fetch(`/api/games/${data.gameId}/players`, {
+        credentials: 'include'
+      });
+      
+      let actualPlayerCount = bookedCartelas.size; // fallback
+      let actualEntryFee = parseFloat(gameAmount || "20");
+      
+      if (playersResponse.ok) {
+        const players = await playersResponse.json();
+        actualPlayerCount = players.length;
+        if (players.length > 0) {
+          actualEntryFee = parseFloat(players[0].entryFee || "20");
+        }
+        console.log('✅ Retrieved actual game data:', {
+          playersFromDB: players.length,
+          entryFeeFromDB: actualEntryFee
+        });
+      }
+      
+      const totalCollectedAmount = actualPlayerCount * actualEntryFee;
       
       console.log('🎯 DECLARING WINNER: Cartela #' + data.cartelaNumber + ' in Game ' + data.gameId);
-      console.log('📊 USING PRESERVED GAME DATA:', {
-        gameStartCartelaCount: gameStartCartelaCount,
-        gameStartEntryFee: gameStartEntryFee,
-        calculatedTotal: totalCollectedAmount,
-        fallbackCurrentCount: bookedCartelas.size
+      console.log('📊 FINAL FINANCIAL DATA:', {
+        actualPlayerCount,
+        actualEntryFee,
+        totalCollectedAmount,
+        calculatedPrize: Math.round(totalCollectedAmount * 0.85)
       });
       
       const response = await fetch(`/api/games/${data.gameId}/declare-winner`, {
@@ -194,8 +212,8 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           winnerCartelaNumber: data.cartelaNumber,
-          totalPlayers: actualCartelaCount,
-          actualPrizeAmount: Math.round(totalCollectedAmount * 0.85), // 15% profit margin
+          totalPlayers: actualPlayerCount,
+          actualPrizeAmount: Math.round(totalCollectedAmount * 0.85),
           allCartelaNumbers: Array.from(bookedCartelas),
           entryFeePerPlayer: actualEntryFee
         }),
