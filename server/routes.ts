@@ -2951,6 +2951,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Declare winner with complete financial data
+  app.post("/api/games/:gameId/declare-winner", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const gameId = parseInt(req.params.gameId);
+      const { winnerCartelaNumber, totalPlayers, actualPrizeAmount, allCartelaNumbers } = req.body;
+
+      console.log('🎯 COMPREHENSIVE GAME RECORDING - Game ' + gameId + ', Winner ' + winnerCartelaNumber + ', Cartela ' + winnerCartelaNumber);
+
+      // Create player record for the winner
+      console.log('🔧 Creating player record for winner cartela #' + winnerCartelaNumber + ' in game ' + gameId);
+      const winnerPlayer = await storage.addGamePlayer({
+        gameId,
+        playerName: `Player ${winnerCartelaNumber}`,
+        cartelaNumbers: [winnerCartelaNumber],
+        entryFee: "20.00",
+        isWinner: true
+      });
+      console.log('✅ Player record created: ID ' + winnerPlayer.id + ' for cartela #' + winnerCartelaNumber + ', winnerId updated to ' + winnerPlayer.id);
+
+      // Calculate financial data
+      const entryFeePerPlayer = 20.00;
+      const totalCollected = totalPlayers * entryFeePerPlayer;
+      const profitMargin = user.role === 'super_admin' ? 0.15 : 0.10; // 15% for super admin, 10% for admin
+      const adminProfit = totalCollected * profitMargin;
+      const prizeAmount = actualPrizeAmount || (totalCollected - adminProfit);
+      const superAdminCommissionRate = (user as any).commissionRate ? parseFloat((user as any).commissionRate) / 100 : 0.25;
+      const superAdminCommission = adminProfit * superAdminCommissionRate;
+
+      console.log('💰 FINANCIAL CALCULATION:', {
+        totalCollected,
+        playerCount: totalPlayers,
+        entryFeePerPlayer: entryFeePerPlayer.toString(),
+        allPlayerDetails: [{
+          playerId: winnerPlayer.id,
+          playerName: `Player ${winnerCartelaNumber}`,
+          cartelaNumbers: winnerCartelaNumber,
+          amount: entryFeePerPlayer
+        }]
+      });
+
+      console.log('🧮 PROFIT CALCULATIONS:', {
+        totalCollected,
+        profitMargin: (profitMargin * 100) + '%',
+        adminProfit,
+        prizeAmount,
+        superAdminCommissionRate: (superAdminCommissionRate * 100) + '%',
+        superAdminCommission
+      });
+
+      // Update game with winner
+      await storage.updateGameWinner(gameId, winnerPlayer.id);
+      await storage.updateGameStatus(gameId, 'completed');
+
+      // Create comprehensive game history record
+      console.log('💾 CREATING COMPREHENSIVE GAME HISTORY RECORD...');
+      const gameHistory = {
+        gameId,
+        shopId: user.shopId!,
+        employeeId: userId,
+        totalCollected: totalCollected.toFixed(2),
+        prizeAmount: prizeAmount.toFixed(2),
+        adminProfit: adminProfit.toFixed(2),
+        superAdminCommission: superAdminCommission.toFixed(2),
+        playerCount: totalPlayers,
+        winnerName: `Player ${winnerCartelaNumber}`,
+        winningCartela: `#${winnerCartelaNumber}`,
+        completedAt: new Date()
+      };
+
+      const historyRecord = await storage.recordGameHistory(gameHistory);
+      console.log('✅ GAME HISTORY CREATED:', { historyId: historyRecord.id, gameId, uniqueRecord: true });
+
+      // Update shop revenue
+      console.log('Updating shop ' + user.shopId + ' revenue to ' + totalCollected.toFixed(2));
+      await storage.updateShopRevenue(user.shopId!, totalCollected.toFixed(2));
+
+      // Log super admin commission
+      console.log('✅ Super Admin revenue logged: ' + superAdminCommission.toFixed(2) + ' ETB from game ' + gameId);
+      console.log('✅ Super Admin revenue logged from game ' + gameId + ': ' + superAdminCommission + ' ETB');
+
+      const game = await storage.getGame(gameId);
+      res.json({
+        game,
+        winner: winnerPlayer,
+        financialData: {
+          totalCollected: totalCollected.toFixed(2),
+          prizeAmount: prizeAmount.toFixed(2),
+          adminProfit: adminProfit.toFixed(2),
+          superAdminCommission: superAdminCommission.toFixed(2)
+        },
+        isWinner: true,
+        cartelaNumber: winnerCartelaNumber
+      });
+    } catch (error) {
+      console.error("Declare winner error:", error);
+      res.status(500).json({ message: "Failed to declare winner" });
+    }
+  });
+
   // Complete game (with manual winner verification)
   app.patch("/api/games/:gameId/complete", async (req: Request, res) => {
     try {

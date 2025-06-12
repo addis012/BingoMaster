@@ -174,25 +174,27 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   // Check winner mutation
   const checkWinnerMutation = useMutation({
     mutationFn: async (data: { gameId: number; cartelaNumber: number; calledNumbers: number[] }) => {
-      console.log('Sending check winner request:', data);
-      const response = await fetch(`/api/games/${data.gameId}/check-winner`, {
+      console.log('🎯 DECLARING WINNER: Cartela #' + data.cartelaNumber + ' in Game ' + data.gameId);
+      const response = await fetch(`/api/games/${data.gameId}/declare-winner`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cartelaNumber: data.cartelaNumber,
-          calledNumbers: data.calledNumbers
+          winnerCartelaNumber: data.cartelaNumber,
+          totalPlayers: bookedCartelas.size, // Include actual player count
+          actualPrizeAmount: calculatePrizeAmount(), // Include calculated prize
+          allCartelaNumbers: Array.from(bookedCartelas) // Include all participating cartelas
         }),
         credentials: 'include'
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Check winner error response:', errorText);
+        console.error('Declare winner error response:', errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
       
       const result = await response.json();
-      console.log('Check winner success response:', result);
+      console.log('✅ WINNER SUCCESSFULLY LOGGED TO GAME HISTORY:', result);
       return result;
     },
     onSuccess: (result) => {
@@ -224,6 +226,14 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       });
     }
   });
+
+  // Calculate prize amount based on booked cartelas
+  const calculatePrizeAmount = () => {
+    const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "20");
+    const profitMargin = 0.15; // 15% profit margin
+    const prizeAmount = totalCollected * (1 - profitMargin);
+    return Math.round(prizeAmount);
+  };
 
   // Game functions
   const startNewGame = async () => {
