@@ -248,16 +248,16 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   };
 
   const bookSelectedCartelas = () => {
-    if (!currentGame || selectedCartelas.size === 0) return;
+    if (selectedCartelas.size === 0) return;
     
-    addPlayersMutation.mutate({
-      gameId: currentGame.id,
-      playerName: `Player-${Date.now()}`,
-      cartelaNumbers: Array.from(selectedCartelas),
-      entryFee: gameAmount
-    });
-    
+    // Book cartelas locally - no game required
+    setBookedCartelas(new Set([...Array.from(bookedCartelas), ...Array.from(selectedCartelas)]));
+    setSelectedCartelas(new Set());
     setShowCartelaSelector(false);
+    toast({
+      title: "Cartelas Booked",
+      description: `Successfully booked ${selectedCartelas.size} cartelas`,
+    });
   };
 
   const startAutoCall = () => {
@@ -288,7 +288,17 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       setCalledNumbers(newCalledNumbers);
       setLastCalledNumber(newNumber);
       
-      // Play audio feedback for called number
+      // Play Amharic audio for called number
+      try {
+        const audioFileName = `${getLetterForNumber(newNumber)}${newNumber}.mp3`;
+        const audio = new Audio(`/attached_assets/${audioFileName}`);
+        audio.volume = 0.7;
+        audio.play().catch(err => {
+          console.log(`Audio file not found for ${audioFileName}`);
+        });
+      } catch (error) {
+        console.log(`Audio playback error for ${getLetterForNumber(newNumber)}${newNumber}`);
+      }
       console.log(`🔊 Calling: ${getLetterForNumber(newNumber)}-${newNumber}`);
 
       if (currentGame) {
@@ -435,12 +445,12 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </p>
                 </div>
 
-                {/* Main Action Button - Smaller */}
-                <div className="text-center mb-4">
-                  <div className="w-20 h-20 mx-auto bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-blue-200 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                {/* Main Action Button - Restored size */}
+                <div className="text-center mb-6">
+                  <div className="w-32 h-32 mx-auto bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold border-4 border-blue-200 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
                     {gameActive ? "CALLING..." : "CALLING..."}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Generate Number</p>
+                  <p className="text-sm text-gray-500 mt-2">Generate Number</p>
                 </div>
 
                 {/* Game Settings */}
@@ -724,11 +734,11 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </div>
                 </div>
 
-                {/* Control Buttons - Matching your image layout */}
-                <div className="grid grid-cols-3 gap-4 mt-8">
+                {/* Compact Control Buttons - Smaller bar to make Called Numbers Board bigger */}
+                <div className="grid grid-cols-6 gap-2 mt-4">
                   <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
                     <DialogTrigger asChild>
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white py-3">
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white py-2 text-xs">
                         Select Cartela
                       </Button>
                     </DialogTrigger>
@@ -789,24 +799,41 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </Dialog>
 
                   <Button 
-                    className="bg-red-600 hover:bg-red-700 text-white py-3"
+                    className="bg-red-600 hover:bg-red-700 text-white py-2 text-xs"
                     onClick={restartGame}
                   >
                     Reset Game
                   </Button>
 
                   <Button 
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white py-3"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white py-2 text-xs"
                     onClick={shuffleNumbers}
                     disabled={isShuffling}
                   >
                     {isShuffling ? "Shuffling..." : "Shuffle"}
                   </Button>
 
+                  {gameActive ? (
+                    <Button
+                      onClick={pauseGame}
+                      className="bg-orange-600 hover:bg-orange-700 text-white py-2 text-xs"
+                    >
+                      Pause
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={resumeGame}
+                      disabled={gameFinished || !currentGame}
+                      className="bg-green-600 hover:bg-green-700 text-white py-2 text-xs"
+                    >
+                      Resume
+                    </Button>
+                  )}
+
                   <Dialog open={showWinnerChecker} onOpenChange={setShowWinnerChecker}>
                     <DialogTrigger asChild>
                       <Button 
-                        className="bg-purple-600 hover:bg-purple-700 text-white py-3"
+                        className="bg-purple-600 hover:bg-purple-700 text-white py-2 text-xs"
                         disabled={!gameActive}
                       >
                         Check Winner
@@ -843,26 +870,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                       </div>
                     </DialogContent>
                   </Dialog>
-
-                  {gameActive ? (
-                    <Button
-                      onClick={pauseGame}
-                      className="bg-orange-600 hover:bg-orange-700 text-white py-3"
-                    >
-                      Pause
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={resumeGame}
-                      disabled={gameFinished || !currentGame}
-                      className="bg-green-600 hover:bg-green-700 text-white py-3"
-                    >
-                      Resume
-                    </Button>
-                  )}
                 </div>
-
-
               </CardContent>
             </Card>
           </div>
