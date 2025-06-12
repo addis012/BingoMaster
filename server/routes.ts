@@ -2976,17 +2976,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allCartelaNumbers
       });
 
-      // Create player record for the winner
-      const winnerPlayer = await storage.addGamePlayer({
+      // Get existing players for this game to calculate accurate financial data
+      const existingPlayers = await storage.getGamePlayers(gameId);
+      console.log('🔍 EXISTING PLAYERS IN GAME:', {
         gameId,
-        playerName: `Player ${winnerCartelaNumber}`,
-        cartelaNumbers: [winnerCartelaNumber],
-        entryFee: entryFeePerPlayer.toString(),
-        isWinner: true
+        playerCount: existingPlayers.length,
+        players: existingPlayers.map(p => ({ id: p.id, cartelas: p.cartelaNumbers, fee: p.entryFee }))
       });
 
-      // Calculate financial data using frontend values
-      const totalCollected = totalPlayers * entryFeePerPlayer;
+      // Use actual data from existing players
+      const actualPlayerCount = existingPlayers.length;
+      const actualEntryFee = existingPlayers.length > 0 ? parseFloat(existingPlayers[0].entryFee) : entryFeePerPlayer;
+      const totalCollected = actualPlayerCount * actualEntryFee;
+
+      // Find or create winner player record
+      let winnerPlayer = existingPlayers.find(p => p.cartelaNumbers.includes(winnerCartelaNumber));
+      if (!winnerPlayer) {
+        // Create new player record only if not found
+        winnerPlayer = await storage.addGamePlayer({
+          gameId,
+          playerName: `Player ${winnerCartelaNumber}`,
+          cartelaNumbers: [winnerCartelaNumber],
+          entryFee: actualEntryFee.toString(),
+          isWinner: true
+        });
+        console.log('⚠️ Created new player record for winner - this should not happen in normal flow');
+      } else {
+        // Mark existing player as winner
+        winnerPlayer.isWinner = true;
+        console.log('✅ Found existing player record for winner cartela #' + winnerCartelaNumber);
+      }
       const profitMargin = user.role === 'super_admin' ? 0.15 : 0.10; // 15% for super admin, 10% for admin
       const adminProfit = totalCollected * profitMargin;
       const prizeAmount = actualPrizeAmount || (totalCollected - adminProfit);
@@ -2995,14 +3014,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('💰 FINANCIAL CALCULATION:', {
         totalCollected,
-        playerCount: totalPlayers,
-        entryFeePerPlayer: entryFeePerPlayer.toString(),
-        allPlayerDetails: [{
-          playerId: winnerPlayer.id,
-          playerName: `Player ${winnerCartelaNumber}`,
-          cartelaNumbers: winnerCartelaNumber,
-          amount: entryFeePerPlayer
-        }]
+        playerCount: actualPlayerCount,
+        entryFeePerPlayer: actualEntryFee.toString(),
+        allPlayerDetails: existingPlayers.map(p => ({
+          playerId: p.id,
+          playerName: p.playerName,
+          cartelaNumbers: p.cartelaNumbers,
+          amount: parseFloat(p.entryFee)
+        }))
       });
 
       console.log('🧮 PROFIT CALCULATIONS:', {
@@ -3028,7 +3047,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prizeAmount: prizeAmount.toFixed(2),
         adminProfit: adminProfit.toFixed(2),
         superAdminCommission: superAdminCommission.toFixed(2),
-        playerCount: totalPlayers,
+        playerCount: actualPlayerCount,
         winnerName: `Player ${winnerCartelaNumber}`,
         winningCartela: `#${winnerCartelaNumber}`,
         completedAt: new Date()

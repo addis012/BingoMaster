@@ -177,7 +177,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   const checkWinnerMutation = useMutation({
     mutationFn: async (data: { gameId: number; cartelaNumber: number; calledNumbers: number[] }) => {
       // Get game players to determine actual player count
-      console.log('🔍 Fetching game players for accurate count...');
+      console.log('🔍 Fetching game players for Game ' + data.gameId);
       const playersResponse = await fetch(`/api/games/${data.gameId}/players`, {
         credentials: 'include'
       });
@@ -187,13 +187,20 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       
       if (playersResponse.ok) {
         const players = await playersResponse.json();
+        console.log('🔍 PLAYERS RESPONSE:', players);
         actualPlayerCount = players.length;
         if (players.length > 0) {
           actualEntryFee = parseFloat(players[0].entryFee || "20");
         }
-        console.log('✅ Retrieved actual game data:', {
+        console.log('✅ USING DATABASE DATA:', {
           playersFromDB: players.length,
-          entryFeeFromDB: actualEntryFee
+          entryFeeFromDB: actualEntryFee,
+          totalFromDB: players.length * actualEntryFee
+        });
+      } else {
+        console.log('❌ PLAYERS FETCH FAILED, using fallback:', {
+          fallbackCount: actualPlayerCount,
+          fallbackFee: actualEntryFee
         });
       }
       
