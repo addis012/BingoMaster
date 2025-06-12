@@ -634,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/games/:id/declare-winner", async (req, res) => {
     try {
       const gameId = parseInt(req.params.id);
-      const { winnerId, winnerCartela } = req.body;
+      let { winnerId, winnerCartela } = req.body;
       console.log(`🎯 COMPREHENSIVE GAME RECORDING - Game ${gameId}, Winner ${winnerId}, Cartela ${winnerCartela}`);
       
       // Validate that winnerId is provided
@@ -651,9 +651,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const shop = await storage.getShop(game.shopId);
-      const players = await storage.getGamePlayers(gameId);
-      const winner = players.find(p => p.id === winnerId);
+      let players = await storage.getGamePlayers(gameId);
+      let winner = players.find(p => p.id === winnerId);
       const employee = await storage.getUser(game.employeeId);
+      
+      // If winner doesn't exist, create a player record for the winner
+      if (!winner && winnerCartela) {
+        console.log(`🔧 Creating player record for winner cartela #${winnerCartela} in game ${gameId}`);
+        try {
+          const newPlayer = await storage.createGamePlayer({
+            gameId,
+            playerName: `Player ${winnerCartela}`,
+            cartelaNumbers: JSON.stringify([winnerCartela]),
+            entryFee: game.entryFee || "20.00",
+            isWinner: false
+          });
+          players.push(newPlayer);
+          winner = newPlayer;
+          // Update winnerId to match the newly created player
+          winnerId = newPlayer.id;
+          console.log(`✅ Player record created: ID ${newPlayer.id} for cartela #${winnerCartela}, winnerId updated to ${winnerId}`);
+        } catch (playerError) {
+          console.log(`⚠️ Could not create player record, proceeding with simplified logging for cartela #${winnerCartela}`);
+          // Create a minimal winner object for logging purposes
+          winner = {
+            id: winnerId,
+            playerName: `Player ${winnerCartela}`,
+            cartelaNumbers: JSON.stringify([winnerCartela]),
+            entryFee: game.entryFee || "20.00"
+          };
+        }
+      }
       
       // Validate that winner exists in the game
       if (!winner) {
