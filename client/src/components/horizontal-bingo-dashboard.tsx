@@ -42,6 +42,8 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [winnerResult, setWinnerResult] = useState<{isWinner: boolean, cartelaNumber: number} | null>(null);
   const [isShuffling, setIsShuffling] = useState(false);
+  const [gameStartCartelaCount, setGameStartCartelaCount] = useState(0);
+  const [gameStartEntryFee, setGameStartEntryFee] = useState("20");
 
   // Game state ref for reliable interval access
   const gameStateRef = useRef({
@@ -174,14 +176,17 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   // Check winner mutation
   const checkWinnerMutation = useMutation({
     mutationFn: async (data: { gameId: number; cartelaNumber: number; calledNumbers: number[] }) => {
-      const actualBookedCount = bookedCartelas.size;
-      const actualBookedCartelas = Array.from(bookedCartelas);
+      // Use preserved game start data for accurate financial calculations
+      const actualCartelaCount = gameStartCartelaCount || bookedCartelas.size;
+      const actualEntryFee = parseFloat(gameStartEntryFee || gameAmount || "20");
+      const totalCollectedAmount = actualCartelaCount * actualEntryFee;
       
       console.log('🎯 DECLARING WINNER: Cartela #' + data.cartelaNumber + ' in Game ' + data.gameId);
-      console.log('📊 FRONTEND CARTELA DATA:', {
-        bookedCartelasSize: actualBookedCount,
-        bookedCartelasArray: actualBookedCartelas,
-        gameAmount: gameAmount
+      console.log('📊 USING PRESERVED GAME DATA:', {
+        gameStartCartelaCount: gameStartCartelaCount,
+        gameStartEntryFee: gameStartEntryFee,
+        calculatedTotal: totalCollectedAmount,
+        fallbackCurrentCount: bookedCartelas.size
       });
       
       const response = await fetch(`/api/games/${data.gameId}/declare-winner`, {
@@ -189,10 +194,10 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           winnerCartelaNumber: data.cartelaNumber,
-          totalPlayers: actualBookedCount,
-          actualPrizeAmount: calculatePrizeAmount(),
-          allCartelaNumbers: actualBookedCartelas,
-          entryFeePerPlayer: parseFloat(gameAmount || "20")
+          totalPlayers: actualCartelaCount,
+          actualPrizeAmount: Math.round(totalCollectedAmount * 0.85), // 15% profit margin
+          allCartelaNumbers: Array.from(bookedCartelas),
+          entryFeePerPlayer: actualEntryFee
         }),
         credentials: 'include'
       });
@@ -248,6 +253,16 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   // Game functions
   const startNewGame = async () => {
     if (!(user as any)?.shopId || bookedCartelas.size === 0) return;
+    
+    // Preserve original cartela count and entry fee for accurate financial tracking
+    setGameStartCartelaCount(bookedCartelas.size);
+    setGameStartEntryFee(gameAmount);
+    
+    console.log('🎮 GAME START - Preserving financial data:', {
+      cartelaCount: bookedCartelas.size,
+      entryFee: gameAmount,
+      totalExpected: bookedCartelas.size * parseFloat(gameAmount)
+    });
     
     const newGame = await createGameMutation.mutateAsync({
       shopId: (user as any).shopId,
