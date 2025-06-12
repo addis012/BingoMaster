@@ -123,6 +123,8 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         const gameData = {
           shopId: user?.shopId || 1,
           employeeId: user?.id || 1,
+          status: "waiting",
+          entryFee: gameAmount,
         };
         
         const game = await createGameMutation.mutateAsync(gameData);
