@@ -118,7 +118,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
 
   // Add players mutation
   const addPlayersMutation = useMutation({
-    mutationFn: async (data: { gameId: number; playerName: string; cartelaNumbers: number[]; entryFee: string }) => {
+    mutationFn: async (data: { gameId: number; playerName: string; cartelas: number[]; entryFee: string }) => {
       const response = await fetch(`/api/games/${data.gameId}/players`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,11 +129,9 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       return response.json();
     },
     onSuccess: () => {
-      setBookedCartelas(new Set([...Array.from(bookedCartelas), ...Array.from(selectedCartelas)]));
-      setSelectedCartelas(new Set());
       toast({
         title: "Cartelas Booked",
-        description: `Successfully booked ${selectedCartelas.size} cartelas`,
+        description: `Successfully booked cartelas in backend`,
       });
     }
   });
@@ -307,17 +305,46 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
     await startGameMutation.mutateAsync(newGame.id);
   };
 
-  const bookSelectedCartelas = () => {
+  const bookSelectedCartelas = async () => {
     if (selectedCartelas.size === 0) return;
     
-    // Book cartelas locally - no game required
-    setBookedCartelas(new Set([...Array.from(bookedCartelas), ...Array.from(selectedCartelas)]));
-    setSelectedCartelas(new Set());
-    setShowCartelaSelector(false);
-    toast({
-      title: "Cartelas Booked",
-      description: `Successfully booked ${selectedCartelas.size} cartelas`,
-    });
+    try {
+      // Create game first if it doesn't exist
+      if (!currentGame) {
+        console.log('🎮 Creating backend game for cartela booking');
+        const game = await createGameMutation.mutateAsync({ 
+          shopId: (user as any).shopId, 
+          employeeId: user.id, 
+          entryFee: gameAmount || "20" 
+        });
+        setCurrentGame(game);
+        console.log('✅ Backend game created with ID:', game.id);
+      }
+      
+      // Create player records in backend
+      console.log('📝 Creating player records for cartelas:', Array.from(selectedCartelas));
+      await addPlayersMutation.mutateAsync({
+        gameId: currentGame.id,
+        playerName: "Player",
+        cartelas: Array.from(selectedCartelas),
+        entryFee: gameAmount || "20"
+      });
+      
+      console.log('✅ Player records created successfully');
+      
+      // Update local state
+      setBookedCartelas(new Set([...Array.from(bookedCartelas), ...Array.from(selectedCartelas)]));
+      setSelectedCartelas(new Set());
+      setShowCartelaSelector(false);
+      
+    } catch (error) {
+      console.error('❌ Failed to book cartelas:', error);
+      toast({
+        title: "Booking Failed",
+        description: "Failed to book cartelas. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const startAutoCall = () => {
