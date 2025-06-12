@@ -390,13 +390,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/games", async (req, res) => {
     try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
       console.log("🎮 BACKEND GAME CREATION REQUEST:", {
         body: req.body,
-        userId: req.session?.userId,
+        userId: userId,
+        authenticatedUser: user.username,
+        authenticatedEmployeeName: user.name,
         timestamp: new Date().toISOString()
       });
       
-      const gameData = insertGameSchema.parse(req.body);
+      // Use authenticated user's data instead of request body
+      const gameData = insertGameSchema.parse({
+        ...req.body,
+        employeeId: user.id,  // Force use of authenticated user's ID
+        shopId: user.shopId   // Force use of authenticated user's shop
+      });
       console.log("✅ Game data validated:", gameData);
       
       const game = await storage.createGame(gameData);
@@ -404,6 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gameId: game.id,
         shopId: game.shopId,
         employeeId: game.employeeId,
+        authenticatedEmployee: user.name,
         entryFee: game.entryFee
       });
       
