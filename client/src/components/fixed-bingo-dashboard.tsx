@@ -130,19 +130,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         const game = await createGameMutation.mutateAsync(gameData);
         setActiveGameId(game.id);
         
-        // Add all booked cartelas as players
-        for (const cartelaNum of Array.from(bookedCartelas)) {
-          const playerData = {
-            playerName: `Player ${cartelaNum}`,
-            cartelas: [cartelaNum],
-            entryFee: gameAmount,
-          };
-          
-          await addPlayerMutation.mutateAsync({
-            gameId: game.id,
-            playerData,
-          });
-        }
+        console.log(`✅ BACKEND GAME CREATED: Game ID ${game.id} for ${bookedCartelas.size} cartelas`);
       }
     } catch (error) {
       console.error("Failed to create backend game:", error);
@@ -265,30 +253,40 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     const isWinner = true;
     
     try {
-      // If we have an active backend game, declare the winner properly
+      // If we have an active backend game, create a simple game record for this winner
       if (activeGameId) {
         console.log(`🎯 DECLARING WINNER: Cartela #${cartelaNum} in Game ${activeGameId}`);
         
-        // Find the player/winner ID (for demo, use cartela number as player ID)
-        const winnerId = cartelaNum;
-        
-        const result = await declareWinnerMutation.mutateAsync({
-          gameId: activeGameId,
-          winnerId: winnerId,
-          winnerCartela: cartelaNum,
+        // Create a simple player record and declare winner directly via API
+        const response = await fetch(`/api/games/${activeGameId}/declare-winner`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            winnerId: cartelaNum, // Use cartela number as winner ID
+            winnerCartela: cartelaNum,
+            playerName: `Player ${cartelaNum}`,
+            totalCollected: Array.from(bookedCartelas).length * parseInt(gameAmount),
+            prizeAmount: Array.from(bookedCartelas).length * parseInt(gameAmount) * 0.8 // 80% prize
+          }),
         });
         
-        console.log(`✅ WINNER SUCCESSFULLY LOGGED TO GAME HISTORY:`, {
-          gameId: activeGameId,
-          winnerCartela: cartelaNum,
-          prizeAmount: result.financial?.prizeAmount,
-          gameHistory: 'Created in backend'
-        });
-        
-        setGameFinished(true);
-        setGameActive(false);
-        if (autoCallInterval.current) {
-          clearInterval(autoCallInterval.current);
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`✅ WINNER SUCCESSFULLY LOGGED TO GAME HISTORY:`, {
+            gameId: activeGameId,
+            winnerCartela: cartelaNum,
+            totalCollected: Array.from(bookedCartelas).length * parseInt(gameAmount),
+            prizeAmount: result.financial?.prizeAmount,
+            gameHistory: 'Created in backend'
+          });
+          
+          setGameFinished(true);
+          setGameActive(false);
+          if (autoCallInterval.current) {
+            clearInterval(autoCallInterval.current);
+          }
+        } else {
+          console.error("Failed to declare winner:", await response.text());
         }
       }
     } catch (error) {
