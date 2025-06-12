@@ -672,7 +672,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const newPlayer = await storage.createGamePlayer({
               gameId,
               playerName: `Player ${winnerCartela}`,
-              cartelaNumbers: JSON.stringify([winnerCartela]),
+              cartelaNumbers: [winnerCartela],
               entryFee: game.entryFee || "20.00",
               isWinner: false
             });
@@ -685,7 +685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             winner = {
               id: winnerId,
               playerName: `Player ${winnerCartela}`,
-              cartelaNumbers: JSON.stringify([winnerCartela]),
+              cartelaNumbers: [winnerCartela],
               entryFee: game.entryFee || "20.00"
             };
           }
