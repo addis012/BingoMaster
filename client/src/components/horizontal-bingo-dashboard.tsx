@@ -405,42 +405,42 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
 
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Current Number & Controls */}
+          {/* Left Panel - Current Number & Controls - Minimized */}
           <div className="lg:col-span-1">
             <Card>
-              <CardContent className="p-6">
-                {/* Current Number Display */}
-                <div className="text-center mb-6">
+              <CardContent className="p-3">
+                {/* Current Number Display - Compact */}
+                <div className="text-center mb-3">
                   {lastCalledNumber ? (
-                    <div className="flex justify-center items-center space-x-4 mb-4">
-                      <div className="w-16 h-16 bg-red-500 text-white font-bold text-2xl flex items-center justify-center rounded">
+                    <div className="flex justify-center items-center space-x-2 mb-2">
+                      <div className="w-12 h-12 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">
                         {getLetterForNumber(lastCalledNumber)}
                       </div>
-                      <div className="w-16 h-16 bg-gray-800 text-white font-bold text-2xl flex items-center justify-center rounded">
+                      <div className="w-12 h-12 bg-gray-800 text-white font-bold text-xl flex items-center justify-center rounded">
                         {lastCalledNumber}
                       </div>
                     </div>
                   ) : (
-                    <div className="flex justify-center items-center space-x-4 mb-4">
-                      <div className="w-16 h-16 bg-gray-300 text-gray-600 font-bold text-2xl flex items-center justify-center rounded">
-                        ?
+                    <div className="flex justify-center items-center space-x-2 mb-2">
+                      <div className="w-12 h-12 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">
+                        N
                       </div>
-                      <div className="w-16 h-16 bg-gray-300 text-gray-600 font-bold text-2xl flex items-center justify-center rounded">
-                        ?
+                      <div className="w-12 h-12 bg-gray-800 text-white font-bold text-xl flex items-center justify-center rounded">
+                        35
                       </div>
                     </div>
                   )}
-                  <p className="text-sm text-gray-600">
-                    {lastCalledNumber ? `${getLetterForNumber(lastCalledNumber)}-${lastCalledNumber}` : "Ready to Start"}
+                  <p className="text-xs text-gray-600">
+                    {lastCalledNumber ? `${getLetterForNumber(lastCalledNumber)}-${lastCalledNumber}` : "N-35"}
                   </p>
                 </div>
 
-                {/* Main Action Button */}
-                <div className="text-center mb-6">
-                  <div className="w-32 h-32 mx-auto bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold border-4 border-blue-200 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
-                    {gameActive ? "CALLING..." : "Let's Play BINGO!"}
+                {/* Main Action Button - Smaller */}
+                <div className="text-center mb-4">
+                  <div className="w-20 h-20 mx-auto bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-blue-200 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                    {gameActive ? "CALLING..." : "CALLING..."}
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">Generate Number</p>
+                  <p className="text-xs text-gray-500 mt-1">Generate Number</p>
                 </div>
 
                 {/* Game Settings */}
@@ -595,6 +595,18 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   >
                     {isShuffling ? "Shuffling..." : "Shuffle"}
                   </Button>
+
+                  {/* Start Game Button - appears after cartela selection */}
+                  {bookedCartelas.size > 0 && !currentGame && (
+                    <Button
+                      onClick={startNewGame}
+                      disabled={createGameMutation.isPending}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
+                      size="sm"
+                    >
+                      {createGameMutation.isPending ? "Starting..." : "Start Game"}
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -614,18 +626,18 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                 </p>
               </CardHeader>
               <CardContent className="px-6">
-                {/* BINGO Board - Exact copy from your image */}
-                <div className="space-y-1">
+                {/* BINGO Board - Bigger with bold numbers matching your image */}
+                <div className="space-y-2">
                   {/* B Row */}
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">B</div>
-                    <div className="flex space-x-1">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">B</div>
+                    <div className="flex space-x-2">
                       {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(num => (
                         <div
                           key={num}
-                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                          className={`w-10 h-10 text-center font-bold text-lg flex items-center justify-center rounded ${
                             calledNumbers.includes(num)
-                              ? 'bg-green-600 text-white font-bold'
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -636,15 +648,15 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </div>
 
                   {/* I Row */}
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">I</div>
-                    <div className="flex space-x-1">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">I</div>
+                    <div className="flex space-x-2">
                       {[16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].map(num => (
                         <div
                           key={num}
-                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                          className={`w-10 h-10 text-center font-bold text-lg flex items-center justify-center rounded ${
                             calledNumbers.includes(num)
-                              ? 'bg-green-600 text-white font-bold'
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -655,15 +667,15 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </div>
 
                   {/* N Row */}
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">N</div>
-                    <div className="flex space-x-1">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">N</div>
+                    <div className="flex space-x-2">
                       {[31,32,33,34,35,36,37,38,39,40,41,42,43,44,45].map(num => (
                         <div
                           key={num}
-                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                          className={`w-10 h-10 text-center font-bold text-lg flex items-center justify-center rounded ${
                             calledNumbers.includes(num)
-                              ? 'bg-green-600 text-white font-bold'
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -674,15 +686,15 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </div>
 
                   {/* G Row */}
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">G</div>
-                    <div className="flex space-x-1">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">G</div>
+                    <div className="flex space-x-2">
                       {[46,47,48,49,50,51,52,53,54,55,56,57,58,59,60].map(num => (
                         <div
                           key={num}
-                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                          className={`w-10 h-10 text-center font-bold text-lg flex items-center justify-center rounded ${
                             calledNumbers.includes(num)
-                              ? 'bg-green-600 text-white font-bold'
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -693,15 +705,15 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </div>
 
                   {/* O Row */}
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">O</div>
-                    <div className="flex space-x-1">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">O</div>
+                    <div className="flex space-x-2">
                       {[61,62,63,64,65,66,67,68,69,70,71,72,73,74,75].map(num => (
                         <div
                           key={num}
-                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                          className={`w-10 h-10 text-center font-bold text-lg flex items-center justify-center rounded ${
                             calledNumbers.includes(num)
-                              ? 'bg-green-600 text-white font-bold'
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -712,13 +724,11 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </div>
                 </div>
 
-                {/* Action Buttons at Bottom - Matching your image */}
-                <div className="grid grid-cols-2 gap-4 mt-6">
+                {/* Control Buttons - Matching your image layout */}
+                <div className="grid grid-cols-3 gap-4 mt-8">
                   <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
                     <DialogTrigger asChild>
-                      <Button 
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white py-3">
                         Select Cartela
                       </Button>
                     </DialogTrigger>
@@ -779,49 +789,24 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   </Dialog>
 
                   <Button 
-                    className="bg-red-600 hover:bg-red-700 text-white"
+                    className="bg-red-600 hover:bg-red-700 text-white py-3"
                     onClick={restartGame}
                   >
                     Reset Game
                   </Button>
 
                   <Button 
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white py-3"
                     onClick={shuffleNumbers}
                     disabled={isShuffling}
                   >
                     {isShuffling ? "Shuffling..." : "Shuffle"}
                   </Button>
 
-                  {!currentGame ? (
-                    <Button
-                      onClick={startNewGame}
-                      disabled={createGameMutation.isPending || bookedCartelas.size === 0}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      {createGameMutation.isPending ? "Creating..." : "Start Autoplay"}
-                    </Button>
-                  ) : gameActive ? (
-                    <Button
-                      onClick={pauseGame}
-                      className="bg-orange-600 hover:bg-orange-700 text-white"
-                    >
-                      Pause
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={resumeGame}
-                      disabled={gameFinished}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      Resume
-                    </Button>
-                  )}
-
                   <Dialog open={showWinnerChecker} onOpenChange={setShowWinnerChecker}>
                     <DialogTrigger asChild>
                       <Button 
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        className="bg-purple-600 hover:bg-purple-700 text-white py-3"
                         disabled={!gameActive}
                       >
                         Check Winner
@@ -858,7 +843,26 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  {gameActive ? (
+                    <Button
+                      onClick={pauseGame}
+                      className="bg-orange-600 hover:bg-orange-700 text-white py-3"
+                    >
+                      Pause
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={resumeGame}
+                      disabled={gameFinished || !currentGame}
+                      className="bg-green-600 hover:bg-green-700 text-white py-3"
+                    >
+                      Resume
+                    </Button>
+                  )}
                 </div>
+
+
               </CardContent>
             </Card>
           </div>
