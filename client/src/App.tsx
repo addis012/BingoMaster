@@ -30,7 +30,7 @@ function AppRouter() {
         <SimpleAdminDashboard onLogout={handleLogout} />
       </Route>
       <Route path="/dashboard/employee">
-        <EmployeeDashboard />
+        <EmployeeDashboard onLogout={handleLogout} />
       </Route>
       
       {/* Legacy Routes for backward compatibility */}
@@ -38,10 +38,10 @@ function AppRouter() {
         <SimpleAdminDashboard onLogout={handleLogout} />
       </Route>
       <Route path="/employee">
-        <EmployeeDashboard />
+        <EmployeeDashboard onLogout={handleLogout} />
       </Route>
       <Route path="/employee-dashboard">
-        <EmployeeDashboard />
+        <EmployeeDashboard onLogout={handleLogout} />
       </Route>
     </Router>
   );

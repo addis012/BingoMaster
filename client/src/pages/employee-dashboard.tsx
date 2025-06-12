@@ -1,8 +1,19 @@
 import FixedBingoDashboard from "@/components/fixed-bingo-dashboard";
 import { useAuth } from "@/hooks/use-auth";
 
-export default function EmployeeDashboard() {
+interface EmployeeDashboardProps {
+  onLogout?: () => void;
+}
+
+export default function EmployeeDashboard({ onLogout }: EmployeeDashboardProps) {
   const { logout } = useAuth();
   
-  return <FixedBingoDashboard onLogout={logout} />;
+  const handleLogout = async () => {
+    await logout();
+    if (onLogout) {
+      onLogout();
+    }
+  };
+  
+  return <FixedBingoDashboard onLogout={handleLogout} />;
 }
