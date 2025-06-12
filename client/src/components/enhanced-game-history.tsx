@@ -29,7 +29,7 @@ interface EnhancedGameHistoryProps {
   shopId: number;
 }
 
-export function EnhancedGameHistory({ shopId }: EnhancedGameHistoryProps) {
+function EnhancedGameHistory({ shopId }: EnhancedGameHistoryProps) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -43,7 +43,9 @@ export function EnhancedGameHistory({ shopId }: EnhancedGameHistoryProps) {
       const response = await fetch(`/api/game-history/${shopId}?${params}`);
       if (!response.ok) throw new Error('Failed to fetch game history');
       return response.json();
-    }
+    },
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true
   });
 
   const totalGames = gameHistory.length;
@@ -236,3 +238,5 @@ export function EnhancedGameHistory({ shopId }: EnhancedGameHistoryProps) {
     </div>
   );
 }
+
+export { EnhancedGameHistory };
