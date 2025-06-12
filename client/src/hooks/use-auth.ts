@@ -43,10 +43,12 @@ export function AuthProvider(props: { children: ReactNode }) {
       return data.user;
     },
     onSuccess: (user) => {
-      // Force immediate state update with correct structure
+      // Clear any cached data first
+      queryClient.removeQueries({ queryKey: ["/api/auth/me"] });
+      // Set fresh user data with correct structure
       queryClient.setQueryData(["/api/auth/me"], { user });
-      // Then refetch to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      // Force immediate refetch to ensure consistency
+      refetch();
     },
   });
 
@@ -55,8 +57,9 @@ export function AuthProvider(props: { children: ReactNode }) {
       await apiRequest("POST", "/api/auth/logout");
     },
     onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ["/api/auth/me"] });
       queryClient.setQueryData(["/api/auth/me"], null);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.clear();
     },
   });
 
