@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 
 interface FixedBingoDashboardProps {
   onLogout: () => void;
@@ -23,6 +25,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
   const [lastCalledNumber, setLastCalledNumber] = useState<number | null>(null);
   const [gameAmount, setGameAmount] = useState("20");
+  const [activeGameId, setActiveGameId] = useState<number | null>(null);
   
   // Cartela selection
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
@@ -40,6 +43,46 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const [isShuffling, setIsShuffling] = useState(false);
   const autoCallInterval = useRef<NodeJS.Timeout | null>(null);
   const gameStateRef = useRef({ calledNumbers: [], finished: false });
+
+  // Backend mutations
+  const createGameMutation = useMutation({
+    mutationFn: async (gameData: { shopId: number; employeeId: number }) => {
+      const response = await fetch("/api/games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(gameData),
+      });
+      if (!response.ok) throw new Error("Failed to create game");
+      return response.json();
+    },
+  });
+
+  const declareWinnerMutation = useMutation({
+    mutationFn: async ({ gameId, winnerId, winnerCartela }: { gameId: number; winnerId: number; winnerCartela: number }) => {
+      const response = await fetch(`/api/games/${gameId}/declare-winner`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ winnerId, winnerCartela }),
+      });
+      if (!response.ok) throw new Error("Failed to declare winner");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+    },
+  });
+
+  const addPlayerMutation = useMutation({
+    mutationFn: async ({ gameId, playerData }: { gameId: number; playerData: any }) => {
+      const response = await fetch(`/api/games/${gameId}/players`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(playerData),
+      });
+      if (!response.ok) throw new Error("Failed to add player");
+      return response.json();
+    },
+  });
 
   // Helper functions
   const getLetterForNumber = (num: number): string => {
