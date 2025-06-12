@@ -2580,11 +2580,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const gameId = parseInt(req.params.gameId);
-      const { playerName, cartelas, entryFee } = req.body;
+      const { playerName, cartelaNumbers, entryFee } = req.body;
 
       // Add multiple cartelas for the same player
       const players = [];
-      for (const cartelaNumber of cartelas) {
+      for (const cartelaNumber of cartelaNumbers) {
         const player = await storage.addGamePlayer({
           gameId,
           playerName: `${playerName} (Card ${cartelaNumber})`,
@@ -2595,7 +2595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update game prize pool
-      const totalAmount = cartelas.length * parseFloat(entryFee);
+      const totalAmount = cartelaNumbers.length * parseFloat(entryFee);
       await storage.updateGamePrizePool(gameId, totalAmount);
 
       res.json(players);
@@ -2864,7 +2864,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update game prize pool
-      const totalAmount = cartelas.length * parseFloat(entryFee);
+      const totalAmount = cartelaNumbers.length * parseFloat(entryFee);
       await storage.updateGamePrizePool(gameId, totalAmount);
 
       console.log('✅ ADD PLAYERS SUCCESS:', {
