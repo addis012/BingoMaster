@@ -26,6 +26,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const [lastCalledNumber, setLastCalledNumber] = useState<number | null>(null);
   const [gameAmount, setGameAmount] = useState("20");
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
+  const [shopData, setShopData] = useState<any>(null);
   
   // Cartela selection
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
@@ -333,6 +334,34 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     }
   };
 
+  // Fetch shop data for profit margin
+  useEffect(() => {
+    const fetchShopData = async () => {
+      if (user?.shopId) {
+        try {
+          const response = await fetch(`/api/shops/${user.shopId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setShopData(data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch shop data:", error);
+        }
+      }
+    };
+    
+    fetchShopData();
+  }, [user?.shopId]);
+
+  // Calculate winner payout based on admin-configurable profit margin
+  const calculateWinnerPayout = (collectedAmount: number): number => {
+    if (!shopData?.profitMargin) return collectedAmount * 0.7; // fallback to 30% profit
+    
+    const margin = parseFloat(shopData.profitMargin) || 0;
+    const adminProfit = (collectedAmount * margin) / 100;
+    return collectedAmount - adminProfit;
+  };
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -358,7 +387,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600">Winner Gets</p>
-              <p className="text-xl font-bold text-green-600">{Math.floor(bookedCartelas.size * parseInt(gameAmount) * 0.7)} Birr</p>
+              <p className="text-xl font-bold text-green-600">{Math.floor(calculateWinnerPayout(bookedCartelas.size * parseInt(gameAmount)))} Birr</p>
             </div>
             <Button 
               variant="outline" 
@@ -369,6 +398,12 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
             </Button>
           </div>
         </div>
+        
+        {shopData && (
+          <div className="mt-2 text-sm text-gray-500 text-center">
+            Shop Profit Margin: {shopData.profitMargin || 0}%
+          </div>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
