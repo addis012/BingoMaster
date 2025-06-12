@@ -68,7 +68,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   });
 
   // Calculate values
-  const adminProfitMargin = adminStats?.commissionRate || 30;
+  const adminProfitMargin = (adminStats as any)?.commissionRate || 30;
   const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
   const prizeAmount = totalCollected * (100 - adminProfitMargin) / 100;
 
@@ -127,7 +127,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       return response.json();
     },
     onSuccess: () => {
-      setBookedCartelas(new Set([...bookedCartelas, ...selectedCartelas]));
+      setBookedCartelas(new Set([...Array.from(bookedCartelas), ...Array.from(selectedCartelas)]));
       setSelectedCartelas(new Set());
       toast({
         title: "Cartelas Booked",
@@ -227,11 +227,11 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
 
   // Game functions
   const startNewGame = async () => {
-    if (!user?.shopId || bookedCartelas.size === 0) return;
+    if (!(user as any)?.shopId || bookedCartelas.size === 0) return;
     
     const newGame = await createGameMutation.mutateAsync({
-      shopId: user.shopId,
-      employeeId: user.id,
+      shopId: (user as any).shopId,
+      employeeId: (user as any).id,
       entryFee: gameAmount
     });
 
@@ -366,10 +366,10 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   useEffect(() => {
     if (activeGame) {
       setCurrentGame(activeGame);
-      if (activeGame.calledNumbers) {
-        setCalledNumbers(activeGame.calledNumbers.map((n: string) => parseInt(n)));
+      if ((activeGame as any).calledNumbers) {
+        setCalledNumbers((activeGame as any).calledNumbers.map((n: string) => parseInt(n)));
       }
-      if (activeGame.status === 'active') {
+      if ((activeGame as any).status === 'active') {
         setGameActive(true);
       }
     }
@@ -382,7 +382,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Bingo Play</h1>
-            <p className="text-gray-600">{user?.username} - Employee</p>
+            <p className="text-gray-600">{(user as any)?.username} - Employee</p>
           </div>
           <div className="flex items-center space-x-6">
             <div className="text-right">
