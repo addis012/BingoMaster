@@ -650,6 +650,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Game not found" });
       }
       
+      // Check if game is already completed to prevent duplicate processing
+      if (game.status === 'completed') {
+        console.log(`⚠️ Game ${gameId} is already completed, skipping duplicate winner declaration`);
+        return res.status(400).json({ message: "Game is already completed" });
+      }
+      
       const shop = await storage.getShop(game.shopId);
       let players = await storage.getGamePlayers(gameId);
       let winner = players.find(p => p.id === winnerId);
