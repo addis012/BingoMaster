@@ -118,7 +118,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
 
   // Add players mutation
   const addPlayersMutation = useMutation({
-    mutationFn: async (data: { gameId: number; playerName: string; cartelas: number[]; entryFee: string }) => {
+    mutationFn: async (data: { gameId: number; playerName: string; cartelaNumbers: number[]; entryFee: string }) => {
       const response = await fetch(`/api/games/${data.gameId}/players`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -297,7 +297,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
     await addPlayersMutation.mutateAsync({
       gameId: newGame.id,
       playerName: `Player-${Date.now()}`,
-      cartelas: Array.from(bookedCartelas),
+      cartelaNumbers: Array.from(bookedCartelas),
       entryFee: gameAmount
     });
 
@@ -335,7 +335,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       const playerData = {
         gameId,
         playerName: "Player",
-        cartelas: Array.from(selectedCartelas),
+        cartelaNumbers: Array.from(selectedCartelas),
         entryFee: gameAmount || "20"
       };
       console.log('📝 Player data payload:', playerData);

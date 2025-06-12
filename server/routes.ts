@@ -2829,26 +2829,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const gameId = parseInt(req.params.gameId);
-      const { playerName, cartelas, entryFee } = req.body;
+      const { playerName, cartelaNumbers, entryFee } = req.body;
 
       console.log('🎯 ADD PLAYERS API CALLED:', {
         gameId,
         playerName,
-        cartelas,
+        cartelaNumbers,
         entryFee,
-        cartelasCount: cartelas?.length
+        cartelasCount: cartelaNumbers?.length
       });
 
-      if (!playerName || !cartelas || !Array.isArray(cartelas) || cartelas.length === 0) {
+      if (!playerName || !cartelaNumbers || !Array.isArray(cartelaNumbers) || cartelaNumbers.length === 0) {
         console.log('❌ ADD PLAYERS: Invalid request data');
-        return res.status(400).json({ message: "Player name and cartelas are required" });
+        return res.status(400).json({ message: "Player name and cartelaNumbers are required" });
       }
 
       // Add each cartela as a separate player entry
       const players = [];
-      console.log('📝 Creating player records for', cartelas.length, 'cartelas');
+      console.log('📝 Creating player records for', cartelaNumbers.length, 'cartelas');
       
-      for (const cartelaNumber of cartelas) {
+      for (const cartelaNumber of cartelaNumbers) {
         const playerData = {
           gameId,
           playerName: `${playerName} #${cartelaNumber}`,
