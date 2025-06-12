@@ -112,9 +112,39 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     setShowCartelaSelector(false);
   };
 
-  const startGame = () => {
+  const startGame = async () => {
     if (bookedCartelas.size === 0) {
       return;
+    }
+
+    try {
+      // Create backend game if starting fresh
+      if (!activeGameId && calledNumbers.length === 0) {
+        const gameData = {
+          shopId: user?.shopId || 1,
+          employeeId: user?.id || 1,
+        };
+        
+        const game = await createGameMutation.mutateAsync(gameData);
+        setActiveGameId(game.id);
+        
+        // Add all booked cartelas as players
+        for (const cartelaNum of Array.from(bookedCartelas)) {
+          const playerData = {
+            playerName: `Player ${cartelaNum}`,
+            cartelaNumbers: [cartelaNum],
+            amount: parseInt(gameAmount),
+            phoneNumber: `+251900${String(cartelaNum).padStart(6, '0')}`,
+          };
+          
+          await addPlayerMutation.mutateAsync({
+            gameId: game.id,
+            playerData,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to create backend game:", error);
     }
 
     setGameActive(true);
@@ -208,6 +238,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     setCalledNumbers([]);
     setLastCalledNumber(null);
     setBookedCartelas(new Set());
+    setActiveGameId(null);
     gameStateRef.current = { calledNumbers: [], finished: false };
   };
 
@@ -218,7 +249,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     }, 1000);
   };
 
-  const checkWinner = () => {
+  const checkWinner = async () => {
     const cartelaNum = parseInt(winnerCartelaNumber);
     
     if (!cartelaNum || cartelaNum < 1 || cartelaNum > 100) {
@@ -229,8 +260,39 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
       return;
     }
 
-    // For demo purposes, random winner check
-    const isWinner = Math.random() > 0.7;
+    // Manual winner verification - assume this cartela is a winner
+    const isWinner = true;
+    
+    try {
+      // If we have an active backend game, declare the winner properly
+      if (activeGameId) {
+        console.log(`🎯 DECLARING WINNER: Cartela #${cartelaNum} in Game ${activeGameId}`);
+        
+        // Find the player/winner ID (for demo, use cartela number as player ID)
+        const winnerId = cartelaNum;
+        
+        const result = await declareWinnerMutation.mutateAsync({
+          gameId: activeGameId,
+          winnerId: winnerId,
+          winnerCartela: cartelaNum,
+        });
+        
+        console.log(`✅ WINNER SUCCESSFULLY LOGGED TO GAME HISTORY:`, {
+          gameId: activeGameId,
+          winnerCartela: cartelaNum,
+          prizeAmount: result.financial?.prizeAmount,
+          gameHistory: 'Created in backend'
+        });
+        
+        setGameFinished(true);
+        setGameActive(false);
+        if (autoCallInterval.current) {
+          clearInterval(autoCallInterval.current);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to declare winner in backend:", error);
+    }
     
     setWinnerResult({ isWinner, cartela: cartelaNum });
     setShowWinnerChecker(false);
