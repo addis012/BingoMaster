@@ -297,7 +297,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
     await addPlayersMutation.mutateAsync({
       gameId: newGame.id,
       playerName: `Player-${Date.now()}`,
-      cartelaNumbers: Array.from(bookedCartelas),
+      cartelas: Array.from(bookedCartelas),
       entryFee: gameAmount
     });
 
@@ -314,7 +314,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         console.log('🎮 Creating backend game for cartela booking');
         const game = await createGameMutation.mutateAsync({ 
           shopId: (user as any).shopId, 
-          employeeId: user.id, 
+          employeeId: user?.id || 0, 
           entryFee: gameAmount || "20" 
         });
         setCurrentGame(game);
