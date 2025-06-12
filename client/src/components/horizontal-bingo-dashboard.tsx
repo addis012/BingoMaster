@@ -287,6 +287,9 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       gameStateRef.current.calledNumbers = newCalledNumbers;
       setCalledNumbers(newCalledNumbers);
       setLastCalledNumber(newNumber);
+      
+      // Play audio feedback for called number
+      console.log(`🔊 Calling: ${getLetterForNumber(newNumber)}-${newNumber}`);
 
       if (currentGame) {
         updateNumbersMutation.mutate({
@@ -611,135 +614,214 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                 </p>
               </CardHeader>
               <CardContent className="px-6">
-                {/* BINGO Letters Header */}
-                <div className="grid grid-cols-5 gap-3 mb-4">
-                  <div className="text-center font-bold text-white bg-orange-500 py-3 rounded text-2xl">B</div>
-                  <div className="text-center font-bold text-white bg-green-600 py-3 rounded text-2xl">I</div>
-                  <div className="text-center font-bold text-white bg-blue-600 py-3 rounded text-2xl">N</div>
-                  <div className="text-center font-bold text-white bg-red-500 py-3 rounded text-2xl">G</div>
-                  <div className="text-center font-bold text-white bg-purple-500 py-3 rounded text-2xl">O</div>
-                </div>
-                
-                {/* Numbers Grid - Horizontal Layout */}
-                <div className="grid grid-cols-5 gap-3">
-                  {/* B Column (1-15) */}
-                  <div className="space-y-2">
-                    {Array.from({ length: 15 }, (_, i) => {
-                      const num = i + 1;
-                      const isCalled = calledNumbers.includes(num);
-                      return (
+                {/* BINGO Board - Exact copy from your image */}
+                <div className="space-y-1">
+                  {/* B Row */}
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">B</div>
+                    <div className="flex space-x-1">
+                      {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(num => (
                         <div
                           key={num}
-                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
-                            isCalled
-                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
-                              : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                            calledNumbers.includes(num)
+                              ? 'bg-green-600 text-white font-bold'
+                              : 'bg-gray-100 text-gray-700'
                           }`}
                         >
                           {num}
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
 
-                  {/* I Column (16-30) */}
-                  <div className="space-y-2">
-                    {Array.from({ length: 15 }, (_, i) => {
-                      const num = i + 16;
-                      const isCalled = calledNumbers.includes(num);
-                      return (
+                  {/* I Row */}
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">I</div>
+                    <div className="flex space-x-1">
+                      {[16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].map(num => (
                         <div
                           key={num}
-                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
-                            isCalled
-                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
-                              : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                            calledNumbers.includes(num)
+                              ? 'bg-green-600 text-white font-bold'
+                              : 'bg-gray-100 text-gray-700'
                           }`}
                         >
                           {num}
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
 
-                  {/* N Column (31-45) */}
-                  <div className="space-y-2">
-                    {Array.from({ length: 15 }, (_, i) => {
-                      const num = i + 31;
-                      const isCalled = calledNumbers.includes(num);
-                      return (
+                  {/* N Row */}
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">N</div>
+                    <div className="flex space-x-1">
+                      {[31,32,33,34,35,36,37,38,39,40,41,42,43,44,45].map(num => (
                         <div
                           key={num}
-                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
-                            isCalled
-                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
-                              : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                            calledNumbers.includes(num)
+                              ? 'bg-green-600 text-white font-bold'
+                              : 'bg-gray-100 text-gray-700'
                           }`}
                         >
                           {num}
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
 
-                  {/* G Column (46-60) */}
-                  <div className="space-y-2">
-                    {Array.from({ length: 15 }, (_, i) => {
-                      const num = i + 46;
-                      const isCalled = calledNumbers.includes(num);
-                      return (
+                  {/* G Row */}
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">G</div>
+                    <div className="flex space-x-1">
+                      {[46,47,48,49,50,51,52,53,54,55,56,57,58,59,60].map(num => (
                         <div
                           key={num}
-                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
-                            isCalled
-                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
-                              : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                            calledNumbers.includes(num)
+                              ? 'bg-green-600 text-white font-bold'
+                              : 'bg-gray-100 text-gray-700'
                           }`}
                         >
                           {num}
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
 
-                  {/* O Column (61-75) */}
-                  <div className="space-y-2">
-                    {Array.from({ length: 15 }, (_, i) => {
-                      const num = i + 61;
-                      const isCalled = calledNumbers.includes(num);
-                      return (
+                  {/* O Row */}
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-red-500 text-white font-bold text-lg flex items-center justify-center rounded">O</div>
+                    <div className="flex space-x-1">
+                      {[61,62,63,64,65,66,67,68,69,70,71,72,73,74,75].map(num => (
                         <div
                           key={num}
-                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
-                            isCalled
-                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
-                              : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          className={`w-8 h-8 text-center text-sm font-medium flex items-center justify-center rounded ${
+                            calledNumbers.includes(num)
+                              ? 'bg-green-600 text-white font-bold'
+                              : 'bg-gray-100 text-gray-700'
                           }`}
                         >
                           {num}
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Action Buttons at Bottom */}
-                <div className="flex justify-center space-x-4 mt-6">
+                {/* Action Buttons at Bottom - Matching your image */}
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        Select Cartela
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+                      <DialogHeader>
+                        <DialogTitle>Select Cartelas (1-100)</DialogTitle>
+                        <DialogDescription>
+                          Choose multiple cartelas. Each number has a unique, fixed pattern.
+                          Selected: {selectedCartelas.size} cartelas
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid grid-cols-10 gap-2 p-4">
+                        {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                          const isBooked = bookedCartelas.has(num);
+                          const isSelected = selectedCartelas.has(num);
+                          return (
+                            <div key={num} className="flex flex-col items-center space-y-1">
+                              <Button
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                disabled={isBooked}
+                                className={`h-12 w-12 ${
+                                  isBooked 
+                                    ? 'bg-red-500 text-white opacity-50' 
+                                    : isSelected 
+                                      ? 'bg-blue-600 text-white' 
+                                      : 'hover:bg-blue-100'
+                                }`}
+                                onClick={() => toggleCartelaSelection(num)}
+                              >
+                                {num}
+                              </Button>
+                              <Checkbox
+                                id={`cartela-${num}`}
+                                checked={isSelected}
+                                disabled={isBooked}
+                                onCheckedChange={() => toggleCartelaSelection(num)}
+                                className="h-3 w-3"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      <div className="flex justify-between p-4">
+                        <Button variant="outline" onClick={() => setShowCartelaSelector(false)}>
+                          Close
+                        </Button>
+                        <Button 
+                          onClick={bookSelectedCartelas}
+                          disabled={selectedCartelas.size === 0 || addPlayersMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {addPlayersMutation.isPending ? "Booking..." : `Book ${selectedCartelas.size} Cartelas`}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Button 
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={restartGame}
+                  >
+                    Reset Game
+                  </Button>
+
+                  <Button 
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    onClick={shuffleNumbers}
+                    disabled={isShuffling}
+                  >
+                    {isShuffling ? "Shuffling..." : "Shuffle"}
+                  </Button>
+
+                  {!currentGame ? (
+                    <Button
+                      onClick={startNewGame}
+                      disabled={createGameMutation.isPending || bookedCartelas.size === 0}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {createGameMutation.isPending ? "Creating..." : "Start Autoplay"}
+                    </Button>
+                  ) : gameActive ? (
+                    <Button
+                      onClick={pauseGame}
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      Pause
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={resumeGame}
+                      disabled={gameFinished}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      Resume
+                    </Button>
+                  )}
+
                   <Dialog open={showWinnerChecker} onOpenChange={setShowWinnerChecker}>
                     <DialogTrigger asChild>
                       <Button 
-                        variant="outline"
-                        className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
                         disabled={!gameActive}
                       >
                         Check Winner
