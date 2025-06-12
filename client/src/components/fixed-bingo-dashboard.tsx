@@ -134,9 +134,8 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         for (const cartelaNum of Array.from(bookedCartelas)) {
           const playerData = {
             playerName: `Player ${cartelaNum}`,
-            cartelaNumbers: [cartelaNum],
-            amount: parseInt(gameAmount),
-            phoneNumber: `+251900${String(cartelaNum).padStart(6, '0')}`,
+            cartelas: [cartelaNum],
+            entryFee: gameAmount,
           };
           
           await addPlayerMutation.mutateAsync({
