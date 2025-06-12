@@ -699,19 +699,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         winnerName: winner?.playerName || 'Unknown'
       });
       
-      // Calculate total collected from entry fees - use fallback if no transactions exist
-      const entryFeeTransactions = await storage.getTransactionsByShop(game.shopId);
-      const gameEntryFees = entryFeeTransactions.filter(t => t.gameId === gameId && t.type === 'entry_fee');
-      let totalCollectedBirr = gameEntryFees.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      // ALWAYS calculate total from actual cartelas - this is the definitive source
+      const entryFee = parseFloat(game.entryFee || "0");
+      const totalCartelas = players.reduce((sum, p) => sum + (p.cartelaNumbers?.length || 0), 0);
+      const totalCollectedBirr = totalCartelas * entryFee;
       
-      // If no entry fee transactions found, calculate from total cartelas across all players
-      if (totalCollectedBirr === 0 && players.length > 0) {
-        const entryFee = parseFloat(game.entryFee || "0");
-        const totalCartelas = players.reduce((sum, p) => sum + (p.cartelaNumbers?.length || 0), 0);
-        totalCollectedBirr = totalCartelas * entryFee;
-        console.log(`📊 Calculated total from cartelas: ${totalCartelas} cartelas × ${entryFee} = ${totalCollectedBirr} ETB`);
-        console.log(`📊 Player breakdown: ${players.length} players with cartela counts:`, players.map(p => `${p.playerName}: ${p.cartelaNumbers?.length || 0} cartelas`));
-      }
+      console.log(`📊 DEFINITIVE CALCULATION from cartelas: ${totalCartelas} cartelas × ${entryFee} = ${totalCollectedBirr} ETB`);
+      console.log(`📊 Player breakdown: ${players.length} players with cartela counts:`, players.map(p => `${p.playerName}: ${p.cartelaNumbers?.length || 0} cartelas`));
       
       // Log all player cartelas for comprehensive record
       const playerDetails = players.map(p => ({
