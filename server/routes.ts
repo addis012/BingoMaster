@@ -783,7 +783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           gameId: gameId,
           shopId: game.shopId,
           employeeId: game.employeeId,
-          playerCount: players.length,
+          playerCount: totalCartelas,
           totalCollected: totalCollectedBirr.toString(),
           prizeAmount: prizeAmountBirr.toString(),
           adminProfit: adminProfit.toString(),
