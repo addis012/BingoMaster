@@ -2965,23 +2965,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const gameId = parseInt(req.params.gameId);
-      const { winnerCartelaNumber, totalPlayers, actualPrizeAmount, allCartelaNumbers } = req.body;
+      const { winnerCartelaNumber, totalPlayers, actualPrizeAmount, allCartelaNumbers, entryFeePerPlayer } = req.body;
 
-      console.log('🎯 COMPREHENSIVE GAME RECORDING - Game ' + gameId + ', Winner ' + winnerCartelaNumber + ', Cartela ' + winnerCartelaNumber);
+      console.log('🎯 COMPREHENSIVE GAME RECORDING - Game ' + gameId + ', Winner ' + winnerCartelaNumber);
+      console.log('📊 RECEIVED FRONTEND DATA:', {
+        winnerCartelaNumber,
+        totalPlayers,
+        actualPrizeAmount,
+        entryFeePerPlayer,
+        allCartelaNumbers
+      });
 
       // Create player record for the winner
-      console.log('🔧 Creating player record for winner cartela #' + winnerCartelaNumber + ' in game ' + gameId);
       const winnerPlayer = await storage.addGamePlayer({
         gameId,
         playerName: `Player ${winnerCartelaNumber}`,
         cartelaNumbers: [winnerCartelaNumber],
-        entryFee: "20.00",
+        entryFee: entryFeePerPlayer.toString(),
         isWinner: true
       });
-      console.log('✅ Player record created: ID ' + winnerPlayer.id + ' for cartela #' + winnerCartelaNumber + ', winnerId updated to ' + winnerPlayer.id);
 
-      // Calculate financial data
-      const entryFeePerPlayer = 20.00;
+      // Calculate financial data using frontend values
       const totalCollected = totalPlayers * entryFeePerPlayer;
       const profitMargin = user.role === 'super_admin' ? 0.15 : 0.10; // 15% for super admin, 10% for admin
       const adminProfit = totalCollected * profitMargin;

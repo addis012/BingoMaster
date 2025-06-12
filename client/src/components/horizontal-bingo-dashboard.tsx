@@ -174,15 +174,25 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   // Check winner mutation
   const checkWinnerMutation = useMutation({
     mutationFn: async (data: { gameId: number; cartelaNumber: number; calledNumbers: number[] }) => {
+      const actualBookedCount = bookedCartelas.size;
+      const actualBookedCartelas = Array.from(bookedCartelas);
+      
       console.log('🎯 DECLARING WINNER: Cartela #' + data.cartelaNumber + ' in Game ' + data.gameId);
+      console.log('📊 FRONTEND CARTELA DATA:', {
+        bookedCartelasSize: actualBookedCount,
+        bookedCartelasArray: actualBookedCartelas,
+        gameAmount: gameAmount
+      });
+      
       const response = await fetch(`/api/games/${data.gameId}/declare-winner`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           winnerCartelaNumber: data.cartelaNumber,
-          totalPlayers: bookedCartelas.size, // Include actual player count
-          actualPrizeAmount: calculatePrizeAmount(), // Include calculated prize
-          allCartelaNumbers: Array.from(bookedCartelas) // Include all participating cartelas
+          totalPlayers: actualBookedCount,
+          actualPrizeAmount: calculatePrizeAmount(),
+          allCartelaNumbers: actualBookedCartelas,
+          entryFeePerPlayer: parseFloat(gameAmount || "20")
         }),
         credentials: 'include'
       });
