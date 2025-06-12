@@ -32,6 +32,9 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   // Winner checking
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
+  const [showWinnerResult, setShowWinnerResult] = useState(false);
+  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0 });
+  const [wasGameActiveBeforeCheck, setWasGameActiveBeforeCheck] = useState(false);
   
   // Game mechanics
   const [isShuffling, setIsShuffling] = useState(false);
@@ -211,24 +214,29 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
       return;
     }
 
+    // Pause game immediately when checking winner
+    setWasGameActiveBeforeCheck(gameActive);
+    if (gameActive) {
+      pauseGame();
+    }
+
     // For demo purposes, random winner check
     const isWinner = Math.random() > 0.7;
     
-    if (isWinner) {
-      toast({
-        title: "🎉 WINNER!",
-        description: `Cartela #${cartelaNum} is a WINNER! Congratulations!`,
-      });
-      pauseGame();
-    } else {
-      toast({
-        title: "❌ Not a Winner",
-        description: `Cartela #${cartelaNum} is not a winner yet. Game continues...`,
-      });
-    }
-    
+    setWinnerResult({ isWinner, cartela: cartelaNum });
     setShowWinnerChecker(false);
     setWinnerCartelaNumber("");
+    setShowWinnerResult(true);
+    
+    // If not a winner, auto-resume after 3 seconds
+    if (!isWinner) {
+      setTimeout(() => {
+        setShowWinnerResult(false);
+        if (wasGameActiveBeforeCheck && !gameFinished) {
+          resumeGame();
+        }
+      }, 3000);
+    }
   };
 
   // Cleanup on unmount
@@ -341,16 +349,15 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="space-y-3 mt-6">
+                {/* Compact Action Buttons - Minimized */}
+                <div className="grid grid-cols-2 gap-2 mt-6">
                   <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 py-1 text-xs"
                       >
-                        Select Cartela
+                        Select
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
@@ -409,27 +416,24 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                   </Dialog>
 
                   <Button 
-                    className="w-full bg-red-600 hover:bg-red-700 text-white"
-                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white py-1 text-xs"
                     onClick={resetGame}
                   >
-                    Reset Game
+                    Reset
                   </Button>
 
                   {!gameActive && !gameFinished ? (
                     <Button
                       onClick={startGame}
                       disabled={bookedCartelas.size === 0}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white py-1 text-xs"
                     >
-                      Start Game
+                      Start
                     </Button>
                   ) : gameActive ? (
                     <Button
                       onClick={pauseGame}
-                      className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-                      size="sm"
+                      className="bg-orange-600 hover:bg-orange-700 text-white py-1 text-xs"
                     >
                       Pause
                     </Button>
@@ -437,20 +441,18 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                     <Button
                       onClick={resumeGame}
                       disabled={gameFinished}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white py-1 text-xs"
                     >
                       Resume
                     </Button>
                   )}
 
                   <Button 
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                    size="sm"
+                    className="bg-purple-600 hover:bg-purple-700 text-white py-1 text-xs"
                     onClick={shuffleNumbers}
                     disabled={isShuffling}
                   >
-                    {isShuffling ? "Shuffling..." : "Shuffle"}
+                    {isShuffling ? "..." : "Shuffle"}
                   </Button>
                 </div>
               </CardContent>
@@ -577,52 +579,12 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                   </div>
                 </div>
 
-                {/* Compact Control Buttons */}
-                <div className="grid grid-cols-6 gap-2 mt-4">
-                  <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white py-2 text-xs">
-                        Select Cartela
-                      </Button>
-                    </DialogTrigger>
-                  </Dialog>
-
-                  <Button 
-                    className="bg-red-600 hover:bg-red-700 text-white py-2 text-xs"
-                    onClick={resetGame}
-                  >
-                    Reset Game
-                  </Button>
-
-                  <Button 
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white py-2 text-xs"
-                    onClick={shuffleNumbers}
-                    disabled={isShuffling}
-                  >
-                    {isShuffling ? "Shuffling..." : "Shuffle"}
-                  </Button>
-
-                  {gameActive ? (
-                    <Button
-                      onClick={pauseGame}
-                      className="bg-orange-600 hover:bg-orange-700 text-white py-2 text-xs"
-                    >
-                      Pause
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={resumeGame}
-                      disabled={gameFinished || bookedCartelas.size === 0}
-                      className="bg-green-600 hover:bg-green-700 text-white py-2 text-xs"
-                    >
-                      Resume
-                    </Button>
-                  )}
-
+                {/* Winner Check Button - Only button under the board */}
+                <div className="flex justify-center mt-4">
                   <Dialog open={showWinnerChecker} onOpenChange={setShowWinnerChecker}>
                     <DialogTrigger asChild>
                       <Button 
-                        className="bg-purple-600 hover:bg-purple-700 text-white py-2 text-xs"
+                        className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-6"
                         disabled={!gameActive}
                       >
                         Check Winner
@@ -663,6 +625,53 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
             </Card>
           </div>
         </div>
+
+        {/* Winner Result Modal */}
+        <Dialog open={showWinnerResult} onOpenChange={setShowWinnerResult}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl">
+                {winnerResult.isWinner ? "🎉 WINNER!" : "❌ Not a Winner"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="text-center py-8">
+              {winnerResult.isWinner ? (
+                <div className="space-y-4">
+                  <div className="w-24 h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-white text-4xl font-bold">✓</span>
+                  </div>
+                  <p className="text-lg font-semibold text-green-600">
+                    Cartela #{winnerResult.cartela} is a WINNER!
+                  </p>
+                  <p className="text-gray-600">
+                    Congratulations! Prize: {Math.floor(bookedCartelas.size * parseInt(gameAmount) * 0.7)} Birr
+                  </p>
+                  <Button 
+                    onClick={() => setShowWinnerResult(false)}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Claim Prize
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="w-24 h-24 bg-red-500 rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-white text-4xl font-bold">✕</span>
+                  </div>
+                  <p className="text-lg font-semibold text-red-500">
+                    Cartela #{winnerResult.cartela} is not a winner yet
+                  </p>
+                  <p className="text-gray-600">
+                    Game will continue automatically in 3 seconds...
+                  </p>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-red-500 h-2 rounded-full animate-pulse" style={{width: "33%"}}></div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
