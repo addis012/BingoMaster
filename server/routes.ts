@@ -2818,23 +2818,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       if (!userId) {
+        console.log('❌ ADD PLAYERS: Not authenticated');
         return res.status(401).json({ message: "Not authenticated" });
       }
 
       const user = await storage.getUser(userId);
       if (!user || user.role !== 'employee') {
+        console.log('❌ ADD PLAYERS: Employee access required');
         return res.status(403).json({ message: "Employee access required" });
       }
 
       const gameId = parseInt(req.params.gameId);
       const { playerName, cartelas, entryFee } = req.body;
 
+      console.log('🎯 ADD PLAYERS API CALLED:', {
+        gameId,
+        playerName,
+        cartelas,
+        entryFee,
+        cartelasCount: cartelas?.length
+      });
+
       if (!playerName || !cartelas || !Array.isArray(cartelas) || cartelas.length === 0) {
+        console.log('❌ ADD PLAYERS: Invalid request data');
         return res.status(400).json({ message: "Player name and cartelas are required" });
       }
 
       // Add each cartela as a separate player entry
       const players = [];
+      console.log('📝 Creating player records for', cartelas.length, 'cartelas');
+      
       for (const cartelaNumber of cartelas) {
         const playerData = {
           gameId,
@@ -2844,16 +2857,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isWinner: false
         };
         
+        console.log('📝 Creating player record:', playerData);
         const player = await storage.addGamePlayer(playerData);
         players.push(player);
+        console.log('✅ Player record created:', player.id);
       }
 
       // Update game prize pool
       const totalAmount = cartelas.length * parseFloat(entryFee);
       await storage.updateGamePrizePool(gameId, totalAmount);
 
+      console.log('✅ ADD PLAYERS SUCCESS:', {
+        playersCreated: players.length,
+        totalAmount,
+        gameId
+      });
+
       res.json(players);
     } catch (error) {
+      console.error('❌ ADD PLAYERS ERROR:', error);
       res.status(500).json({ message: "Failed to add players" });
     }
   });
