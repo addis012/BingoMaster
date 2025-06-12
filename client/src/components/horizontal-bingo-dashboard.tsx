@@ -306,7 +306,10 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   };
 
   const bookSelectedCartelas = async () => {
-    if (selectedCartelas.size === 0) return;
+    if (selectedCartelas.size === 0) {
+      console.log('❌ No cartelas selected for booking');
+      return;
+    }
     
     console.log('🎯 BOOKING CARTELAS:', {
       selectedCount: selectedCartelas.size,
@@ -330,18 +333,21 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         console.log('✅ Backend game created with ID:', gameId);
       }
       
-      // Create player records in backend
+      // CRITICAL: Create player records in backend
       console.log('📝 CALLING ADD PLAYERS API for game', gameId);
+      console.log('📝 Selected cartelas for booking:', Array.from(selectedCartelas));
+      
       const playerData = {
         gameId,
         playerName: "Player",
         cartelaNumbers: Array.from(selectedCartelas),
         entryFee: gameAmount || "20"
       };
-      console.log('📝 Player data payload:', playerData);
+      console.log('📝 Player data payload being sent:', playerData);
       
       const result = await addPlayersMutation.mutateAsync(playerData);
-      console.log('✅ Player API response:', result);
+      console.log('✅ Player API response received:', result);
+      console.log('✅ Created', result?.length || 0, 'player records in backend');
       
       // Update local state
       setBookedCartelas(new Set([...Array.from(bookedCartelas), ...Array.from(selectedCartelas)]));
@@ -350,14 +356,16 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       
       toast({
         title: "Cartelas Booked Successfully",
-        description: `${selectedCartelas.size} cartelas booked with backend records`,
+        description: `${selectedCartelas.size} cartelas booked with ${result?.length || 0} backend records`,
       });
       
     } catch (error) {
-      console.error('❌ Failed to book cartelas:', error);
+      console.error('❌ BOOKING ERROR DETAILS:', error);
+      console.error('❌ Error message:', error?.message);
+      console.error('❌ Error response:', error?.response);
       toast({
         title: "Booking Failed",
-        description: `Failed to book cartelas: ${error.message}`,
+        description: `Failed to book cartelas: ${error?.message || 'Unknown error'}`,
         variant: "destructive"
       });
     }
