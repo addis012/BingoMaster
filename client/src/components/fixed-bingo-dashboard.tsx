@@ -131,6 +131,28 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         setActiveGameId(game.id);
         
         console.log(`✅ BACKEND GAME CREATED: Game ID ${game.id} for ${bookedCartelas.size} cartelas`);
+        
+        // CRITICAL: Create player records for all booked cartelas
+        if (bookedCartelas.size > 0) {
+          console.log('📝 Creating player records for', bookedCartelas.size, 'cartelas');
+          
+          const playerData = {
+            gameId: game.id,
+            playerName: "Player",
+            cartelaNumbers: Array.from(bookedCartelas),
+            entryFee: gameAmount
+          };
+          
+          console.log('📝 Player data being sent:', playerData);
+          
+          try {
+            const result = await addPlayerMutation.mutateAsync(playerData);
+            console.log('✅ Created', result?.length || 0, 'player records in backend');
+            console.log('✅ Financial tracking will now show accurate player counts');
+          } catch (playerError) {
+            console.error('❌ Failed to create player records:', playerError);
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to create backend game:", error);
