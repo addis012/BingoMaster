@@ -137,7 +137,6 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
           console.log('📝 Creating player records for', bookedCartelas.size, 'cartelas');
           
           const playerData = {
-            gameId: game.id,
             playerName: "Player",
             cartelaNumbers: Array.from(bookedCartelas),
             entryFee: gameAmount
@@ -146,7 +145,10 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
           console.log('📝 Player data being sent:', playerData);
           
           try {
-            const result = await addPlayerMutation.mutateAsync(playerData);
+            const result = await addPlayerMutation.mutateAsync({
+              gameId: game.id,
+              playerData: playerData
+            });
             console.log('✅ Created', result?.length || 0, 'player records in backend');
             console.log('✅ Financial tracking will now show accurate player counts');
           } catch (playerError) {
