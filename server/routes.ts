@@ -715,7 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const playerDetails = players.map(p => ({
         playerId: p.id,
         playerName: p.playerName,
-        cartelaNumbers: JSON.parse(p.cartelaNumbers || "[]"),
+        cartelaNumbers: p.cartelaNumbers || [],
         amount: parseFloat(game.entryFee || "0")
       }));
       
