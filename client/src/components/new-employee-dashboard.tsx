@@ -33,6 +33,9 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
   const [currentGame, setCurrentGame] = useState<any>(null);
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
+  const [showWinnerModal, setShowWinnerModal] = useState(false);
+  const [winnerResult, setWinnerResult] = useState<{isWinner: boolean, cartelaNumber: number} | null>(null);
+  const [isShuffling, setIsShuffling] = useState(false);
   
   // Use ref to track game state for reliable interval access
   const gameStateRef = useRef({
@@ -159,17 +162,19 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
       setWinnerCartelaNumber("");
       
       if (result.isWinner) {
-        toast({
-          title: "🎉 WINNER CONFIRMED!",
-          description: `Cartela #${result.cartelaNumber} won! This cartela is a valid winner.`,
-          variant: "default"
-        });
+        // Show winner modal
+        setWinnerResult({ isWinner: true, cartelaNumber: result.cartelaNumber });
+        setShowWinnerModal(true);
       } else {
-        toast({
-          title: "❌ No Win Yet",
-          description: `Cartela #${result.cartelaNumber} didn't won. This cartela is not a winner yet.`,
-          variant: "destructive"
-        });
+        // Show non-winner modal and auto-resume after 3 seconds
+        setWinnerResult({ isWinner: false, cartelaNumber: result.cartelaNumber });
+        setShowWinnerModal(true);
+        setTimeout(() => {
+          setShowWinnerModal(false);
+          if (!gameActive && !gameFinished) {
+            resumeGame();
+          }
+        }, 3000);
       }
     },
     onError: (error) => {
@@ -453,6 +458,36 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
   // Clear selected cartelas
   const clearSelectedCartelas = () => {
     setSelectedCartelas(new Set());
+  };
+
+  // Shuffle animation function
+  const shuffleNumbers = () => {
+    setIsShuffling(true);
+    // Play shuffle sound effect (placeholder)
+    console.log("Playing shuffle sound effect...");
+    
+    setTimeout(() => {
+      setIsShuffling(false);
+    }, 2000);
+  };
+
+  // Restart game function
+  const restartGame = () => {
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+    setGameActive(false);
+    setGameFinished(false);
+    setCurrentGame(null);
+    setCalledNumbers([]);
+    setBookedCartelas(new Set());
+    setSelectedCartelas(new Set());
+    setLastCalledNumber(null);
+    toast({
+      title: "Game Restarted",
+      description: "Ready to start a new game",
+    });
   };
 
   // Check winner cartela

@@ -1,0 +1,810 @@
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+
+interface User {
+  id: number;
+  username: string;
+  role: string;
+  name?: string;
+  shopId?: number;
+}
+
+interface BingoHorizontalDashboardProps {
+  onLogout: () => void;
+}
+
+export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDashboardProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // State variables
+  const [gameAmount, setGameAmount] = useState("20");
+  const [autoplaySpeed, setAutoplaySpeed] = useState(3);
+  const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
+  const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
+  const [lastCalledNumber, setLastCalledNumber] = useState<number | null>(null);
+  const [gameActive, setGameActive] = useState(false);
+  const [gameFinished, setGameFinished] = useState(false);
+  const [showCartelaSelector, setShowCartelaSelector] = useState(false);
+  const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
+  const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
+  const [currentGame, setCurrentGame] = useState<any>(null);
+  const [showWinnerChecker, setShowWinnerChecker] = useState(false);
+  const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
+  const [showWinnerModal, setShowWinnerModal] = useState(false);
+  const [winnerResult, setWinnerResult] = useState<{isWinner: boolean, cartelaNumber: number} | null>(null);
+  const [isShuffling, setIsShuffling] = useState(false);
+
+  // Game state ref for reliable interval access
+  const gameStateRef = useRef({
+    active: false,
+    calledNumbers: [] as number[],
+    finished: false
+  });
+
+  // Fetch current user
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/me'],
+  });
+
+  // Fetch admin stats for profit margin
+  const { data: adminStats } = useQuery({
+    queryKey: ['/api/admin/shop-stats'],
+    refetchInterval: 5000,
+  });
+
+  // Fetch active game
+  const { data: activeGame } = useQuery({
+    queryKey: ['/api/games/active'],
+    refetchInterval: 2000,
+  });
+
+  // Calculate values
+  const adminProfitMargin = adminStats?.commissionRate || 30;
+  const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
+  const prizeAmount = totalCollected * (100 - adminProfitMargin) / 100;
+
+  // Helper function to get letter for number
+  const getLetterForNumber = (num: number): string => {
+    if (num <= 15) return 'B';
+    if (num <= 30) return 'I';
+    if (num <= 45) return 'N';
+    if (num <= 60) return 'G';
+    return 'O';
+  };
+
+  // Toggle cartela selection
+  const toggleCartelaSelection = (num: number) => {
+    const newSelected = new Set(selectedCartelas);
+    if (newSelected.has(num)) {
+      newSelected.delete(num);
+    } else {
+      newSelected.add(num);
+    }
+    setSelectedCartelas(newSelected);
+  };
+
+  // Create game mutation
+  const createGameMutation = useMutation({
+    mutationFn: async (data: { shopId: number; employeeId: number; entryFee: string }) => {
+      const response = await fetch('/api/games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to create game');
+      return response.json();
+    },
+    onSuccess: (newGame) => {
+      setCurrentGame(newGame);
+      toast({
+        title: "Game Created",
+        description: `New game started with ID: ${newGame.id}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+    }
+  });
+
+  // Add players mutation
+  const addPlayersMutation = useMutation({
+    mutationFn: async (data: { gameId: number; playerName: string; cartelaNumbers: number[]; entryFee: string }) => {
+      const response = await fetch(`/api/games/${data.gameId}/players`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to add players');
+      return response.json();
+    },
+    onSuccess: () => {
+      setBookedCartelas(new Set([...bookedCartelas, ...selectedCartelas]));
+      setSelectedCartelas(new Set());
+      toast({
+        title: "Cartelas Booked",
+        description: `Successfully booked ${selectedCartelas.size} cartelas`,
+      });
+    }
+  });
+
+  // Start game mutation
+  const startGameMutation = useMutation({
+    mutationFn: async (gameId: number) => {
+      const response = await fetch(`/api/games/${gameId}/start`, {
+        method: 'PATCH',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to start game');
+      return response.json();
+    },
+    onSuccess: () => {
+      setGameActive(true);
+      startAutoCall();
+      toast({
+        title: "Game Started",
+        description: "Bingo game is now active!",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+    }
+  });
+
+  // Update numbers mutation
+  const updateNumbersMutation = useMutation({
+    mutationFn: async (data: { gameId: number; calledNumbers: number[] }) => {
+      const response = await fetch(`/api/games/${data.gameId}/numbers`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ calledNumbers: data.calledNumbers }),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to update numbers');
+      return response.json();
+    }
+  });
+
+  // Check winner mutation
+  const checkWinnerMutation = useMutation({
+    mutationFn: async (data: { gameId: number; cartelaNumber: number; calledNumbers: number[] }) => {
+      console.log('Sending check winner request:', data);
+      const response = await fetch(`/api/games/${data.gameId}/check-winner`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartelaNumber: data.cartelaNumber,
+          calledNumbers: data.calledNumbers
+        }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Check winner error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Check winner success response:', result);
+      return result;
+    },
+    onSuccess: (result) => {
+      setShowWinnerChecker(false);
+      setWinnerCartelaNumber("");
+      
+      if (result.isWinner) {
+        // Show winner modal
+        setWinnerResult({ isWinner: true, cartelaNumber: result.cartelaNumber });
+        setShowWinnerModal(true);
+      } else {
+        // Show non-winner modal and auto-resume after 3 seconds
+        setWinnerResult({ isWinner: false, cartelaNumber: result.cartelaNumber });
+        setShowWinnerModal(true);
+        setTimeout(() => {
+          setShowWinnerModal(false);
+          if (!gameActive && !gameFinished) {
+            resumeGame();
+          }
+        }, 3000);
+      }
+    },
+    onError: (error) => {
+      console.error('Check winner mutation error:', error);
+      toast({
+        title: "Error Checking Winner",
+        description: `Failed to check winner: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Game functions
+  const startNewGame = async () => {
+    if (!user?.shopId || bookedCartelas.size === 0) return;
+    
+    const newGame = await createGameMutation.mutateAsync({
+      shopId: user.shopId,
+      employeeId: user.id,
+      entryFee: gameAmount
+    });
+
+    // Add players
+    await addPlayersMutation.mutateAsync({
+      gameId: newGame.id,
+      playerName: `Player-${Date.now()}`,
+      cartelaNumbers: Array.from(bookedCartelas),
+      entryFee: gameAmount
+    });
+
+    // Start the game
+    await startGameMutation.mutateAsync(newGame.id);
+  };
+
+  const bookSelectedCartelas = () => {
+    if (!currentGame || selectedCartelas.size === 0) return;
+    
+    addPlayersMutation.mutate({
+      gameId: currentGame.id,
+      playerName: `Player-${Date.now()}`,
+      cartelaNumbers: Array.from(selectedCartelas),
+      entryFee: gameAmount
+    });
+    
+    setShowCartelaSelector(false);
+  };
+
+  const startAutoCall = () => {
+    if (autoCallInterval) clearInterval(autoCallInterval);
+    
+    const interval = setInterval(() => {
+      if (gameStateRef.current.finished || gameStateRef.current.calledNumbers.length >= 75) {
+        clearInterval(interval);
+        setGameFinished(true);
+        setGameActive(false);
+        return;
+      }
+
+      const availableNumbers = Array.from({ length: 75 }, (_, i) => i + 1)
+        .filter(n => !gameStateRef.current.calledNumbers.includes(n));
+      
+      if (availableNumbers.length === 0) {
+        clearInterval(interval);
+        setGameFinished(true);
+        setGameActive(false);
+        return;
+      }
+
+      const newNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+      const newCalledNumbers = [...gameStateRef.current.calledNumbers, newNumber];
+      
+      gameStateRef.current.calledNumbers = newCalledNumbers;
+      setCalledNumbers(newCalledNumbers);
+      setLastCalledNumber(newNumber);
+
+      if (currentGame) {
+        updateNumbersMutation.mutate({
+          gameId: currentGame.id,
+          calledNumbers: newCalledNumbers
+        });
+      }
+    }, autoplaySpeed * 1000);
+    
+    setAutoCallInterval(interval);
+  };
+
+  const pauseGame = () => {
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+    setGameActive(false);
+  };
+
+  const resumeGame = () => {
+    if (!gameFinished) {
+      setGameActive(true);
+      startAutoCall();
+    }
+  };
+
+  const shuffleNumbers = () => {
+    setIsShuffling(true);
+    console.log("Playing shuffle sound effect...");
+    
+    setTimeout(() => {
+      setIsShuffling(false);
+    }, 2000);
+  };
+
+  const restartGame = () => {
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+    setGameActive(false);
+    setGameFinished(false);
+    setCurrentGame(null);
+    setCalledNumbers([]);
+    setBookedCartelas(new Set());
+    setSelectedCartelas(new Set());
+    setLastCalledNumber(null);
+    gameStateRef.current = { active: false, calledNumbers: [], finished: false };
+    toast({
+      title: "Game Restarted",
+      description: "Ready to start a new game",
+    });
+  };
+
+  const checkWinnerCartela = () => {
+    // Pause the game immediately when checking for winner
+    pauseGame();
+    
+    if (!currentGame || !winnerCartelaNumber) return;
+    
+    checkWinnerMutation.mutate({
+      gameId: currentGame.id,
+      cartelaNumber: parseInt(winnerCartelaNumber),
+      calledNumbers: calledNumbers
+    });
+  };
+
+  // Update refs when state changes
+  useEffect(() => {
+    gameStateRef.current.active = gameActive;
+    gameStateRef.current.calledNumbers = calledNumbers;
+    gameStateRef.current.finished = gameFinished;
+  }, [gameActive, calledNumbers, gameFinished]);
+
+  // Load active game data
+  useEffect(() => {
+    if (activeGame) {
+      setCurrentGame(activeGame);
+      if (activeGame.calledNumbers) {
+        setCalledNumbers(activeGame.calledNumbers.map((n: string) => parseInt(n)));
+      }
+      if (activeGame.status === 'active') {
+        setGameActive(true);
+      }
+    }
+  }, [activeGame]);
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b px-6 py-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Bingo Play</h1>
+            <p className="text-gray-600">{user?.username} - Employee</p>
+          </div>
+          <div className="flex items-center space-x-6">
+            <div className="text-right">
+              <p className="text-sm text-gray-600">Total Collected</p>
+              <p className="text-lg font-bold text-blue-600">{totalCollected.toFixed(0)} Birr</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600">Winner Gets</p>
+              <p className="text-lg font-bold text-green-600">{prizeAmount.toFixed(0)} Birr</p>
+            </div>
+            <Button onClick={onLogout} className="bg-teal-600 hover:bg-teal-700 text-white">
+              Log Out
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Panel - Current Number & Controls */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardContent className="p-6">
+                {/* Current Number Display */}
+                <div className="text-center mb-6">
+                  {lastCalledNumber ? (
+                    <div className="flex justify-center items-center space-x-4 mb-4">
+                      <div className="w-16 h-16 bg-red-500 text-white font-bold text-2xl flex items-center justify-center rounded">
+                        {getLetterForNumber(lastCalledNumber)}
+                      </div>
+                      <div className="w-16 h-16 bg-gray-800 text-white font-bold text-2xl flex items-center justify-center rounded">
+                        {lastCalledNumber}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex justify-center items-center space-x-4 mb-4">
+                      <div className="w-16 h-16 bg-gray-300 text-gray-600 font-bold text-2xl flex items-center justify-center rounded">
+                        ?
+                      </div>
+                      <div className="w-16 h-16 bg-gray-300 text-gray-600 font-bold text-2xl flex items-center justify-center rounded">
+                        ?
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-600">
+                    {lastCalledNumber ? `${getLetterForNumber(lastCalledNumber)}-${lastCalledNumber}` : "Ready to Start"}
+                  </p>
+                </div>
+
+                {/* Main Action Button */}
+                <div className="text-center mb-6">
+                  <div className="w-32 h-32 mx-auto bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold border-4 border-blue-200 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                    {gameActive ? "CALLING..." : "Let's Play BINGO!"}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">Generate Number</p>
+                </div>
+
+                {/* Game Settings */}
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="gameAmount" className="text-sm font-medium">Game Amount (Birr)</Label>
+                    <Input
+                      id="gameAmount"
+                      type="number"
+                      value={gameAmount}
+                      onChange={(e) => setGameAmount(e.target.value)}
+                      disabled={gameActive}
+                      min="1"
+                      step="1"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {/* Selected Cartelas Display */}
+                  <div className="border rounded-lg p-3 bg-gray-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Selected Cartelas</span>
+                      {bookedCartelas.size > 0 && (
+                        <span className="text-xs text-blue-600">{bookedCartelas.size} cartelas</span>
+                      )}
+                    </div>
+                    {bookedCartelas.size > 0 ? (
+                      <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto">
+                        {Array.from(bookedCartelas).sort((a, b) => a - b).slice(0, 10).map(num => (
+                          <Badge key={num} variant="default" className="text-xs bg-green-600 text-white">
+                            #{num}
+                          </Badge>
+                        ))}
+                        {bookedCartelas.size > 10 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{bookedCartelas.size - 10}
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500">No cartelas selected yet</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-3 mt-6">
+                  <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                        size="sm"
+                      >
+                        Select Cartela
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+                      <DialogHeader>
+                        <DialogTitle>Select Cartelas (1-100)</DialogTitle>
+                        <DialogDescription>
+                          Choose multiple cartelas. Each number has a unique, fixed pattern.
+                          Selected: {selectedCartelas.size} cartelas
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid grid-cols-10 gap-2 p-4">
+                        {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                          const isBooked = bookedCartelas.has(num);
+                          const isSelected = selectedCartelas.has(num);
+                          return (
+                            <div key={num} className="flex flex-col items-center space-y-1">
+                              <Button
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                disabled={isBooked}
+                                className={`h-12 w-12 ${
+                                  isBooked 
+                                    ? 'bg-red-500 text-white opacity-50' 
+                                    : isSelected 
+                                      ? 'bg-blue-600 text-white' 
+                                      : 'hover:bg-blue-100'
+                                }`}
+                                onClick={() => toggleCartelaSelection(num)}
+                              >
+                                {num}
+                              </Button>
+                              <Checkbox
+                                id={`cartela-${num}`}
+                                checked={isSelected}
+                                disabled={isBooked}
+                                onCheckedChange={() => toggleCartelaSelection(num)}
+                                className="h-3 w-3"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      <div className="flex justify-between p-4">
+                        <Button variant="outline" onClick={() => setShowCartelaSelector(false)}>
+                          Close
+                        </Button>
+                        <Button 
+                          onClick={bookSelectedCartelas}
+                          disabled={selectedCartelas.size === 0 || addPlayersMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {addPlayersMutation.isPending ? "Booking..." : `Book ${selectedCartelas.size} Cartelas`}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Button 
+                    className="w-full bg-red-600 hover:bg-red-700 text-white"
+                    size="sm"
+                    onClick={restartGame}
+                  >
+                    Reset Game
+                  </Button>
+
+                  {!currentGame ? (
+                    <Button
+                      onClick={startNewGame}
+                      disabled={createGameMutation.isPending || bookedCartelas.size === 0}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {createGameMutation.isPending ? "Creating..." : "Start Autoplay"}
+                    </Button>
+                  ) : gameActive ? (
+                    <Button
+                      onClick={pauseGame}
+                      className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                    >
+                      Pause
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={resumeGame}
+                      disabled={gameFinished}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      Resume
+                    </Button>
+                  )}
+
+                  <Button 
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    size="sm"
+                    onClick={shuffleNumbers}
+                    disabled={isShuffling}
+                  >
+                    {isShuffling ? "Shuffling..." : "Shuffle"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Center and Right - BINGO Board */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">Called Numbers Board</CardTitle>
+                <p className="text-center text-sm text-gray-600">
+                  {gameFinished ? (
+                    <span className="text-green-600 font-semibold">Game Completed!</span>
+                  ) : (
+                    <>Numbers Called: {calledNumbers?.length || 0}</>
+                  )}
+                </p>
+              </CardHeader>
+              <CardContent className="px-6">
+                {/* BINGO Letters Header */}
+                <div className="grid grid-cols-5 gap-3 mb-4">
+                  <div className="text-center font-bold text-white bg-orange-500 py-3 rounded text-2xl">B</div>
+                  <div className="text-center font-bold text-white bg-green-600 py-3 rounded text-2xl">I</div>
+                  <div className="text-center font-bold text-white bg-blue-600 py-3 rounded text-2xl">N</div>
+                  <div className="text-center font-bold text-white bg-red-500 py-3 rounded text-2xl">G</div>
+                  <div className="text-center font-bold text-white bg-purple-500 py-3 rounded text-2xl">O</div>
+                </div>
+                
+                {/* Numbers Grid - Horizontal Layout */}
+                <div className="grid grid-cols-5 gap-3">
+                  {/* B Column (1-15) */}
+                  <div className="space-y-2">
+                    {Array.from({ length: 15 }, (_, i) => {
+                      const num = i + 1;
+                      const isCalled = calledNumbers.includes(num);
+                      return (
+                        <div
+                          key={num}
+                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
+                            isCalled
+                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
+                              : isShuffling 
+                                ? 'bg-gray-300 animate-pulse'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {num}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* I Column (16-30) */}
+                  <div className="space-y-2">
+                    {Array.from({ length: 15 }, (_, i) => {
+                      const num = i + 16;
+                      const isCalled = calledNumbers.includes(num);
+                      return (
+                        <div
+                          key={num}
+                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
+                            isCalled
+                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
+                              : isShuffling 
+                                ? 'bg-gray-300 animate-pulse'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {num}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* N Column (31-45) */}
+                  <div className="space-y-2">
+                    {Array.from({ length: 15 }, (_, i) => {
+                      const num = i + 31;
+                      const isCalled = calledNumbers.includes(num);
+                      return (
+                        <div
+                          key={num}
+                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
+                            isCalled
+                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
+                              : isShuffling 
+                                ? 'bg-gray-300 animate-pulse'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {num}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* G Column (46-60) */}
+                  <div className="space-y-2">
+                    {Array.from({ length: 15 }, (_, i) => {
+                      const num = i + 46;
+                      const isCalled = calledNumbers.includes(num);
+                      return (
+                        <div
+                          key={num}
+                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
+                            isCalled
+                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
+                              : isShuffling 
+                                ? 'bg-gray-300 animate-pulse'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {num}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* O Column (61-75) */}
+                  <div className="space-y-2">
+                    {Array.from({ length: 15 }, (_, i) => {
+                      const num = i + 61;
+                      const isCalled = calledNumbers.includes(num);
+                      return (
+                        <div
+                          key={num}
+                          className={`p-2 text-center rounded font-medium transition-all duration-300 ${
+                            isCalled
+                              ? 'bg-green-600 text-white font-bold shadow-lg transform scale-105'
+                              : isShuffling 
+                                ? 'bg-gray-300 animate-pulse'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {num}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Action Buttons at Bottom */}
+                <div className="flex justify-center space-x-4 mt-6">
+                  <Dialog open={showWinnerChecker} onOpenChange={setShowWinnerChecker}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline"
+                        className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                        disabled={!gameActive}
+                      >
+                        Check Winner
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Check Winner Cartela</DialogTitle>
+                        <DialogDescription>
+                          Enter the cartela number to check if it's a valid winner.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Input
+                          type="number"
+                          placeholder="Enter cartela number (1-100)"
+                          value={winnerCartelaNumber}
+                          onChange={(e) => setWinnerCartelaNumber(e.target.value)}
+                          min="1"
+                          max="100"
+                        />
+                        <div className="flex justify-between">
+                          <Button variant="outline" onClick={() => setShowWinnerChecker(false)}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={checkWinnerCartela}
+                            disabled={checkWinnerMutation.isPending}
+                            className="bg-purple-600 hover:bg-purple-700"
+                          >
+                            {checkWinnerMutation.isPending ? "Checking..." : "Check Winner"}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Winner Result Modal */}
+        <Dialog open={showWinnerModal} onOpenChange={setShowWinnerModal}>
+          <DialogContent className="max-w-md">
+            <div className="text-center py-6">
+              {winnerResult?.isWinner ? (
+                <div>
+                  <div className="text-6xl text-green-600 mb-4">✅</div>
+                  <h2 className="text-2xl font-bold text-green-600 mb-2">Congratulations!</h2>
+                  <p className="text-lg">Cartela #{winnerResult.cartelaNumber} Has Won!</p>
+                  <p className="text-sm text-gray-600 mt-2">This cartela is a valid winner</p>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-6xl text-red-600 mb-4">❌</div>
+                  <h2 className="text-2xl font-bold text-red-600 mb-2">Not a Winner</h2>
+                  <p className="text-lg">Cartela #{winnerResult?.cartelaNumber} Did Not Win</p>
+                  <p className="text-sm text-gray-600 mt-2">Game will resume automatically in 3 seconds</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+}
