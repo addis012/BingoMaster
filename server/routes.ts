@@ -704,11 +704,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameEntryFees = entryFeeTransactions.filter(t => t.gameId === gameId && t.type === 'entry_fee');
       let totalCollectedBirr = gameEntryFees.reduce((sum, t) => sum + parseFloat(t.amount), 0);
       
-      // If no entry fee transactions found, calculate from players and entry fee
+      // If no entry fee transactions found, calculate from total cartelas across all players
       if (totalCollectedBirr === 0 && players.length > 0) {
         const entryFee = parseFloat(game.entryFee || "0");
-        totalCollectedBirr = players.length * entryFee;
-        console.log(`📊 Calculated total from players: ${players.length} × ${entryFee} = ${totalCollectedBirr} ETB`);
+        const totalCartelas = players.reduce((sum, p) => sum + (p.cartelaNumbers?.length || 0), 0);
+        totalCollectedBirr = totalCartelas * entryFee;
+        console.log(`📊 Calculated total from cartelas: ${totalCartelas} cartelas × ${entryFee} = ${totalCollectedBirr} ETB`);
+        console.log(`📊 Player breakdown: ${players.length} players with cartela counts:`, players.map(p => `${p.playerName}: ${p.cartelaNumbers?.length || 0} cartelas`));
       }
       
       // Log all player cartelas for comprehensive record
@@ -716,7 +718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         playerId: p.id,
         playerName: p.playerName,
         cartelaNumbers: p.cartelaNumbers || [],
-        amount: parseFloat(game.entryFee || "0")
+        amount: (p.cartelaNumbers?.length || 0) * parseFloat(game.entryFee || "0")
       }));
       
       console.log(`💰 FINANCIAL CALCULATION:`, {
