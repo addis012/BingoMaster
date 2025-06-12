@@ -1,0 +1,44 @@
+inpage.js:2283 Uncaught (in promise) TypeError: Cannot read properties of null (reading 'type')
+    at mr.<anonymous> (inpage.js:2283:37280)
+    at Generator.next (<anonymous>)
+    at ke (inpage.js:2283:36168)
+client:536 WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=mSuFXih5-QeU' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=mSuFXih5-QeU' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+chunk-RPCDYKBN.js?v=b67f63d3:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/auth/me:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+use-auth.ts:88 Auth state updated: Object
+login-page.tsx:19 Attempting login with: Object
+login-page.tsx:22 Login response: Object
+fixed-bingo-dashboard.tsx:133 ✅ BACKEND GAME CREATED: Game ID 124 for 10 cartelas
+fixed-bingo-dashboard.tsx:203 🔊 Calling: O-69
+fixed-bingo-dashboard.tsx:203 🔊 Calling: O-62
+fixed-bingo-dashboard.tsx:203 🔊 Calling: B-11
+use-auth.ts:88 Auth state updated: Object
+fixed-bingo-dashboard.tsx:203 🔊 Calling: G-53
+fixed-bingo-dashboard.tsx:203 🔊 Calling: N-31
+fixed-bingo-dashboard.tsx:203 🔊 Calling: I-21
+fixed-bingo-dashboard.tsx:203 🔊 Calling: I-26
+fixed-bingo-dashboard.tsx:203 🔊 Calling: I-22
+fixed-bingo-dashboard.tsx:203 🔊 Calling: N-44
+fixed-bingo-dashboard.tsx:203 🔊 Calling: N-40
+fixed-bingo-dashboard.tsx:203 🔊 Calling: O-75
+fixed-bingo-dashboard.tsx:203 🔊 Calling: I-27
+fixed-bingo-dashboard.tsx:203 🔊 Calling: N-32
+fixed-bingo-dashboard.tsx:203 🔊 Calling: N-37
+fixed-bingo-dashboard.tsx:203 🔊 Calling: G-46
+fixed-bingo-dashboard.tsx:203 🔊 Calling: O-73
+fixed-bingo-dashboard.tsx:203 🔊 Calling: I-17
+fixed-bingo-dashboard.tsx:203 🔊 Calling: O-70
+fixed-bingo-dashboard.tsx:203 🔊 Calling: I-24
+fixed-bingo-dashboard.tsx:258 🎯 DECLARING WINNER: Cartela #11 in Game 124
+fixed-bingo-dashboard.tsx:275 ✅ WINNER SUCCESSFULLY LOGGED TO GAME HISTORY: Object
+@radix-ui_react-dialog.js?v=b67f63d3:335 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:335
+use-auth.ts:88 Auth state updated: Object
