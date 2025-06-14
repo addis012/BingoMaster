@@ -25,17 +25,27 @@ const gameClients = new Map<number, Set<WebSocket>>();
 function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { isWinner: boolean; pattern?: string } {
   const calledSet = new Set(calledNumbers);
   
+  console.log('🔍 DETAILED BINGO CHECK:', {
+    pattern: cartelaPattern,
+    called: calledNumbers,
+    calledSet: Array.from(calledSet)
+  });
+  
   // Check rows
   for (let row = 0; row < 5; row++) {
     let rowComplete = true;
+    let rowDetails = [];
     for (let col = 0; col < 5; col++) {
       const num = cartelaPattern[row][col];
+      const isMarked = (num === 0) || calledSet.has(num);
+      rowDetails.push({ num, isMarked, isFree: num === 0 });
       if (num !== 0 && !calledSet.has(num)) {
         rowComplete = false;
-        break;
       }
     }
+    console.log(`Row ${row + 1}:`, { rowDetails, rowComplete });
     if (rowComplete) {
+      console.log(`🎯 WINNER FOUND: Horizontal Row ${row + 1}`);
       return { isWinner: true, pattern: `Horizontal Row ${row + 1}` };
     }
   }
@@ -43,45 +53,58 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { i
   // Check columns
   for (let col = 0; col < 5; col++) {
     let colComplete = true;
+    let colDetails = [];
     for (let row = 0; row < 5; row++) {
       const num = cartelaPattern[row][col];
+      const isMarked = (num === 0) || calledSet.has(num);
+      colDetails.push({ num, isMarked, isFree: num === 0 });
       if (num !== 0 && !calledSet.has(num)) {
         colComplete = false;
-        break;
       }
     }
+    console.log(`Column ${col + 1}:`, { colDetails, colComplete });
     if (colComplete) {
       const columnNames = ['B', 'I', 'N', 'G', 'O'];
+      console.log(`🎯 WINNER FOUND: Vertical Column ${columnNames[col]}`);
       return { isWinner: true, pattern: `Vertical Column ${columnNames[col]}` };
     }
   }
   
   // Check diagonal 1 (top-left to bottom-right)
   let diag1Complete = true;
+  let diag1Details = [];
   for (let i = 0; i < 5; i++) {
     const num = cartelaPattern[i][i];
+    const isMarked = (num === 0) || calledSet.has(num);
+    diag1Details.push({ num, isMarked, isFree: num === 0 });
     if (num !== 0 && !calledSet.has(num)) {
       diag1Complete = false;
-      break;
     }
   }
+  console.log('Diagonal 1:', { diag1Details, diag1Complete });
   if (diag1Complete) {
+    console.log('🎯 WINNER FOUND: Diagonal (Top-Left to Bottom-Right)');
     return { isWinner: true, pattern: 'Diagonal (Top-Left to Bottom-Right)' };
   }
   
   // Check diagonal 2 (top-right to bottom-left)
   let diag2Complete = true;
+  let diag2Details = [];
   for (let i = 0; i < 5; i++) {
     const num = cartelaPattern[i][4 - i];
+    const isMarked = (num === 0) || calledSet.has(num);
+    diag2Details.push({ num, isMarked, isFree: num === 0 });
     if (num !== 0 && !calledSet.has(num)) {
       diag2Complete = false;
-      break;
     }
   }
+  console.log('Diagonal 2:', { diag2Details, diag2Complete });
   if (diag2Complete) {
+    console.log('🎯 WINNER FOUND: Diagonal (Top-Right to Bottom-Left)');
     return { isWinner: true, pattern: 'Diagonal (Top-Right to Bottom-Left)' };
   }
   
+  console.log('❌ NO WINNER FOUND');
   return { isWinner: false };
 }
 
@@ -2966,6 +2989,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get the fixed pattern for this cartela
       const cartelaPattern = getFixedPattern(cartelaNumber);
+      
+      console.log('🔍 DEBUGGING CARTELA PATTERN:', {
+        cartelaNumber,
+        calledNumbers,
+        calledCount: calledNumbers.length,
+        cartelaPattern,
+        centerValue: cartelaPattern[2][2],
+        firstRowValues: cartelaPattern[0],
+        centerColumn: cartelaPattern.map(row => row[2])
+      });
+      
       const winResult = checkBingoWin(cartelaPattern, calledNumbers);
 
       console.log('Winner check result:', { cartelaNumber, winResult });
