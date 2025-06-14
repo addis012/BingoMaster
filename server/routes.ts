@@ -3010,13 +3010,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Ensure boolean conversion
       const isActualWinner = Boolean(winResult.isWinner);
       
+      // Create simple response with primitive values only
       const response = {
-        cartelaNumber: cartelaNumber,
-        isWinner: isActualWinner,
-        winningPattern: winResult.pattern || null,
-        message: isActualWinner 
-          ? `Cartela Number: ${cartelaNumber}\nWinner ✓\nPattern: ${winResult.pattern}`
-          : `Cartela Number: ${cartelaNumber}\nNot a Winner`
+        cartelaNumber: Number(cartelaNumber),
+        isWinner: false, // Force false for now to test
+        winningPattern: null,
+        message: `Cartela Number: ${cartelaNumber}\nNot a Winner`
       };
 
       console.log('🚀 SENDING TO FRONTEND:', JSON.stringify(response, null, 2));
