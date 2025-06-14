@@ -3045,7 +3045,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('💰 FINANCIAL CALCULATION:', {
         totalCollected,
-        playerCount: actualPlayerCount,
+        totalCartelas,
         entryFeePerPlayer: actualEntryFee.toString(),
         allPlayerDetails: existingPlayers.map(p => ({
           playerId: p.id,
@@ -3057,7 +3057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('🧮 PROFIT CALCULATIONS:', {
         totalCollected,
-        profitMargin: (profitMargin * 100) + '%',
+        profitMargin: (shopProfitMargin * 100) + '%',
         adminProfit,
         prizeAmount,
         superAdminCommissionRate: (superAdminCommissionRate * 100) + '%',
@@ -3078,7 +3078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prizeAmount: prizeAmount.toFixed(2),
         adminProfit: adminProfit.toFixed(2),
         superAdminCommission: superAdminCommission.toFixed(2),
-        playerCount: actualPlayerCount,
+        playerCount: totalCartelas,
         winnerName: `Player ${winnerCartelaNumber}`,
         winningCartela: `#${winnerCartelaNumber}`,
         completedAt: new Date()
