@@ -2972,62 +2972,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Check winner
   app.post("/api/games/:gameId/check-winner", async (req: Request, res) => {
+    console.log('🚨 ENDPOINT STARTED');
     try {
       const userId = req.session?.userId;
+      console.log('🚨 USER CHECK:', userId);
       if (!userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
       const gameId = parseInt(req.params.gameId);
       const { cartelaNumber, calledNumbers } = req.body;
-
-      console.log('Check winner request:', { gameId, cartelaNumber, calledNumbers });
+      console.log('🚨 REQUEST DATA:', { gameId, cartelaNumber, calledNumbers });
 
       if (!cartelaNumber || !Array.isArray(calledNumbers)) {
         return res.status(400).json({ message: "Cartela number and called numbers are required" });
       }
 
-      // Get the fixed pattern for this cartela
-      const cartelaPattern = getFixedPattern(cartelaNumber);
+      console.log('🚨 BEFORE PATTERN FETCH');
       
-      console.log('🔍 DEBUGGING CARTELA PATTERN:', {
-        cartelaNumber,
-        calledNumbers,
-        calledCount: calledNumbers.length,
-        cartelaPattern,
-        centerValue: cartelaPattern[2][2],
-        firstRowValues: cartelaPattern[0],
-        centerColumn: cartelaPattern.map(row => row[2])
-      });
-      
-      const winResult = checkBingoWin(cartelaPattern, calledNumbers);
-
-      console.log('Winner check result:', { cartelaNumber, winResult });
-      console.log('🔧 winResult type:', typeof winResult);
-      console.log('🔧 winResult.isWinner:', winResult.isWinner);
-      console.log('🔧 winResult.isWinner type:', typeof winResult.isWinner);
-
-      // Ensure boolean conversion
-      const isActualWinner = Boolean(winResult.isWinner);
-      
-      // Create simple response with primitive values only
+      // Create hardcoded simple response to test
       const response = {
-        cartelaNumber: Number(cartelaNumber),
-        isWinner: false, // Force false for now to test
+        cartelaNumber: 1,
+        isWinner: false,
         winningPattern: null,
-        message: `Cartela Number: ${cartelaNumber}\nNot a Winner`
+        message: "Cartela Number: 1\nNot a Winner"
       };
 
-      console.log('🚀 SENDING TO FRONTEND:', JSON.stringify(response, null, 2));
-      console.log('🔍 RESPONSE BOOLEAN CHECK:', {
-        isWinner: response.isWinner,
-        type: typeof response.isWinner,
-        strictEqual: response.isWinner === false,
-        strictTrue: response.isWinner === true
-      });
+      console.log('🚨 HARDCODED RESPONSE:', response);
+      console.log('🚨 SENDING RESPONSE');
       res.json(response);
+      console.log('🚨 RESPONSE SENT');
     } catch (error) {
-      console.error('Check winner error:', error);
+      console.error('🚨 ENDPOINT ERROR:', error);
       res.status(500).json({ message: "Failed to check winner" });
     }
   });
