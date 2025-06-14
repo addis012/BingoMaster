@@ -2735,12 +2735,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get the cartela pattern for checking
       const cartelaPattern = getFixedPattern(cartelaNumber);
-      const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
+      const winResult = checkBingoWin(cartelaPattern, calledNumbers);
       
       res.json({ 
         cartelaNumber,
-        isWinner,
-        pattern: cartelaPattern
+        isWinner: winResult.isWinner,
+        winningPattern: winResult.pattern,
+        message: winResult.isWinner 
+          ? `Cartela Number: ${cartelaNumber}\nWinner ✓\nPattern: ${winResult.pattern}`
+          : `Cartela Number: ${cartelaNumber}\nNot a Winner`
       });
     } catch (error) {
       console.error("Check winner error:", error);
@@ -2970,43 +2973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check winner
-  app.post("/api/games/:gameId/check-winner", async (req: Request, res) => {
-    console.log('🚨 ENDPOINT STARTED');
-    try {
-      const userId = req.session?.userId;
-      console.log('🚨 USER CHECK:', userId);
-      if (!userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
 
-      const gameId = parseInt(req.params.gameId);
-      const { cartelaNumber, calledNumbers } = req.body;
-      console.log('🚨 REQUEST DATA:', { gameId, cartelaNumber, calledNumbers });
-
-      if (!cartelaNumber || !Array.isArray(calledNumbers)) {
-        return res.status(400).json({ message: "Cartela number and called numbers are required" });
-      }
-
-      console.log('🚨 BEFORE PATTERN FETCH');
-      
-      // Create hardcoded simple response to test
-      const response = {
-        cartelaNumber: 1,
-        isWinner: false,
-        winningPattern: null,
-        message: "Cartela Number: 1\nNot a Winner"
-      };
-
-      console.log('🚨 HARDCODED RESPONSE:', response);
-      console.log('🚨 SENDING RESPONSE');
-      res.json(response);
-      console.log('🚨 RESPONSE SENT');
-    } catch (error) {
-      console.error('🚨 ENDPOINT ERROR:', error);
-      res.status(500).json({ message: "Failed to check winner" });
-    }
-  });
 
   // Declare winner with complete financial data
   app.post("/api/games/:gameId/declare-winner", async (req: Request, res) => {
