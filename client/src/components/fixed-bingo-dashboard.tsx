@@ -318,10 +318,14 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
       }
       
       const result = await response.json();
-      console.log('🔍 FRONTEND RECEIVED:', {
-        result,
+      console.log('🔍 FRONTEND RECEIVED:', result);
+      console.log('🔍 DETAILED ANALYSIS:', {
+        fullResult: JSON.stringify(result, null, 2),
         isWinner: result.isWinner,
         isWinnerType: typeof result.isWinner,
+        isWinnerValue: String(result.isWinner),
+        isWinnerStrict: result.isWinner === false,
+        isWinnerTruthy: Boolean(result.isWinner),
         message: result.message,
         winningPattern: result.winningPattern
       });
