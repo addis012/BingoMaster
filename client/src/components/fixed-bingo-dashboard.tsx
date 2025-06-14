@@ -318,7 +318,13 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
       }
       
       const result = await response.json();
-      console.log('Winner verification result:', result);
+      console.log('🔍 FRONTEND RECEIVED:', {
+        result,
+        isWinner: result.isWinner,
+        isWinnerType: typeof result.isWinner,
+        message: result.message,
+        winningPattern: result.winningPattern
+      });
       
       // Show winner verification popup with proper message
       setWinnerResult({ 

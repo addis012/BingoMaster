@@ -3004,14 +3004,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Winner check result:', { cartelaNumber, winResult });
 
-      res.json({
+      const response = {
         cartelaNumber,
         isWinner: winResult.isWinner,
         winningPattern: winResult.pattern,
         message: winResult.isWinner 
           ? `Cartela Number: ${cartelaNumber}\nWinner ✓\nPattern: ${winResult.pattern}`
           : `Cartela Number: ${cartelaNumber}\nNot a Winner`
-      });
+      };
+
+      console.log('🚀 SENDING TO FRONTEND:', response);
+      res.json(response);
     } catch (error) {
       console.error('Check winner error:', error);
       res.status(500).json({ message: "Failed to check winner" });
