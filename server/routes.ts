@@ -3003,6 +3003,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const winResult = checkBingoWin(cartelaPattern, calledNumbers);
 
       console.log('Winner check result:', { cartelaNumber, winResult });
+      console.log('🔧 winResult type:', typeof winResult);
+      console.log('🔧 winResult.isWinner:', winResult.isWinner);
+      console.log('🔧 winResult.isWinner type:', typeof winResult.isWinner);
 
       // Ensure boolean conversion
       const isActualWinner = Boolean(winResult.isWinner);
