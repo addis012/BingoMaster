@@ -47,6 +47,23 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const [isShuffling, setIsShuffling] = useState(false);
   const autoCallInterval = useRef<NodeJS.Timeout | null>(null);
   const gameStateRef = useRef({ calledNumbers: [], finished: false });
+  
+  // Audio functionality
+  const playAudio = (audioType: 'start' | 'winner') => {
+    try {
+      const audioUrl = audioType === 'start' 
+        ? '/attached_assets/start voice_1749898419925.MP3'
+        : '/attached_assets/winner voice_1749898419926.MP3';
+      
+      const audio = new Audio(audioUrl);
+      audio.volume = 0.8;
+      audio.play().catch(error => {
+        console.log('Audio play failed:', error);
+      });
+    } catch (error) {
+      console.log('Audio creation failed:', error);
+    }
+  };
 
   // Backend mutations
   const createGameMutation = useMutation({
@@ -188,6 +205,9 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
       setLastCalledNumber(null);
       gameStateRef.current = { calledNumbers: [], finished: false };
     }
+    
+    // Play start voice audio
+    playAudio('start');
     
     // Start auto-calling
     startAutoCalling();
@@ -343,6 +363,9 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
       
       // If it's a winner, declare and save to game history
       if (result.isWinner) {
+        // Play winner voice audio
+        playAudio('winner');
+        
         try {
           const declareResponse = await fetch(`/api/games/${activeGameId}/declare-winner`, {
             method: "POST",
