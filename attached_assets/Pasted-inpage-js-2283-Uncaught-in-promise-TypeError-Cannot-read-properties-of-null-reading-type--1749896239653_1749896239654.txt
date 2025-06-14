@@ -1,0 +1,37 @@
+inpage.js:2283 Uncaught (in promise) TypeError: Cannot read properties of null (reading 'type')
+    at mr.<anonymous> (inpage.js:2283:37280)
+    at Generator.next (<anonymous>)
+    at ke (inpage.js:2283:36168)
+ WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=a1k8-FD0cyfa' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=a1k8-FD0cyfa' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+chunk-RPCDYKBN.js?v=b67f63d3:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+login-page.tsx:19 Attempting login with: Object
+login-page.tsx:22 Login response: Object
+fixed-bingo-dashboard.tsx:145 ✅ BACKEND GAME CREATED: Game ID 164 for 4 cartelas
+fixed-bingo-dashboard.tsx:149 📝 Creating player records for 4 fixed cartelas
+fixed-bingo-dashboard.tsx:160 📝 Player data being sent: Object
+fixed-bingo-dashboard.tsx:171 ✅ Created player records for fixed cartelas: Array(4)
+fixed-bingo-dashboard.tsx:172 ✅ Financial tracking will now show accurate cartela counts
+fixed-bingo-dashboard.tsx:246 🔊 Calling: G-48
+fixed-bingo-dashboard.tsx:246 🔊 Calling: I-29
+use-auth.ts:91 Auth state updated: Object
+fixed-bingo-dashboard.tsx:246 🔊 Calling: G-52
+fixed-bingo-dashboard.tsx:321 🔍 FRONTEND RECEIVED: Object
+fixed-bingo-dashboard.tsx:322 🔍 DETAILED ANALYSIS: Object
+@radix-ui_react-dialog.js?v=b67f63d3:321 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:321
+@radix-ui_react-dialog.js?v=b67f63d3:335 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:335
+/api/games/164/declare-winner:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)

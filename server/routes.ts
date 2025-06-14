@@ -2988,7 +2988,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get the fixed pattern for this cartela
-      const cartelaPattern = getFixedPattern(cartelaNumber);
+      const cartelaPattern = getFixedCartelaPattern(cartelaNumber);
       
       console.log('🔍 DEBUGGING CARTELA PATTERN:', {
         cartelaNumber,
