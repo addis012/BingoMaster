@@ -3013,7 +3013,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           : `Cartela Number: ${cartelaNumber}\nNot a Winner`
       };
 
-      console.log('🚀 SENDING TO FRONTEND:', response);
+      console.log('🚀 SENDING TO FRONTEND:', JSON.stringify(response, null, 2));
+      console.log('🔍 RESPONSE BOOLEAN CHECK:', {
+        isWinner: response.isWinner,
+        type: typeof response.isWinner,
+        strictEqual: response.isWinner === false,
+        strictTrue: response.isWinner === true
+      });
       res.json(response);
     } catch (error) {
       console.error('Check winner error:', error);
