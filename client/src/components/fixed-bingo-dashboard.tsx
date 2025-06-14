@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { FIXED_CARTELAS, getCartelaNumbers, formatCartelaDisplay } from "@/data/fixed-cartelas";
+import { FIXED_CARTELAS, getCartelaNumbers, formatCartelaDisplay, getFixedPattern } from "@/data/fixed-cartelas";
 
 interface FixedBingoDashboardProps {
   onLogout: () => void;

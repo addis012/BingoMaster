@@ -1,0 +1,132 @@
+inpage.js:2283 Uncaught (in promise) 
+ WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=oIlbQF8rChlx' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) 
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Attempting login with: Object
+ Login response: Object
+ ✅ BACKEND GAME CREATED: Game ID 170 for 9 cartelas
+ 📝 Creating player records for 9 fixed cartelas
+ 📝 Player data being sent: Object
+ ✅ Created player records for fixed cartelas: Array(9)
+ ✅ Financial tracking will now show accurate cartela counts
+ 🔊 Calling: N-39
+ 🔊 Calling: G-54
+ 🔊 Calling: O-67
+ 🔊 Calling: G-46
+ Auth state updated: Object
+ 🔊 Calling: I-27
+ 🔊 Calling: I-24
+ 🔊 Calling: O-72
+ 🔊 Calling: B-7
+ 🔊 Calling: O-68
+ 🔊 Calling: G-49
+ 🔊 Calling: I-20
+fixed-bingo-dashboard.tsx:246 🔊 Calling: O-61
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-11
+fixed-bingo-dashboard.tsx:246 🔊 Calling: N-36
+fixed-bingo-dashboard.tsx:246 🔊 Calling: N-33
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-5
+fixed-bingo-dashboard.tsx:246 🔊 Calling: N-44
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-1
+fixed-bingo-dashboard.tsx:246 🔊 Calling: N-35
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-2
+fixed-bingo-dashboard.tsx:246 🔊 Calling: I-22
+fixed-bingo-dashboard.tsx:246 🔊 Calling: G-47
+fixed-bingo-dashboard.tsx:246 🔊 Calling: N-34
+fixed-bingo-dashboard.tsx:246 🔊 Calling: O-62
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-9
+fixed-bingo-dashboard.tsx:246 🔊 Calling: G-48
+fixed-bingo-dashboard.tsx:246 🔊 Calling: N-43
+fixed-bingo-dashboard.tsx:321 🔍 FRONTEND RECEIVED: Object
+fixed-bingo-dashboard.tsx:322 🔍 DETAILED ANALYSIS: Object
+@radix-ui_react-dialog.js?v=b67f63d3:321 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:321
+@radix-ui_react-dialog.js?v=b67f63d3:335 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:335
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-8
+fixed-bingo-dashboard.tsx:321 🔍 FRONTEND RECEIVED: Object
+fixed-bingo-dashboard.tsx:322 🔍 DETAILED ANALYSIS: Object
+@radix-ui_react-dialog.js?v=b67f63d3:321 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:321
+@radix-ui_react-dialog.js?v=b67f63d3:335 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:335
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-10
+fixed-bingo-dashboard.tsx:321 🔍 FRONTEND RECEIVED: Object
+fixed-bingo-dashboard.tsx:322 🔍 DETAILED ANALYSIS: Object
+@radix-ui_react-dialog.js?v=b67f63d3:321 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:321
+@radix-ui_react-dialog.js?v=b67f63d3:335 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=b67f63d3:335
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-6
+fixed-bingo-dashboard.tsx:246 🔊 Calling: O-65
+fixed-bingo-dashboard.tsx:246 🔊 Calling: G-53
+fixed-bingo-dashboard.tsx:246 🔊 Calling: G-51
+fixed-bingo-dashboard.tsx:246 🔊 Calling: B-4
+fixed-bingo-dashboard.tsx:246 🔊 Calling: N-38
+fixed-bingo-dashboard.tsx:321 🔍 FRONTEND RECEIVED: Object
+fixed-bingo-dashboard.tsx:322 🔍 DETAILED ANALYSIS: Object
+fixed-bingo-dashboard.tsx:856 Uncaught ReferenceError: getFixedPattern is not defined
+    at fixed-bingo-dashboard.tsx:856:48
+    at FixedBingoDashboard (fixed-bingo-dashboard.tsx:878:23)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=b67f63d3:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js?v=b67f63d3:14582:28)
+    at beginWork (chunk-RPCDYKBN.js?v=b67f63d3:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=b67f63d3:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=b67f63d3:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=b67f63d3:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=b67f63d3:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=b67f63d3:19198:20)
+fixed-bingo-dashboard.tsx:856 Uncaught ReferenceError: getFixedPattern is not defined
+    at fixed-bingo-dashboard.tsx:856:48
+    at FixedBingoDashboard (fixed-bingo-dashboard.tsx:878:23)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=b67f63d3:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js?v=b67f63d3:14582:28)
+    at beginWork (chunk-RPCDYKBN.js?v=b67f63d3:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=b67f63d3:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=b67f63d3:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=b67f63d3:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=b67f63d3:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=b67f63d3:19198:20)
+chunk-RPCDYKBN.js?v=b67f63d3:14032 The above error occurred in the <FixedBingoDashboard> component:
+
+    at FixedBingoDashboard (https://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/src/components/fixed-bingo-dashboard.tsx:30:47)
+    at EmployeeDashboard (https://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/src/pages/employee-dashboard.tsx:20:45)
+    at Route (https://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b67f63d3:323:16)
+    at Router (https://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b67f63d3:291:17)
+    at AppRouter (https://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/src/App.tsx?v=ra0zFmEQNetD5XYeBJNZW:29:20)
+    at AuthProvider (https://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/src/hooks/use-auth.ts:6:23)
+    at QueryClientProvider (https://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=b67f63d3:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-RPCDYKBN.js?v=b67f63d3:14032
+chunk-RPCDYKBN.js?v=b67f63d3:19413 Uncaught ReferenceError: getFixedPattern is not defined
+    at fixed-bingo-dashboard.tsx:856:48
+    at FixedBingoDashboard (fixed-bingo-dashboard.tsx:878:23)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=b67f63d3:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js?v=b67f63d3:14582:28)
+    at beginWork (chunk-RPCDYKBN.js?v=b67f63d3:15924:22)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=b67f63d3:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=b67f63d3:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js?v=b67f63d3:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js?v=b67f63d3:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js?v=b67f63d3:18736:28)
+/api/games/170/declare-winner:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)

@@ -639,3 +639,23 @@ ${cartela.B[3].toString().padStart(2)} | ${cartela.I[3].toString().padStart(2)} 
 ${cartela.B[4].toString().padStart(2)} | ${cartela.I[4].toString().padStart(2)} | ${cartela.N[4].toString().padStart(2)} | ${cartela.G[4].toString().padStart(2)} | ${cartela.O[4].toString().padStart(2)}
   `.trim();
 }
+
+// Helper function to get cartela pattern as 5x5 grid
+export function getFixedPattern(cartelaNumber: number): number[][] {
+  const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNumber);
+  if (!cartela) {
+    return [];
+  }
+  
+  const pattern: number[][] = [];
+  for (let row = 0; row < 5; row++) {
+    pattern[row] = [
+      Number(cartela.B[row]),
+      Number(cartela.I[row]), 
+      cartela.N[row] === "FREE" ? 0 : Number(cartela.N[row]),
+      Number(cartela.G[row]),
+      Number(cartela.O[row])
+    ];
+  }
+  return pattern;
+}
