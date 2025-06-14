@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+import { FIXED_CARTELAS, getCartelaNumbers, formatCartelaDisplay } from "@/data/fixed-cartelas";
 
 interface FixedBingoDashboardProps {
   onLogout: () => void;
@@ -32,6 +33,8 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
   const [showCartelaSelector, setShowCartelaSelector] = useState(false);
+  const [previewCartela, setPreviewCartela] = useState<any>(null);
+  const [showPreview, setShowPreview] = useState(false);
   
   // Winner checking
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
@@ -105,6 +108,14 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     setSelectedCartelas(newSelected);
   };
 
+  const previewCartelaByNumber = (cartelaNumber: number) => {
+    const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNumber);
+    if (cartela) {
+      setPreviewCartela(cartela);
+      setShowPreview(true);
+    }
+  };
+
   const bookSelectedCartelas = () => {
     if (selectedCartelas.size === 0) return;
     
@@ -133,25 +144,38 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         
         console.log(`✅ BACKEND GAME CREATED: Game ID ${game.id} for ${bookedCartelas.size} cartelas`);
         
-        // CRITICAL: Create player records for all booked cartelas
+        // CRITICAL: Create player records for all booked cartelas using fixed cartela numbers
         if (bookedCartelas.size > 0) {
-          console.log('📝 Creating player records for', bookedCartelas.size, 'cartelas');
+          console.log('📝 Creating player records for', bookedCartelas.size, 'fixed cartelas');
+          
+          const cartelaNumbers: number[] = [];
+          Array.from(bookedCartelas).forEach(cartelaNum => {
+            const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
+            if (cartela) {
+              const numbers = getCartelaNumbers(cartela);
+              cartelaNumbers.push(...numbers);
+            }
+          });
           
           const playerData = {
             playerName: "Player",
-            cartelaNumbers: Array.from(bookedCartelas),
+            cartelaNumbers: cartelaNumbers,
             entryFee: gameAmount
           };
           
-          console.log('📝 Player data being sent:', playerData);
+          console.log('📝 Player data being sent:', {
+            ...playerData,
+            selectedCartelas: Array.from(bookedCartelas),
+            totalNumbers: cartelaNumbers.length
+          });
           
           try {
             const result = await addPlayerMutation.mutateAsync({
               gameId: game.id,
               playerData: playerData
             });
-            console.log('✅ Created', result?.length || 0, 'player records in backend');
-            console.log('✅ Financial tracking will now show accurate player counts');
+            console.log('✅ Created player records for fixed cartelas:', Array.from(bookedCartelas));
+            console.log('✅ Financial tracking will now show accurate cartela counts');
           } catch (playerError) {
             console.error('❌ Failed to create player records:', playerError);
           }
