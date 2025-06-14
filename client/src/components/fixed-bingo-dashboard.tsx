@@ -808,42 +808,44 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         {/* Winner Result Modal */}
         <Dialog open={showWinnerResult} onOpenChange={setShowWinnerResult}>
           <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-center text-xl">
-                {winnerResult.isWinner ? "🎉 WINNER!" : "❌ Not a Winner"}
-              </DialogTitle>
-            </DialogHeader>
             <div className="text-center py-8">
               {winnerResult.isWinner ? (
                 <div className="space-y-4">
-                  <div className="w-24 h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto">
-                    <span className="text-white text-4xl font-bold">✓</span>
+                  <div className="text-6xl mb-4">🎉</div>
+                  <div className="text-xl font-bold text-green-600">
+                    Cartela Number: {winnerResult.cartela}
                   </div>
-                  <p className="text-lg font-semibold text-green-600">
-                    Cartela #{winnerResult.cartela} is a WINNER!
-                  </p>
-                  <p className="text-gray-600">
-                    Congratulations! Prize: {Math.floor(bookedCartelas.size * parseInt(gameAmount) * 0.7)} Birr
-                  </p>
+                  <div className="text-2xl font-bold text-green-600 flex items-center justify-center gap-2">
+                    Winner <span className="text-green-600">✓</span>
+                  </div>
+                  {winnerResult.pattern && (
+                    <div className="text-lg text-gray-700">
+                      Pattern: {winnerResult.pattern}
+                    </div>
+                  )}
+                  <div className="text-gray-600 mt-4">
+                    Prize: {Math.floor(bookedCartelas.size * parseInt(gameAmount) * 0.7)} Birr
+                  </div>
                   <Button 
                     onClick={() => setShowWinnerResult(false)}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-green-600 hover:bg-green-700 text-white mt-4"
                   >
-                    Claim Prize
+                    Continue
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="w-24 h-24 bg-red-500 rounded-full flex items-center justify-center mx-auto">
-                    <span className="text-white text-4xl font-bold">✕</span>
+                  <div className="text-6xl mb-4">❌</div>
+                  <div className="text-xl font-bold text-red-600">
+                    Cartela Number: {winnerResult.cartela}
                   </div>
-                  <p className="text-lg font-semibold text-red-500">
-                    Cartela #{winnerResult.cartela} is not a winner yet
-                  </p>
-                  <p className="text-gray-600">
+                  <div className="text-2xl font-bold text-red-600">
+                    Not a Winner
+                  </div>
+                  <div className="text-gray-600 mt-4">
                     Game will continue automatically in 3 seconds...
-                  </p>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
                     <div className="bg-red-500 h-2 rounded-full animate-pulse" style={{width: "33%"}}></div>
                   </div>
                 </div>
