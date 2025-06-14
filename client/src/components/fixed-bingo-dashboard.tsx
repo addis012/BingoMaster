@@ -49,11 +49,22 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const gameStateRef = useRef({ calledNumbers: [], finished: false });
   
   // Audio functionality
-  const playAudio = (audioType: 'start' | 'winner') => {
+  const playAudio = (audioType: 'start' | 'winner' | 'loser') => {
     try {
-      const audioUrl = audioType === 'start' 
-        ? '/attached_assets/start voice_1749898419925.MP3'
-        : '/attached_assets/winner voice_1749898419926.MP3';
+      let audioUrl;
+      switch (audioType) {
+        case 'start':
+          audioUrl = '/attached_assets/game started_1749900837783.mp3';
+          break;
+        case 'winner':
+          audioUrl = '/attached_assets/winner_1749900837784.mp3';
+          break;
+        case 'loser':
+          audioUrl = '/attached_assets/losser_1749900837785.mp3';
+          break;
+        default:
+          return;
+      }
       
       const audio = new Audio(audioUrl);
       audio.volume = 0.8;
@@ -391,6 +402,9 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
           console.error("Failed to declare winner:", declareError);
         }
       } else {
+        // Play loser sound for non-winner
+        playAudio('loser');
+        
         // If not a winner, auto-resume after 3 seconds
         setTimeout(() => {
           setShowWinnerResult(false);
