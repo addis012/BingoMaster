@@ -2870,12 +2870,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Actually save super admin commission to database
       if (superAdminCommission > 0) {
         try {
-          await storage.logSuperAdminRevenue({
+          // Get current EAT date for filtering
+          const now = new Date();
+          const eatDate = new Date(now.getTime() + 3 * 60 * 60 * 1000); // Add 3 hours for EAT
+          const dateEAT = eatDate.toISOString().split('T')[0];
+          
+          await storage.createSuperAdminRevenue({
             adminId: user.shopId || user.id,
             adminName: user.name || 'Unknown Admin',
-            amount: superAdminCommission.toFixed(2),
+            shopId: user.shopId || 1,
+            shopName: `Shop ${user.shopId || 'Unknown'}`,
             gameId: gameId,
-            shopName: `Shop ${user.shopId || 'Unknown'}`
+            revenueType: 'game_commission',
+            amount: superAdminCommission.toFixed(2),
+            commissionRate: '20.00',
+            sourceAmount: adminProfit.toFixed(2),
+            description: `Game ${gameId} commission from ${user.name || 'Admin'}`,
+            dateEAT: dateEAT
           });
           console.log('✅ Super Admin revenue saved to database: ' + superAdminCommission.toFixed(2) + ' ETB from game ' + gameId);
         } catch (revenueError) {
