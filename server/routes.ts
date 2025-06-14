@@ -105,7 +105,7 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { i
   }
   
   console.log('❌ NO WINNER FOUND');
-  return { isWinner: false };
+  return { isWinner: false, pattern: null };
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -3004,11 +3004,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Winner check result:', { cartelaNumber, winResult });
 
+      // Ensure boolean conversion
+      const isActualWinner = Boolean(winResult.isWinner);
+      
       const response = {
-        cartelaNumber,
-        isWinner: winResult.isWinner,
-        winningPattern: winResult.pattern,
-        message: winResult.isWinner 
+        cartelaNumber: cartelaNumber,
+        isWinner: isActualWinner,
+        winningPattern: winResult.pattern || null,
+        message: isActualWinner 
           ? `Cartela Number: ${cartelaNumber}\nWinner ✓\nPattern: ${winResult.pattern}`
           : `Cartela Number: ${cartelaNumber}\nNot a Winner`
       };
