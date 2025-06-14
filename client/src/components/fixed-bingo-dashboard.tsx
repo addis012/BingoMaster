@@ -820,7 +820,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
           <DialogContent className="max-w-md">
             <div className="text-center py-8">
               {winnerResult.isWinner ? (
-                <div className="space-y-6 p-8">
+                <div className="space-y-6 p-6">
                   <div className="text-center">
                     <div className="text-4xl font-bold text-gray-700 mb-2">
                       Cartela Number: {winnerResult.cartela}
@@ -834,6 +834,58 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                       </div>
                     )}
                   </div>
+
+                  {/* Winner Cartela Visualization */}
+                  <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                    <div className="text-center mb-3">
+                      <div className="text-lg font-bold text-blue-700">Winning Cartela Pattern</div>
+                    </div>
+                    
+                    {/* BINGO Header */}
+                    <div className="grid grid-cols-5 gap-1 mb-2">
+                      {['B', 'I', 'N', 'G', 'O'].map((letter, index) => (
+                        <div key={letter} className="h-8 bg-red-500 text-white rounded flex items-center justify-center font-bold text-lg">
+                          {letter}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Cartela Grid */}
+                    <div className="grid grid-cols-5 gap-1">
+                      {(() => {
+                        const cartelaPattern = getFixedPattern(winnerResult.cartela);
+                        const calledSet = new Set(calledNumbers);
+                        return cartelaPattern.flatMap((row, rowIndex) =>
+                          row.map((num, colIndex) => {
+                            const isFree = num === 0;
+                            const isCalled = calledSet.has(num) || isFree;
+                            return (
+                              <div
+                                key={`${rowIndex}-${colIndex}`}
+                                className={`h-12 flex items-center justify-center text-sm font-bold rounded ${
+                                  isFree 
+                                    ? 'bg-yellow-400 text-black' 
+                                    : isCalled 
+                                      ? 'bg-green-500 text-white' 
+                                      : 'bg-white border border-gray-300 text-gray-700'
+                                }`}
+                              >
+                                {isFree ? 'FREE' : num}
+                              </div>
+                            );
+                          })
+                        );
+                      })()}
+                    </div>
+                    
+                    <div className="text-center mt-3">
+                      <div className="text-sm text-gray-600">
+                        <span className="inline-block w-4 h-4 bg-green-500 rounded mr-2"></span>Called Numbers
+                        <span className="inline-block w-4 h-4 bg-yellow-400 rounded mr-2 ml-4"></span>Free Space
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="text-center">
                     <div className="text-lg text-gray-600 mb-2">Prize Amount:</div>
                     <div className="text-2xl font-bold text-green-600">

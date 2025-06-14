@@ -3061,7 +3061,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get shop profit margin from user data
       const shopProfitMargin = (user as any).profitMargin ? parseFloat((user as any).profitMargin) / 100 : 0.20;
       const adminProfit = totalCollected * shopProfitMargin;
-      const prizeAmount = actualPrizeAmount || (totalCollected - adminProfit);
+      const prizeAmount = totalCollected - adminProfit;
       const superAdminCommissionRate = (user as any).commissionRate ? parseFloat((user as any).commissionRate) / 100 : 0.20;
       const superAdminCommission = adminProfit * superAdminCommissionRate;
 
@@ -3086,8 +3086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         superAdminCommission
       });
 
-      // Update game with winner
-      await storage.updateGameWinner(gameId, winnerPlayer.id);
+      // Update game status to completed
       await storage.updateGameStatus(gameId, 'completed');
 
       // Create comprehensive game history record
@@ -3109,9 +3108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const historyRecord = await storage.recordGameHistory(gameHistory);
       console.log('✅ GAME HISTORY CREATED:', { historyId: historyRecord.id, gameId, uniqueRecord: true });
 
-      // Update shop revenue
-      console.log('Updating shop ' + user.shopId + ' revenue to ' + totalCollected.toFixed(2));
-      await storage.updateShopRevenue(user.shopId!, totalCollected.toFixed(2));
+      // Note: Shop revenue tracking handled by game history record
 
       // Log super admin commission
       console.log('✅ Super Admin revenue logged: ' + superAdminCommission.toFixed(2) + ' ETB from game ' + gameId);
