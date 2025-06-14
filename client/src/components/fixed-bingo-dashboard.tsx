@@ -144,29 +144,23 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         
         console.log(`✅ BACKEND GAME CREATED: Game ID ${game.id} for ${bookedCartelas.size} cartelas`);
         
-        // CRITICAL: Create player records for all booked cartelas using fixed cartela numbers
+        // CRITICAL: Create player records for all booked cartelas - send cartela IDs not individual numbers
         if (bookedCartelas.size > 0) {
           console.log('📝 Creating player records for', bookedCartelas.size, 'fixed cartelas');
           
-          const cartelaNumbers: number[] = [];
-          Array.from(bookedCartelas).forEach(cartelaNum => {
-            const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
-            if (cartela) {
-              const numbers = getCartelaNumbers(cartela);
-              cartelaNumbers.push(...numbers);
-            }
-          });
+          // Send cartela board numbers (1-75) instead of individual bingo numbers
+          const cartelaNumbers = Array.from(bookedCartelas);
           
           const playerData = {
             playerName: "Player",
-            cartelaNumbers: cartelaNumbers,
+            cartelaNumbers: cartelaNumbers, // Send cartela IDs (1-75)
             entryFee: gameAmount
           };
           
           console.log('📝 Player data being sent:', {
             ...playerData,
-            selectedCartelas: Array.from(bookedCartelas),
-            totalNumbers: cartelaNumbers.length
+            selectedCartelas: cartelaNumbers,
+            totalCartelas: cartelaNumbers.length
           });
           
           try {
@@ -174,7 +168,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
               gameId: game.id,
               playerData: playerData
             });
-            console.log('✅ Created player records for fixed cartelas:', Array.from(bookedCartelas));
+            console.log('✅ Created player records for fixed cartelas:', cartelaNumbers);
             console.log('✅ Financial tracking will now show accurate cartela counts');
           } catch (playerError) {
             console.error('❌ Failed to create player records:', playerError);

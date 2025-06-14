@@ -2696,7 +2696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { cartelaNumber, calledNumbers } = req.body;
 
       // Get the cartela pattern for checking
-      const cartelaPattern = getFixedCartelaPattern(cartelaNumber);
+      const cartelaPattern = getFixedPattern(cartelaNumber);
       const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
       
       res.json({ 
@@ -2950,7 +2950,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get the fixed pattern for this cartela
-      const cartelaPattern = getFixedCartelaPattern(cartelaNumber);
+      const cartelaPattern = getFixedPattern(cartelaNumber);
       const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
 
       console.log('Winner check result:', { cartelaNumber, isWinner });
@@ -2999,10 +2999,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         players: existingPlayers.map(p => ({ id: p.id, cartelas: p.cartelaNumbers, fee: p.entryFee }))
       });
 
-      // Use actual data from existing players
-      const actualPlayerCount = existingPlayers.length;
-      const actualEntryFee = existingPlayers.length > 0 ? parseFloat(existingPlayers[0].entryFee) : entryFeePerPlayer;
-      const totalCollected = actualPlayerCount * actualEntryFee;
+      // Calculate actual cartelas and financial data correctly
+      let totalCartelas = 0;
+      let actualEntryFee = entryFeePerPlayer;
+      
+      if (existingPlayers.length > 0) {
+        // Count total cartelas from all players (cartelaNumbers array contains cartela IDs)
+        totalCartelas = existingPlayers.reduce((sum, player) => sum + player.cartelaNumbers.length, 0);
+        actualEntryFee = parseFloat(existingPlayers[0].entryFee);
+      }
+      
+      const totalCollected = totalCartelas * actualEntryFee;
+      
+      console.log('📊 CORRECTED CALCULATION:', {
+        totalCartelas,
+        actualEntryFee,
+        totalCollected,
+        playerRecords: existingPlayers.length
+      });
 
       // Find or create winner player record
       let winnerPlayer = existingPlayers.find(p => p.cartelaNumbers.includes(winnerCartelaNumber));
@@ -3021,10 +3035,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         winnerPlayer.isWinner = true;
         console.log('✅ Found existing player record for winner cartela #' + winnerCartelaNumber);
       }
-      const profitMargin = user.role === 'super_admin' ? 0.15 : 0.10; // 15% for super admin, 10% for admin
-      const adminProfit = totalCollected * profitMargin;
+      
+      // Get shop profit margin from user data
+      const shopProfitMargin = (user as any).profitMargin ? parseFloat((user as any).profitMargin) / 100 : 0.20;
+      const adminProfit = totalCollected * shopProfitMargin;
       const prizeAmount = actualPrizeAmount || (totalCollected - adminProfit);
-      const superAdminCommissionRate = (user as any).commissionRate ? parseFloat((user as any).commissionRate) / 100 : 0.25;
+      const superAdminCommissionRate = (user as any).commissionRate ? parseFloat((user as any).commissionRate) / 100 : 0.20;
       const superAdminCommission = adminProfit * superAdminCommissionRate;
 
       console.log('💰 FINANCIAL CALCULATION:', {
