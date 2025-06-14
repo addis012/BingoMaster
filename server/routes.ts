@@ -2867,6 +2867,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Note: Shop revenue tracking handled by game history record
 
+      // Actually save super admin commission to database
+      if (superAdminCommission > 0) {
+        try {
+          await storage.logSuperAdminRevenue({
+            adminId: user.shopId || user.id,
+            adminName: user.name || 'Unknown Admin',
+            amount: superAdminCommission.toFixed(2),
+            gameId: gameId,
+            shopName: `Shop ${user.shopId || 'Unknown'}`
+          });
+          console.log('✅ Super Admin revenue saved to database: ' + superAdminCommission.toFixed(2) + ' ETB from game ' + gameId);
+        } catch (revenueError) {
+          console.error('❌ Failed to save super admin revenue:', revenueError);
+        }
+      }
+
       // Log super admin commission
       console.log('✅ Super Admin revenue logged: ' + superAdminCommission.toFixed(2) + ' ETB from game ' + gameId);
       console.log('✅ Super Admin revenue logged from game ' + gameId + ': ' + superAdminCommission + ' ETB');
