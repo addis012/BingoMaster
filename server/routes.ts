@@ -7,6 +7,7 @@ import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import { insertUserSchema, insertShopSchema, insertGameSchema, insertGamePlayerSchema, insertTransactionSchema } from "@shared/schema";
 import { z } from "zod";
+import { getFixedCartelaPattern as getFixedPattern, getCartelaNumbers } from "./fixed-cartelas";
 
 // Extend Express Request to include session
 declare module 'express-serve-static-core' {
@@ -18,44 +19,7 @@ declare module 'express-serve-static-core' {
 // WebSocket clients by game ID
 const gameClients = new Map<number, Set<WebSocket>>();
 
-// Helper function to generate fixed cartela pattern
-function getFixedCartelaPattern(cartelaNum: number): number[][] {
-  let seed = cartelaNum * 12345;
-  const seededRandom = () => {
-    seed = (seed * 9301 + 49297) % 233280;
-    return seed / 233280;
-  };
-  
-  const card: number[][] = [[], [], [], [], []];
-  const ranges = [
-    [1, 15],   // B column
-    [16, 30],  // I column  
-    [31, 45],  // N column
-    [46, 60],  // G column
-    [61, 75]   // O column
-  ];
-
-  for (let col = 0; col < 5; col++) {
-    const [min, max] = ranges[col];
-    const columnNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-    
-    for (let i = columnNumbers.length - 1; i > 0; i--) {
-      const j = Math.floor(seededRandom() * (i + 1));
-      [columnNumbers[i], columnNumbers[j]] = [columnNumbers[j], columnNumbers[i]];
-    }
-    
-    for (let row = 0; row < 5; row++) {
-      if (col === 2 && row === 2) {
-        card[row].push(0); // FREE space in center
-      } else {
-        const numberIndex = row < 2 ? row : row - 1;
-        card[row].push(columnNumbers[numberIndex]);
-      }
-    }
-  }
-  
-  return card;
-}
+// Fixed cartela patterns are now handled by imported functions from fixed-cartelas.ts
 
 // Helper function to check if cartela has bingo
 function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): boolean {

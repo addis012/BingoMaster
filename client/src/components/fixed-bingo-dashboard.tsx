@@ -515,13 +515,14 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                     </DialogTrigger>
                     <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
                       <DialogHeader>
-                        <DialogTitle>Select Cartelas (1-100)</DialogTitle>
+                        <DialogTitle>Select Fixed Cartelas (1-75)</DialogTitle>
                         <DialogDescription>
-                          Choose multiple cartelas. Selected: {selectedCartelas.size} cartelas
+                          Choose from 75 official fixed cartelas. Selected: {selectedCartelas.size} cartelas
                         </DialogDescription>
                       </DialogHeader>
                       <div className="grid grid-cols-10 gap-2 p-4">
-                        {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                        {FIXED_CARTELAS.map(cartela => {
+                          const num = cartela.Board;
                           const isBooked = bookedCartelas.has(num);
                           const isSelected = selectedCartelas.has(num);
                           return (
@@ -541,13 +542,14 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                               >
                                 {num}
                               </Button>
-                              <Checkbox
-                                id={`cartela-${num}`}
-                                checked={isSelected}
-                                disabled={isBooked}
-                                onCheckedChange={() => toggleCartelaSelection(num)}
-                                className="h-3 w-3"
-                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-12 text-xs p-0 hover:bg-gray-200"
+                                onClick={() => previewCartelaByNumber(num)}
+                              >
+                                View
+                              </Button>
                             </div>
                           );
                         })}
@@ -829,6 +831,97 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                 </div>
               )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cartela Preview Dialog */}
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Cartela #{previewCartela?.Board} Preview</DialogTitle>
+              <DialogDescription>
+                Fixed cartela pattern - these numbers are always the same for this cartela
+              </DialogDescription>
+            </DialogHeader>
+            {previewCartela && (
+              <div className="space-y-4">
+                {/* BINGO Header */}
+                <div className="grid grid-cols-5 gap-1">
+                  {['B', 'I', 'N', 'G', 'O'].map((letter, index) => (
+                    <div key={letter} className="h-8 bg-red-500 text-white rounded flex items-center justify-center font-bold text-lg">
+                      {letter}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Cartela Grid */}
+                <div className="grid grid-cols-5 gap-1">
+                  {/* Row 1 */}
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <div key={`row1-${i}`} className="h-10 border border-gray-300 flex items-center justify-center text-sm font-medium bg-white">
+                      {i === 0 ? previewCartela.B[0] : 
+                       i === 1 ? previewCartela.I[0] : 
+                       i === 2 ? previewCartela.N[0] : 
+                       i === 3 ? previewCartela.G[0] : 
+                       previewCartela.O[0]}
+                    </div>
+                  ))}
+                  
+                  {/* Row 2 */}
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <div key={`row2-${i}`} className="h-10 border border-gray-300 flex items-center justify-center text-sm font-medium bg-white">
+                      {i === 0 ? previewCartela.B[1] : 
+                       i === 1 ? previewCartela.I[1] : 
+                       i === 2 ? previewCartela.N[1] : 
+                       i === 3 ? previewCartela.G[1] : 
+                       previewCartela.O[1]}
+                    </div>
+                  ))}
+                  
+                  {/* Row 3 (with FREE) */}
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <div key={`row3-${i}`} className={`h-10 border border-gray-300 flex items-center justify-center text-sm font-medium ${i === 2 ? 'bg-yellow-200 text-yellow-800' : 'bg-white'}`}>
+                      {i === 0 ? previewCartela.B[2] : 
+                       i === 1 ? previewCartela.I[2] : 
+                       i === 2 ? 'FREE' : 
+                       i === 3 ? previewCartela.G[2] : 
+                       previewCartela.O[2]}
+                    </div>
+                  ))}
+                  
+                  {/* Row 4 */}
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <div key={`row4-${i}`} className="h-10 border border-gray-300 flex items-center justify-center text-sm font-medium bg-white">
+                      {i === 0 ? previewCartela.B[3] : 
+                       i === 1 ? previewCartela.I[3] : 
+                       i === 2 ? previewCartela.N[3] : 
+                       i === 3 ? previewCartela.G[3] : 
+                       previewCartela.O[3]}
+                    </div>
+                  ))}
+                  
+                  {/* Row 5 */}
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <div key={`row5-${i}`} className="h-10 border border-gray-300 flex items-center justify-center text-sm font-medium bg-white">
+                      {i === 0 ? previewCartela.B[4] : 
+                       i === 1 ? previewCartela.I[4] : 
+                       i === 2 ? previewCartela.N[4] : 
+                       i === 3 ? previewCartela.G[4] : 
+                       previewCartela.O[4]}
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="text-center">
+                  <Button 
+                    onClick={() => setShowPreview(false)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Close Preview
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
