@@ -820,25 +820,29 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
           <DialogContent className="max-w-md">
             <div className="text-center py-8">
               {winnerResult.isWinner ? (
-                <div className="space-y-4">
-                  <div className="text-6xl mb-4">🎉</div>
-                  <div className="text-xl font-bold text-green-600">
-                    Cartela Number: {winnerResult.cartela}
-                  </div>
-                  <div className="text-2xl font-bold text-green-600 flex items-center justify-center gap-2">
-                    Winner <span className="text-green-600">✓</span>
-                  </div>
-                  {winnerResult.pattern && (
-                    <div className="text-lg text-gray-700">
-                      Pattern: {winnerResult.pattern}
+                <div className="space-y-6 p-8">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-gray-700 mb-2">
+                      Cartela Number: {winnerResult.cartela}
                     </div>
-                  )}
-                  <div className="text-gray-600 mt-4">
-                    Prize: {Math.floor(bookedCartelas.size * parseInt(gameAmount) * 0.7)} Birr
+                    <div className="text-4xl font-bold text-blue-600 flex items-center justify-center gap-3">
+                      Winner <span className="text-blue-600">✓</span>
+                    </div>
+                    {winnerResult.pattern && (
+                      <div className="text-lg text-gray-600 mt-4">
+                        Pattern: {winnerResult.pattern}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg text-gray-600 mb-2">Prize Amount:</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {Math.floor(calculateWinnerPayout(bookedCartelas.size * parseInt(gameAmount)))} Birr
+                    </div>
                   </div>
                   <Button 
                     onClick={() => setShowWinnerResult(false)}
-                    className="bg-green-600 hover:bg-green-700 text-white mt-4"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg"
                   >
                     Continue
                   </Button>

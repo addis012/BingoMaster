@@ -2989,9 +2989,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const gameId = parseInt(req.params.gameId);
-      const { winnerCartelaNumber, totalPlayers, actualPrizeAmount, allCartelaNumbers, entryFeePerPlayer, calledNumbers } = req.body;
+      const { winnerCartelaNumber, totalPlayers, entryFeePerPlayer, allCartelaNumbers, calledNumbers } = req.body;
 
-      // First verify if this cartela is actually a winner
+      console.log('🎯 COMPREHENSIVE GAME RECORDING - Game ' + gameId + ', Winner ' + winnerCartelaNumber + ', Cartela ' + winnerCartelaNumber);
+
+      if (!winnerCartelaNumber) {
+        console.log('❌ No winnerCartelaNumber provided for game ' + gameId);
+        return res.status(400).json({ message: "Winner cartela number is required" });
+      }
+
+      // Verify if this cartela is actually a winner
       const cartelaPattern = getFixedPattern(winnerCartelaNumber);
       const winResult = checkBingoWin(cartelaPattern, calledNumbers);
       
@@ -3005,13 +3012,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('✅ WINNER VERIFIED - Game ' + gameId + ', Winner ' + winnerCartelaNumber + ', Pattern: ' + winResult.pattern);
-      console.log('📊 RECEIVED FRONTEND DATA:', {
-        winnerCartelaNumber,
-        totalPlayers,
-        actualPrizeAmount,
-        entryFeePerPlayer,
-        allCartelaNumbers
-      });
 
       // Get existing players for this game to calculate accurate financial data
       const existingPlayers = await storage.getGamePlayers(gameId);
