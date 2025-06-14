@@ -22,7 +22,7 @@ const gameClients = new Map<number, Set<WebSocket>>();
 // Fixed cartela patterns are now handled by imported functions from fixed-cartelas.ts
 
 // Helper function to check if cartela has bingo
-function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): boolean {
+function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { isWinner: boolean; pattern?: string } {
   const calledSet = new Set(calledNumbers);
   
   // Check rows
@@ -35,7 +35,9 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): boo
         break;
       }
     }
-    if (rowComplete) return true;
+    if (rowComplete) {
+      return { isWinner: true, pattern: `Horizontal Row ${row + 1}` };
+    }
   }
   
   // Check columns
@@ -48,26 +50,39 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): boo
         break;
       }
     }
-    if (colComplete) return true;
+    if (colComplete) {
+      const columnNames = ['B', 'I', 'N', 'G', 'O'];
+      return { isWinner: true, pattern: `Vertical Column ${columnNames[col]}` };
+    }
   }
   
-  // Check diagonals
+  // Check diagonal 1 (top-left to bottom-right)
   let diag1Complete = true;
-  let diag2Complete = true;
-  
   for (let i = 0; i < 5; i++) {
-    const num1 = cartelaPattern[i][i];
-    const num2 = cartelaPattern[i][4 - i];
-    
-    if (num1 !== 0 && !calledSet.has(num1)) {
+    const num = cartelaPattern[i][i];
+    if (num !== 0 && !calledSet.has(num)) {
       diag1Complete = false;
-    }
-    if (num2 !== 0 && !calledSet.has(num2)) {
-      diag2Complete = false;
+      break;
     }
   }
+  if (diag1Complete) {
+    return { isWinner: true, pattern: 'Diagonal (Top-Left to Bottom-Right)' };
+  }
   
-  return diag1Complete || diag2Complete;
+  // Check diagonal 2 (top-right to bottom-left)
+  let diag2Complete = true;
+  for (let i = 0; i < 5; i++) {
+    const num = cartelaPattern[i][4 - i];
+    if (num !== 0 && !calledSet.has(num)) {
+      diag2Complete = false;
+      break;
+    }
+  }
+  if (diag2Complete) {
+    return { isWinner: true, pattern: 'Diagonal (Top-Right to Bottom-Left)' };
+  }
+  
+  return { isWinner: false };
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -2951,14 +2966,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get the fixed pattern for this cartela
       const cartelaPattern = getFixedPattern(cartelaNumber);
-      const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
+      const winResult = checkBingoWin(cartelaPattern, calledNumbers);
 
-      console.log('Winner check result:', { cartelaNumber, isWinner });
+      console.log('Winner check result:', { cartelaNumber, winResult });
 
       res.json({
         cartelaNumber,
-        isWinner,
-        pattern: cartelaPattern
+        isWinner: winResult.isWinner,
+        winningPattern: winResult.pattern,
+        message: winResult.isWinner 
+          ? `Cartela Number: ${cartelaNumber}\nWinner ✓\nPattern: ${winResult.pattern}`
+          : `Cartela Number: ${cartelaNumber}\nNot a Winner`
       });
     } catch (error) {
       console.error('Check winner error:', error);
@@ -2980,9 +2998,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const gameId = parseInt(req.params.gameId);
-      const { winnerCartelaNumber, totalPlayers, actualPrizeAmount, allCartelaNumbers, entryFeePerPlayer } = req.body;
+      const { winnerCartelaNumber, totalPlayers, actualPrizeAmount, allCartelaNumbers, entryFeePerPlayer, calledNumbers } = req.body;
 
-      console.log('🎯 COMPREHENSIVE GAME RECORDING - Game ' + gameId + ', Winner ' + winnerCartelaNumber);
+      // First verify if this cartela is actually a winner
+      const cartelaPattern = getFixedPattern(winnerCartelaNumber);
+      const winResult = checkBingoWin(cartelaPattern, calledNumbers);
+      
+      if (!winResult.isWinner) {
+        console.log('❌ WINNER VERIFICATION FAILED:', { cartelaNumber: winnerCartelaNumber, winResult });
+        return res.status(400).json({ 
+          message: "This cartela is not a winner",
+          cartelaNumber: winnerCartelaNumber,
+          isWinner: false
+        });
+      }
+
+      console.log('✅ WINNER VERIFIED - Game ' + gameId + ', Winner ' + winnerCartelaNumber + ', Pattern: ' + winResult.pattern);
       console.log('📊 RECEIVED FRONTEND DATA:', {
         winnerCartelaNumber,
         totalPlayers,

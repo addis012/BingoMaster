@@ -40,7 +40,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   const [showWinnerResult, setShowWinnerResult] = useState(false);
-  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0 });
+  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "" });
   const [wasGameActiveBeforeCheck, setWasGameActiveBeforeCheck] = useState(false);
   
   // Game mechanics
@@ -284,71 +284,95 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const checkWinner = async () => {
     const cartelaNum = parseInt(winnerCartelaNumber);
     
-    if (!cartelaNum || cartelaNum < 1 || cartelaNum > 100) {
+    if (!cartelaNum || cartelaNum < 1 || cartelaNum > 75) {
+      toast({
+        title: "Invalid Cartela",
+        description: "Please enter a cartela number between 1 and 75",
+        variant: "destructive"
+      });
       return;
     }
 
     if (!bookedCartelas.has(cartelaNum)) {
+      toast({
+        title: "Cartela Not Selected",
+        description: "This cartela was not selected for this game",
+        variant: "destructive"
+      });
       return;
     }
 
-    // Manual winner verification - assume this cartela is a winner
-    const isWinner = true;
-    
     try {
-      // If we have an active backend game, create a simple game record for this winner
-      if (activeGameId) {
-        console.log(`🎯 DECLARING WINNER: Cartela #${cartelaNum} in Game ${activeGameId}`);
-        
-        // Create a simple player record and declare winner directly via API
-        const response = await fetch(`/api/games/${activeGameId}/declare-winner`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            winnerId: cartelaNum, // Use cartela number as winner ID
-            winnerCartela: cartelaNum,
-            playerName: `Player ${cartelaNum}`,
-            totalCollected: Array.from(bookedCartelas).length * parseInt(gameAmount),
-            prizeAmount: Array.from(bookedCartelas).length * parseInt(gameAmount) * 0.8 // 80% prize
-          }),
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`✅ WINNER SUCCESSFULLY LOGGED TO GAME HISTORY:`, {
-            gameId: activeGameId,
-            winnerCartela: cartelaNum,
-            totalCollected: Array.from(bookedCartelas).length * parseInt(gameAmount),
-            prizeAmount: result.financial?.prizeAmount,
-            gameHistory: 'Created in backend'
+      // Call the proper winner verification API
+      const response = await fetch(`/api/games/${activeGameId}/check-winner`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          cartelaNumber: cartelaNum,
+          calledNumbers: calledNumbers
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to verify winner");
+      }
+      
+      const result = await response.json();
+      console.log('Winner verification result:', result);
+      
+      // Show winner verification popup with proper message
+      setWinnerResult({ 
+        isWinner: result.isWinner, 
+        cartela: cartelaNum,
+        message: result.message,
+        pattern: result.winningPattern
+      });
+      setShowWinnerChecker(false);
+      setWinnerCartelaNumber("");
+      setShowWinnerResult(true);
+      
+      // If it's a winner, declare and save to game history
+      if (result.isWinner) {
+        try {
+          const declareResponse = await fetch(`/api/games/${activeGameId}/declare-winner`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              winnerCartelaNumber: cartelaNum,
+              totalPlayers: bookedCartelas.size,
+              entryFeePerPlayer: gameAmount,
+              allCartelaNumbers: Array.from(bookedCartelas),
+              calledNumbers: calledNumbers
+            }),
           });
           
-          setGameFinished(true);
-          setGameActive(false);
-          if (autoCallInterval.current) {
-            clearInterval(autoCallInterval.current);
+          if (declareResponse.ok) {
+            console.log('Winner successfully logged to game history');
+            setGameFinished(true);
+            setGameActive(false);
+            if (autoCallInterval.current) {
+              clearInterval(autoCallInterval.current);
+            }
           }
-        } else {
-          console.error("Failed to declare winner:", await response.text());
+        } catch (declareError) {
+          console.error("Failed to declare winner:", declareError);
         }
+      } else {
+        // If not a winner, auto-resume after 3 seconds
+        setTimeout(() => {
+          setShowWinnerResult(false);
+          if (wasGameActiveBeforeCheck && !gameFinished) {
+            resumeGame();
+          }
+        }, 3000);
       }
     } catch (error) {
-      console.error("Failed to declare winner in backend:", error);
-    }
-    
-    setWinnerResult({ isWinner, cartela: cartelaNum });
-    setShowWinnerChecker(false);
-    setWinnerCartelaNumber("");
-    setShowWinnerResult(true);
-    
-    // If not a winner, auto-resume after 3 seconds
-    if (!isWinner) {
-      setTimeout(() => {
-        setShowWinnerResult(false);
-        if (wasGameActiveBeforeCheck && !gameFinished) {
-          resumeGame();
-        }
-      }, 3000);
+      console.error("Failed to check winner:", error);
+      toast({
+        title: "Error",
+        description: "Failed to verify winner. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
