@@ -874,7 +874,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <div className="mt-6 text-center">
                 <Button 
                   onClick={() => setShowWinnerChecker(true)}
-                  disabled={!gameActive || calledNumbers.length < 5}
+                  disabled={!activeGameId}
                   className="bg-purple-500 hover:bg-purple-600 text-white px-8"
                 >
                   Check Winner
