@@ -773,11 +773,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       <div className="text-2xl font-bold text-green-600">
                         {calculateAmounts().winnerAmount.toFixed(2)} Birr
                       </div>
-                      {selectedCartelas.size > 0 && (
-                        <div className="text-xs text-gray-600 mt-1">
-                          (After {(shopData?.profitMargin || 10)}% admin profit margin)
-                        </div>
-                      )}
+
                     </div>
                   </div>
                 </div>
