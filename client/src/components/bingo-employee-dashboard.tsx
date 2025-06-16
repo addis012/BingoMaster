@@ -64,7 +64,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const totalCartelas = selectedCartelas.size;
     const amountPerCartela = parseFloat(gameAmount) || 20;
     const totalCollected = totalCartelas * amountPerCartela;
-    const profitMargin = (shopData?.profitMargin || 0) / 100;
+    // Use admin's actual profit margin from adminData, not shopData
+    const profitMargin = (adminData?.profitMargin || 10) / 100;
     const winnerAmount = totalCollected * (1 - profitMargin);
     const profitAmount = totalCollected * profitMargin;
     
@@ -279,7 +280,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   });
 
-  // Reset game mutation
+  // Reset game mutation - only clears data when manually starting new game
   const resetGameMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/games/${activeGameId}/complete`, {
@@ -289,12 +290,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     onSuccess: () => {
-      setGameActive(false);
-      setGameFinished(false);
-      setCalledNumbers([]);
-      setLastCalledNumber(null);
-      setActiveGameId(null);
-      setBookedCartelas(new Set());
+      // Only reset state when manually starting new game, not during winner declaration
+      if (!gameFinished) {
+        setGameActive(false);
+        setGameFinished(false);
+        setCalledNumbers([]);
+        setLastCalledNumber(null);
+        setActiveGameId(null);
+        setBookedCartelas(new Set());
+      }
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       toast({
         title: "Game Reset",
@@ -682,10 +686,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           <span>Winner Amount:</span>
                           <span className="font-bold">{calculateAmounts().winnerAmount.toFixed(2)} Birr</span>
                         </div>
-                        <div className="flex justify-between text-gray-500">
-                          <span>Profit Margin:</span>
-                          <span>{(shopData?.profitMargin || 0)}%</span>
-                        </div>
+
                       </div>
                     </div>
                   )}
@@ -726,11 +727,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     </Button>
                   ) : gameFinished ? (
                     <Button 
-                      onClick={() => resetGameMutation.mutate()}
-                      disabled={resetGameMutation.isPending}
+                      onClick={() => {
+                        // Manually reset all state for new game
+                        setGameActive(false);
+                        setGameFinished(false);
+                        setCalledNumbers([]);
+                        setLastCalledNumber(null);
+                        setActiveGameId(null);
+                        setBookedCartelas(new Set());
+                        setSelectedCartelas(new Set());
+                        setWinnerResult({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] });
+                        setShowWinnerResult(false);
+                        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+                      }}
                       className="bg-blue-500 hover:bg-blue-600 text-white"
                     >
-                      {resetGameMutation.isPending ? "Creating..." : "New Game"}
+                      New Game
                     </Button>
                   ) : gameActive ? (
                     <Button 
