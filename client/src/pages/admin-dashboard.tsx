@@ -9,7 +9,7 @@ import { NavigationHeader } from "@/components/navigation-header";
 import { FinancialDashboard } from "@/components/financial-dashboard";
 import { EmployeeCreationForm } from "@/components/employee-creation-form";
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard } from "lucide-react";
+import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, AlertTriangle } from "lucide-react";
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -48,6 +48,23 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2">Manage your shop operations and employees</p>
         </div>
+
+        {/* Low Credit Warning */}
+        {creditBalance && parseFloat(creditBalance.balance) < 1000 && (
+          <Card className="mb-6 border-orange-200 bg-orange-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <div>
+                  <p className="font-medium text-orange-800">Low Credit Balance Warning</p>
+                  <p className="text-sm text-orange-700">
+                    Your current balance is {creditBalance.balance} ETB. Consider adding more credits to continue operations.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">

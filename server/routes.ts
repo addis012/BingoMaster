@@ -2898,6 +2898,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('✅ Super Admin revenue logged: ' + superAdminCommission.toFixed(2) + ' ETB from game ' + gameId);
       console.log('✅ Super Admin revenue logged from game ' + gameId + ': ' + superAdminCommission + ' ETB');
 
+      // Deduct the commission from admin's credit balance
+      if (superAdminCommission > 0) {
+        try {
+          // Get the shop admin for this game
+          const shopAdmin = await storage.getUserByShopId(user.shopId!);
+          if (shopAdmin && shopAdmin.role === 'admin') {
+            const currentBalance = parseFloat(shopAdmin.creditBalance || '0');
+            const newBalance = Math.max(0, currentBalance - superAdminCommission);
+            
+            await storage.updateUserBalance(shopAdmin.id, newBalance.toFixed(2));
+            console.log(`💰 COMMISSION DEDUCTED: ${superAdminCommission.toFixed(2)} ETB from admin ${shopAdmin.name} (${currentBalance.toFixed(2)} → ${newBalance.toFixed(2)} ETB)`);
+          }
+        } catch (balanceError) {
+          console.error('❌ Failed to deduct commission from admin balance:', balanceError);
+        }
+      }
+
       const game = await storage.getGame(gameId);
       res.json({
         game,
