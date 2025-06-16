@@ -1,4 +1,4 @@
-import FixedBingoDashboard from "@/components/fixed-bingo-dashboard";
+import BingoEmployeeDashboard from "@/components/bingo-employee-dashboard";
 import { useAuth } from "@/hooks/use-auth";
 
 interface EmployeeDashboardProps {
@@ -15,5 +15,5 @@ export default function EmployeeDashboard({ onLogout }: EmployeeDashboardProps) 
     }
   };
   
-  return <FixedBingoDashboard onLogout={handleLogout} />;
+  return <BingoEmployeeDashboard onLogout={handleLogout} />;
 }
