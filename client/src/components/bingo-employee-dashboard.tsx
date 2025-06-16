@@ -110,6 +110,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
+    } else {
+      // Clear all game state when no active game
+      setActiveGameId(null);
+      setGameActive(false);
+      setGameFinished(false);
+      setCalledNumbers([]);
+      setLastCalledNumber(null);
+      setBookedCartelas(new Set());
     }
   }, [activeGame]);
 
