@@ -55,6 +55,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     enabled: !!user?.shopId
   });
 
+  // Game history query for admin connection
+  const { data: gameHistory } = useQuery({
+    queryKey: ['/api/analytics/shop', user?.shopId],
+    enabled: !!user?.shopId,
+    refetchInterval: 10000 // Refresh every 10 seconds for live updates
+  });
+
   // Sync with active game data
   useEffect(() => {
     if (activeGame) {
@@ -149,9 +156,65 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     },
     onSuccess: () => {
       setGameActive(true);
+      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       toast({
         title: "Game Started",
         description: "Bingo game is now active"
+      });
+    }
+  });
+
+  // Call number mutation
+  const callNumberMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/games/${activeGameId}/numbers`, {
+        method: 'PATCH'
+      });
+      if (!response.ok) throw new Error('Failed to call number');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setCalledNumbers(data.calledNumbers);
+      setLastCalledNumber(data.calledNumbers[data.calledNumbers.length - 1]);
+      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      
+      // Play number audio if available
+      const lastNumber = data.calledNumbers[data.calledNumbers.length - 1];
+      if (lastNumber) {
+        const letter = getLetterForNumber(lastNumber);
+        try {
+          const audio = new Audio(`/attached_assets/${letter}${lastNumber}.mp3`);
+          audio.volume = 0.8;
+          audio.play().catch(() => {
+            console.log(`Audio for ${letter}${lastNumber} not available`);
+          });
+        } catch (error) {
+          console.log('Audio playback error');
+        }
+      }
+    }
+  });
+
+  // Reset game mutation
+  const resetGameMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/games/${activeGameId}/complete`, {
+        method: 'PATCH'
+      });
+      if (!response.ok) throw new Error('Failed to reset game');
+      return response.json();
+    },
+    onSuccess: () => {
+      setGameActive(false);
+      setGameFinished(false);
+      setCalledNumbers([]);
+      setLastCalledNumber(null);
+      setActiveGameId(null);
+      setBookedCartelas(new Set());
+      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      toast({
+        title: "Game Reset",
+        description: "Game has been completed and reset"
       });
     }
   });
@@ -196,7 +259,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setGameActive(false);
       setGameFinished(true);
       
-      // Submit winner to backend
+      // Submit winner to backend and complete the game
       try {
         await fetch(`/api/games/${activeGameId}/declare-winner`, {
           method: 'POST',
@@ -207,9 +270,41 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           })
         });
         
+        // Mark game as completed to save to history
+        await fetch(`/api/games/${activeGameId}/complete`, {
+          method: 'PATCH'
+        });
+        
+        // Invalidate all related queries to update admin dashboard
         queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/shop'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/trends'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/profit-distribution'] });
+        
+        // Play winner sound
+        try {
+          const audio = new Audio('/attached_assets/winner_1749900837784.mp3');
+          audio.volume = 0.8;
+          audio.play().catch(() => {
+            console.log('Winner sound not available');
+          });
+        } catch (error) {
+          console.log('Winner audio playback error');
+        }
+        
+        toast({
+          title: "Winner Confirmed!",
+          description: `Cartela #${cartelaNum} wins with ${isWinner.pattern}`,
+          duration: 5000
+        });
+        
       } catch (error) {
         console.error('Failed to declare winner:', error);
+        toast({
+          title: "Error",
+          description: "Failed to process winner. Please try again.",
+          variant: "destructive"
+        });
       }
     }
   };
@@ -394,26 +489,50 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   >
                     Reset
                   </Button>
-                  <Button 
-                    onClick={() => {
-                      if (!activeGameId && selectedCartelas.size > 0) {
-                        createGameMutation.mutate();
-                      } else if (activeGameId && !gameActive) {
-                        startGameMutation.mutate();
-                      }
-                    }}
-                    disabled={(activeGameId && gameActive) || createGameMutation.isPending || startGameMutation.isPending}
-                    className="bg-green-500 hover:bg-green-600 text-white"
-                  >
-                    {!activeGameId ? "Start" : "Start"}
-                  </Button>
-                  <Button 
-                    onClick={shuffleNumbers}
-                    disabled={isShuffling || !activeGameId}
-                    className="bg-purple-500 hover:bg-purple-600 text-white"
-                  >
-                    {isShuffling ? "..." : "Shuffle"}
-                  </Button>
+                  
+                  {!activeGameId ? (
+                    <Button 
+                      onClick={() => createGameMutation.mutate()}
+                      disabled={selectedCartelas.size === 0 || createGameMutation.isPending}
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      {createGameMutation.isPending ? "Creating..." : "Start"}
+                    </Button>
+                  ) : !gameActive ? (
+                    <Button 
+                      onClick={() => startGameMutation.mutate()}
+                      disabled={startGameMutation.isPending}
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      {startGameMutation.isPending ? "Starting..." : "Start"}
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={() => callNumberMutation.mutate()}
+                      disabled={callNumberMutation.isPending || !gameActive}
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                      {callNumberMutation.isPending ? "Calling..." : "Call Number"}
+                    </Button>
+                  )}
+                  
+                  {gameActive ? (
+                    <Button 
+                      onClick={() => resetGameMutation.mutate()}
+                      disabled={resetGameMutation.isPending}
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                    >
+                      {resetGameMutation.isPending ? "Ending..." : "End Game"}
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={shuffleNumbers}
+                      disabled={isShuffling || !activeGameId}
+                      className="bg-purple-500 hover:bg-purple-600 text-white"
+                    >
+                      {isShuffling ? "..." : "Shuffle"}
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
