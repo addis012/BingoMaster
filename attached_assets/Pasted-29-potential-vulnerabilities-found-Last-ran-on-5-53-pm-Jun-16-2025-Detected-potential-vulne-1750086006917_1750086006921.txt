@@ -1,0 +1,33 @@
+29 potential vulnerabilities found.
+Last ran on
+ 
+5:53 pm, Jun 16, 2025
+Detected potential vulnerability in attached_assets/BingoMaster/attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749213642847.txt
+Detected potential vulnerability in attached_assets/BingoMaster/attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749213642847.txt
+Detected potential vulnerability in attached_assets/BingoMaster/attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749465578322_1749465578324.txt
+Detected potential vulnerability in attached_assets/BingoMaster/attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749465578322_1749465578324.txt
+Detected potential vulnerability in attached_assets/BingoMaster/attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749465882547_1749465882549.txt
+Detected potential vulnerability in attached_assets/BingoMaster/attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749465882547_1749465882549.txt
+Detected potential vulnerability in attached_assets/BingoMaster/attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749466061392_1749466061394.txt
+Detected potential vulnerability in attached_assets/BingoMaster/attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749466061392_1749466061394.txt
+Detected potential vulnerability in attached_assets/BingoMaster/package.json
+Detected potential vulnerability in attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749213642847.txt
+Detected potential vulnerability in attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749213642847.txt
+Detected potential vulnerability in attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749465578322_1749465578324.txt
+Detected potential vulnerability in attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749465578322_1749465578324.txt
+Detected potential vulnerability in attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749465882547_1749465882549.txt
+Detected potential vulnerability in attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749465882547_1749465882549.txt
+Detected potential vulnerability in attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749466061392_1749466061394.txt
+Detected potential vulnerability in attached_assets/Pasted-client-536-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe-rike-1749466061392_1749466061394.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749700850073_1749700850075.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749700850073_1749700850075.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749702804455_1749702804456.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749702804455_1749702804456.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749895916935_1749895916936.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749895916935_1749895916936.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749896104345_1749896104347.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749896104345_1749896104347.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749896395182_1749896395183.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-TypeError-Cannot-read-properties-of-null-reading-type--1749896395182_1749896395183.txt
+Detected potential vulnerability in attached_assets/Pasted-inpage-js-2283-Uncaught-in-promise-WebSocket-connection-to-wss-c1b9d8e1-09e2-4ee1-980f-3c07d-1749897881012_1749897881014.txt
+Detected potential vulnerability in package.json
