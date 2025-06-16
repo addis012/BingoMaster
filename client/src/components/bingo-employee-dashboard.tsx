@@ -59,6 +59,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     enabled: !!user?.shopId
   });
 
+  // Calculate amounts based on selected cartelas and profit margin
+  const calculateAmounts = () => {
+    const totalCartelas = selectedCartelas.size;
+    const amountPerCartela = parseFloat(gameAmount) || 20;
+    const totalCollected = totalCartelas * amountPerCartela;
+    const profitMargin = (shopData?.profitMargin || 0) / 100;
+    const winnerAmount = totalCollected * (1 - profitMargin);
+    const profitAmount = totalCollected * profitMargin;
+    
+    return {
+      totalCollected,
+      winnerAmount,
+      profitAmount,
+      totalCartelas
+    };
+  };
+
   // Game history query for admin connection
   const { data: gameHistory } = useQuery({
     queryKey: ['/api/analytics/shop', user?.shopId],
@@ -623,6 +640,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <div className="text-xs text-gray-500 mt-1">
                     {selectedCartelas.size} cartelas
                   </div>
+                  
+                  {/* Winner Amount Calculation Display */}
+                  {selectedCartelas.size > 0 && (
+                    <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="text-sm font-medium text-green-800 mb-2">Amount Calculations:</div>
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span>Total Collected:</span>
+                          <span className="font-medium">{calculateAmounts().totalCollected.toFixed(2)} Birr</span>
+                        </div>
+                        <div className="flex justify-between text-green-600">
+                          <span>Winner Amount:</span>
+                          <span className="font-bold">{calculateAmounts().winnerAmount.toFixed(2)} Birr</span>
+                        </div>
+                        <div className="flex justify-between text-gray-500">
+                          <span>Profit Margin:</span>
+                          <span>{(shopData?.profitMargin || 0)}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Control Buttons */}
@@ -670,19 +708,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     <Button 
                       onClick={() => {
                         if (gamePaused) {
-                          // Resume game and trigger next number call
-                          setGamePaused(false);
-                          setTimeout(() => {
-                            if (activeGameId && gameActive && !gameFinished) {
-                              callNumberMutation.mutate();
-                            }
-                          }, 1000);
+                          resumeGame();
                         } else {
-                          // Pause game
-                          setGamePaused(true);
+                          pauseGame();
                         }
                       }}
-                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                      className={gamePaused ? "bg-green-500 hover:bg-green-600 text-white" : "bg-orange-500 hover:bg-orange-600 text-white"}
                     >
                       {gamePaused ? "Resume Game" : "Pause Game"}
                     </Button>
@@ -988,35 +1019,62 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
       {/* Winner Result Dialog */}
       <Dialog open={showWinnerResult} onOpenChange={setShowWinnerResult}>
-        <DialogContent>
+        <DialogContent className={winnerResult.isWinner ? "border-green-500" : "border-red-500"}>
           <DialogHeader>
-            <DialogTitle>Winner Check Result</DialogTitle>
+            <DialogTitle className={winnerResult.isWinner ? "text-green-600" : "text-red-600"}>
+              {winnerResult.isWinner ? "🎉 WINNER FOUND!" : "❌ NOT A WINNER"}
+            </DialogTitle>
           </DialogHeader>
           <div className="text-center py-6">
             {winnerResult.isWinner ? (
-              <div className="space-y-4">
-                <div className="text-6xl mb-4">🎉</div>
-                <div className="text-xl font-bold text-green-600">
+              <div className="space-y-4 bg-green-50 p-6 rounded-lg">
+                <div className="text-6xl mb-4">✅</div>
+                <div className="text-2xl font-bold text-green-600">
+                  Congratulations! This Cartela Has Won!
+                </div>
+                <div className="text-xl font-bold text-green-700">
                   Cartela #{winnerResult.cartela}
                 </div>
-                <div className="text-2xl font-bold text-green-600">
-                  BINGO! WINNER!
+                <div className="text-lg text-green-600">
+                  Winning Pattern: {winnerResult.pattern}
                 </div>
-                <div className="text-lg text-gray-600">
-                  Pattern: {winnerResult.pattern}
-                </div>
+                
+                {/* Display cartela grid */}
+                {winnerResult.cartela > 0 && (
+                  <div className="mt-4">
+                    <div className="text-sm font-medium mb-2 text-green-700">Cartela Grid:</div>
+                    <div className="grid grid-cols-5 gap-1 max-w-xs mx-auto bg-white p-3 rounded border">
+                      {/* Header */}
+                      <div className="text-center font-bold text-xs bg-green-100 p-1">B</div>
+                      <div className="text-center font-bold text-xs bg-green-100 p-1">I</div>
+                      <div className="text-center font-bold text-xs bg-green-100 p-1">N</div>
+                      <div className="text-center font-bold text-xs bg-green-100 p-1">G</div>
+                      <div className="text-center font-bold text-xs bg-green-100 p-1">O</div>
+                      
+                      {/* Cartela pattern */}
+                      {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => (
+                        <div key={index} className={`text-center text-xs p-1 border ${
+                          index === 12 ? 'bg-yellow-200' : 
+                          calledNumbers.includes(num) ? 'bg-green-200' : 'bg-gray-50'
+                        }`}>
+                          {index === 12 ? 'FREE' : num}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 bg-red-50 p-6 rounded-lg">
                 <div className="text-6xl mb-4">❌</div>
-                <div className="text-xl font-bold text-red-600">
+                <div className="text-2xl font-bold text-red-600">
+                  This Cartela Did Not Win
+                </div>
+                <div className="text-xl font-bold text-red-700">
                   Cartela #{winnerResult.cartela}
                 </div>
-                <div className="text-2xl font-bold text-red-600">
-                  Not a Winner
-                </div>
-                <div className="text-gray-600 mt-4">
-                  Game continues...
+                <div className="text-lg text-red-600">
+                  {winnerResult.message}
                 </div>
               </div>
             )}
