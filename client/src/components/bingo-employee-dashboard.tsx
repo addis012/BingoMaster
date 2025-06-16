@@ -658,15 +658,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <div className="text-xs text-gray-500">Total Collected</div>
-              <div className="font-bold">
-                {activeGameId ? 
-                  `${(bookedCartelas.size * parseFloat(gameAmount)).toFixed(2)} Birr` : 
-                  `${(selectedCartelas.size * parseFloat(gameAmount)).toFixed(2)} Birr`
-                }
-              </div>
-            </div>
+
             <div className="text-right">
               <div className="text-xs text-gray-500">Winner Gets</div>
               <div className="font-bold text-green-600">
