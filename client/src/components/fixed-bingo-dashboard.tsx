@@ -381,32 +381,24 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const shuffleNumbers = () => {
     setIsShuffling(true);
     
-    // Play shuffle sound effect with fallback options
+    // Play money counter sound effect for shuffle
     try {
-      // Try multiple audio sources for shuffle sound
-      const audioSources = [
-        '/attached_assets/B1.mp3', // Use existing Bingo audio as shuffle sound
-        '/attached_assets/start voice_1749898419925.MP3'
-      ];
-      
-      const audio = new Audio(audioSources[0]);
-      audio.volume = 0.3; // Lower volume for shuffle effect
-      audio.currentTime = 0.5; // Start partway through for shorter sound
+      const audio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
+      audio.volume = 0.6;
       audio.play().catch(() => {
-        // Try second audio source
-        const fallbackAudio = new Audio(audioSources[1]);
-        fallbackAudio.volume = 0.2;
-        fallbackAudio.play().catch(() => {
-          console.log('Shuffle audio not available');
-        });
+        console.log('Money counter sound not available');
       });
     } catch (error) {
       console.log('Audio playback error for shuffle sound');
     }
     
+    // Show "N-35" calling sequence during shuffle
+    setLastCalledNumber(35);
+    
     // Enhanced shuffle animation duration
     setTimeout(() => {
       setIsShuffling(false);
+      // Keep N-35 displayed after shuffle
     }, 2500);
   };
 
@@ -625,7 +617,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                     </div>
                   </div>
                   <p className="text-xs text-gray-600">
-                    {lastCalledNumber ? `${getLetterForNumber(lastCalledNumber)}-${lastCalledNumber}` : "N-35"}
+                    {isShuffling ? "CALLING..." : (lastCalledNumber ? `${getLetterForNumber(lastCalledNumber)}-${lastCalledNumber}` : "N-35")}
                   </p>
                 </div>
 
