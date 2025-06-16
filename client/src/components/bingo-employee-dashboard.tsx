@@ -700,23 +700,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   </div>
 
                   
-                  {/* Winner Amount Calculation Display */}
-                  {selectedCartelas.size > 0 && (
-                    <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div className="text-sm font-medium text-green-800 mb-2">Amount Calculations:</div>
-                      <div className="space-y-1 text-xs">
-                        <div className="flex justify-between">
-                          <span>Total Collected:</span>
-                          <span className="font-medium">{calculateAmounts().totalCollected.toFixed(2)} Birr</span>
-                        </div>
-                        <div className="flex justify-between text-green-600">
-                          <span>Winner Amount:</span>
-                          <span className="font-bold">{calculateAmounts().winnerAmount.toFixed(2)} Birr</span>
-                        </div>
-
+                  {/* Winner Amount Display - Always Visible */}
+                  <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-green-800 mb-1">Winner Gets</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {calculateAmounts().winnerAmount.toFixed(2)} Birr
                       </div>
+                      {selectedCartelas.size > 0 && (
+                        <div className="text-xs text-gray-600 mt-1">
+                          (After {(adminData?.profitMargin || 10)}% admin profit margin)
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* Control Buttons */}
