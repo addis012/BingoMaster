@@ -669,9 +669,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       </Badge>
                     ))}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {selectedCartelas.size} cartelas
-                  </div>
+
                   
                   {/* Winner Amount Calculation Display */}
                   {selectedCartelas.size > 0 && (
@@ -1061,92 +1059,108 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         </DialogContent>
       </Dialog>
 
-      {/* Winner Result Dialog */}
+      {/* Winner Result Dialog - Horizontal Layout */}
       <Dialog open={showWinnerResult} onOpenChange={setShowWinnerResult}>
-        <DialogContent className={winnerResult.isWinner ? "border-green-500" : "border-red-500"}>
-          <DialogHeader>
-            <DialogTitle className={winnerResult.isWinner ? "text-green-600" : "text-red-600"}>
+        <DialogContent className={`max-w-4xl w-full ${winnerResult.isWinner ? "border-green-500" : "border-red-500"}`}>
+          <DialogHeader className="flex flex-row items-center justify-between">
+            <DialogTitle className={`text-xl ${winnerResult.isWinner ? "text-green-600" : "text-red-600"}`}>
               {winnerResult.isWinner ? "🎉 WINNER FOUND!" : "❌ NOT A WINNER"}
             </DialogTitle>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowWinnerResult(false)}
+              className="h-8 w-8 p-0 hover:bg-gray-100"
+            >
+              ✕
+            </Button>
           </DialogHeader>
-          <div className="text-center py-6">
-            {winnerResult.isWinner ? (
+          
+          {winnerResult.isWinner ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+              {/* Left side - Winner info and amount */}
               <div className="space-y-4 bg-green-50 p-6 rounded-lg">
-                <div className="text-6xl mb-4">✅</div>
-                <div className="text-2xl font-bold text-green-600">
-                  Congratulations! This Cartela Has Won!
-                </div>
-                <div className="text-xl font-bold text-green-700">
-                  Cartela #{winnerResult.cartela}
-                </div>
-                <div className="text-lg text-green-600">
-                  Winning Pattern: {winnerResult.pattern}
+                <div className="text-center">
+                  <div className="text-4xl mb-2">✅</div>
+                  <div className="text-xl font-bold text-green-600 mb-2">
+                    Congratulations! This Cartela Has Won!
+                  </div>
+                  <div className="text-lg font-bold text-green-700 mb-2">
+                    Cartela #{winnerResult.cartela}
+                  </div>
+                  <div className="text-md text-green-600 mb-4">
+                    Winning Pattern: {winnerResult.pattern}
+                  </div>
                 </div>
                 
                 {/* Winner Amount Display */}
-                <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-4 mt-4">
-                  <div className="text-lg font-bold text-yellow-800 mb-2">💰 Winner Amount:</div>
-                  <div className="text-2xl font-bold text-green-700">
-                    {calculateAmounts().winnerAmount.toFixed(2)} Birr
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    From {selectedCartelas.size} cartelas × {gameAmount} Birr each
-                  </div>
-
-                </div>
-                
-                {/* Display cartela grid */}
-                {winnerResult.cartela > 0 && (
-                  <div className="mt-4">
-                    <div className="text-sm font-medium mb-2 text-green-700">Cartela Grid:</div>
-                    <div className="grid grid-cols-5 gap-1 max-w-xs mx-auto bg-white p-3 rounded border">
-                      {/* Header */}
-                      <div className="text-center font-bold text-xs bg-green-100 p-1">B</div>
-                      <div className="text-center font-bold text-xs bg-green-100 p-1">I</div>
-                      <div className="text-center font-bold text-xs bg-green-100 p-1">N</div>
-                      <div className="text-center font-bold text-xs bg-green-100 p-1">G</div>
-                      <div className="text-center font-bold text-xs bg-green-100 p-1">O</div>
-                      
-                      {/* Cartela pattern */}
-                      {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => {
-                        const isWinningCell = winnerResult.winningCells?.includes(index);
-                        const isCalled = num !== 0 && calledNumbers.includes(num);
-                        const isFree = index === 12;
-                        
-                        return (
-                          <div key={index} className={`text-center text-xs p-1 border-2 ${
-                            isWinningCell 
-                              ? 'bg-yellow-300 border-yellow-500 font-bold shadow-md animate-pulse' 
-                              : isFree
-                                ? 'bg-yellow-200 border-yellow-300' 
-                                : isCalled
-                                  ? 'bg-green-200 border-green-300'
-                                  : 'bg-gray-50 border-gray-200'
-                          }`}>
-                            {isFree ? 'FREE' : num}
-                          </div>
-                        );
-                      })}
+                <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-4">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-yellow-800 mb-2">💰 Winner Amount:</div>
+                    <div className="text-2xl font-bold text-green-700">
+                      {calculateAmounts().winnerAmount.toFixed(2)} Birr
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      From {selectedCartelas.size} cartelas × {gameAmount} Birr each
                     </div>
                   </div>
-                )}
+                </div>
               </div>
-            ) : (
-              <div className="space-y-4 bg-red-50 p-6 rounded-lg">
-                <div className="text-6xl mb-4">❌</div>
-                <div className="text-2xl font-bold text-red-600">
+
+              {/* Right side - Cartela grid */}
+              <div className="bg-white p-4 rounded-lg border">
+                <div className="text-center mb-4">
+                  <div className="text-md font-medium text-green-700 mb-2">Cartela Grid:</div>
+                  <div className="grid grid-cols-5 gap-2 max-w-sm mx-auto">
+                    {/* Header */}
+                    <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">B</div>
+                    <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">I</div>
+                    <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">N</div>
+                    <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">G</div>
+                    <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">O</div>
+                    
+                    {/* Cartela pattern */}
+                    {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => {
+                      const isWinningCell = winnerResult.winningCells?.includes(index);
+                      const isCalled = num !== 0 && calledNumbers.includes(num);
+                      const isFree = index === 12;
+                      
+                      return (
+                        <div key={index} className={`text-center text-sm p-2 border-2 rounded ${
+                          isWinningCell 
+                            ? 'bg-yellow-300 border-yellow-500 font-bold shadow-lg animate-pulse' 
+                            : isFree
+                              ? 'bg-yellow-200 border-yellow-300 font-medium' 
+                              : isCalled
+                                ? 'bg-green-200 border-green-400'
+                                : 'bg-gray-50 border-gray-200'
+                        }`}>
+                          {isFree ? 'FREE' : num}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <div className="space-y-4 bg-red-50 p-6 rounded-lg max-w-md mx-auto">
+                <div className="text-4xl mb-4">❌</div>
+                <div className="text-xl font-bold text-red-600">
                   This Cartela Did Not Win
                 </div>
-                <div className="text-xl font-bold text-red-700">
+                <div className="text-lg font-bold text-red-700">
                   Cartela #{winnerResult.cartela}
                 </div>
-                <div className="text-lg text-red-600">
+                <div className="text-md text-red-600">
                   {winnerResult.message}
                 </div>
               </div>
-            )}
-          </div>
-          <DialogFooter>
+            </div>
+          )}
+          
+          <DialogFooter className="flex justify-center gap-4">
             <Button 
               onClick={() => {
                 setShowWinnerResult(false);
@@ -1160,7 +1174,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   }, 1000);
                 }
               }}
-              className={winnerResult.isWinner ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}
+              className={`px-8 py-2 ${winnerResult.isWinner ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"} text-white`}
             >
               {winnerResult.isWinner ? "Close & Complete Game" : "Continue Game"}
             </Button>
