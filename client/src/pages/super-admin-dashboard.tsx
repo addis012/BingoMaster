@@ -107,7 +107,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   });
 
   // Get Super Admin revenues with date and admin filtering
-  const { data: revenues = [], isLoading: revenuesLoading } = useQuery({
+  const { data: revenues = [], isLoading: revenuesLoading, refetch: refetchRevenues } = useQuery({
     queryKey: ["/api/super-admin/revenues", dateFrom, dateTo, selectedAdminFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -168,6 +168,22 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
       return response.json() as WithdrawalRequest[];
     },
   });
+
+  // Filter handling functions
+  const handleDateFilter = () => {
+    refetchRevenues();
+    queryClient.invalidateQueries({ queryKey: ["/api/super-admin/revenue-total"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/super-admin/daily-summaries"] });
+  };
+
+  const clearDateFilter = () => {
+    setDateFrom("");
+    setDateTo("");
+    setSelectedAdminFilter("");
+    refetchRevenues();
+    queryClient.invalidateQueries({ queryKey: ["/api/super-admin/revenue-total"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/super-admin/daily-summaries"] });
+  };
 
   // Daily reset mutation
   const dailyResetMutation = useMutation({
@@ -251,17 +267,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     },
   });
 
-  const handleDateFilter = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/super-admin"] });
-  };
-
-  const clearDateFilter = () => {
-    setDateFrom("");
-    setDateTo("");
-    setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ["/api/super-admin"] });
-    }, 100);
-  };
+  // Remove duplicate functions - they are defined earlier
 
   const formatCurrency = (amount: string) => {
     return `${parseFloat(amount).toLocaleString()} ETB`;
@@ -354,30 +360,46 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
           </Button>
         </div>
 
+        {/* Filtered Admin Display */}
         <div className="space-y-4">
-          {admins.map((admin: any) => (
-            <div key={admin.id} className="border rounded-lg p-4">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="font-medium">{admin.name}</div>
-                    <Badge variant={admin.isBlocked ? "destructive" : "default"}>
-                      {admin.isBlocked ? "Blocked" : "Active"}
-                    </Badge>
+          {(showLowCreditOnly 
+            ? admins.filter((admin: any) => parseFloat(admin.creditBalance) < 100)
+            : admins
+          ).map((admin: any) => {
+            const creditBalance = parseFloat(admin.creditBalance);
+            const isLowCredit = creditBalance < 100;
+            
+            return (
+              <div key={admin.id} className={`border rounded-lg p-4 ${isLowCredit ? 'border-red-300 bg-red-50' : ''}`}>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="font-medium">{admin.name}</div>
+                      <Badge variant={admin.isBlocked ? "destructive" : "default"}>
+                        {admin.isBlocked ? "Blocked" : "Active"}
+                      </Badge>
+                      {isLowCredit && (
+                        <Badge variant="destructive" className="text-xs">
+                          Low Credit
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      Username: {admin.username} • Account: {admin.accountNumber}
+                    </div>
+                    <div className={`text-sm ${isLowCredit ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                      Credit Balance: {formatCurrency(admin.creditBalance)}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Shop: {admin.shopName || 'No Shop Assigned'}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Commission Rate: {admin.commissionRate || '15'}%
+                    </div>
+                    {admin.email && (
+                      <div className="text-sm text-gray-500">Email: {admin.email}</div>
+                    )}
                   </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    Username: {admin.username} • Account: {admin.accountNumber}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Credit Balance: {formatCurrency(admin.creditBalance)}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Commission Rate: {admin.commissionRate || '15'}%
-                  </div>
-                  {admin.email && (
-                    <div className="text-sm text-gray-500">Email: {admin.email}</div>
-                  )}
-                </div>
                 
                 <div className="flex gap-2">
                   <Button
@@ -803,8 +825,8 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 items-end">
-              <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div>
                 <Label htmlFor="dateFrom">From Date</Label>
                 <Input
                   id="dateFrom"
@@ -814,7 +836,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                   className="mt-1"
                 />
               </div>
-              <div className="flex-1">
+              <div>
                 <Label htmlFor="dateTo">To Date</Label>
                 <Input
                   id="dateTo"
@@ -824,6 +846,22 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                   className="mt-1"
                 />
               </div>
+              <div>
+                <Label htmlFor="adminFilter">Filter by Admin</Label>
+                <select
+                  id="adminFilter"
+                  value={selectedAdminFilter}
+                  onChange={(e) => setSelectedAdminFilter(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">All Admins</option>
+                  {admins.map((admin: any) => (
+                    <option key={admin.id} value={admin.id}>
+                      {admin.name} ({admin.shopName || 'No Shop'})
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="flex gap-2">
                 <Button onClick={handleDateFilter} variant="outline">
                   Apply Filter
@@ -832,6 +870,19 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                   Clear
                 </Button>
               </div>
+            </div>
+            
+            {/* Low Credit Filter Toggle */}
+            <div className="mt-4 pt-4 border-t">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={showLowCreditOnly}
+                  onChange={(e) => setShowLowCreditOnly(e.target.checked)}
+                  className="rounded"
+                />
+                Show only admins with low credit balance (< 100 ETB)
+              </label>
             </div>
           </CardContent>
         </Card>
