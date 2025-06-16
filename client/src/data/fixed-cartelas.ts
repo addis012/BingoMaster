@@ -1,4 +1,3 @@
-// Fixed 75 Cartelas - Official Bingo Cards
 export const FIXED_CARTELAS = [
   {
     "Board": 1,
@@ -602,60 +601,72 @@ export const FIXED_CARTELAS = [
   }
 ];
 
-// Helper function to get all numbers from a cartela
-export function getCartelaNumbers(cartela: any): number[] {
+export function getCartelaNumbers(cartelaNum: number): number[] {
+  const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
+  if (!cartela) return [];
+  
   const numbers: number[] = [];
   
-  // Add B numbers
-  cartela.B.forEach((num: number) => numbers.push(num));
-  
-  // Add I numbers
-  cartela.I.forEach((num: number) => numbers.push(num));
-  
-  // Add N numbers (excluding FREE)
-  cartela.N.forEach((num: number | string) => {
-    if (num !== "FREE") {
-      numbers.push(num as number);
-    }
+  // Add all B numbers
+  cartela.B.forEach(num => {
+    if (typeof num === 'number') numbers.push(num);
   });
   
-  // Add G numbers
-  cartela.G.forEach((num: number) => numbers.push(num));
+  // Add all I numbers
+  cartela.I.forEach(num => {
+    if (typeof num === 'number') numbers.push(num);
+  });
   
-  // Add O numbers
-  cartela.O.forEach((num: number) => numbers.push(num));
+  // Add all N numbers (excluding FREE)
+  cartela.N.forEach(num => {
+    if (typeof num === 'number') numbers.push(num);
+  });
+  
+  // Add all G numbers
+  cartela.G.forEach(num => {
+    if (typeof num === 'number') numbers.push(num);
+  });
+  
+  // Add all O numbers
+  cartela.O.forEach(num => {
+    if (typeof num === 'number') numbers.push(num);
+  });
   
   return numbers;
 }
 
-// Helper function to display cartela in grid format
-export function formatCartelaDisplay(cartela: any): string {
-  return `
-B    I    N    G    O
-${cartela.B[0].toString().padStart(2)} | ${cartela.I[0].toString().padStart(2)} | ${cartela.N[0].toString().padStart(2)} | ${cartela.G[0].toString().padStart(2)} | ${cartela.O[0].toString().padStart(2)}
-${cartela.B[1].toString().padStart(2)} | ${cartela.I[1].toString().padStart(2)} | ${cartela.N[1].toString().padStart(2)} | ${cartela.G[1].toString().padStart(2)} | ${cartela.O[1].toString().padStart(2)}
-${cartela.B[2].toString().padStart(2)} | ${cartela.I[2].toString().padStart(2)} | FREE | ${cartela.G[2].toString().padStart(2)} | ${cartela.O[2].toString().padStart(2)}
-${cartela.B[3].toString().padStart(2)} | ${cartela.I[3].toString().padStart(2)} | ${cartela.N[3].toString().padStart(2)} | ${cartela.G[3].toString().padStart(2)} | ${cartela.O[3].toString().padStart(2)}
-${cartela.B[4].toString().padStart(2)} | ${cartela.I[4].toString().padStart(2)} | ${cartela.N[4].toString().padStart(2)} | ${cartela.G[4].toString().padStart(2)} | ${cartela.O[4].toString().padStart(2)}
-  `.trim();
-}
-
-// Helper function to get cartela pattern as 5x5 grid
-export function getFixedPattern(cartelaNumber: number): number[][] {
-  const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNumber);
-  if (!cartela) {
-    return [];
-  }
+export function getFixedCartelaPattern(cartelaNum: number): number[][] {
+  const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
+  if (!cartela) return [];
   
   const pattern: number[][] = [];
+  
+  // Create 5x5 grid (BINGO format)
   for (let row = 0; row < 5; row++) {
-    pattern[row] = [
-      Number(cartela.B[row]),
-      Number(cartela.I[row]), 
-      cartela.N[row] === "FREE" ? 0 : Number(cartela.N[row]),
-      Number(cartela.G[row]),
-      Number(cartela.O[row])
-    ];
+    const rowNumbers: number[] = [];
+    
+    // B column
+    const bVal = cartela.B[row];
+    rowNumbers.push(typeof bVal === 'number' ? bVal : 0);
+    
+    // I column
+    const iVal = cartela.I[row];
+    rowNumbers.push(typeof iVal === 'number' ? iVal : 0);
+    
+    // N column
+    const nVal = cartela.N[row];
+    rowNumbers.push(nVal === "FREE" ? 0 : (typeof nVal === 'number' ? nVal : 0));
+    
+    // G column
+    const gVal = cartela.G[row];
+    rowNumbers.push(typeof gVal === 'number' ? gVal : 0);
+    
+    // O column
+    const oVal = cartela.O[row];
+    rowNumbers.push(typeof oVal === 'number' ? oVal : 0);
+    
+    pattern.push(rowNumbers);
   }
+  
   return pattern;
 }
