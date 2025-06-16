@@ -1147,20 +1147,30 @@ export class DatabaseStorage implements IStorage {
     return createdRevenue;
   }
 
-  async getSuperAdminRevenues(dateFrom?: string, dateTo?: string): Promise<SuperAdminRevenue[]> {
+  async getSuperAdminRevenues(dateFrom?: string, dateTo?: string, adminId?: number): Promise<SuperAdminRevenue[]> {
     let query = db.select().from(superAdminRevenues);
 
+    const conditions = [];
+    
     if (dateFrom && dateTo) {
-      query = query.where(
+      conditions.push(
         and(
           gte(superAdminRevenues.dateEAT, dateFrom),
           lte(superAdminRevenues.dateEAT, dateTo)
         )
       );
     } else if (dateFrom) {
-      query = query.where(gte(superAdminRevenues.dateEAT, dateFrom));
+      conditions.push(gte(superAdminRevenues.dateEAT, dateFrom));
     } else if (dateTo) {
-      query = query.where(lte(superAdminRevenues.dateEAT, dateTo));
+      conditions.push(lte(superAdminRevenues.dateEAT, dateTo));
+    }
+
+    if (adminId) {
+      conditions.push(eq(superAdminRevenues.adminId, adminId));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
 
     return await query.orderBy(desc(superAdminRevenues.createdAt));
@@ -1296,10 +1306,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Admin management methods for Super Admin
-  async getAdminUsers(): Promise<User[]> {
-    return await db.select().from(users)
-      .where(eq(users.role, 'admin'))
-      .orderBy(desc(users.createdAt));
+  async getAdminUsers(): Promise<Array<User & { shopName?: string }>> {
+    const adminUsers = await db.select({
+      id: users.id,
+      username: users.username,
+      password: users.password,
+      role: users.role,
+      name: users.name,
+      email: users.email,
+      isBlocked: users.isBlocked,
+      shopId: users.shopId,
+      creditBalance: users.creditBalance,
+      accountNumber: users.accountNumber,
+      referredBy: users.referredBy,
+      createdAt: users.createdAt,
+      shopName: shops.name,
+    })
+    .from(users)
+    .leftJoin(shops, eq(users.shopId, shops.id))
+    .where(eq(users.role, 'admin'))
+    .orderBy(desc(users.createdAt));
+
+    return adminUsers;
   }
 
   async createAdminUser(adminData: any): Promise<User> {

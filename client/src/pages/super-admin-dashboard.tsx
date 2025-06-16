@@ -76,6 +76,8 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   const [dateTo, setDateTo] = useState("");
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
   const [showScreenshotModal, setShowScreenshotModal] = useState(false);
+  const [selectedAdminFilter, setSelectedAdminFilter] = useState<string>("");
+  const [showLowCreditOnly, setShowLowCreditOnly] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,13 +86,34 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     queryKey: ["/api/super-admin/current-eat-date"],
   });
 
-  // Get Super Admin revenues with date filtering
+  // Get admins with credit balances
+  const { data: admins = [], isLoading: adminsLoading } = useQuery({
+    queryKey: ["/api/super-admin/admins"],
+    queryFn: async () => {
+      const response = await fetch("/api/super-admin/admins");
+      if (!response.ok) throw new Error("Failed to fetch admins");
+      return response.json() as Array<{
+        id: number;
+        username: string;
+        name: string;
+        email: string;
+        creditBalance: string;
+        accountNumber: string;
+        isBlocked: boolean;
+        shopId: number;
+        shopName: string;
+      }>;
+    },
+  });
+
+  // Get Super Admin revenues with date and admin filtering
   const { data: revenues = [], isLoading: revenuesLoading } = useQuery({
-    queryKey: ["/api/super-admin/revenues", dateFrom, dateTo],
+    queryKey: ["/api/super-admin/revenues", dateFrom, dateTo, selectedAdminFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (dateFrom) params.append("dateFrom", dateFrom);
       if (dateTo) params.append("dateTo", dateTo);
+      if (selectedAdminFilter) params.append("adminId", selectedAdminFilter);
       
       const response = await fetch(`/api/super-admin/revenues?${params}`);
       if (!response.ok) throw new Error("Failed to fetch revenues");

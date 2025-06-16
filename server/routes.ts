@@ -1960,10 +1960,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Super admin access required" });
       }
 
-      const { dateFrom, dateTo } = req.query;
+      const { dateFrom, dateTo, adminId } = req.query;
       const revenues = await storage.getSuperAdminRevenues(
         dateFrom as string,
-        dateTo as string
+        dateTo as string,
+        adminId ? parseInt(adminId as string) : undefined
       );
 
       res.json(revenues);
