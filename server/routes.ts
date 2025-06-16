@@ -2375,7 +2375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const game = await storage.createGame({
         shopId: user.shopId!,
         employeeId: user.id,
-        status: 'waiting',
+        status: 'pending',
         entryFee: entryFee.toString(),
         prizePool: "0.00"
       });
