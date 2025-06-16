@@ -430,101 +430,111 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               </p>
             </CardHeader>
             <CardContent>
-              {/* BINGO Headers */}
-              <div className="grid grid-cols-5 gap-2 mb-4">
-                {[
-                  { letter: 'B', color: 'bg-red-500' },
-                  { letter: 'I', color: 'bg-blue-500' },
-                  { letter: 'N', color: 'bg-green-500' },
-                  { letter: 'G', color: 'bg-yellow-500' },
-                  { letter: 'O', color: 'bg-purple-500' }
-                ].map(({ letter, color }) => (
-                  <div key={letter} className={`h-10 ${color} text-white rounded flex items-center justify-center font-bold text-lg`}>
-                    {letter}
+              {/* Horizontal BINGO Board */}
+              <div className="space-y-2">
+                {/* B Row */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                    B
                   </div>
-                ))}
-              </div>
-              
-              {/* Numbers Grid */}
-              <div className="grid grid-cols-5 gap-2">
-                {/* B Column */}
-                <div className="space-y-1">
-                  {Array.from({length: 15}, (_, i) => i + 1).map(num => (
-                    <div 
-                      key={num} 
-                      className={`h-8 rounded flex items-center justify-center text-xs font-medium ${
-                        calledNumbers.includes(num) 
-                          ? 'bg-red-500 text-white' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {num}
-                    </div>
-                  ))}
+                  <div className="grid grid-cols-15 gap-1 flex-1">
+                    {Array.from({length: 15}, (_, i) => i + 1).map(num => (
+                      <div 
+                        key={num} 
+                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
+                          calledNumbers.includes(num) 
+                            ? 'bg-red-500 text-white' 
+                            : 'bg-gray-100 text-gray-700 border'
+                        }`}
+                      >
+                        {num}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                
-                {/* I Column */}
-                <div className="space-y-1">
-                  {Array.from({length: 15}, (_, i) => i + 16).map(num => (
-                    <div 
-                      key={num} 
-                      className={`h-8 rounded flex items-center justify-center text-xs font-medium ${
-                        calledNumbers.includes(num) 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {num}
-                    </div>
-                  ))}
+
+                {/* I Row */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                    I
+                  </div>
+                  <div className="grid grid-cols-15 gap-1 flex-1">
+                    {Array.from({length: 15}, (_, i) => i + 16).map(num => (
+                      <div 
+                        key={num} 
+                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
+                          calledNumbers.includes(num) 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-100 text-gray-700 border'
+                        }`}
+                      >
+                        {num}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                
-                {/* N Column */}
-                <div className="space-y-1">
-                  {Array.from({length: 15}, (_, i) => i + 31).map(num => (
-                    <div 
-                      key={num} 
-                      className={`h-8 rounded flex items-center justify-center text-xs font-medium ${
-                        calledNumbers.includes(num) 
-                          ? 'bg-green-500 text-white' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {num}
-                    </div>
-                  ))}
+
+                {/* N Row */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-green-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                    N
+                  </div>
+                  <div className="grid grid-cols-15 gap-1 flex-1">
+                    {Array.from({length: 15}, (_, i) => i + 31).map(num => (
+                      <div 
+                        key={num} 
+                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
+                          calledNumbers.includes(num) 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-gray-100 text-gray-700 border'
+                        }`}
+                      >
+                        {num}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                
-                {/* G Column */}
-                <div className="space-y-1">
-                  {Array.from({length: 15}, (_, i) => i + 46).map(num => (
-                    <div 
-                      key={num} 
-                      className={`h-8 rounded flex items-center justify-center text-xs font-medium ${
-                        calledNumbers.includes(num) 
-                          ? 'bg-yellow-500 text-white' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {num}
-                    </div>
-                  ))}
+
+                {/* G Row */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-yellow-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                    G
+                  </div>
+                  <div className="grid grid-cols-15 gap-1 flex-1">
+                    {Array.from({length: 15}, (_, i) => i + 46).map(num => (
+                      <div 
+                        key={num} 
+                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
+                          calledNumbers.includes(num) 
+                            ? 'bg-yellow-500 text-white' 
+                            : 'bg-gray-100 text-gray-700 border'
+                        }`}
+                      >
+                        {num}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                
-                {/* O Column */}
-                <div className="space-y-1">
-                  {Array.from({length: 15}, (_, i) => i + 61).map(num => (
-                    <div 
-                      key={num} 
-                      className={`h-8 rounded flex items-center justify-center text-xs font-medium ${
-                        calledNumbers.includes(num) 
-                          ? 'bg-purple-500 text-white' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {num}
-                    </div>
-                  ))}
+
+                {/* O Row */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-purple-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                    O
+                  </div>
+                  <div className="grid grid-cols-15 gap-1 flex-1">
+                    {Array.from({length: 15}, (_, i) => i + 61).map(num => (
+                      <div 
+                        key={num} 
+                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
+                          calledNumbers.includes(num) 
+                            ? 'bg-purple-500 text-white' 
+                            : 'bg-gray-100 text-gray-700 border'
+                        }`}
+                      >
+                        {num}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
