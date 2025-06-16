@@ -59,10 +59,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 2000
   });
 
-  // Shop data query
+  // Shop data query with frequent refresh for real-time profit margin updates
   const { data: shopData } = useQuery({
-    queryKey: ['/api/shops', user?.shopId],
-    enabled: !!user?.shopId
+    queryKey: [`/api/shops/${user?.shopId}`],
+    enabled: !!user?.shopId,
+    refetchInterval: 5000 // Refresh every 5 seconds to catch admin changes
   });
 
   // Calculate amounts based on selected cartelas and profit margin
