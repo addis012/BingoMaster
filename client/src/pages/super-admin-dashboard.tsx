@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, Users, Calendar, TrendingUp, Download, RefreshCw, XCircle, Filter, User, Plus } from "lucide-react";
+import { DollarSign, Users, Calendar, TrendingUp, Download, RefreshCw, XCircle, Filter, User, Plus, Edit, Settings } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
 const formatCurrency = (amount: string | number) => {
@@ -87,6 +87,8 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   const [selectedAdminFilter, setSelectedAdminFilter] = useState("");
   const [showLowCreditOnly, setShowLowCreditOnly] = useState(false);
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
+  const [showAddAdmin, setShowAddAdmin] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<any>(null);
 
   // Get current EAT date
   const { data: currentDate } = useQuery({
@@ -280,7 +282,159 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     },
   });
 
+  // Admin management mutations
+  const createAdminMutation = useMutation({
+    mutationFn: async (adminData: any) => {
+      const response = await fetch("/api/super-admin/admins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(adminData),
+      });
+      if (!response.ok) throw new Error("Failed to create admin");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Admin Created",
+        description: "New admin has been created successfully.",
+      });
+      setShowAddAdmin(false);
+      refetchAdmins();
+    },
+  });
+
+  const updateAdminMutation = useMutation({
+    mutationFn: async ({ adminId, data }: { adminId: number; data: any }) => {
+      const response = await fetch(`/api/super-admin/admins/${adminId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to update admin");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Admin Updated",
+        description: "Admin has been updated successfully.",
+      });
+      setEditingAdmin(null);
+      refetchAdmins();
+    },
+  });
+
+  const toggleAdminStatusMutation = useMutation({
+    mutationFn: async ({ adminId, action }: { adminId: number; action: string }) => {
+      const response = await fetch(`/api/super-admin/admins/${adminId}/${action}`, {
+        method: "PATCH",
+      });
+      if (!response.ok) throw new Error(`Failed to ${action} admin`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Admin Status Updated",
+        description: "Admin status has been updated successfully.",
+      });
+      refetchAdmins();
+    },
+  });
+
   const totalRevenueAmount = (totalRevenue as any)?.total || "0";
+
+  // Admin Form Component
+  const AdminForm = ({ admin, onSubmit, onCancel, isSubmitting }: {
+    admin?: any;
+    onSubmit: (data: any) => void;
+    onCancel: () => void;
+    isSubmitting: boolean;
+  }) => {
+    const [formData, setFormData] = useState({
+      name: admin?.name || '',
+      username: admin?.username || '',
+      password: '',
+      shopName: admin?.shopName || '',
+      commissionRate: admin?.commissionRate || '15',
+      email: admin?.email || '',
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      onSubmit(formData);
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="name">Full Name</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="password">{admin ? 'New Password (leave empty to keep current)' : 'Password'}</Label>
+          <Input
+            id="password"
+            type="password"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            required={!admin}
+          />
+        </div>
+        <div>
+          <Label htmlFor="shopName">Shop Name</Label>
+          <Input
+            id="shopName"
+            value={formData.shopName}
+            onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="commissionRate">Commission Rate (%)</Label>
+          <Input
+            id="commissionRate"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            value={formData.commissionRate}
+            onChange={(e) => setFormData({ ...formData, commissionRate: e.target.value })}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="email">Email (Optional)</Label>
+          <Input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          />
+        </div>
+        <div className="flex gap-2 pt-4">
+          <Button type="submit" disabled={isSubmitting}>
+            {admin ? 'Update Admin' : 'Create Admin'}
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -500,6 +654,14 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                 <div className="flex justify-between items-center">
                   <CardTitle>Admin Management</CardTitle>
                   <div className="flex items-center gap-4">
+                    <Button
+                      onClick={() => setShowAddAdmin(true)}
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add New Admin
+                    </Button>
                     <label className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
@@ -545,6 +707,33 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                             <div className="text-sm text-gray-500">
                               Shop: {admin.shopName || 'No Shop Assigned'}
                             </div>
+                            <div className="text-sm text-gray-500">
+                              Commission Rate: {admin.commissionRate || '15'}%
+                            </div>
+                            {admin.email && (
+                              <div className="text-sm text-gray-500">Email: {admin.email}</div>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingAdmin(admin)}
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={admin.isBlocked ? "default" : "destructive"}
+                              onClick={() => toggleAdminStatusMutation.mutate({
+                                adminId: admin.id,
+                                action: admin.isBlocked ? 'unblock' : 'block'
+                              })}
+                              disabled={toggleAdminStatusMutation.isPending}
+                            >
+                              {admin.isBlocked ? 'Unblock' : 'Block'}
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -663,6 +852,34 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {/* Admin Form Modal */}
+        {(showAddAdmin || editingAdmin) && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-auto">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4">
+                  {editingAdmin ? 'Edit Admin' : 'Add New Admin'}
+                </h3>
+                <AdminForm
+                  admin={editingAdmin}
+                  onSubmit={(data) => {
+                    if (editingAdmin) {
+                      updateAdminMutation.mutate({ adminId: editingAdmin.id, data });
+                    } else {
+                      createAdminMutation.mutate(data);
+                    }
+                  }}
+                  onCancel={() => {
+                    setShowAddAdmin(false);
+                    setEditingAdmin(null);
+                  }}
+                  isSubmitting={createAdminMutation.isPending || updateAdminMutation.isPending}
+                />
+              </div>
+            </div>
           </div>
         )}
 

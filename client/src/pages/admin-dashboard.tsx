@@ -47,6 +47,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2">Manage your shop operations and employees</p>
+          {user.accountNumber && (
+            <p className="text-sm text-gray-500 mt-1">
+              Account Number: <span className="font-mono font-medium">{user.accountNumber}</span>
+            </p>
+          )}
         </div>
 
         {/* Low Credit Warning */}
