@@ -542,11 +542,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
           </div>
         </div>
         
-        {shopData && user?.role === 'admin' && (
-          <div className="mt-2 text-sm text-gray-500 text-center">
-            Shop Profit Margin: {shopData.profitMargin || 0}%
-          </div>
-        )}
+
         
         {/* Low Credit Warning for Admin's Balance */}
         {user?.role === 'employee' && creditBalance && parseFloat(creditBalance.balance) < 100 && (
