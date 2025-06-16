@@ -65,6 +65,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Admin credit balance query
   const { data: adminData } = useQuery({
     queryKey: ['/api/users', shopData?.adminId],
+    queryFn: async () => {
+      if (!shopData?.adminId) return null;
+      const response = await fetch(`/api/users/${shopData.adminId}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
     enabled: !!shopData?.adminId,
     refetchInterval: 30000 // Check admin balance every 30 seconds
   });
@@ -164,8 +170,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       if (!response.ok) throw new Error('Failed to start game');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setGameActive(true);
+      setActiveGameId(data.id);
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       
       // Play game start sound
@@ -186,10 +193,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Automatically start calling numbers after a short delay
       setTimeout(() => {
-        if (activeGameId) {
-          callNumberMutation.mutate();
-        }
+        callNumberMutation.mutate();
       }, 2000);
+    },
+    onError: (error: any) => {
+      console.error("Start game error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start game",
+        variant: "destructive"
+      });
     }
   });
 
@@ -565,15 +578,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       disabled={selectedCartelas.size === 0 || createGameMutation.isPending}
                       className="bg-green-500 hover:bg-green-600 text-white"
                     >
-                      {createGameMutation.isPending ? "Creating..." : "Start"}
+                      {createGameMutation.isPending ? "Creating..." : "Create Game"}
                     </Button>
-                  ) : !gameActive ? (
+                  ) : !gameActive && !gameFinished ? (
                     <Button 
                       onClick={() => startGameMutation.mutate()}
                       disabled={startGameMutation.isPending}
                       className="bg-green-500 hover:bg-green-600 text-white"
                     >
-                      {startGameMutation.isPending ? "Starting..." : "Start"}
+                      {startGameMutation.isPending ? "Starting..." : "Start Game"}
+                    </Button>
+                  ) : gameFinished ? (
+                    <Button 
+                      onClick={() => resetGameMutation.mutate()}
+                      disabled={resetGameMutation.isPending}
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      {resetGameMutation.isPending ? "Creating..." : "New Game"}
                     </Button>
                   ) : (
                     <Button 
