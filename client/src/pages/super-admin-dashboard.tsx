@@ -87,22 +87,12 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
   });
 
   // Get admins with credit balances
-  const { data: admins = [], isLoading: adminsLoading } = useQuery({
+  const { data: admins = [], isLoading: adminsLoading, refetch: refetchAdmins } = useQuery({
     queryKey: ["/api/super-admin/admins"],
     queryFn: async () => {
       const response = await fetch("/api/super-admin/admins");
       if (!response.ok) throw new Error("Failed to fetch admins");
-      return response.json() as Array<{
-        id: number;
-        username: string;
-        name: string;
-        email: string;
-        creditBalance: string;
-        accountNumber: string;
-        isBlocked: boolean;
-        shopId: number;
-        shopName: string;
-      }>;
+      return response.json();
     },
   });
 
@@ -267,8 +257,6 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
     },
   });
 
-  // Remove duplicate functions - they are defined earlier
-
   const formatCurrency = (amount: string) => {
     return `${parseFloat(amount).toLocaleString()} ETB`;
   };
@@ -363,10 +351,10 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
         {/* Filtered Admin Display */}
         <div className="space-y-4">
           {(showLowCreditOnly 
-            ? admins.filter((admin: any) => parseFloat(admin.creditBalance) < 100)
-            : admins
+            ? (admins as any[]).filter((admin: any) => parseFloat(admin.creditBalance || '0') < 100)
+            : (admins as any[])
           ).map((admin: any) => {
-            const creditBalance = parseFloat(admin.creditBalance);
+            const creditBalance = parseFloat(admin.creditBalance || '0');
             const isLowCredit = creditBalance < 100;
             
             return (
@@ -388,7 +376,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                       Username: {admin.username} • Account: {admin.accountNumber}
                     </div>
                     <div className={`text-sm ${isLowCredit ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
-                      Credit Balance: {formatCurrency(admin.creditBalance)}
+                      Credit Balance: {formatCurrency(admin.creditBalance || '0')}
                     </div>
                     <div className="text-sm text-gray-500">
                       Shop: {admin.shopName || 'No Shop Assigned'}
@@ -424,7 +412,8 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {(showAddAdmin || editingAdmin) && (
@@ -456,16 +445,6 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
       </div>
     );
   };
-
-  // Get admins for referral dropdown
-  const { data: allAdmins = [] } = useQuery({
-    queryKey: ["/api/super-admin/admins"],
-    queryFn: async () => {
-      const response = await fetch("/api/super-admin/admins");
-      if (!response.ok) throw new Error("Failed to fetch admins");
-      return response.json();
-    },
-  });
 
   // Admin Form Component
   const AdminForm = ({ admin, onSubmit, onCancel, isSubmitting }: {
