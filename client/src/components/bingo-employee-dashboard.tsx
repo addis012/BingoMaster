@@ -267,13 +267,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           console.log('Audio playback error');
         }
         
-        // Auto-call next number after 4 seconds if game is still active and not paused
+        // Auto-call next number after 3 seconds if game is still active and not paused
         if (gameActive && !gameFinished && !gamePaused) {
           numberCallTimer.current = setTimeout(() => {
             if (gameActive && !gameFinished && !gamePaused && activeGameId) {
               callNumberMutation.mutate();
             }
-          }, 4000);
+          }, 3000);
         }
       }
     }
@@ -347,32 +347,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         pattern: ""
       });
       
-      // Play loser sound
-      try {
-        const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
-        audio.volume = 0.8;
-        audio.play().catch(() => {
-          console.log('Loser sound not available');
-        });
-      } catch (error) {
-        console.log('Loser audio playback error');
+      // Clear any existing timer to prevent audio overlap
+      if (numberCallTimer.current) {
+        clearTimeout(numberCallTimer.current);
+        numberCallTimer.current = null;
       }
+      
+      // Play loser sound after a small delay to avoid overlap
+      setTimeout(() => {
+        try {
+          const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
+          audio.volume = 0.8;
+          audio.play().catch(() => {
+            console.log('Loser sound not available');
+          });
+        } catch (error) {
+          console.log('Loser audio playback error');
+        }
+      }, 500);
       
       setShowWinnerResult(true);
       setShowWinnerChecker(false);
-      
-      // Auto-close popup after 3 seconds and resume game
-      setTimeout(() => {
-        setShowWinnerResult(false);
-        // Resume game if it was active
-        if (gameActive && !gameFinished) {
-          setGamePaused(false);
-          // Continue calling numbers if not paused
-          if (activeGameId && !gamePaused) {
-            callNumberMutation.mutate();
-          }
-        }
-      }, 3000);
       
     } else {
       // IS A WINNER - Pause game completely and show green popup
@@ -873,7 +868,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               {/* Check Winner Button */}
               <div className="mt-6 text-center">
                 <Button 
-                  onClick={() => setShowWinnerChecker(true)}
+                  onClick={() => {
+                    // Immediately pause the game to stop number calling
+                    pauseGame();
+                    setShowWinnerChecker(true);
+                  }}
                   disabled={!activeGameId}
                   className="bg-purple-500 hover:bg-purple-600 text-white px-8"
                 >
@@ -1049,6 +1048,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   Winning Pattern: {winnerResult.pattern}
                 </div>
                 
+                {/* Winner Amount Display */}
+                <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-4 mt-4">
+                  <div className="text-lg font-bold text-yellow-800 mb-2">💰 Winner Amount:</div>
+                  <div className="text-2xl font-bold text-green-700">
+                    {calculateAmounts().winnerAmount.toFixed(2)} Birr
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    From {selectedCartelas.size} cartelas × {gameAmount} Birr each
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Admin profit margin: {(shopData?.profitMargin || 0)}%
+                  </div>
+                </div>
+                
                 {/* Display cartela grid */}
                 {winnerResult.cartela > 0 && (
                   <div className="mt-4">
@@ -1105,7 +1118,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               }}
               className={winnerResult.isWinner ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}
             >
-              {winnerResult.isWinner ? "OK" : "Continue Game"}
+              {winnerResult.isWinner ? "Close & Complete Game" : "Continue Game"}
             </Button>
           </DialogFooter>
         </DialogContent>
