@@ -368,6 +368,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     if (autoCallInterval.current) {
       clearInterval(autoCallInterval.current);
     }
+    setGameSetup(false);
     setGameActive(false);
     setGameFinished(false);
     setCalledNumbers([]);
@@ -748,6 +749,13 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                     >
                       Pause
                     </Button>
+                  ) : gameSetup && !gameFinished ? (
+                    <Button
+                      onClick={startNumberCalling}
+                      className="bg-blue-600 hover:bg-blue-700 text-white py-1 text-xs"
+                    >
+                      Start Game
+                    </Button>
                   ) : calledNumbers.length > 0 && !gameFinished ? (
                     <Button
                       onClick={resumeGame}
@@ -761,7 +769,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                       disabled={bookedCartelas.size === 0}
                       className="bg-green-600 hover:bg-green-700 text-white py-1 text-xs"
                     >
-                      Start
+                      Setup Game
                     </Button>
                   )}
 
@@ -790,7 +798,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
               </CardHeader>
               <CardContent className="px-6">
                 {/* BINGO Board - Horizontal Layout with Bold Numbers */}
-                <div className="space-y-2">
+                <div className="bingo-board space-y-2">
                   {/* B Row */}
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">B</div>
