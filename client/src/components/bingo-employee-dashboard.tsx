@@ -477,16 +477,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           </div>
         </div>
         <div className="text-center text-sm text-gray-600 mt-2">
-          Shop Profit Margin: 20.00%
-        </div>
-        <div className="bg-orange-50 border border-orange-200 text-orange-700 p-3 rounded mt-2">
-          <div className="flex items-center">
-            <span className="mr-2">⚠</span>
-            <div>
-              <div className="font-semibold">Admin Low Credit Balance</div>
-              <div className="text-sm">Shop admin balance is low (0.00 ETB). Contact admin to add more credits.</div>
-            </div>
-          </div>
+          Shop Profit Margin: {((shopData as any)?.profitMargin || 20).toFixed(2)}%
         </div>
       </div>
 

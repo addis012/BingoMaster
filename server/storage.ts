@@ -230,8 +230,13 @@ export class DatabaseStorage implements IStorage {
     const [game] = await db.select().from(games)
       .where(and(
         eq(games.employeeId, employeeId),
-        eq(games.status, 'waiting')
-      ));
+        or(
+          eq(games.status, 'waiting'),
+          eq(games.status, 'pending'),
+          eq(games.status, 'active')
+        )
+      ))
+      .orderBy(desc(games.id));
     return game || undefined;
   }
 

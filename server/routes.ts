@@ -2461,6 +2461,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const gameId = parseInt(req.params.gameId);
+      const currentGame = await storage.getGame(gameId);
+      
+      if (!currentGame) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      if (currentGame.status !== 'pending') {
+        return res.status(400).json({ message: "Game already started or completed" });
+      }
       
       const game = await storage.updateGameStatus(gameId, 'active');
       res.json(game);
