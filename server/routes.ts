@@ -443,7 +443,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameData = insertGameSchema.parse({
         ...req.body,
         employeeId: user.id,  // Force use of authenticated user's ID
-        shopId: user.shopId   // Force use of authenticated user's shop
+        shopId: user.shopId,  // Force use of authenticated user's shop
+        status: "waiting",    // Default status for new games
+        entryFee: req.body.amount || "20.00" // Use amount as entryFee
       });
       console.log("✅ Game data validated:", gameData);
       

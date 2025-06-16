@@ -801,7 +801,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       disabled={selectedCartelas.size === 0 || createGameMutation.isPending}
                       className="bg-green-500 hover:bg-green-600 text-white"
                     >
-                      {createGameMutation.isPending ? "Creating..." : "Create Game"}
+                      {createGameMutation.isPending ? "Starting..." : "Start Game"}
                     </Button>
                   ) : !gameActive && !gameFinished ? (
                     <Button 
