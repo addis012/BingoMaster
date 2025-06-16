@@ -445,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         employeeId: user.id,  // Force use of authenticated user's ID
         shopId: user.shopId,  // Force use of authenticated user's shop
         status: "waiting",    // Default status for new games
-        entryFee: req.body.amount || "20.00" // Use amount as entryFee
+        entryFee: String(req.body.amount || "20.00") // Convert to string for entryFee
       });
       console.log("✅ Game data validated:", gameData);
       
