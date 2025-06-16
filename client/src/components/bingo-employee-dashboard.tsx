@@ -163,10 +163,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setActiveGameId(data.id);
       setGameActive(false);
       setGameFinished(false);
-      setCalledNumbers([]);
+      setCalledNumbers([]); // Ensure no numbers are pre-marked
       setLastCalledNumber(null);
       setBookedCartelas(new Set(selectedCartelas));
-      setSelectedCartelas(new Set());
+      // Keep selectedCartelas for validation during the game
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       toast({
         title: "Game Created",
@@ -194,6 +194,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     onSuccess: (data) => {
       setGameActive(true);
       setActiveGameId(data.id);
+      setCalledNumbers([]); // Clear any previous numbers when starting
+      setLastCalledNumber(null);
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       
       // Play game start sound
@@ -306,12 +308,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
 
-    if (!bookedCartelas.has(cartelaNum)) {
+    if (!selectedCartelas.has(cartelaNum)) {
       // Show red popup for not booked cartela
       setWinnerResult({
         isWinner: false,
         cartela: cartelaNum,
-        message: "This cartela was not booked for this game",
+        message: "This cartela was not selected for this game",
         pattern: ""
       });
       setShowWinnerResult(true);
