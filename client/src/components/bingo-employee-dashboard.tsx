@@ -44,6 +44,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [isShuffling, setIsShuffling] = useState(false);
   const [showCartelaPreview, setShowCartelaPreview] = useState(false);
   const [previewCartela, setPreviewCartela] = useState<number | null>(null);
+  const [isBoardShuffling, setIsBoardShuffling] = useState(false);
+  const [shuffledPositions, setShuffledPositions] = useState<number[]>([]);
+  
+  // Speed control
+  const [autoPlaySpeed, setAutoPlaySpeed] = useState(3); // seconds between numbers
   
   // Timer reference for instant pause control
   const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
@@ -138,7 +143,46 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return "?";
   };
 
-  // Shuffle animation with sound
+  // Board shuffle animation - purely visual entertainment
+  const shuffleBingoBoard = () => {
+    setIsBoardShuffling(true);
+    
+    // Create array of all 75 numbers for shuffling
+    const allNumbers = Array.from({length: 75}, (_, i) => i + 1);
+    
+    // Play shuffle sound effect
+    try {
+      const audio = new Audio('/attached_assets/money-counter-95830_1750080978946.mp3');
+      audio.volume = 0.7;
+      audio.play().catch(() => {
+        console.log('Shuffle sound not available');
+      });
+    } catch (error) {
+      console.log('Audio playback error for shuffle sound');
+    }
+    
+    // Shuffle animation phases
+    let shuffleCount = 0;
+    const maxShuffles = 8;
+    
+    const shuffleInterval = setInterval(() => {
+      // Create randomized positions for visual effect
+      const shuffled = [...allNumbers].sort(() => Math.random() - 0.5);
+      setShuffledPositions(shuffled);
+      
+      shuffleCount++;
+      if (shuffleCount >= maxShuffles) {
+        clearInterval(shuffleInterval);
+        // Return to original positions
+        setShuffledPositions([]);
+        setTimeout(() => {
+          setIsBoardShuffling(false);
+        }, 300);
+      }
+    }, 200);
+  };
+
+  // Original shuffle for number calling - keep existing functionality
   const shuffleNumbers = () => {
     if (!activeGameId) return;
     
@@ -300,7 +344,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           if (gameActive && !gameFinished && !gamePaused && activeGameId) {
             callNumberMutation.mutate();
           }
-        }, 3000);
+        }, autoPlaySpeed * 1000); // Use adjustable speed
       }
     }
   });
@@ -688,6 +732,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   />
                 </div>
 
+                {/* Speed Control */}
+                <div>
+                  <Label className="text-sm font-medium">Auto Play Speed</Label>
+                  <div className="mt-2 space-y-2">
+                    <Input
+                      type="range"
+                      min="1"
+                      max="10"
+                      step="0.5"
+                      value={autoPlaySpeed}
+                      onChange={(e) => setAutoPlaySpeed(parseFloat(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>Fast (1s)</span>
+                      <span className="font-medium">{autoPlaySpeed}s between numbers</span>
+                      <span>Slow (10s)</span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Selected Cartelas */}
                 <div>
                   <Label className="text-sm font-medium">Selected Cartelas</Label>
@@ -824,18 +889,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     B
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
-                    {Array.from({length: 15}, (_, i) => i + 1).map(num => (
-                      <div 
-                        key={num} 
-                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
-                          calledNumbers.includes(num) 
-                            ? 'bg-red-500 text-white' 
-                            : 'bg-gray-100 text-gray-700 border'
-                        }`}
-                      >
-                        {num}
-                      </div>
-                    ))}
+                    {Array.from({length: 15}, (_, i) => i + 1).map((num, index) => {
+                      const shuffledNum = isBoardShuffling && shuffledPositions.length > 0 ? shuffledPositions[index] : num;
+                      return (
+                        <div 
+                          key={num} 
+                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                            isBoardShuffling 
+                              ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : calledNumbers.includes(num) 
+                                ? 'bg-red-500 text-white' 
+                                : 'bg-gray-100 text-gray-700 border'
+                          }`}
+                        >
+                          {shuffledNum}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -845,18 +915,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     I
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
-                    {Array.from({length: 15}, (_, i) => i + 16).map(num => (
-                      <div 
-                        key={num} 
-                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
-                          calledNumbers.includes(num) 
-                            ? 'bg-blue-500 text-white' 
-                            : 'bg-gray-100 text-gray-700 border'
-                        }`}
-                      >
-                        {num}
-                      </div>
-                    ))}
+                    {Array.from({length: 15}, (_, i) => i + 16).map((num, index) => {
+                      const shuffledNum = isBoardShuffling && shuffledPositions.length > 0 ? shuffledPositions[index + 15] : num;
+                      return (
+                        <div 
+                          key={num} 
+                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                            isBoardShuffling 
+                              ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : calledNumbers.includes(num) 
+                                ? 'bg-blue-500 text-white' 
+                                : 'bg-gray-100 text-gray-700 border'
+                          }`}
+                        >
+                          {shuffledNum}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -924,8 +999,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 </div>
               </div>
 
-              {/* Check Winner Button */}
-              <div className="mt-6 text-center">
+              {/* Action Buttons */}
+              <div className="mt-6 flex gap-4 justify-center">
                 <Button 
                   onClick={() => {
                     // Immediately pause the game to stop number calling
@@ -936,6 +1011,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   className="bg-purple-500 hover:bg-purple-600 text-white px-8"
                 >
                   Check Winner
+                </Button>
+                <Button 
+                  onClick={shuffleBingoBoard}
+                  disabled={isBoardShuffling}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+                >
+                  {isBoardShuffling ? "Shuffling..." : "🎲 Shuffle Board"}
                 </Button>
               </div>
             </CardContent>
