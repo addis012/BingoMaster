@@ -2635,14 +2635,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Complete the game
       const game = await storage.completeGame(gameId, winnerId, prizeAmount);
       
-      // Record game history
+      // Record game history with safe calculations
+      const totalCollected = parseFloat(game.prizePool || "0");
+      const prize = parseFloat(prizeAmount || "0");
+      const adminProfit = isNaN(totalCollected) || isNaN(prize) ? 0 : totalCollected - prize;
+      
       await storage.recordGameHistory({
         gameId,
         shopId: user.shopId!,
         employeeId: user.id,
-        totalCollected: game.prizePool,
-        prizeAmount,
-        adminProfit: (parseFloat(game.prizePool) - parseFloat(prizeAmount)).toString(),
+        totalCollected: game.prizePool || "0.00",
+        prizeAmount: prizeAmount || "0.00",
+        adminProfit: adminProfit.toString(),
         superAdminCommission: "0.00",
         playerCount: await storage.getGamePlayerCount(gameId),
         winnerName,

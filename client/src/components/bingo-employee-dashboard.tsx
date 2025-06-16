@@ -287,11 +287,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
 
     if (!bookedCartelas.has(cartelaNum)) {
-      toast({
-        title: "Cartela Not Booked",
-        description: "This cartela was not booked for this game",
-        variant: "destructive"
+      setWinnerResult({
+        isWinner: false,
+        cartela: cartelaNum,
+        message: "This cartela was not booked for this game",
+        pattern: ""
       });
+      setShowWinnerResult(true);
+      setShowWinnerChecker(false);
       return;
     }
 
@@ -429,7 +432,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Check if admin has low credit balance
   const adminCreditBalance = parseFloat((adminData as any)?.creditBalance || '0');
-  const showLowCreditWarning = adminCreditBalance < 100;
+  const showLowCreditWarning = adminData && adminCreditBalance < 100;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -599,7 +602,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     </Button>
                   ) : gameActive ? (
                     <Button 
-                      onClick={() => setGamePaused(!gamePaused)}
+                      onClick={() => {
+                        if (gamePaused) {
+                          // Resume game and trigger next number call
+                          setGamePaused(false);
+                          setTimeout(() => {
+                            if (activeGameId && gameActive && !gameFinished) {
+                              callNumberMutation.mutate();
+                            }
+                          }, 1000);
+                        } else {
+                          // Pause game
+                          setGamePaused(true);
+                        }
+                      }}
                       className="bg-orange-500 hover:bg-orange-600 text-white"
                     >
                       {gamePaused ? "Resume Game" : "Pause Game"}
