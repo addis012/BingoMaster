@@ -344,12 +344,6 @@ export default function BingoGameFixed({ employeeName, employeeId, shopId, onLog
             </Button>
           </div>
         </div>
-        
-        {shopData && (
-          <div className="mt-2 text-sm text-gray-500">
-            Shop Profit Margin: {shopData.profitMargin || 0}%
-          </div>
-        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
