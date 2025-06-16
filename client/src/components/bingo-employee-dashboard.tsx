@@ -107,7 +107,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Convert string array to number array for proper number tracking
       const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
-      setCalledNumbers(gameCalledNumbers);
+      
+      // Only update called numbers if game is not finished to preserve numbers during winner verification
+      if ((activeGame as any).status !== 'completed') {
+        setCalledNumbers(gameCalledNumbers);
+      }
+      
       setBookedCartelas(new Set((activeGame as any).cartelas || []));
       
       const lastNumber = gameCalledNumbers.slice(-1)[0];
