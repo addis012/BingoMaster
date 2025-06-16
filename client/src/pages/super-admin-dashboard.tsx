@@ -356,6 +356,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
       shopName: admin?.shopName || '',
       commissionRate: admin?.commissionRate || '15',
       email: admin?.email || '',
+      referredBy: admin?.referredBy || '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -423,6 +424,22 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           />
+        </div>
+        <div>
+          <Label htmlFor="referredBy">Referred By Admin ID (Optional)</Label>
+          <select
+            id="referredBy"
+            value={formData.referredBy}
+            onChange={(e) => setFormData({ ...formData, referredBy: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">No Referrer</option>
+            {(admins as any[]).map((admin: any) => (
+              <option key={admin.id} value={admin.id.toString()}>
+                {admin.name} ({admin.username})
+              </option>
+            ))}
+          </select>
         </div>
         <div className="flex gap-2 pt-4">
           <Button type="submit" disabled={isSubmitting}>
