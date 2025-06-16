@@ -22,7 +22,8 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const { toast } = useToast();
 
   // Game state
-  const [gameActive, setGameActive] = useState(false);
+  const [gameSetup, setGameSetup] = useState(false); // Game created but not started
+  const [gameActive, setGameActive] = useState(false); // Numbers being called
   const [gameFinished, setGameFinished] = useState(false);
   const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
   const [lastCalledNumber, setLastCalledNumber] = useState<number | null>(null);
@@ -261,7 +262,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
       console.error("Failed to create backend game:", error);
     }
 
-    setGameActive(true);
+    setGameSetup(true);
     setGameFinished(false);
     
     // Only clear numbers if starting fresh game (no called numbers yet)
@@ -271,11 +272,28 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
       gameStateRef.current = { calledNumbers: [], finished: false };
     }
     
+    console.log("🎮 Game setup complete - ready to start calling numbers");
+  };
+
+  const startNumberCalling = () => {
+    if (!gameSetup) {
+      toast({
+        title: "Setup Required",
+        description: "Please set up the game first by selecting cartelas and clicking Start.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setGameActive(true);
+    
     // Play start voice audio
     playAudio('start');
     
-    // Start auto-calling
+    // Start auto-calling numbers
     startAutoCalling();
+    
+    console.log("🎮 Number calling started!");
   };
 
   const startAutoCalling = () => {
@@ -361,9 +379,21 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
 
   const shuffleNumbers = () => {
     setIsShuffling(true);
+    
+    // Play pool ball sound effect
+    try {
+      const audio = new Audio('/attached_assets/pool-balls-smash.mp3');
+      audio.volume = 0.8;
+      audio.play().catch(() => {
+        console.log('Pool ball sound not found, using fallback');
+      });
+    } catch (error) {
+      console.log('Audio playback error for shuffle sound');
+    }
+    
     setTimeout(() => {
       setIsShuffling(false);
-    }, 1000);
+    }, 2000); // Extended for better visual effect
   };
 
   const checkWinner = async () => {
