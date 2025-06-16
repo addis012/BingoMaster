@@ -2916,16 +2916,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         players: existingPlayers.map(p => ({ id: p.id, cartelas: p.cartelaNumbers, fee: p.entryFee }))
       });
 
-      // Calculate actual cartelas and financial data correctly
-      let totalCartelas = 0;
-      let actualEntryFee = entryFeePerPlayer;
-      
-      if (existingPlayers.length > 0) {
-        // Count total cartelas from all players (cartelaNumbers array contains cartela IDs)
-        totalCartelas = existingPlayers.reduce((sum, player) => sum + player.cartelaNumbers.length, 0);
-        actualEntryFee = parseFloat(existingPlayers[0].entryFee);
-      }
-      
+      // Use frontend-provided data for accurate calculations
+      const totalCartelas = allCartelaNumbers ? allCartelaNumbers.length : totalPlayers;
+      const actualEntryFee = parseFloat(entryFeePerPlayer.toString());
       const totalCollected = totalCartelas * actualEntryFee;
       
       console.log('📊 CORRECTED CALCULATION:', {
@@ -2953,11 +2946,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('✅ Found existing player record for winner cartela #' + winnerCartelaNumber);
       }
       
-      // Get shop profit margin from user data
-      const shopProfitMargin = (user as any).profitMargin ? parseFloat((user as any).profitMargin) / 100 : 0.20;
+      // Get admin user data to fetch profit margin
+      const admin = await storage.getUserByShopId(user.shopId);
+      const shopProfitMargin = admin?.profitMargin ? parseFloat(admin.profitMargin) / 100 : 0.10; // Default to 10%
       const adminProfit = totalCollected * shopProfitMargin;
       const prizeAmount = totalCollected - adminProfit;
-      const superAdminCommissionRate = (user as any).commissionRate ? parseFloat((user as any).commissionRate) / 100 : 0.20;
+      const superAdminCommissionRate = admin?.commissionRate ? parseFloat(admin.commissionRate) / 100 : 0.20;
       const superAdminCommission = adminProfit * superAdminCommissionRate;
 
       console.log('💰 FINANCIAL CALCULATION:', {
