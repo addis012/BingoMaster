@@ -2127,7 +2127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Super admin access required" });
       }
 
-      const { name, username, password, shopName, commissionRate, referredBy } = req.body;
+      const { name, username, password, shopName, commissionRate, referredBy, referralCommissionRate } = req.body;
       
       if (!name || !username || !password || !shopName) {
         return res.status(400).json({ message: "Missing required fields" });
@@ -2142,7 +2142,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         shopName,
         commissionRate: commissionRate || "15",
-        referredBy: referredBy ? parseInt(referredBy) : null
+        referredBy: referredBy ? parseInt(referredBy) : null,
+        referralCommissionRate: referralCommissionRate || "5.00"
       };
 
       const newAdmin = await storage.createAdminUser(adminData);

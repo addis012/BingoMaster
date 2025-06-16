@@ -357,6 +357,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
       commissionRate: admin?.commissionRate || '15',
       email: admin?.email || '',
       referredBy: admin?.referredBy || '',
+      referralCommissionRate: admin?.referralCommissionRate || '5',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -440,6 +441,19 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <Label htmlFor="referralCommissionRate">Referral Commission Rate (%)</Label>
+          <Input
+            id="referralCommissionRate"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            value={formData.referralCommissionRate}
+            onChange={(e) => setFormData({ ...formData, referralCommissionRate: e.target.value })}
+            placeholder="5.00"
+          />
         </div>
         <div className="flex gap-2 pt-4">
           <Button type="submit" disabled={isSubmitting}>
