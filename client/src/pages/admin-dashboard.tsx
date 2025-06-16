@@ -50,7 +50,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         </div>
 
         {/* Low Credit Warning */}
-        {creditBalance && parseFloat(creditBalance.balance) < 1000 && (
+        {creditBalance && parseFloat(creditBalance.balance) < 100 && (
           <Card className="mb-6 border-orange-200 bg-orange-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">

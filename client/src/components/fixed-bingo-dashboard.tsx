@@ -549,7 +549,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         )}
         
         {/* Low Credit Warning for Admin's Balance */}
-        {user?.role === 'employee' && creditBalance && parseFloat(creditBalance.balance) < 1000 && (
+        {user?.role === 'employee' && creditBalance && parseFloat(creditBalance.balance) < 100 && (
           <div className="mt-4 mx-6">
             <Card className="border-orange-200 bg-orange-50">
               <CardContent className="pt-4">
