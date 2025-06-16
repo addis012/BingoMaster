@@ -2635,23 +2635,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Complete the game
       const game = await storage.completeGame(gameId, winnerId, prizeAmount);
       
-      // Record game history with safe calculations
-      const totalCollected = parseFloat(game.prizePool || "0");
-      const prize = parseFloat(prizeAmount || "0");
-      const adminProfit = isNaN(totalCollected) || isNaN(prize) ? 0 : totalCollected - prize;
-      
-      await storage.recordGameHistory({
-        gameId,
-        shopId: user.shopId!,
-        employeeId: user.id,
-        totalCollected: game.prizePool || "0.00",
-        prizeAmount: prizeAmount || "0.00",
-        adminProfit: adminProfit.toString(),
-        superAdminCommission: "0.00",
-        playerCount: await storage.getGamePlayerCount(gameId),
-        winnerName,
-        winningCartela
-      });
+      // Check if game history already exists (created by declare-winner endpoint)
+      try {
+        const existingHistory = await storage.getGameHistory(gameId);
+        if (!existingHistory) {
+          // Only create game history if it doesn't exist
+          const totalCollected = parseFloat(game.prizePool || "0");
+          const prize = parseFloat(prizeAmount || "0");
+          const adminProfit = isNaN(totalCollected) || isNaN(prize) ? 0 : totalCollected - prize;
+          
+          await storage.recordGameHistory({
+            gameId,
+            shopId: user.shopId!,
+            employeeId: user.id,
+            totalCollected: game.prizePool || "0.00",
+            prizeAmount: prizeAmount || "0.00",
+            adminProfit: adminProfit.toString(),
+            superAdminCommission: "0.00",
+            playerCount: await storage.getGamePlayerCount(gameId),
+            winnerName,
+            winningCartela
+          });
+        }
+      } catch (historyError) {
+        console.log('Game history may already exist, skipping duplicate creation');
+      }
 
       res.json(game);
     } catch (error) {

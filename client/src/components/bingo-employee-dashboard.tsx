@@ -37,7 +37,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   const [showWinnerResult, setShowWinnerResult] = useState(false);
-  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "" });
+  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] as number[] });
   
   // Animation states
   const [isShuffling, setIsShuffling] = useState(false);
@@ -459,7 +459,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   };
 
   // Check for BINGO win patterns
-  function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { isWinner: boolean; pattern?: string } {
+  function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { isWinner: boolean; pattern?: string; winningCells?: number[] } {
     if (cartelaPattern.length !== 5) return { isWinner: false };
     
     // Check horizontal lines
@@ -473,7 +473,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         }
       }
       if (hasAllNumbers) {
-        return { isWinner: true, pattern: `Horizontal Row ${row + 1}` };
+        const winningCells = [];
+        for (let col = 0; col < 5; col++) {
+          winningCells.push(row * 5 + col);
+        }
+        return { isWinner: true, pattern: `Horizontal Row ${row + 1}`, winningCells };
       }
     }
     
@@ -489,7 +493,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       if (hasAllNumbers) {
         const letters = ['B', 'I', 'N', 'G', 'O'];
-        return { isWinner: true, pattern: `Vertical ${letters[col]} Column` };
+        const winningCells = [];
+        for (let row = 0; row < 5; row++) {
+          winningCells.push(row * 5 + col);
+        }
+        return { isWinner: true, pattern: `Vertical ${letters[col]} Column`, winningCells };
       }
     }
     
@@ -503,7 +511,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
     }
     if (hasAllNumbers) {
-      return { isWinner: true, pattern: "Diagonal (Top-Left to Bottom-Right)" };
+      const winningCells = [];
+      for (let i = 0; i < 5; i++) {
+        winningCells.push(i * 5 + i);
+      }
+      return { isWinner: true, pattern: "Diagonal (Top-Left to Bottom-Right)", winningCells };
     }
     
     // Check diagonal (top-right to bottom-left)
@@ -516,7 +528,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
     }
     if (hasAllNumbers) {
-      return { isWinner: true, pattern: "Diagonal (Top-Right to Bottom-Left)" };
+      const winningCells = [];
+      for (let i = 0; i < 5; i++) {
+        winningCells.push(i * 5 + (4 - i));
+      }
+      return { isWinner: true, pattern: "Diagonal (Top-Right to Bottom-Left)", winningCells };
     }
     
     return { isWinner: false };
@@ -1061,9 +1077,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <div className="text-sm text-gray-600 mt-1">
                     From {selectedCartelas.size} cartelas × {gameAmount} Birr each
                   </div>
-                  <div className="text-sm text-gray-500">
-                    Admin profit margin: {(shopData?.profitMargin || 0)}%
-                  </div>
+
                 </div>
                 
                 {/* Display cartela grid */}
@@ -1079,14 +1093,25 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       <div className="text-center font-bold text-xs bg-green-100 p-1">O</div>
                       
                       {/* Cartela pattern */}
-                      {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => (
-                        <div key={index} className={`text-center text-xs p-1 border ${
-                          index === 12 ? 'bg-yellow-200' : 
-                          calledNumbers.includes(num) ? 'bg-green-200' : 'bg-gray-50'
-                        }`}>
-                          {index === 12 ? 'FREE' : num}
-                        </div>
-                      ))}
+                      {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => {
+                        const isWinningCell = winnerResult.winningCells?.includes(index);
+                        const isCalled = num !== 0 && calledNumbers.includes(num);
+                        const isFree = index === 12;
+                        
+                        return (
+                          <div key={index} className={`text-center text-xs p-1 border-2 ${
+                            isWinningCell 
+                              ? 'bg-yellow-300 border-yellow-500 font-bold shadow-md animate-pulse' 
+                              : isFree
+                                ? 'bg-yellow-200 border-yellow-300' 
+                                : isCalled
+                                  ? 'bg-green-200 border-green-300'
+                                  : 'bg-gray-50 border-gray-200'
+                          }`}>
+                            {isFree ? 'FREE' : num}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
