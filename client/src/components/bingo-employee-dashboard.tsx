@@ -178,7 +178,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Play game start sound
       try {
-        const audio = new Audio('/attached_assets/start voice_1749898419925.MP3');
+        const audio = new Audio('/attached_assets/game started_1750069128880.mp3');
         audio.volume = 0.8;
         audio.play().catch(() => {
           console.log('Start game sound not available');
@@ -309,6 +309,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       pattern: isWinner.pattern || ""
     });
     
+    // Play loser sound if not a winner
+    if (!isWinner.isWinner) {
+      try {
+        const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
+        audio.volume = 0.8;
+        audio.play().catch(() => {
+          console.log('Loser sound not available');
+        });
+      } catch (error) {
+        console.log('Loser audio playback error');
+      }
+    }
+    
     setShowWinnerResult(true);
     setShowWinnerChecker(false);
     
@@ -340,7 +353,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         
         // Play winner sound
         try {
-          const audio = new Audio('/attached_assets/winner voice_1749898419926.MP3');
+          const audio = new Audio('/attached_assets/winner_1750069128882.mp3');
           audio.volume = 0.8;
           audio.play().catch(() => {
             console.log('Winner sound not available');
