@@ -941,18 +941,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     N
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
-                    {Array.from({length: 15}, (_, i) => i + 31).map(num => (
-                      <div 
-                        key={num} 
-                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
-                          calledNumbers.includes(num) 
-                            ? 'bg-green-500 text-white' 
-                            : 'bg-gray-100 text-gray-700 border'
-                        }`}
-                      >
-                        {num}
-                      </div>
-                    ))}
+                    {Array.from({length: 15}, (_, i) => i + 31).map((num, index) => {
+                      const shuffledNum = isBoardShuffling && shuffledPositions.length > 0 ? shuffledPositions[index + 30] : num;
+                      return (
+                        <div 
+                          key={num} 
+                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                            isBoardShuffling 
+                              ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : calledNumbers.includes(num) 
+                                ? 'bg-green-500 text-white' 
+                                : 'bg-gray-100 text-gray-700 border'
+                          }`}
+                        >
+                          {shuffledNum}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -962,18 +967,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     G
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
-                    {Array.from({length: 15}, (_, i) => i + 46).map(num => (
-                      <div 
-                        key={num} 
-                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
-                          calledNumbers.includes(num) 
-                            ? 'bg-yellow-500 text-white' 
-                            : 'bg-gray-100 text-gray-700 border'
-                        }`}
-                      >
-                        {num}
-                      </div>
-                    ))}
+                    {Array.from({length: 15}, (_, i) => i + 46).map((num, index) => {
+                      const shuffledNum = isBoardShuffling && shuffledPositions.length > 0 ? shuffledPositions[index + 45] : num;
+                      return (
+                        <div 
+                          key={num} 
+                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                            isBoardShuffling 
+                              ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : calledNumbers.includes(num) 
+                                ? 'bg-yellow-500 text-white' 
+                                : 'bg-gray-100 text-gray-700 border'
+                          }`}
+                        >
+                          {shuffledNum}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -983,18 +993,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     O
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
-                    {Array.from({length: 15}, (_, i) => i + 61).map(num => (
-                      <div 
-                        key={num} 
-                        className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium ${
-                          calledNumbers.includes(num) 
-                            ? 'bg-purple-500 text-white' 
-                            : 'bg-gray-100 text-gray-700 border'
-                        }`}
-                      >
-                        {num}
-                      </div>
-                    ))}
+                    {Array.from({length: 15}, (_, i) => i + 61).map((num, index) => {
+                      const shuffledNum = isBoardShuffling && shuffledPositions.length > 0 ? shuffledPositions[index + 60] : num;
+                      return (
+                        <div 
+                          key={num} 
+                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                            isBoardShuffling 
+                              ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : calledNumbers.includes(num) 
+                                ? 'bg-purple-500 text-white' 
+                                : 'bg-gray-100 text-gray-700 border'
+                          }`}
+                        >
+                          {shuffledNum}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
