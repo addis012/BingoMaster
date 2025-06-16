@@ -1364,13 +1364,14 @@ export class DatabaseStorage implements IStorage {
 
     // Create initial referral commission entry if admin has a referrer
     if (adminData.referredBy) {
+      const referralCommissionRate = adminData.referralCommissionRate || "5.00"; // Default 5% if not specified
       await db.insert(referralCommissions).values({
         referrerId: parseInt(adminData.referredBy),
         referredId: newAdmin.id,
         sourceType: 'admin_signup',
         sourceId: newAdmin.id,
         sourceAmount: "0.00",
-        commissionRate: "3.00",
+        commissionRate: referralCommissionRate,
         commissionAmount: "0.00",
         status: 'pending'
       });
@@ -1385,7 +1386,7 @@ export class DatabaseStorage implements IStorage {
       id: referralCommissions.id,
       referrerId: referralCommissions.referrerId,
       referrerName: users.name,
-      amount: referralCommissions.amount,
+      commissionAmount: referralCommissions.commissionAmount,
       sourceAmount: referralCommissions.sourceAmount,
       status: referralCommissions.status,
       createdAt: referralCommissions.createdAt,
@@ -1410,6 +1411,35 @@ export class DatabaseStorage implements IStorage {
     // In a real implementation, this would update a settings table
     // For now, we'll just log the update
     console.log("Referral settings updated:", settings);
+  }
+
+  // Block/unblock employees based on admin status
+  async blockEmployeesByAdmin(adminId: number): Promise<void> {
+    // Get the admin's shop first
+    const admin = await this.getUser(adminId);
+    if (!admin || !admin.shopId) return;
+
+    // Block all employees in this shop
+    await db.update(users)
+      .set({ isBlocked: true })
+      .where(and(
+        eq(users.shopId, admin.shopId),
+        eq(users.role, 'employee')
+      ));
+  }
+
+  async unblockEmployeesByAdmin(adminId: number): Promise<void> {
+    // Get the admin's shop first
+    const admin = await this.getUser(adminId);
+    if (!admin || !admin.shopId) return;
+
+    // Unblock all employees in this shop
+    await db.update(users)
+      .set({ isBlocked: false })
+      .where(and(
+        eq(users.shopId, admin.shopId),
+        eq(users.role, 'employee')
+      ));
   }
 }
 

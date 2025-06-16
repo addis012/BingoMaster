@@ -132,7 +132,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (user.isBlocked) {
-        return res.status(403).json({ message: "Account is blocked" });
+        if (user.role === 'employee') {
+          return res.status(403).json({ message: "Your account has been blocked. Please contact super admin for assistance." });
+        } else {
+          return res.status(403).json({ message: "Account is blocked" });
+        }
       }
 
       // Set session with both userId and user for compatibility
@@ -2243,8 +2247,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (action === 'block') {
         await storage.updateUser(adminId, { isBlocked: true });
+        // Block all employees under this admin
+        await storage.blockEmployeesByAdmin(adminId);
       } else if (action === 'unblock') {
         await storage.updateUser(adminId, { isBlocked: false });
+        // Unblock all employees under this admin
+        await storage.unblockEmployeesByAdmin(adminId);
       }
       
       res.json({ success: true });
