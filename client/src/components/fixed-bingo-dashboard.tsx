@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
@@ -491,6 +492,25 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         {shopData && (
           <div className="mt-2 text-sm text-gray-500 text-center">
             Shop Profit Margin: {shopData.profitMargin || 0}%
+          </div>
+        )}
+        
+        {/* Low Credit Warning for Admin's Balance */}
+        {user?.role === 'employee' && user?.creditBalance && parseFloat(user.creditBalance) < 1000 && (
+          <div className="mt-4 mx-6">
+            <Card className="border-orange-200 bg-orange-50">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <p className="font-medium text-orange-800">Admin Low Credit Balance</p>
+                    <p className="text-sm text-orange-700">
+                      Shop admin balance is low ({user.creditBalance} ETB). Contact admin to add more credits.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
