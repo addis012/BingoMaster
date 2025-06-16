@@ -157,10 +157,29 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     onSuccess: () => {
       setGameActive(true);
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      
+      // Play game start sound
+      try {
+        const audio = new Audio('/attached_assets/start voice_1749898419925.MP3');
+        audio.volume = 0.8;
+        audio.play().catch(() => {
+          console.log('Start game sound not available');
+        });
+      } catch (error) {
+        console.log('Start audio playback error');
+      }
+      
       toast({
         title: "Game Started",
-        description: "Bingo game is now active"
+        description: "Bingo game is now active - start calling numbers!"
       });
+      
+      // Automatically start calling numbers after a short delay
+      setTimeout(() => {
+        if (activeGameId) {
+          callNumberMutation.mutate();
+        }
+      }, 2000);
     }
   });
 
@@ -190,6 +209,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           });
         } catch (error) {
           console.log('Audio playback error');
+        }
+        
+        // Auto-call next number after 4 seconds if game is still active
+        if (gameActive && !gameFinished) {
+          setTimeout(() => {
+            if (gameActive && !gameFinished && activeGameId) {
+              callNumberMutation.mutate();
+            }
+          }, 4000);
         }
       }
     }
@@ -283,7 +311,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         
         // Play winner sound
         try {
-          const audio = new Audio('/attached_assets/winner_1749900837784.mp3');
+          const audio = new Audio('/attached_assets/winner voice_1749898419926.MP3');
           audio.volume = 0.8;
           audio.play().catch(() => {
             console.log('Winner sound not available');
@@ -387,11 +415,25 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <div className="text-xs text-gray-500">Total Collected</div>
-              <div className="font-bold">140 Birr</div>
+              <div className="font-bold">
+                {activeGameId ? 
+                  `${(bookedCartelas.size * parseFloat(gameAmount)).toFixed(2)} Birr` : 
+                  `${(selectedCartelas.size * parseFloat(gameAmount)).toFixed(2)} Birr`
+                }
+              </div>
             </div>
             <div className="text-right">
               <div className="text-xs text-gray-500">Winner Gets</div>
-              <div className="font-bold text-green-600">112 Birr</div>
+              <div className="font-bold text-green-600">
+                {(() => {
+                  const totalAmount = activeGameId ? 
+                    bookedCartelas.size * parseFloat(gameAmount) : 
+                    selectedCartelas.size * parseFloat(gameAmount);
+                  const profitMargin = ((shopData as any)?.profitMargin || 20) / 100;
+                  const winnerAmount = totalAmount * (1 - profitMargin);
+                  return `${winnerAmount.toFixed(2)} Birr`;
+                })()}
+              </div>
             </div>
             <Button onClick={onLogout} className="bg-red-500 hover:bg-red-600 text-white">
               Log Out
