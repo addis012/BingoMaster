@@ -1362,6 +1362,20 @@ export class DatabaseStorage implements IStorage {
       .set({ adminId: newAdmin.id })
       .where(eq(shops.id, newShop.id));
 
+    // Create initial referral commission entry if admin has a referrer
+    if (adminData.referredBy) {
+      await db.insert(referralCommissions).values({
+        referrerId: parseInt(adminData.referredBy),
+        referredId: newAdmin.id,
+        sourceType: 'admin_signup',
+        sourceId: newAdmin.id,
+        sourceAmount: "0.00",
+        commissionRate: "3.00",
+        commissionAmount: "0.00",
+        status: 'pending'
+      });
+    }
+
     return { ...newAdmin, shopName: newShop.name };
   }
 

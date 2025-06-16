@@ -1516,6 +1516,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Super admin: Approve credit load
+  app.patch("/api/admin/credit-loads/:id/approve", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ message: "Super admin access required" });
+      }
+
+      const loadId = parseInt(req.params.id);
+      const processedLoad = await storage.processCreditLoad(loadId, 'confirmed', user.id);
+      res.json(processedLoad);
+    } catch (error) {
+      console.error("Credit load approval error:", error);
+      res.status(500).json({ message: "Failed to approve credit load" });
+    }
+  });
+
   // Super admin: Reject credit load
   app.patch("/api/admin/credit-loads/:id/reject", async (req, res) => {
     try {
