@@ -1338,7 +1338,7 @@ export class DatabaseStorage implements IStorage {
       name: adminData.shopName,
       profitMargin: "20.00",
       superAdminCommission: adminData.commissionRate || "15.00",
-      referralCommission: "3.00", // Fixed 3% for referral system
+      referralCommission: adminData.referralCommissionRate || "5.00", // Use provided rate or default to 5%
       isBlocked: false,
       totalRevenue: "0.00"
     }).returning();

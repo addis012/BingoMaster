@@ -1584,6 +1584,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (shop.superAdminCommission) {
             settings.commissionRate = shop.superAdminCommission;
           }
+          if (shop.referralCommission) {
+            settings.referralCommissionRate = shop.referralCommission;
+          }
         }
       }
       
@@ -2102,10 +2105,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const shop = await storage.getShop(admin.shopId);
             return {
               ...admin,
-              commissionRate: shop?.superAdminCommission || '15'
+              commissionRate: shop?.superAdminCommission || '15',
+              referralCommissionRate: shop?.referralCommission || '5'
             };
           }
-          return { ...admin, commissionRate: '15' };
+          return { 
+            ...admin, 
+            commissionRate: '15',
+            referralCommissionRate: '5'
+          };
         })
       );
       
@@ -2171,22 +2179,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Updating admin ${adminId} with data:`, updates);
       
+      // Get admin user for shop updates
+      const adminUser = await storage.getUser(adminId);
+      
       // If commission rate is being updated, update the shop as well
-      if (updates.commissionRate !== undefined) {
-        const adminUser = await storage.getUser(adminId);
-        console.log(`Found admin user:`, adminUser);
-        
-        if (adminUser && adminUser.shopId) {
-          console.log(`Updating shop ${adminUser.shopId} with commission: ${updates.commissionRate}`);
-          const shopUpdate = await storage.updateShop(adminUser.shopId, {
-            superAdminCommission: updates.commissionRate.toString()
-          });
-          console.log(`Shop update result:`, shopUpdate);
-        } else {
-          console.log(`Admin user not found or no shopId:`, { adminUser, shopId: adminUser?.shopId });
-        }
+      if (updates.commissionRate !== undefined && adminUser?.shopId) {
+        console.log(`Updating shop ${adminUser.shopId} with commission: ${updates.commissionRate}`);
+        await storage.updateShop(adminUser.shopId, {
+          superAdminCommission: updates.commissionRate.toString()
+        });
         // Remove commissionRate from user updates since it's stored in shop
         delete updates.commissionRate;
+      }
+      
+      // If referral commission rate is being updated, update the shop as well
+      if (updates.referralCommissionRate !== undefined && adminUser?.shopId) {
+        console.log(`Updating shop ${adminUser.shopId} with referral commission: ${updates.referralCommissionRate}`);
+        await storage.updateShop(adminUser.shopId, {
+          referralCommission: updates.referralCommissionRate.toString()
+        });
+        // Remove referralCommissionRate from user updates since it's stored in shop
+        delete updates.referralCommissionRate;
       }
       
       // Only update user if there are remaining fields to update
