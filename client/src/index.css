@@ -68,8 +68,9 @@
   }
 }
 
+/* Shuffle animation with improved timing */
 .shuffle-animation {
-  animation: shuffle-blink 0.3s ease-in-out infinite;
+  animation: shuffle-blink 0.4s ease-in-out infinite;
 }
 
 /* Fix UI scaling issues by preventing unwanted transforms */
@@ -77,9 +78,9 @@
   transform: none;
 }
 
-/* Only allow transforms on shuffle animation within bingo board */
+/* Ensure shuffle animation works properly within bingo board */
 .bingo-board .shuffle-animation {
-  animation: shuffle-blink 0.3s ease-in-out infinite;
+  animation: shuffle-blink 0.4s ease-in-out infinite;
 }
 
 .dark {

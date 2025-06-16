@@ -381,20 +381,33 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const shuffleNumbers = () => {
     setIsShuffling(true);
     
-    // Play pool ball sound effect
+    // Play shuffle sound effect with fallback options
     try {
-      const audio = new Audio('/attached_assets/pool-balls-smash.mp3');
-      audio.volume = 0.8;
+      // Try multiple audio sources for shuffle sound
+      const audioSources = [
+        '/attached_assets/B1.mp3', // Use existing Bingo audio as shuffle sound
+        '/attached_assets/start voice_1749898419925.MP3'
+      ];
+      
+      const audio = new Audio(audioSources[0]);
+      audio.volume = 0.3; // Lower volume for shuffle effect
+      audio.currentTime = 0.5; // Start partway through for shorter sound
       audio.play().catch(() => {
-        console.log('Pool ball sound not found, using fallback');
+        // Try second audio source
+        const fallbackAudio = new Audio(audioSources[1]);
+        fallbackAudio.volume = 0.2;
+        fallbackAudio.play().catch(() => {
+          console.log('Shuffle audio not available');
+        });
       });
     } catch (error) {
       console.log('Audio playback error for shuffle sound');
     }
     
+    // Enhanced shuffle animation duration
     setTimeout(() => {
       setIsShuffling(false);
-    }, 2000); // Extended for better visual effect
+    }, 2500);
   };
 
   const checkWinner = async () => {
