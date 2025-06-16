@@ -292,7 +292,7 @@ export default function SuperAdminDashboard({ onLogout }: SuperAdminDashboardPro
                 Super Admin Dashboard
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Current EAT Date: {currentDate || "Loading..."}
+                Current EAT Date: {(currentDate as any)?.date || "Loading..."}
               </p>
             </div>
             <div className="flex items-center gap-4">
