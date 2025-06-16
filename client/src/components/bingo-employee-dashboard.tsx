@@ -260,28 +260,42 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       if (newNumber && !audioPlaying) {
         const letter = getLetterForNumber(newNumber);
         setAudioPlaying(true);
+        
+        // Set a fallback timeout to reset audio state in case audio events fail
+        const audioResetTimer = setTimeout(() => {
+          setAudioPlaying(false);
+        }, 2500); // Reset audio state after 2.5 seconds max
+        
         try {
           const audio = new Audio(`/attached_assets/${letter}${newNumber}.mp3`);
           audio.volume = 0.8;
-          audio.onended = () => setAudioPlaying(false);
-          audio.onerror = () => setAudioPlaying(false);
+          audio.onended = () => {
+            clearTimeout(audioResetTimer);
+            setAudioPlaying(false);
+          };
+          audio.onerror = () => {
+            clearTimeout(audioResetTimer);
+            setAudioPlaying(false);
+          };
           audio.play().catch(() => {
             console.log(`Audio for ${letter}${newNumber} not available`);
+            clearTimeout(audioResetTimer);
             setAudioPlaying(false);
           });
         } catch (error) {
           console.log('Audio playback error');
+          clearTimeout(audioResetTimer);
           setAudioPlaying(false);
         }
-        
-        // Auto-call next number after 3 seconds if game is still active and not paused
-        if (gameActive && !gameFinished && !gamePaused) {
-          numberCallTimer.current = setTimeout(() => {
-            if (gameActive && !gameFinished && !gamePaused && activeGameId && !audioPlaying) {
-              callNumberMutation.mutate();
-            }
-          }, 3000);
-        }
+      }
+      
+      // Always set timer for next number call (don't depend on audio state)
+      if (gameActive && !gameFinished && !gamePaused) {
+        numberCallTimer.current = setTimeout(() => {
+          if (gameActive && !gameFinished && !gamePaused && activeGameId) {
+            callNumberMutation.mutate();
+          }
+        }, 3000);
       }
     }
   });
