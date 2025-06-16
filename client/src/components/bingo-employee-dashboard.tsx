@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -1079,6 +1079,25 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               </div>
             )}
           </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => {
+                setShowWinnerResult(false);
+                // Reset and resume game if not a winner
+                if (!winnerResult.isWinner && gamePaused) {
+                  setTimeout(() => {
+                    setGamePaused(false);
+                    if (activeGameId && gameActive && !gameFinished) {
+                      callNumberMutation.mutate();
+                    }
+                  }, 1000);
+                }
+              }}
+              className={winnerResult.isWinner ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}
+            >
+              {winnerResult.isWinner ? "OK" : "Continue Game"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
