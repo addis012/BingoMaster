@@ -1910,12 +1910,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
-      const balance = await storage.getCreditBalance(userId);
-      res.json({ balance });
+      if (user.role === 'admin') {
+        // Admin can see their own balance
+        const balance = await storage.getCreditBalance(userId);
+        res.json({ balance });
+      } else if (user.role === 'employee') {
+        // Employee can see their admin's balance
+        const adminUser = await storage.getUserByShopId(user.shopId!);
+        if (!adminUser) {
+          return res.status(404).json({ message: "Shop admin not found" });
+        }
+        const balance = adminUser.creditBalance || '0.00';
+        res.json({ balance });
+      } else {
+        return res.status(403).json({ message: "Access denied" });
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to get credit balance" });
     }

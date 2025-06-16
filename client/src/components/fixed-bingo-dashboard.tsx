@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { FIXED_CARTELAS, getCartelaNumbers, formatCartelaDisplay, getFixedPattern } from "@/data/fixed-cartelas";
 
@@ -48,6 +48,13 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
   const [isShuffling, setIsShuffling] = useState(false);
   const autoCallInterval = useRef<NodeJS.Timeout | null>(null);
   const gameStateRef = useRef({ calledNumbers: [], finished: false });
+  
+  // Query to get admin credit balance (works for both admin and employee)
+  const { data: creditBalance } = useQuery({
+    queryKey: ['/api/credit/balance'],
+    enabled: !!user && (user.role === 'admin' || user.role === 'employee'),
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
   
   // Audio functionality
   const playAudio = (audioType: 'start' | 'winner' | 'loser') => {
@@ -542,7 +549,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         )}
         
         {/* Low Credit Warning for Admin's Balance */}
-        {user?.role === 'employee' && user?.creditBalance && parseFloat(user.creditBalance) < 1000 && (
+        {user?.role === 'employee' && creditBalance && parseFloat(creditBalance.balance) < 1000 && (
           <div className="mt-4 mx-6">
             <Card className="border-orange-200 bg-orange-50">
               <CardContent className="pt-4">
@@ -551,7 +558,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                   <div>
                     <p className="font-medium text-orange-800">Admin Low Credit Balance</p>
                     <p className="text-sm text-orange-700">
-                      Shop admin balance is low ({user.creditBalance} ETB). Contact admin to add more credits.
+                      Shop admin balance is low ({creditBalance.balance} ETB). Contact admin to add more credits.
                     </p>
                   </div>
                 </div>
