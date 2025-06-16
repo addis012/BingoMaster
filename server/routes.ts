@@ -139,6 +139,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Check if employee's admin is blocked (cascading block)
+      if (user.role === 'employee' && user.shopId) {
+        const adminUser = await storage.getUserByShopId(user.shopId);
+        if (adminUser && adminUser.isBlocked) {
+          return res.status(403).json({ message: "Your account has been blocked. Please contact super admin for assistance." });
+        }
+      }
+
       // Set session with both userId and user for compatibility
       req.session.userId = user.id;
       req.session.user = user;
