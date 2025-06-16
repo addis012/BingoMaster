@@ -391,7 +391,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            cartelaNumber: cartelaNum,
+            winnerCartelaNumber: cartelaNum,
+            totalPlayers: selectedCartelas.size,
+            entryFeePerPlayer: parseFloat(gameAmount),
+            allCartelaNumbers: Array.from(selectedCartelas),
+            calledNumbers: calledNumbers,
             pattern: isWinner.pattern
           })
         });
