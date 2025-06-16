@@ -2989,7 +2989,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         adminProfit: adminProfit.toFixed(2),
         superAdminCommission: superAdminCommission.toFixed(2),
         playerCount: totalCartelas,
-        winnerName: `Player ${winnerCartelaNumber}`,
+        winnerName: winnerPlayer.playerName || `Player ${winnerCartelaNumber}`,
         winningCartela: `#${winnerCartelaNumber}`,
         completedAt: new Date()
       };
