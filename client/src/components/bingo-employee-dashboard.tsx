@@ -27,6 +27,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [lastCalledNumber, setLastCalledNumber] = useState<number | null>(null);
   const [gameAmount, setGameAmount] = useState("20");
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
+  const [audioPlaying, setAudioPlaying] = useState(false);
   
   // Cartela management
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
@@ -255,23 +256,28 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setLastCalledNumber(newNumber);
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       
-      // Play number audio if available
-      if (newNumber) {
+      // Play number audio if available and no other audio is playing
+      if (newNumber && !audioPlaying) {
         const letter = getLetterForNumber(newNumber);
+        setAudioPlaying(true);
         try {
           const audio = new Audio(`/attached_assets/${letter}${newNumber}.mp3`);
           audio.volume = 0.8;
+          audio.onended = () => setAudioPlaying(false);
+          audio.onerror = () => setAudioPlaying(false);
           audio.play().catch(() => {
             console.log(`Audio for ${letter}${newNumber} not available`);
+            setAudioPlaying(false);
           });
         } catch (error) {
           console.log('Audio playback error');
+          setAudioPlaying(false);
         }
         
         // Auto-call next number after 3 seconds if game is still active and not paused
         if (gameActive && !gameFinished && !gamePaused) {
           numberCallTimer.current = setTimeout(() => {
-            if (gameActive && !gameFinished && !gamePaused && activeGameId) {
+            if (gameActive && !gameFinished && !gamePaused && activeGameId && !audioPlaying) {
               callNumberMutation.mutate();
             }
           }, 3000);
@@ -359,18 +365,25 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         numberCallTimer.current = null;
       }
       
-      // Play loser sound after a small delay to avoid overlap
-      setTimeout(() => {
-        try {
-          const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
-          audio.volume = 0.8;
-          audio.play().catch(() => {
-            console.log('Loser sound not available');
-          });
-        } catch (error) {
-          console.log('Loser audio playback error');
-        }
-      }, 500);
+      // Play loser sound with proper state management
+      if (!audioPlaying) {
+        setAudioPlaying(true);
+        setTimeout(() => {
+          try {
+            const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
+            audio.volume = 0.8;
+            audio.onended = () => setAudioPlaying(false);
+            audio.onerror = () => setAudioPlaying(false);
+            audio.play().catch(() => {
+              console.log('Loser sound not available');
+              setAudioPlaying(false);
+            });
+          } catch (error) {
+            console.log('Loser audio playback error');
+            setAudioPlaying(false);
+          }
+        }, 500);
+      }
       
       setShowWinnerResult(true);
       setShowWinnerChecker(false);
@@ -607,9 +620,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               Log Out
             </Button>
           </div>
-        </div>
-        <div className="text-center text-sm text-gray-600 mt-2">
-          Shop Profit Margin: {((shopData as any)?.profitMargin || 20).toFixed(2)}%
         </div>
       </div>
 
@@ -1100,9 +1110,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     <div className="text-2xl font-bold text-green-700">
                       {calculateAmounts().winnerAmount.toFixed(2)} Birr
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      From {selectedCartelas.size} cartelas × {gameAmount} Birr each
-                    </div>
+
                   </div>
                 </div>
               </div>
@@ -1164,11 +1172,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             <Button 
               onClick={() => {
                 setShowWinnerResult(false);
+                setAudioPlaying(false); // Reset audio state
                 // Reset and resume game if not a winner
                 if (!winnerResult.isWinner && gamePaused) {
                   setTimeout(() => {
                     setGamePaused(false);
-                    if (activeGameId && gameActive && !gameFinished) {
+                    if (activeGameId && gameActive && !gameFinished && !audioPlaying) {
                       callNumberMutation.mutate();
                     }
                   }, 1000);
