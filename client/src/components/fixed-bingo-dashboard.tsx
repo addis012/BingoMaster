@@ -810,7 +810,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                             calledNumbers.includes(num)
                               ? 'bg-green-600 text-white'
                               : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
+                                ? 'shuffle-animation text-black'
                                 : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -831,7 +831,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                             calledNumbers.includes(num)
                               ? 'bg-green-600 text-white'
                               : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
+                                ? 'shuffle-animation text-black'
                                 : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -852,7 +852,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                             calledNumbers.includes(num)
                               ? 'bg-green-600 text-white'
                               : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
+                                ? 'shuffle-animation text-black'
                                 : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -873,7 +873,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                             calledNumbers.includes(num)
                               ? 'bg-green-600 text-white'
                               : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
+                                ? 'shuffle-animation text-black'
                                 : 'bg-gray-100 text-gray-700'
                           }`}
                         >
@@ -894,7 +894,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                             calledNumbers.includes(num)
                               ? 'bg-green-600 text-white'
                               : isShuffling 
-                                ? 'bg-gray-300 animate-pulse'
+                                ? 'shuffle-animation text-black'
                                 : 'bg-gray-100 text-gray-700'
                           }`}
                         >
