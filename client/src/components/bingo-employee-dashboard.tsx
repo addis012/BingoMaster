@@ -322,7 +322,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         isWinner: false,
         cartela: cartelaNum,
         message: "This cartela was not selected for this game",
-        pattern: ""
+        pattern: "",
+        winningCells: []
       });
       setShowWinnerResult(true);
       setShowWinnerChecker(false);
@@ -344,7 +345,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         isWinner: false,
         cartela: cartelaNum,
         message: "This Cartela Did Not Win",
-        pattern: ""
+        pattern: "",
+        winningCells: []
       });
       
       // Clear any existing timer to prevent audio overlap
@@ -379,7 +381,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         isWinner: true,
         cartela: cartelaNum,
         message: "Congratulations! This Cartela Has Won!",
-        pattern: isWinner.pattern || ""
+        pattern: isWinner.pattern || "",
+        winningCells: isWinner.winningCells || []
       });
       
       setShowWinnerResult(true);
