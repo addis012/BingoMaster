@@ -2329,6 +2329,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Employee access required" });
       }
 
+      // Check admin's credit balance before allowing game creation
+      const adminUser = await storage.getUserByShopId(user.shopId!);
+      if (!adminUser) {
+        return res.status(404).json({ message: "Shop admin not found" });
+      }
+
+      const adminBalance = parseFloat(adminUser.creditBalance || '0.00');
+      if (adminBalance < 50) {
+        return res.status(400).json({ 
+          message: `Insufficient admin credit balance. Current balance: ${adminUser.creditBalance} ETB. Minimum required: 50.00 ETB. Contact admin to add more credits.`
+        });
+      }
+
       const { entryFee } = req.body;
       
       const game = await storage.createGame({
