@@ -2946,12 +2946,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('✅ Found existing player record for winner cartela #' + winnerCartelaNumber);
       }
       
-      // Get admin user data to fetch profit margin
-      const admin = await storage.getUserByShopId(user.shopId);
-      const shopProfitMargin = admin?.profitMargin ? parseFloat(admin.profitMargin) / 100 : 0.10; // Default to 10%
+      // Get shop data to fetch correct profit margin
+      const shop = await storage.getShop(user.shopId!);
+      const shopProfitMargin = shop?.profitMargin ? parseFloat(shop.profitMargin) / 100 : 0.10; // Default to 10%
       const adminProfit = totalCollected * shopProfitMargin;
       const prizeAmount = totalCollected - adminProfit;
-      const superAdminCommissionRate = admin?.commissionRate ? parseFloat(admin.commissionRate) / 100 : 0.20;
+      const superAdminCommissionRate = shop?.superAdminCommission ? parseFloat(shop.superAdminCommission) / 100 : 0.20;
       const superAdminCommission = adminProfit * superAdminCommissionRate;
 
       console.log('💰 FINANCIAL CALCULATION:', {
