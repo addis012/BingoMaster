@@ -2588,6 +2588,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Entry fee is required" });
       }
 
+      // Check admin's credit balance before allowing game creation
+      const adminUser = await storage.getUserByShopId(user.shopId!);
+      if (!adminUser) {
+        return res.status(400).json({ message: "Shop admin not found" });
+      }
+
+      const adminBalance = parseFloat(adminUser.creditBalance || '0');
+      const minimumBalance = 50; // ETB
+
+      if (adminBalance < minimumBalance) {
+        return res.status(400).json({ 
+          message: `Insufficient admin credit balance. Admin has ${adminBalance.toFixed(2)} ETB but needs at least ${minimumBalance} ETB to start a game.`,
+          balance: adminBalance.toFixed(2),
+          required: minimumBalance
+        });
+      }
+
       const gameData = {
         shopId: user.shopId!,
         employeeId: userId,
@@ -2600,6 +2617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const game = await storage.createGame(gameData);
       res.json(game);
     } catch (error) {
+      console.error("Game creation error:", error);
       res.status(500).json({ message: "Failed to create game" });
     }
   });

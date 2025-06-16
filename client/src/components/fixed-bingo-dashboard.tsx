@@ -85,7 +85,10 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(gameData),
       });
-      if (!response.ok) throw new Error("Failed to create game");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create game");
+      }
       return response.json();
     },
   });
@@ -155,6 +158,14 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
 
   const checkAdminCreditBalance = async (): Promise<boolean> => {
     try {
+      // For employees, check if they have admin info available, otherwise allow game to proceed
+      if (user?.role === 'employee') {
+        // If we can't check admin balance as employee, allow the game to start
+        // The backend will handle the balance validation during game creation
+        return true;
+      }
+      
+      // For admins, check their own balance
       const response = await fetch("/api/credit/balance");
       if (response.ok) {
         const data = await response.json();
@@ -194,8 +205,17 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
           entryFee: gameAmount,
         };
         
-        const game = await createGameMutation.mutateAsync(gameData);
-        setActiveGameId(game.id);
+        try {
+          const game = await createGameMutation.mutateAsync(gameData);
+          setActiveGameId(game.id);
+        } catch (gameError: any) {
+          toast({
+            title: "Cannot Start Game",
+            description: gameError.message || "Failed to create game",
+            variant: "destructive",
+          });
+          return;
+        }
         
         console.log(`✅ BACKEND GAME CREATED: Game ID ${game.id} for ${bookedCartelas.size} cartelas`);
         
