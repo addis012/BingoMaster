@@ -22,6 +22,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Game state
   const [gameActive, setGameActive] = useState(false);
   const [gameFinished, setGameFinished] = useState(false);
+  const [gamePaused, setGamePaused] = useState(false);
   const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
   const [lastCalledNumber, setLastCalledNumber] = useState<number | null>(null);
   const [gameAmount, setGameAmount] = useState("20");
@@ -236,10 +237,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           console.log('Audio playback error');
         }
         
-        // Auto-call next number after 4 seconds if game is still active
-        if (gameActive && !gameFinished) {
+        // Auto-call next number after 4 seconds if game is still active and not paused
+        if (gameActive && !gameFinished && !gamePaused) {
           setTimeout(() => {
-            if (gameActive && !gameFinished && activeGameId) {
+            if (gameActive && !gameFinished && !gamePaused && activeGameId) {
               callNumberMutation.mutate();
             }
           }, 4000);
@@ -596,15 +597,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     >
                       {resetGameMutation.isPending ? "Creating..." : "New Game"}
                     </Button>
-                  ) : (
+                  ) : gameActive ? (
                     <Button 
-                      onClick={() => callNumberMutation.mutate()}
-                      disabled={callNumberMutation.isPending || !gameActive}
+                      onClick={() => setGamePaused(!gamePaused)}
                       className="bg-orange-500 hover:bg-orange-600 text-white"
                     >
-                      {callNumberMutation.isPending ? "Calling..." : "Call Number"}
+                      {gamePaused ? "Resume Game" : "Pause Game"}
                     </Button>
-                  )}
+                  ) : null}
                   
                   {gameActive ? (
                     <Button 
