@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [isShuffling, setIsShuffling] = useState(false);
   const [showCartelaPreview, setShowCartelaPreview] = useState(false);
   const [previewCartela, setPreviewCartela] = useState<number | null>(null);
+  
+  // Timer reference for instant pause control
+  const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
   
   // Active game query
   const { data: activeGame } = useQuery({
@@ -239,7 +242,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         
         // Auto-call next number after 4 seconds if game is still active and not paused
         if (gameActive && !gameFinished && !gamePaused) {
-          setTimeout(() => {
+          numberCallTimer.current = setTimeout(() => {
             if (gameActive && !gameFinished && !gamePaused && activeGameId) {
               callNumberMutation.mutate();
             }
@@ -273,7 +276,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   });
 
-  // Check winner function
+  // Check winner function - can be called anytime even when paused
   const checkWinner = async () => {
     const cartelaNum = parseInt(winnerCartelaNumber);
     
@@ -287,6 +290,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
 
     if (!bookedCartelas.has(cartelaNum)) {
+      // Show red popup for not booked cartela
       setWinnerResult({
         isWinner: false,
         cartela: cartelaNum,
@@ -295,6 +299,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       });
       setShowWinnerResult(true);
       setShowWinnerChecker(false);
+      
+      // Auto-close after 3 seconds
+      setTimeout(() => {
+        setShowWinnerResult(false);
+      }, 3000);
       return;
     }
 
@@ -302,15 +311,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const cartelaPattern = getFixedCartelaPattern(cartelaNum);
     const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
     
-    setWinnerResult({
-      isWinner: isWinner.isWinner,
-      cartela: cartelaNum,
-      message: isWinner.isWinner ? "BINGO! Winner found!" : "Not a winner yet",
-      pattern: isWinner.pattern || ""
-    });
-    
-    // Play loser sound if not a winner
     if (!isWinner.isWinner) {
+      // NOT A WINNER - Show red popup and resume game
+      setWinnerResult({
+        isWinner: false,
+        cartela: cartelaNum,
+        message: "This Cartela Did Not Win",
+        pattern: ""
+      });
+      
+      // Play loser sound
       try {
         const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
         audio.volume = 0.8;
@@ -320,14 +330,38 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       } catch (error) {
         console.log('Loser audio playback error');
       }
-    }
-    
-    setShowWinnerResult(true);
-    setShowWinnerChecker(false);
-    
-    if (isWinner.isWinner) {
+      
+      setShowWinnerResult(true);
+      setShowWinnerChecker(false);
+      
+      // Auto-close popup after 3 seconds and resume game
+      setTimeout(() => {
+        setShowWinnerResult(false);
+        // Resume game if it was active
+        if (gameActive && !gameFinished) {
+          setGamePaused(false);
+          // Continue calling numbers if not paused
+          if (activeGameId && !gamePaused) {
+            callNumberMutation.mutate();
+          }
+        }
+      }, 3000);
+      
+    } else {
+      // IS A WINNER - Pause game completely and show green popup
+      setGamePaused(true);
       setGameActive(false);
       setGameFinished(true);
+      
+      setWinnerResult({
+        isWinner: true,
+        cartela: cartelaNum,
+        message: "Congratulations! This Cartela Has Won!",
+        pattern: isWinner.pattern || ""
+      });
+      
+      setShowWinnerResult(true);
+      setShowWinnerChecker(false);
       
       // Submit winner to backend and complete the game
       try {
@@ -376,6 +410,25 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           variant: "destructive"
         });
       }
+    }
+  };
+
+  // Pause game function - instantly stops number calling
+  const pauseGame = () => {
+    setGamePaused(true);
+    // Clear the timer immediately to stop number calling
+    if (numberCallTimer.current) {
+      clearTimeout(numberCallTimer.current);
+      numberCallTimer.current = null;
+    }
+  };
+
+  // Resume game function - continues number calling
+  const resumeGame = () => {
+    setGamePaused(false);
+    // Resume calling numbers if game is still active
+    if (gameActive && !gameFinished && activeGameId) {
+      callNumberMutation.mutate();
     }
   };
 
