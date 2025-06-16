@@ -2484,7 +2484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Game not found" });
       }
 
-      if (currentGame.status !== 'pending') {
+      if (currentGame.status === 'active' || currentGame.status === 'completed') {
         return res.status(400).json({ message: "Game already started or completed" });
       }
       
