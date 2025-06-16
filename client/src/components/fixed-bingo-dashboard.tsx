@@ -153,8 +153,34 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
     setShowCartelaSelector(false);
   };
 
+  const checkAdminCreditBalance = async (): Promise<boolean> => {
+    try {
+      const response = await fetch("/api/credit/balance");
+      if (response.ok) {
+        const data = await response.json();
+        const balance = parseFloat(data.balance || '0');
+        return balance >= 50; // Require at least 50 ETB to start a game
+      }
+      return false;
+    } catch (error) {
+      console.error("Failed to check admin balance:", error);
+      return false;
+    }
+  };
+
   const startGame = async () => {
     if (bookedCartelas.size === 0) {
+      return;
+    }
+
+    // Check admin credit balance before starting game
+    const hasEnoughBalance = await checkAdminCreditBalance();
+    if (!hasEnoughBalance) {
+      toast({
+        title: "Insufficient Credit Balance",
+        description: "Admin's credit balance is too low to start a new game. Please contact your admin to add more credits.",
+        variant: "destructive",
+      });
       return;
     }
 
