@@ -2484,9 +2484,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const gameId = parseInt(req.params.gameId);
-      const { calledNumbers } = req.body;
+      const game = await storage.getGame(gameId);
       
-      const game = await storage.updateGameNumbers(gameId, calledNumbers);
+      if (!game || game.status !== 'active') {
+        return res.status(400).json({ message: "Game not active" });
+      }
+
+      // Generate next random number
+      const currentNumbers = game.calledNumbers || [];
+      const availableNumbers = [];
+      
+      // Generate all possible BINGO numbers (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
+      for (let i = 1; i <= 75; i++) {
+        if (!currentNumbers.includes(i.toString())) {
+          availableNumbers.push(i);
+        }
+      }
+
+      if (availableNumbers.length === 0) {
+        return res.status(400).json({ message: "All numbers have been called" });
+      }
+
+      // Pick random number from available
+      const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+      const newNumber = availableNumbers[randomIndex];
+      const updatedNumbers = [...currentNumbers, newNumber.toString()];
+      
+      const updatedGame = await storage.updateGameNumbers(gameId, updatedNumbers);
       
       // Broadcast to WebSocket clients
       const clients = gameClients.get(gameId);
@@ -2494,8 +2518,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const message = JSON.stringify({
           type: 'number_called',
           gameId,
-          calledNumbers,
-          latestNumber: calledNumbers[calledNumbers.length - 1]
+          calledNumbers: updatedNumbers,
+          latestNumber: newNumber
         });
         clients.forEach(client => {
           if (client.readyState === WebSocket.OPEN) {
@@ -2504,7 +2528,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      res.json(game);
+      res.json({
+        ...updatedGame,
+        calledNumbers: updatedNumbers,
+        calledNumber: newNumber
+      });
     } catch (error) {
       console.error("Update numbers error:", error);
       res.status(500).json({ message: "Failed to update called numbers" });

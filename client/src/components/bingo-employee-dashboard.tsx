@@ -62,16 +62,26 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 10000 // Refresh every 10 seconds for live updates
   });
 
+  // Admin credit balance query
+  const { data: adminData } = useQuery({
+    queryKey: ['/api/users', shopData?.adminId],
+    enabled: !!shopData?.adminId,
+    refetchInterval: 30000 // Check admin balance every 30 seconds
+  });
+
   // Sync with active game data
   useEffect(() => {
     if (activeGame) {
       setActiveGameId((activeGame as any).id);
       setGameActive((activeGame as any).status === 'active');
       setGameFinished((activeGame as any).status === 'completed');
-      setCalledNumbers((activeGame as any).calledNumbers || []);
+      
+      // Convert string array to number array for proper number tracking
+      const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
+      setCalledNumbers(gameCalledNumbers);
       setBookedCartelas(new Set((activeGame as any).cartelas || []));
       
-      const lastNumber = (activeGame as any).calledNumbers?.slice(-1)[0];
+      const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
     }
   }, [activeGame]);
@@ -193,19 +203,21 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     onSuccess: (data) => {
-      setCalledNumbers(data.calledNumbers);
-      setLastCalledNumber(data.calledNumbers[data.calledNumbers.length - 1]);
+      // Convert string array to number array for proper tracking
+      const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
+      setCalledNumbers(updatedNumbers);
+      const newNumber = data.calledNumber;
+      setLastCalledNumber(newNumber);
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       
       // Play number audio if available
-      const lastNumber = data.calledNumbers[data.calledNumbers.length - 1];
-      if (lastNumber) {
-        const letter = getLetterForNumber(lastNumber);
+      if (newNumber) {
+        const letter = getLetterForNumber(newNumber);
         try {
-          const audio = new Audio(`/attached_assets/${letter}${lastNumber}.mp3`);
+          const audio = new Audio(`/attached_assets/${letter}${newNumber}.mp3`);
           audio.volume = 0.8;
           audio.play().catch(() => {
-            console.log(`Audio for ${letter}${lastNumber} not available`);
+            console.log(`Audio for ${letter}${newNumber} not available`);
           });
         } catch (error) {
           console.log('Audio playback error');
@@ -401,8 +413,32 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return { isWinner: false };
   }
 
+  // Check if admin has low credit balance
+  const adminCreditBalance = parseFloat((adminData as any)?.creditBalance || '0');
+  const showLowCreditWarning = adminCreditBalance < 100;
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Admin Low Credit Warning */}
+      {showLowCreditWarning && (
+        <div className="bg-orange-100 border-l-4 border-orange-500 p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-orange-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-orange-700">
+                <strong>⚠ Admin Low Credit Balance</strong>
+                <br />
+                Shop admin balance is low ({adminCreditBalance.toFixed(2)} ETB). Contact admin to add more credits.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b p-4">
         <div className="flex justify-between items-center">
