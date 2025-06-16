@@ -542,7 +542,7 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
           </div>
         </div>
         
-        {shopData && (
+        {shopData && user?.role === 'admin' && (
           <div className="mt-2 text-sm text-gray-500 text-center">
             Shop Profit Margin: {shopData.profitMargin || 0}%
           </div>
@@ -556,9 +556,9 @@ export default function FixedBingoDashboard({ onLogout }: FixedBingoDashboardPro
                 <div className="flex items-center gap-3">
                   <AlertTriangle className="h-5 w-5 text-orange-600" />
                   <div>
-                    <p className="font-medium text-orange-800">Admin Low Credit Balance</p>
+                    <p className="font-medium text-orange-800">Low Credit Balance</p>
                     <p className="text-sm text-orange-700">
-                      Shop admin balance is low ({creditBalance.balance} ETB). Contact admin to add more credits.
+                      Contact admin to add more credits.
                     </p>
                   </div>
                 </div>

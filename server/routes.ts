@@ -1331,26 +1331,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Credit System API Endpoints
-  
-  // Get admin credit balance
-  app.get("/api/credit/balance", async (req, res) => {
-    try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const balance = await storage.getCreditBalance(user.id);
-      res.json({ balance });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get credit balance" });
-    }
-  });
 
   // Create credit transfer between admins
   app.post("/api/credit/transfer", async (req, res) => {
@@ -1927,7 +1907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const balance = adminUser.creditBalance || '0.00';
         res.json({ balance });
       } else {
-        return res.status(403).json({ message: "Access denied" });
+        return res.status(403).json({ message: "Admin or employee access required" });
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to get credit balance" });
