@@ -59,6 +59,15 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
     }
   });
 
+  const { data: systemSettings = {} } = useQuery({
+    queryKey: ['admin-system-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/admin/system-settings');
+      if (!response.ok) throw new Error('Failed to fetch system settings');
+      return response.json();
+    }
+  });
+
   const withdrawMutation = useMutation({
     mutationFn: async ({ amount, bankAccount }: { amount: string; bankAccount: string }) => {
       const response = await fetch(`/api/referral-commissions/withdraw`, {
@@ -167,7 +176,7 @@ export function AdminReferralCommissions({ adminId }: AdminReferralCommissionsPr
         <CardContent>
           {commissions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No referral commissions yet. Start referring admins to earn 3% commission on their deposits!
+              No referral commissions yet. Start referring admins to earn {systemSettings.referralCommissionRate || '5'}% commission on their deposits!
             </div>
           ) : (
             <Table>
