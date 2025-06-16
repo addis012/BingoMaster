@@ -1173,14 +1173,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               onClick={() => {
                 setShowWinnerResult(false);
                 setAudioPlaying(false); // Reset audio state
-                // Reset and resume game if not a winner
+                // Reset and resume game immediately if not a winner
                 if (!winnerResult.isWinner && gamePaused) {
+                  setGamePaused(false);
+                  // Resume calling numbers immediately
                   setTimeout(() => {
-                    setGamePaused(false);
-                    if (activeGameId && gameActive && !gameFinished && !audioPlaying) {
+                    if (activeGameId && gameActive && !gameFinished) {
                       callNumberMutation.mutate();
                     }
-                  }, 1000);
+                  }, 100); // Minimal delay to ensure state is updated
                 }
               }}
               className={`px-8 py-2 ${winnerResult.isWinner ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"} text-white`}
