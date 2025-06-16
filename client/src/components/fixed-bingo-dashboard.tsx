@@ -41,10 +41,10 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   // Animation states
   const [isShuffling, setIsShuffling] = useState(false);
   
-  // User balance query
-  const { data: balance } = useQuery({
-    queryKey: ['/api/credit/balance'],
-    refetchInterval: 5000
+  // Active game query
+  const { data: activeGame } = useQuery({
+    queryKey: ['/api/games/active'],
+    refetchInterval: 2000
   });
 
   // Shop data query
@@ -52,6 +52,24 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
     queryKey: ['/api/shops', user?.shopId],
     enabled: !!user?.shopId
   });
+
+  // Cartela preview state
+  const [previewCartela, setPreviewCartela] = useState<number | null>(null);
+  const [showCartelaPreview, setShowCartelaPreview] = useState(false);
+
+  // Sync with active game data
+  useEffect(() => {
+    if (activeGame) {
+      setActiveGameId((activeGame as any).id);
+      setGameActive((activeGame as any).status === 'active');
+      setGameFinished((activeGame as any).status === 'completed');
+      setCalledNumbers((activeGame as any).calledNumbers || []);
+      setBookedCartelas(new Set((activeGame as any).cartelas || []));
+      
+      const lastNumber = (activeGame as any).calledNumbers?.slice(-1)[0];
+      setLastCalledNumber(lastNumber || null);
+    }
+  }, [activeGame]);
 
   // Helper function to get letter for number
   const getLetterForNumber = (num: number): string => {
@@ -274,7 +292,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
             <div>
               <h1 className="text-2xl font-bold text-gray-900">BINGO Dashboard</h1>
               <p className="text-sm text-gray-600">
-                Welcome, {user?.name} | Credit: {balance?.balance || '0.00'} Birr | Shop: {shopData?.name || 'Loading...'}
+                Welcome, {user?.name} | Employee | Shop: {(shopData as any)?.name || 'Loading...'}
               </p>
             </div>
             <Button 
@@ -342,6 +360,20 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                     />
                   </div>
 
+                  {/* Selected Cartelas Display */}
+                  {selectedCartelas.size > 0 && (
+                    <div className="bg-gray-50 p-3 rounded">
+                      <Label className="text-sm font-medium">Selected Cartelas:</Label>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {Array.from(selectedCartelas).map(num => (
+                          <Badge key={num} variant="secondary" className="text-xs">
+                            #{num}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Select Cartelas Button */}
                   <Button 
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white"
@@ -363,7 +395,11 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                   {/* Start Game Button */}
                   <Button 
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={() => startGameMutation.mutate()}
+                    onClick={() => {
+                      if (activeGameId && !gameActive) {
+                        startGameMutation.mutate();
+                      }
+                    }}
                     disabled={!activeGameId || gameActive || startGameMutation.isPending}
                   >
                     {startGameMutation.isPending ? "Starting..." : "Start Game"}
@@ -518,28 +554,40 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
           </DialogHeader>
           <div className="grid grid-cols-5 gap-2 p-4">
             {FIXED_CARTELAS.map((cartela) => (
-              <div
-                key={cartela.Board}
-                className={`p-2 border rounded cursor-pointer text-center ${
-                  selectedCartelas.has(cartela.Board)
-                    ? 'bg-blue-500 text-white border-blue-600'
-                    : bookedCartelas.has(cartela.Board)
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-100 hover:bg-gray-200'
-                }`}
-                onClick={() => {
-                  if (!bookedCartelas.has(cartela.Board)) {
-                    const newSelected = new Set(selectedCartelas);
-                    if (newSelected.has(cartela.Board)) {
-                      newSelected.delete(cartela.Board);
-                    } else {
-                      newSelected.add(cartela.Board);
+              <div key={cartela.Board} className="space-y-1">
+                <div
+                  className={`p-2 border rounded cursor-pointer text-center ${
+                    selectedCartelas.has(cartela.Board)
+                      ? 'bg-blue-500 text-white border-blue-600'
+                      : bookedCartelas.has(cartela.Board)
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                  onClick={() => {
+                    if (!bookedCartelas.has(cartela.Board)) {
+                      const newSelected = new Set(selectedCartelas);
+                      if (newSelected.has(cartela.Board)) {
+                        newSelected.delete(cartela.Board);
+                      } else {
+                        newSelected.add(cartela.Board);
+                      }
+                      setSelectedCartelas(newSelected);
                     }
-                    setSelectedCartelas(newSelected);
-                  }
-                }}
-              >
-                #{cartela.Board}
+                  }}
+                >
+                  #{cartela.Board}
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full text-xs py-1"
+                  onClick={() => {
+                    setPreviewCartela(cartela.Board);
+                    setShowCartelaPreview(true);
+                  }}
+                >
+                  View
+                </Button>
               </div>
             ))}
           </div>
@@ -616,6 +664,62 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
               </div>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cartela Preview Dialog */}
+      <Dialog open={showCartelaPreview} onOpenChange={setShowCartelaPreview}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cartela #{previewCartela} Preview</DialogTitle>
+            <DialogDescription>
+              Fixed cartela pattern with predefined numbers
+            </DialogDescription>
+          </DialogHeader>
+          {previewCartela && (
+            <div className="space-y-4">
+              {/* BINGO Headers */}
+              <div className="grid grid-cols-5 gap-1">
+                {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                  const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                  return (
+                    <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-sm`}>
+                      {letter}
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Cartela Grid */}
+              <div className="grid grid-cols-5 gap-1">
+                {(() => {
+                  const cartela = FIXED_CARTELAS.find(c => c.Board === previewCartela);
+                  if (!cartela) return null;
+                  
+                  const grid = [];
+                  for (let row = 0; row < 5; row++) {
+                    for (let col = 0; col < 5; col++) {
+                      let value;
+                      switch (col) {
+                        case 0: value = cartela.B[row]; break;
+                        case 1: value = cartela.I[row]; break;
+                        case 2: value = cartela.N[row]; break;
+                        case 3: value = cartela.G[row]; break;
+                        case 4: value = cartela.O[row]; break;
+                      }
+                      
+                      grid.push(
+                        <div key={`${row}-${col}`} className="h-8 bg-gray-100 border rounded flex items-center justify-center text-sm font-medium">
+                          {value === "FREE" ? "★" : value}
+                        </div>
+                      );
+                    }
+                  }
+                  return grid;
+                })()}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
