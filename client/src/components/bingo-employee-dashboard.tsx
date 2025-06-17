@@ -47,6 +47,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [isBoardShuffling, setIsBoardShuffling] = useState(false);
   const [shuffledPositions, setShuffledPositions] = useState<number[]>([]);
   
+  // Auto-calling states
+  const [isAutoCall, setIsAutoCall] = useState(false);
+  const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [nextNumber, setNextNumber] = useState<number | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  
   // Speed control
   const [autoPlaySpeed, setAutoPlaySpeed] = useState(3); // seconds between numbers
   
@@ -134,6 +142,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   }, [activeGame]);
 
+  // Cleanup auto-calling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCallInterval) {
+        clearInterval(autoCallInterval);
+      }
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+    };
+  }, [autoCallInterval, currentAudio]);
+
   // Helper function to get letter for number
   const getLetterForNumber = (num: number): string => {
     if (num >= 1 && num <= 15) return "B";
@@ -142,6 +163,138 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     if (num >= 46 && num <= 60) return "G";
     if (num >= 61 && num <= 75) return "O";
     return "?";
+  };
+
+  // Helper function to get ball color for number
+  const getBallColor = (num: number): string => {
+    if (num >= 1 && num <= 15) return "from-blue-500 to-blue-700"; // B - Blue
+    if (num >= 16 && num <= 30) return "from-red-500 to-red-700"; // I - Red
+    if (num >= 31 && num <= 45) return "from-green-500 to-green-700"; // N - Green
+    if (num >= 46 && num <= 60) return "from-yellow-500 to-yellow-600"; // G - Yellow
+    if (num >= 61 && num <= 75) return "from-purple-500 to-purple-700"; // O - Purple
+    return "from-gray-400 to-gray-600";
+  };
+
+  // Generate next number for calling
+  const getNextNumber = (): number | null => {
+    const availableNumbers = Array.from({ length: 75 }, (_, i) => i + 1)
+      .filter(n => !calledNumbers.includes(n));
+    
+    if (availableNumbers.length === 0) return null;
+    
+    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+    return availableNumbers[randomIndex];
+  };
+
+  // Call a single number with hover effect and audio
+  const callNumber = async () => {
+    if (!activeGameId || isPaused) return;
+
+    const numberToCall = getNextNumber();
+    if (!numberToCall) {
+      setGameActive(false);
+      setGameFinished(true);
+      setIsAutoCall(false);
+      return;
+    }
+
+    // Set hovering state for preview
+    setNextNumber(numberToCall);
+    setIsHovering(true);
+    
+    // Hover effect duration
+    setTimeout(() => {
+      setIsHovering(false);
+      setIsShuffling(true);
+      
+      // Play calling sound
+      try {
+        const audio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
+        audio.volume = 0.6;
+        setCurrentAudio(audio);
+        audio.play().catch(() => {
+          console.log('Money counter sound not available');
+        });
+      } catch (error) {
+        console.log('Audio playback error for calling sound');
+      }
+
+      // Call the API to add the number
+      setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/games/${activeGameId}/numbers`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ number: numberToCall })
+          });
+
+          if (response.ok) {
+            const updatedNumbers = [...calledNumbers, numberToCall];
+            setCalledNumbers(updatedNumbers);
+            setLastCalledNumber(numberToCall);
+          }
+        } catch (error) {
+          console.error('Failed to call number:', error);
+        }
+        
+        setIsShuffling(false);
+        setNextNumber(null);
+      }, 1500);
+    }, 800); // Hover duration
+  };
+
+  // Start auto-calling
+  const startAutoCall = () => {
+    if (autoCallInterval) clearInterval(autoCallInterval);
+    
+    setIsAutoCall(true);
+    setIsPaused(false);
+    
+    const interval = setInterval(() => {
+      if (!isPaused && gameActive && !gameFinished) {
+        callNumber();
+      }
+    }, 4000); // 4 seconds between calls
+    
+    setAutoCallInterval(interval);
+  };
+
+  // Stop auto-calling immediately
+  const stopAutoCall = () => {
+    setIsAutoCall(false);
+    setIsPaused(false);
+    
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+    
+    // Stop any currently playing audio immediately
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+    
+    // Reset states
+    setIsShuffling(false);
+    setIsHovering(false);
+    setNextNumber(null);
+  };
+
+  // Pause auto-calling immediately
+  const pauseAutoCall = () => {
+    setIsPaused(!isPaused);
+    
+    // Stop any currently playing audio immediately when pausing
+    if (!isPaused && currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+      setIsShuffling(false);
+      setIsHovering(false);
+      setNextNumber(null);
+    }
   };
 
   // Board shuffle animation - purely visual entertainment
@@ -685,26 +838,70 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           {/* Current Number Display */}
           <Card className="mb-4">
             <CardContent className="p-6 text-center">
-              {activeGameId && lastCalledNumber ? (
+              {activeGameId ? (
                 <>
-                  <div className="flex justify-center items-center space-x-2 mb-2">
-                    <div className="w-12 h-12 bg-red-500 text-white font-bold text-xl flex items-center justify-center rounded">
-                      {getLetterForNumber(lastCalledNumber)}
-                    </div>
-                    <div className="w-12 h-12 bg-gray-800 text-white font-bold text-xl flex items-center justify-center rounded">
-                      {lastCalledNumber}
-                    </div>
+                  <div className="flex justify-center items-center mb-4">
+                    {/* Show next number if hovering, otherwise show last called number */}
+                    {isHovering && nextNumber ? (
+                      <div className={`relative w-24 h-24 bg-gradient-to-br ${getBallColor(nextNumber)} rounded-full shadow-lg transform scale-110 animate-pulse transition-all duration-300`}>
+                        {/* Ball shine effect */}
+                        <div className="absolute top-2 left-3 w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
+                        <div className="absolute top-1 left-2 w-2 h-2 bg-white/50 rounded-full"></div>
+                        
+                        {/* Letter */}
+                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-white font-black text-sm">
+                          {getLetterForNumber(nextNumber)}
+                        </div>
+                        
+                        {/* Inner white circle for number background */}
+                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                          <span className="text-gray-900 font-black text-xl">
+                            {nextNumber}
+                          </span>
+                        </div>
+                      </div>
+                    ) : lastCalledNumber ? (
+                      <div className={`relative w-24 h-24 bg-gradient-to-br ${getBallColor(lastCalledNumber)} rounded-full shadow-lg transform ${isShuffling ? 'animate-bounce scale-110' : 'hover:scale-105'} transition-all duration-300`}>
+                        {/* Ball shine effect */}
+                        <div className="absolute top-2 left-3 w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
+                        <div className="absolute top-1 left-2 w-2 h-2 bg-white/50 rounded-full"></div>
+                        
+                        {/* Letter */}
+                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-white font-black text-sm">
+                          {getLetterForNumber(lastCalledNumber)}
+                        </div>
+                        
+                        {/* Inner white circle for number background */}
+                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                          <span className="text-gray-900 font-black text-xl">
+                            {lastCalledNumber}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative w-24 h-24 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full shadow-lg">
+                        <div className="absolute top-2 left-3 w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
+                        <div className="absolute top-1 left-2 w-2 h-2 bg-white/50 rounded-full"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-white font-black text-lg">?</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-600">
-                    {isShuffling ? "CALLING..." : `${getLetterForNumber(lastCalledNumber)}-${lastCalledNumber}`}
+                  <p className="text-sm text-gray-600 font-medium">
+                    {isHovering ? "Next Number..." : isShuffling ? "CALLING..." : lastCalledNumber ? `${getLetterForNumber(lastCalledNumber)}-${lastCalledNumber}` : "Ready to Call"}
                   </p>
                 </>
               ) : (
                 <>
-                  <div className="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-xs font-bold">CALLING...</span>
+                  <div className="relative w-24 h-24 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full shadow-lg mx-auto mb-4">
+                    <div className="absolute top-2 left-3 w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
+                    <div className="absolute top-1 left-2 w-2 h-2 bg-white/50 rounded-full"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-white font-black text-xs">START</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-600">Generate Number</p>
+                  <p className="text-sm text-gray-600">Create a Game to Begin</p>
                 </>
               )}
             </CardContent>
@@ -855,6 +1052,52 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     </Button>
                   )}
                 </div>
+
+                {/* Auto-calling Controls */}
+                {gameActive && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="text-sm font-medium mb-2">Auto Calling</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {!isAutoCall ? (
+                        <>
+                          <Button 
+                            onClick={callNumber}
+                            disabled={isShuffling || isHovering}
+                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                          >
+                            {isShuffling || isHovering ? "Calling..." : "Manual Call"}
+                          </Button>
+                          <Button 
+                            onClick={startAutoCall}
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                          >
+                            Auto Call
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button 
+                            onClick={pauseAutoCall}
+                            className={isPaused ? "bg-green-500 hover:bg-green-600 text-white" : "bg-yellow-500 hover:bg-yellow-600 text-white"}
+                          >
+                            {isPaused ? "Resume" : "Pause"}
+                          </Button>
+                          <Button 
+                            onClick={stopAutoCall}
+                            className="bg-red-500 hover:bg-red-600 text-white"
+                          >
+                            Stop
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                    {isAutoCall && (
+                      <div className="mt-2 text-xs text-center text-gray-600">
+                        {isPaused ? "Auto-calling paused" : "Auto-calling every 4 seconds"}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
