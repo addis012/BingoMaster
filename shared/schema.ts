@@ -359,16 +359,13 @@ export const insertCommissionPaymentSchema = createInsertSchema(commissionPaymen
   amount: z.string(),
 });
 
-export const insertGameHistorySchema = createInsertSchema(gameHistory, {
-  totalRevenue: z.string(),
-  prizeAmount: z.string(),
-  adminProfit: z.string(),
-  superAdminCommission: z.string(),
+export const insertGameHistorySchema = createInsertSchema(gameHistory).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
 });
 
-export const insertEmployeeProfitMarginSchema = createInsertSchema(employeeProfitMargins, {
-  profitMargin: z.string(),
-}).omit({
+export const insertEmployeeProfitMarginSchema = createInsertSchema(employeeProfitMargins).omit({
   id: true,
   createdAt: true,
 });

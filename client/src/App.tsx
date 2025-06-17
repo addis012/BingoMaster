@@ -7,6 +7,7 @@ import TestLogin from "./pages/test-login";
 import SimpleAdminDashboard from "./pages/simple-admin-dashboard";
 import SuperAdminDashboard from "./pages/super-admin-dashboard";
 import EmployeeDashboard from "./pages/employee-dashboard";
+import AdminEmployeeManagement from "./pages/admin-employee-management";
 
 function AppRouter() {
   const { user } = useAuth();
@@ -28,6 +29,9 @@ function AppRouter() {
       </Route>
       <Route path="/dashboard/admin">
         <SimpleAdminDashboard onLogout={handleLogout} />
+      </Route>
+      <Route path="/dashboard/admin/employees">
+        <AdminEmployeeManagement />
       </Route>
       <Route path="/dashboard/employee">
         <EmployeeDashboard onLogout={handleLogout} />
