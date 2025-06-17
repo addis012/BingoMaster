@@ -15,6 +15,16 @@ export const users = pgTable("users", {
   creditBalance: decimal("credit_balance", { precision: 12, scale: 2 }).default("0.00"), // Admin credit balance
   accountNumber: text("account_number").unique(), // Unique bank-like account number for Admins
   referredBy: integer("referred_by").references(() => users.id), // Admin who referred this admin
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("25.00"), // Admin commission rate from super admin
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Employee profit margins per shop - allows admins to set different margins for employees in different shops
+export const employeeProfitMargins = pgTable("employee_profit_margins", {
+  id: serial("id").primaryKey(),
+  employeeId: integer("employee_id").references(() => users.id).notNull(),
+  shopId: integer("shop_id").references(() => shops.id).notNull(),
+  profitMargin: decimal("profit_margin", { precision: 5, scale: 2 }).default("20.00"), // Employee's profit margin for this shop
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -196,6 +206,18 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   creditTransfersFrom: many(creditTransfers, { relationName: "fromAdmin" }),
   creditTransfersTo: many(creditTransfers, { relationName: "toAdmin" }),
   creditLoads: many(creditLoads),
+  employeeProfitMargins: many(employeeProfitMargins),
+}));
+
+export const employeeProfitMarginsRelations = relations(employeeProfitMargins, ({ one }) => ({
+  employee: one(users, {
+    fields: [employeeProfitMargins.employeeId],
+    references: [users.id],
+  }),
+  shop: one(shops, {
+    fields: [employeeProfitMargins.shopId],
+    references: [shops.id],
+  }),
 }));
 
 export const shopsRelations = relations(shops, ({ one, many }) => ({
@@ -207,6 +229,7 @@ export const shopsRelations = relations(shops, ({ one, many }) => ({
   games: many(games),
   transactions: many(transactions),
   commissionPayments: many(commissionPayments),
+  employeeProfitMargins: many(employeeProfitMargins),
 }));
 
 export const gamesRelations = relations(games, ({ one, many }) => ({
@@ -343,6 +366,13 @@ export const insertGameHistorySchema = createInsertSchema(gameHistory, {
   superAdminCommission: z.string(),
 });
 
+export const insertEmployeeProfitMarginSchema = createInsertSchema(employeeProfitMargins, {
+  profitMargin: z.string(),
+}).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -358,6 +388,8 @@ export type CommissionPayment = typeof commissionPayments.$inferSelect;
 export type InsertCommissionPayment = z.infer<typeof insertCommissionPaymentSchema>;
 export type GameHistory = typeof gameHistory.$inferSelect;
 export type InsertGameHistory = z.infer<typeof insertGameHistorySchema>;
+export type EmployeeProfitMargin = typeof employeeProfitMargins.$inferSelect;
+export type InsertEmployeeProfitMargin = z.infer<typeof insertEmployeeProfitMarginSchema>;
 
 // Credit system types
 export const insertCreditTransferSchema = createInsertSchema(creditTransfers, {
