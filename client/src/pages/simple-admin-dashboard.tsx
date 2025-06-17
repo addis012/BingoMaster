@@ -388,6 +388,25 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
           </TabsContent>
 
           <TabsContent value="employees" className="space-y-6">
+            {/* Employee Management Navigation */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-900">Advanced Employee Management</h3>
+                    <p className="text-blue-700">Manage passwords and profit margins per employee</p>
+                  </div>
+                  <Button 
+                    onClick={() => window.location.href = '/dashboard/admin/employees'}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Manage Employees
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Employee Creation Form */}
               <Card>
