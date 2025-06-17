@@ -133,6 +133,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setActiveGameId(incomingGameId);
       setGameActive(incomingStatus === 'active');
       setGameFinished(incomingStatus === 'completed');
+      setGamePaused(incomingStatus === 'paused');
       
       // Convert string array to number array for proper number tracking
       const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
@@ -154,6 +155,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setBookedCartelas(new Set());
     }
   }, [activeGame]);
+
+  // Clear timers immediately when game is paused
+  useEffect(() => {
+    if (gamePaused && numberCallTimer.current) {
+      clearTimeout(numberCallTimer.current);
+      numberCallTimer.current = null;
+    }
+  }, [gamePaused]);
 
   // Cleanup auto-calling interval on unmount
   useEffect(() => {
@@ -605,17 +614,25 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       
       // Always set timer for next number call (don't depend on audio state)
-      if (gameActive && !gameFinished && !gamePaused) {
+      // Only set timer if game is truly active and not paused
+      if (gameActive && !gameFinished && !gamePaused && activeGameId) {
         // Clear any existing timer first
         if (numberCallTimer.current) {
           clearTimeout(numberCallTimer.current);
         }
         
         numberCallTimer.current = setTimeout(() => {
+          // Double-check all conditions before calling
           if (gameActive && !gameFinished && !gamePaused && activeGameId) {
             callNumberMutation.mutate();
           }
         }, autoPlaySpeed * 1000); // Use adjustable speed
+      } else {
+        // Clear timer if game is paused, finished, or not active
+        if (numberCallTimer.current) {
+          clearTimeout(numberCallTimer.current);
+          numberCallTimer.current = null;
+        }
       }
     }
   });
