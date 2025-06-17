@@ -113,8 +113,8 @@ export default function LoginPage() {
             <div className="space-y-3 text-xs">
               <div className="bg-purple-50 p-2 rounded">
                 <p className="font-medium text-purple-800">Super Admin Account:</p>
-                <p className="text-purple-600">Username: bingomaster</p>
-                <p className="text-purple-600">Password: 123456</p>
+                <p className="text-purple-600">Username: superadmin</p>
+                <p className="text-purple-600">Password: a1e2y3t4h5</p>
               </div>
               <div className="bg-blue-50 p-2 rounded">
                 <p className="font-medium text-blue-800">Admin Account:</p>
