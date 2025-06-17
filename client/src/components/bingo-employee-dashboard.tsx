@@ -1010,7 +1010,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const showLowCreditWarning = adminData && adminCreditBalance < 100;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-y-auto">
       {/* Admin Low Credit Warning */}
       {showLowCreditWarning && (
         <div className="bg-orange-100 border-l-4 border-orange-500 p-4 mb-4">
