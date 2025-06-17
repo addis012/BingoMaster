@@ -29,6 +29,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [gameAmount, setGameAmount] = useState("20");
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
   const [audioPlaying, setAudioPlaying] = useState(false);
+  const [currentAudioRef, setCurrentAudioRef] = useState<HTMLAudioElement | null>(null);
   
   // Cartela management
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
