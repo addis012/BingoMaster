@@ -41,6 +41,14 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   // Animation states
   const [isShuffling, setIsShuffling] = useState(false);
   
+  // Auto-calling states
+  const [isAutoCall, setIsAutoCall] = useState(false);
+  const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [nextNumber, setNextNumber] = useState<number | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  
   // Active game query
   const { data: activeGame } = useQuery({
     queryKey: ['/api/games/active'],
@@ -79,6 +87,138 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
     if (num >= 46 && num <= 60) return "G";
     if (num >= 61 && num <= 75) return "O";
     return "?";
+  };
+
+  // Helper function to get ball color for number
+  const getBallColor = (num: number): string => {
+    if (num >= 1 && num <= 15) return "from-blue-500 to-blue-700"; // B - Blue
+    if (num >= 16 && num <= 30) return "from-red-500 to-red-700"; // I - Red
+    if (num >= 31 && num <= 45) return "from-green-500 to-green-700"; // N - Green
+    if (num >= 46 && num <= 60) return "from-yellow-500 to-yellow-600"; // G - Yellow
+    if (num >= 61 && num <= 75) return "from-purple-500 to-purple-700"; // O - Purple
+    return "from-gray-400 to-gray-600";
+  };
+
+  // Generate next number for calling
+  const getNextNumber = (): number | null => {
+    const availableNumbers = Array.from({ length: 75 }, (_, i) => i + 1)
+      .filter(n => !calledNumbers.includes(n));
+    
+    if (availableNumbers.length === 0) return null;
+    
+    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+    return availableNumbers[randomIndex];
+  };
+
+  // Call a single number with hover effect and audio
+  const callNumber = async () => {
+    if (!activeGameId || isPaused) return;
+
+    const numberToCall = getNextNumber();
+    if (!numberToCall) {
+      setGameActive(false);
+      setGameFinished(true);
+      setIsAutoCall(false);
+      return;
+    }
+
+    // Set hovering state for preview
+    setNextNumber(numberToCall);
+    setIsHovering(true);
+    
+    // Hover effect duration
+    setTimeout(() => {
+      setIsHovering(false);
+      setIsShuffling(true);
+      
+      // Play calling sound
+      try {
+        const audio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
+        audio.volume = 0.6;
+        setCurrentAudio(audio);
+        audio.play().catch(() => {
+          console.log('Money counter sound not available');
+        });
+      } catch (error) {
+        console.log('Audio playback error for calling sound');
+      }
+
+      // Call the API to add the number
+      setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/games/${activeGameId}/numbers`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ number: numberToCall })
+          });
+
+          if (response.ok) {
+            const updatedNumbers = [...calledNumbers, numberToCall];
+            setCalledNumbers(updatedNumbers);
+            setLastCalledNumber(numberToCall);
+          }
+        } catch (error) {
+          console.error('Failed to call number:', error);
+        }
+        
+        setIsShuffling(false);
+        setNextNumber(null);
+      }, 1500);
+    }, 800); // Hover duration
+  };
+
+  // Start auto-calling
+  const startAutoCall = () => {
+    if (autoCallInterval) clearInterval(autoCallInterval);
+    
+    setIsAutoCall(true);
+    setIsPaused(false);
+    
+    const interval = setInterval(() => {
+      if (!isPaused && gameActive && !gameFinished) {
+        callNumber();
+      }
+    }, 4000); // 4 seconds between calls
+    
+    setAutoCallInterval(interval);
+  };
+
+  // Stop auto-calling immediately
+  const stopAutoCall = () => {
+    setIsAutoCall(false);
+    setIsPaused(false);
+    
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+    
+    // Stop any currently playing audio immediately
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+    
+    // Reset states
+    setIsShuffling(false);
+    setIsHovering(false);
+    setNextNumber(null);
+  };
+
+  // Pause auto-calling immediately
+  const pauseAutoCall = () => {
+    setIsPaused(!isPaused);
+    
+    // Stop any currently playing audio immediately when pausing
+    if (!isPaused && currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+      setIsShuffling(false);
+      setIsHovering(false);
+      setNextNumber(null);
+    }
   };
 
   // Shuffle animation with sound

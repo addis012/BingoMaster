@@ -561,8 +561,65 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                     {startGameMutation.isPending ? "Starting..." : "Start Game"}
                   </Button>
 
+                  {/* Number Calling Controls */}
+                  {gameActive && (
+                    <div className="space-y-2 mt-4 pt-4 border-t">
+                      <h4 className="text-sm font-semibold text-gray-700 text-center">Number Calling</h4>
+                      
+                      {/* Manual Call Button */}
+                      <Button 
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        onClick={callNumber}
+                        disabled={isAutoCall || isShuffling || isHovering}
+                      >
+                        Call Next Number
+                      </Button>
+
+                      {/* Auto Call Controls */}
+                      <div className="flex space-x-2">
+                        {!isAutoCall ? (
+                          <Button 
+                            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                            onClick={startAutoCall}
+                            disabled={isShuffling || isHovering}
+                          >
+                            🎯 Auto Call
+                          </Button>
+                        ) : (
+                          <>
+                            <Button 
+                              className={`flex-1 ${isPaused ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-600 hover:bg-yellow-700'} text-white`}
+                              onClick={pauseAutoCall}
+                            >
+                              {isPaused ? '▶️ Resume' : '⏸️ Pause'}
+                            </Button>
+                            <Button 
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                              onClick={stopAutoCall}
+                            >
+                              ⏹️ Stop
+                            </Button>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Status Indicator */}
+                      <div className="text-center text-xs">
+                        {isAutoCall && !isPaused && (
+                          <span className="text-green-600 font-semibold">🔄 Auto Calling Active</span>
+                        )}
+                        {isAutoCall && isPaused && (
+                          <span className="text-yellow-600 font-semibold">⏸️ Auto Calling Paused</span>
+                        )}
+                        {!isAutoCall && (
+                          <span className="text-gray-500">Manual Control</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Shuffle Button */}
-                  <div className="flex justify-center">
+                  <div className="flex justify-center mt-4">
                     <Button 
                       className="bg-orange-600 hover:bg-orange-700 text-white py-1 text-xs"
                       onClick={shuffleNumbers}
