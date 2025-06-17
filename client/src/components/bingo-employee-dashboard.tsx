@@ -1467,18 +1467,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
       {/* Cartela Selector Dialog */}
       <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Select Fixed Cartelas (1-75)</DialogTitle>
             <DialogDescription>
               Choose from 75 official fixed cartelas. Selected: {selectedCartelas.size} cartelas
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-10 gap-3 p-4">
+          <div className="grid grid-cols-10 gap-4 p-6">
             {FIXED_CARTELAS.map((cartela) => (
               <div key={cartela.Board} className="text-center">
                 <div
-                  className={`p-2 border rounded cursor-pointer text-center mb-1 ${
+                  className={`p-4 border rounded cursor-pointer text-center mb-2 text-2xl font-bold ${
                     selectedCartelas.has(cartela.Board)
                       ? 'bg-red-400 text-white border-red-500'
                       : bookedCartelas.has(cartela.Board)
