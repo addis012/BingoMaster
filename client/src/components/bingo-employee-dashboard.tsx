@@ -829,21 +829,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               {user?.username} - employee
             </p>
           </div>
-          <div className="flex items-center space-x-4">
-
-            <div className="text-right">
-              <div className="text-xs text-gray-500">Winner Gets</div>
-              <div className="font-bold text-green-600">
-                {(() => {
-                  const totalAmount = activeGameId ? 
-                    bookedCartelas.size * parseFloat(gameAmount) : 
-                    selectedCartelas.size * parseFloat(gameAmount);
-                  const profitMargin = ((shopData as any)?.profitMargin || 20) / 100;
-                  const winnerAmount = totalAmount * (1 - profitMargin);
-                  return `${winnerAmount.toFixed(2)} Birr`;
-                })()}
-              </div>
+          
+          {/* Center - Winner Amount */}
+          <div className="text-center">
+            <div className="text-lg font-bold text-green-600">
+              Winner Gets: {(() => {
+                const totalAmount = activeGameId ? 
+                  bookedCartelas.size * parseFloat(gameAmount) : 
+                  selectedCartelas.size * parseFloat(gameAmount);
+                const profitMargin = ((shopData as any)?.profitMargin || 20) / 100;
+                const winnerAmount = totalAmount * (1 - profitMargin);
+                return `${winnerAmount.toFixed(2)} Birr`;
+              })()}
             </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
             <Button onClick={onLogout} className="bg-red-500 hover:bg-red-600 text-white">
               Log Out
             </Button>
@@ -1085,7 +1086,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       disabled={isShuffling || !activeGameId}
                       className="bg-purple-500 hover:bg-purple-600 text-white"
                     >
-                      {isShuffling ? "..." : "Shuffle"}
+                      {isShuffling ? "..." : "Restart"}
                     </Button>
                   )}
                 </div>
