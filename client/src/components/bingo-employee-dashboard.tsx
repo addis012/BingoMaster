@@ -862,13 +862,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                         <div className="absolute top-2 left-4 w-4 h-4 bg-white/50 rounded-full"></div>
                         
                         {/* Letter */}
-                        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white font-black text-lg">
+                        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white font-black text-2xl">
                           {getLetterForNumber(nextNumber)}
                         </div>
                         
                         {/* Inner white circle for number background */}
                         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-white rounded-full flex items-center justify-center">
-                          <span className="text-gray-900 font-black text-4xl">
+                          <span className="text-gray-900 font-black text-6xl">
                             {nextNumber}
                           </span>
                         </div>
@@ -880,13 +880,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                         <div className="absolute top-2 left-4 w-4 h-4 bg-white/50 rounded-full"></div>
                         
                         {/* Letter */}
-                        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white font-black text-lg">
+                        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white font-black text-2xl">
                           {getLetterForNumber(lastCalledNumber)}
                         </div>
                         
                         {/* Inner white circle for number background */}
                         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-white rounded-full flex items-center justify-center">
-                          <span className="text-gray-900 font-black text-4xl">
+                          <span className="text-gray-900 font-black text-6xl">
                             {lastCalledNumber}
                           </span>
                         </div>
