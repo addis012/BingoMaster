@@ -443,10 +443,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         description: "Bingo game is now active - start calling numbers!"
       });
       
-      // Automatically start calling numbers after a short delay
-      setTimeout(() => {
-        callNumberMutation.mutate();
-      }, 2000);
+      // Game is ready for manual number calling
     },
     onError: (error: any) => {
       console.error("Start game error:", error);
@@ -508,14 +505,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         }
       }
       
-      // Always set timer for next number call (don't depend on audio state)
-      if (gameActive && !gameFinished && !gamePaused) {
-        numberCallTimer.current = setTimeout(() => {
-          if (gameActive && !gameFinished && !gamePaused && activeGameId) {
-            callNumberMutation.mutate();
-          }
-        }, autoPlaySpeed * 1000); // Use adjustable speed
-      }
+      // Automatic calling is now disabled - use manual calling system instead
     }
   });
 
@@ -736,7 +726,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setGamePaused(false);
     // Resume calling numbers if game is still active
     if (gameActive && !gameFinished && activeGameId) {
-      callNumberMutation.mutate();
+      // Use the new calling system instead of the old mutation
+      callNumber();
     }
   };
 
@@ -1098,13 +1089,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   ) : null}
                   
                   {gameActive ? (
-                    <Button 
-                      onClick={() => resetGameMutation.mutate()}
-                      disabled={resetGameMutation.isPending}
-                      className="bg-red-500 hover:bg-red-600 text-white"
-                    >
-                      {resetGameMutation.isPending ? "Ending..." : "End Game"}
-                    </Button>
+                    <>
+                      <Button 
+                        onClick={callNumber}
+                        disabled={isShuffling || isHovering || gamePaused}
+                        className="bg-green-500 hover:bg-green-600 text-white"
+                      >
+                        {isShuffling || isHovering ? "Calling..." : "Call Number"}
+                      </Button>
+                      <Button 
+                        onClick={() => resetGameMutation.mutate()}
+                        disabled={resetGameMutation.isPending}
+                        className="bg-red-500 hover:bg-red-600 text-white"
+                      >
+                        {resetGameMutation.isPending ? "Ending..." : "End Game"}
+                      </Button>
+                    </>
                   ) : (
                     <Button 
                       onClick={shuffleNumbers}
