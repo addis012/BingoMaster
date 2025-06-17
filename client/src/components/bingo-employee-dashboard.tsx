@@ -114,33 +114,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 30000 // Check admin balance every 30 seconds
   });
 
-  // Sync with active game data
+  // Reset game state on page load to always allow new games
   useEffect(() => {
-    if (activeGame) {
-      setActiveGameId((activeGame as any).id);
-      setGameActive((activeGame as any).status === 'active');
-      setGameFinished((activeGame as any).status === 'completed');
-      
-      // Convert string array to number array for proper number tracking
-      const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
-      
-      // Always update called numbers to reflect the current game state
-      setCalledNumbers(gameCalledNumbers);
-      
-      setBookedCartelas(new Set((activeGame as any).cartelas || []));
-      
-      const lastNumber = gameCalledNumbers.slice(-1)[0];
-      setLastCalledNumber(lastNumber || null);
-    } else {
-      // Clear all game state when no active game
-      setActiveGameId(null);
-      setGameActive(false);
-      setGameFinished(false);
-      setCalledNumbers([]);
-      setLastCalledNumber(null);
-      setBookedCartelas(new Set());
-    }
-  }, [activeGame]);
+    // Always start fresh - don't sync with existing games from database
+    setActiveGameId(null);
+    setGameActive(false);
+    setGameFinished(false);
+    setCalledNumbers([]);
+    setLastCalledNumber(null);
+    setBookedCartelas(new Set());
+  }, []); // Only run once on component mount
 
   // Cleanup auto-calling interval on unmount
   useEffect(() => {
@@ -1088,24 +1071,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     </Button>
                   ) : null}
                   
-                  {gameActive ? (
-                    <>
-                      <Button 
-                        onClick={callNumber}
-                        disabled={isShuffling || isHovering || gamePaused}
-                        className="bg-green-500 hover:bg-green-600 text-white"
-                      >
-                        {isShuffling || isHovering ? "Calling..." : "Call Number"}
-                      </Button>
-                      <Button 
-                        onClick={() => resetGameMutation.mutate()}
-                        disabled={resetGameMutation.isPending}
-                        className="bg-red-500 hover:bg-red-600 text-white"
-                      >
-                        {resetGameMutation.isPending ? "Ending..." : "End Game"}
-                      </Button>
-                    </>
-                  ) : (
+                  {!gameActive && (
                     <Button 
                       onClick={shuffleNumbers}
                       disabled={isShuffling || !activeGameId}
