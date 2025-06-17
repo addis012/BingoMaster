@@ -676,14 +676,35 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   };
 
-  // Pause game function - instantly stops number calling
+  // Pause game function - instantly stops audio, animations, and number calling like pausing music
   const pauseGame = () => {
     setGamePaused(true);
+    
     // Clear the timer immediately to stop number calling
     if (numberCallTimer.current) {
       clearTimeout(numberCallTimer.current);
       numberCallTimer.current = null;
     }
+    
+    // Stop any currently playing audio immediately
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+    
+    // Stop all animations immediately
+    setIsShuffling(false);
+    setIsHovering(false);
+    setNextNumber(null);
+    
+    // Clear any auto-calling intervals
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+    setIsAutoCall(false);
+    setIsPaused(false);
   };
 
   // Resume game function - continues number calling
@@ -1053,51 +1074,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   )}
                 </div>
 
-                {/* Auto-calling Controls */}
-                {gameActive && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="text-sm font-medium mb-2">Auto Calling</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {!isAutoCall ? (
-                        <>
-                          <Button 
-                            onClick={callNumber}
-                            disabled={isShuffling || isHovering}
-                            className="bg-blue-500 hover:bg-blue-600 text-white"
-                          >
-                            {isShuffling || isHovering ? "Calling..." : "Manual Call"}
-                          </Button>
-                          <Button 
-                            onClick={startAutoCall}
-                            className="bg-green-500 hover:bg-green-600 text-white"
-                          >
-                            Auto Call
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button 
-                            onClick={pauseAutoCall}
-                            className={isPaused ? "bg-green-500 hover:bg-green-600 text-white" : "bg-yellow-500 hover:bg-yellow-600 text-white"}
-                          >
-                            {isPaused ? "Resume" : "Pause"}
-                          </Button>
-                          <Button 
-                            onClick={stopAutoCall}
-                            className="bg-red-500 hover:bg-red-600 text-white"
-                          >
-                            Stop
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                    {isAutoCall && (
-                      <div className="mt-2 text-xs text-center text-gray-600">
-                        {isPaused ? "Auto-calling paused" : "Auto-calling every 4 seconds"}
-                      </div>
-                    )}
-                  </div>
-                )}
+
               </div>
             </CardContent>
           </Card>
