@@ -21,7 +21,7 @@ import { ErrorDisplay, LoadingState } from "@/components/error-display";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift } from "lucide-react";
+import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent } from "lucide-react";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
@@ -220,6 +220,76 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const employeeList = employees as any[] || [];
   const userAccountNumber = (user as any).accountNumber || `ACC${String(user.id).padStart(6, '0')}`;
 
+  // Employee management handlers
+  const handlePasswordChange = async (employee: any) => {
+    const newPassword = prompt(`Enter new password for ${employee.name} (minimum 6 characters):`);
+    if (!newPassword) return;
+    
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await apiRequest(`/api/admin/employees/${employee.id}/password`, {
+        method: "PATCH",
+        body: JSON.stringify({ newPassword }),
+      });
+      
+      toast({
+        title: "Success",
+        description: `Password updated for ${employee.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update password",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleProfitMarginEdit = async (employee: any) => {
+    const profitMarginStr = prompt(`Set profit margin for ${employee.name} (0-100%):`);
+    if (!profitMarginStr) return;
+    
+    const profitMargin = parseFloat(profitMarginStr);
+    if (isNaN(profitMargin) || profitMargin < 0 || profitMargin > 100) {
+      toast({
+        title: "Error",
+        description: "Profit margin must be between 0 and 100",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await apiRequest(`/api/admin/employee-profit-margins`, {
+        method: "POST",
+        body: JSON.stringify({
+          employeeId: employee.id,
+          shopId: user.shopId,
+          profitMargin: profitMargin.toString(),
+        }),
+      });
+      
+      toast({
+        title: "Success",
+        description: `Profit margin set to ${profitMargin}% for ${employee.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to set profit margin",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <NavigationHeader user={user} onLogout={onLogout} />
@@ -388,25 +458,6 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
           </TabsContent>
 
           <TabsContent value="employees" className="space-y-6">
-            {/* Employee Management Navigation */}
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-900">Advanced Employee Management</h3>
-                    <p className="text-blue-700">Manage passwords and profit margins per employee</p>
-                  </div>
-                  <Button 
-                    onClick={() => window.location.href = '/dashboard/admin/employees'}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Manage Employees
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Employee Creation Form */}
               <Card>
@@ -438,16 +489,39 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 <CardContent>
                   <div className="space-y-4">
                     {employeeList.map((employee: any) => (
-                      <div key={employee.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <h4 className="font-medium">{employee.name}</h4>
-                          <p className="text-sm text-muted-foreground">@{employee.username}</p>
-                          <p className="text-sm text-muted-foreground">{employee.email || 'No email'}</p>
+                      <div key={employee.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium">{employee.name}</h4>
+                            <p className="text-sm text-muted-foreground">@{employee.username}</p>
+                            <p className="text-sm text-muted-foreground">{employee.email || 'No email'}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant={employee.isBlocked ? "destructive" : "default"}>
+                              {employee.isBlocked ? "Blocked" : "Active"}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <Badge variant={employee.isBlocked ? "destructive" : "default"}>
-                            {employee.isBlocked ? "Blocked" : "Active"}
-                          </Badge>
+                        {/* Edit Actions */}
+                        <div className="flex gap-2 pt-2 border-t">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handlePasswordChange(employee)}
+                            className="flex items-center gap-1"
+                          >
+                            <Lock className="h-3 w-3" />
+                            Change Password
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleProfitMarginEdit(employee)}
+                            className="flex items-center gap-1"
+                          >
+                            <Percent className="h-3 w-3" />
+                            Set Profit Margin
+                          </Button>
                         </div>
                       </div>
                     ))}
