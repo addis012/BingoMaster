@@ -586,10 +586,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         const letter = getLetterForNumber(newNumber);
         setAudioPlaying(true);
         
-        // Mark the PREVIOUS number immediately when new number starts playing
-        if (lastCalledNumber && !markedNumbers.includes(lastCalledNumber)) {
-          setMarkedNumbers(prev => [...prev, lastCalledNumber]);
-        }
+        // Mark all numbers from called numbers EXCEPT the current one being spoken
+        const numbersToMark = updatedNumbers.slice(0, -1); // All except the last (current) number
+        setMarkedNumbers(numbersToMark);
         
         // Don't mark the current number - it will be marked when the NEXT number starts
         const audioResetTimer = setTimeout(() => {
