@@ -537,29 +537,30 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                           Load Credits
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Load Credits</DialogTitle>
-                          <DialogDescription>
-                            Request to load credits into your account. All requests require approval.
+                          <DialogDescription className="text-sm">
+                            Request to load credits into your account.
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           <div>
-                            <Label htmlFor="loadAmount">Amount (ETB)</Label>
+                            <Label htmlFor="loadAmount" className="text-sm">Amount (ETB)</Label>
                             <Input
                               id="loadAmount"
                               type="number"
                               placeholder="Enter amount"
                               value={loadAmount}
                               onChange={(e) => setLoadAmount(e.target.value)}
+                              className="h-9"
                             />
                           </div>
                           <div>
-                            <Label htmlFor="paymentMethod">Payment Method</Label>
+                            <Label htmlFor="paymentMethod" className="text-sm">Payment Method</Label>
                             <select
                               id="paymentMethod"
-                              className="w-full p-2 border rounded"
+                              className="w-full p-2 border rounded h-9 text-sm"
                               value={paymentMethod}
                               onChange={(e) => setPaymentMethod(e.target.value)}
                             >
@@ -569,49 +570,52 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                             </select>
                           </div>
                           <div>
-                            <Label htmlFor="referenceNumber">Reference Number (Optional)</Label>
+                            <Label htmlFor="referenceNumber" className="text-sm">Reference Number</Label>
                             <Input
                               id="referenceNumber"
-                              placeholder="Enter transaction reference"
+                              placeholder="Transaction reference"
                               value={referenceNumber}
                               onChange={(e) => setReferenceNumber(e.target.value)}
+                              className="h-9"
                             />
                           </div>
                           <div>
                             <FileUpload
-                              label="Bank Transfer Screenshot"
+                              label="Transfer Screenshot"
                               onFileSelect={(file) => setScreenshotFile(file)}
                               onFileRemove={() => setScreenshotFile(null)}
                               selectedFile={screenshotFile}
                               accept="image/*"
                               maxSize={5}
                             />
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Upload proof of bank transfer to your account: {userAccountNumber}
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Account: {userAccountNumber}
                             </p>
                           </div>
                           <div>
-                            <Label htmlFor="notes">Additional Notes (Optional)</Label>
+                            <Label htmlFor="notes" className="text-sm">Notes</Label>
                             <textarea
                               id="notes"
-                              className="w-full p-2 border rounded h-16"
-                              placeholder="Any additional information about this request"
+                              className="w-full p-2 border rounded h-12 text-sm"
+                              placeholder="Additional information"
                               value={notes}
                               onChange={(e) => setNotes(e.target.value)}
                             />
                           </div>
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-2 pt-2">
                             <Button
                               variant="outline"
                               onClick={() => setShowLoadDialog(false)}
+                              size="sm"
                             >
                               Cancel
                             </Button>
                             <Button
                               onClick={handleLoadCredit}
                               disabled={loadCreditMutation.isPending}
+                              size="sm"
                             >
-                              {loadCreditMutation.isPending ? "Submitting..." : "Submit Request"}
+                              {loadCreditMutation.isPending ? "Submitting..." : "Submit"}
                             </Button>
                           </div>
                         </div>
