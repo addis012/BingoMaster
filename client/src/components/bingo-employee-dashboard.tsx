@@ -543,9 +543,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     onSuccess: (data) => {
-      // Convert string array to number array for proper tracking
-      const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
-      setCalledNumbers(updatedNumbers);
+      // Don't process if game is paused
+      if (gamePaused) {
+        return;
+      }
+      
       const newNumber = data.calledNumber;
       setLastCalledNumber(newNumber);
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
@@ -558,6 +560,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Set a fallback timeout to reset audio state in case audio events fail
         const audioResetTimer = setTimeout(() => {
           setAudioPlaying(false);
+          // Mark the number only after audio finishes
+          const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
+          setCalledNumbers(updatedNumbers);
         }, 2500); // Reset audio state after 2.5 seconds max
         
         try {
@@ -566,21 +571,37 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           audio.onended = () => {
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
+            // Mark the number only after audio finishes
+            const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
+            setCalledNumbers(updatedNumbers);
           };
           audio.onerror = () => {
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
+            // Mark the number immediately if audio fails
+            const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
+            setCalledNumbers(updatedNumbers);
           };
           audio.play().catch(() => {
             console.log(`Audio for ${letter}${newNumber} not available`);
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
+            // Mark the number immediately if audio fails
+            const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
+            setCalledNumbers(updatedNumbers);
           });
         } catch (error) {
           console.log('Audio playback error');
           clearTimeout(audioResetTimer);
           setAudioPlaying(false);
+          // Mark the number immediately if audio fails
+          const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
+          setCalledNumbers(updatedNumbers);
         }
+      } else {
+        // If no audio, mark immediately
+        const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
+        setCalledNumbers(updatedNumbers);
       }
       
       // Always set timer for next number call (don't depend on audio state)
@@ -1253,7 +1274,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
@@ -1279,7 +1300,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
@@ -1305,7 +1326,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
@@ -1331,7 +1352,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
@@ -1357,7 +1378,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
