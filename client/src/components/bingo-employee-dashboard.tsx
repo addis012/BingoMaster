@@ -61,6 +61,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Timer reference for instant pause control
   const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
   
+  // Store previous game setup for restart functionality
+  const [previousGameSetup, setPreviousGameSetup] = useState<{
+    cartelas: Set<number>;
+    amount: string;
+  } | null>(null);
+  
   // Active game query
   const { data: activeGame } = useQuery({
     queryKey: ['/api/games/active'],
@@ -295,6 +301,30 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   };
 
+  // Enhanced pause game function for immediate stop
+  const enhancedPauseGame = () => {
+    setGamePaused(true);
+    
+    // Immediately stop all audio and animations
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+    
+    // Clear any pending timers
+    if (numberCallTimer.current) {
+      clearTimeout(numberCallTimer.current);
+      numberCallTimer.current = null;
+    }
+    
+    // Stop all animations immediately
+    setIsShuffling(false);
+    setIsHovering(false);
+    setNextNumber(null);
+    setAudioPlaying(false);
+  };
+
   // Board shuffle animation - purely visual entertainment
   const shuffleBingoBoard = () => {
     setIsBoardShuffling(true);
@@ -332,6 +362,36 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         }, 300);
       }
     }, 200);
+  };
+
+  // Enhanced restart function - restore previous game setup
+  const restartGame = () => {
+    if (previousGameSetup) {
+      // Restore previous cartelas and amount
+      setSelectedCartelas(previousGameSetup.cartelas);
+      setGameAmount(previousGameSetup.amount);
+      
+      toast({
+        title: "Game Setup Restored",
+        description: `Restored ${previousGameSetup.cartelas.size} cartelas and ${previousGameSetup.amount} Birr per cartela. Click Start Game to begin.`
+      });
+    } else {
+      // If no previous setup, just play shuffle sound for feedback
+      try {
+        const audio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
+        audio.volume = 0.6;
+        audio.play().catch(() => {
+          console.log('Money counter sound not available');
+        });
+      } catch (error) {
+        console.log('Audio playback error for shuffle sound');
+      }
+      
+      toast({
+        title: "No Previous Game",
+        description: "No previous game setup to restore. Select cartelas and start a new game."
+      });
+    }
   };
 
   // Original shuffle for number calling - keep existing functionality
@@ -403,6 +463,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     onSuccess: (data) => {
+      // Save current game setup before starting
+      setPreviousGameSetup({
+        cartelas: new Set(selectedCartelas),
+        amount: gameAmount
+      });
+      
       setGameActive(true);
       setActiveGameId(data.id);
       setCalledNumbers([]); // Clear any previous numbers when starting
@@ -1044,7 +1110,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                         if (gamePaused) {
                           resumeGame();
                         } else {
-                          pauseGame();
+                          enhancedPauseGame();
                         }
                       }}
                       className={gamePaused ? "bg-green-500 hover:bg-green-600 text-white" : "bg-orange-500 hover:bg-orange-600 text-white"}
@@ -1063,11 +1129,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     </Button>
                   ) : (
                     <Button 
-                      onClick={shuffleNumbers}
-                      disabled={isShuffling || !activeGameId}
+                      onClick={restartGame}
                       className="bg-purple-500 hover:bg-purple-600 text-white"
                     >
-                      {isShuffling ? "..." : "Restart"}
+                      Restart
                     </Button>
                   )}
                 </div>
