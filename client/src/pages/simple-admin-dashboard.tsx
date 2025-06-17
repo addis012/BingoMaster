@@ -235,10 +235,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     }
 
     try {
-      await apiRequest(`/api/admin/employees/${employee.id}/password`, {
-        method: "PATCH",
-        body: JSON.stringify({ newPassword }),
-      });
+      await apiRequest("PATCH", `/api/admin/employees/${employee.id}/password`, { newPassword });
       
       toast({
         title: "Success",
@@ -268,13 +265,10 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     }
 
     try {
-      await apiRequest(`/api/admin/employee-profit-margins`, {
-        method: "POST",
-        body: JSON.stringify({
-          employeeId: employee.id,
-          shopId: user.shopId,
-          profitMargin: profitMargin.toString(),
-        }),
+      await apiRequest("POST", `/api/admin/employee-profit-margins`, {
+        employeeId: employee.id,
+        shopId: user.shopId,
+        profitMargin: profitMargin.toString(),
       });
       
       toast({
