@@ -586,12 +586,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         const letter = getLetterForNumber(newNumber);
         setAudioPlaying(true);
         
-        // Don't mark anything immediately - wait for audio to finish
+        // Mark the PREVIOUS number immediately when new number starts playing
+        if (lastCalledNumber && !markedNumbers.includes(lastCalledNumber)) {
+          setMarkedNumbers(prev => [...prev, lastCalledNumber]);
+        }
+        
+        // Don't mark the current number - it will be marked when the NEXT number starts
         const audioResetTimer = setTimeout(() => {
           setAudioPlaying(false);
           setCurrentAudioRef(null);
-          // Mark current number only after audio timeout
-          setMarkedNumbers(prev => [...prev, newNumber]);
         }, 2500);
         
         try {
@@ -603,8 +606,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
             setCurrentAudioRef(null);
-            // Mark the current number only after audio finishes
-            setMarkedNumbers(prev => [...prev, newNumber]);
+            // Don't mark here - marking happens when next number starts
           };
           audio.onerror = () => {
             clearTimeout(audioResetTimer);
@@ -630,7 +632,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           setMarkedNumbers(prev => [...prev, newNumber]);
         }
       } else {
-        // If no audio or audio already playing, mark immediately
+        // If no audio or audio already playing, mark all numbers
         setMarkedNumbers(updatedNumbers);
       }
       
