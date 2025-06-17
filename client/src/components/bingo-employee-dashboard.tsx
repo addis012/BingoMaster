@@ -160,13 +160,24 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   }, [activeGame]);
 
-  // Clear timers immediately when game is paused
+  // Clear timers and stop audio immediately when game is paused
   useEffect(() => {
-    if (gamePaused && numberCallTimer.current) {
-      clearTimeout(numberCallTimer.current);
-      numberCallTimer.current = null;
+    if (gamePaused) {
+      // Clear number calling timer
+      if (numberCallTimer.current) {
+        clearTimeout(numberCallTimer.current);
+        numberCallTimer.current = null;
+      }
+      
+      // Stop current audio like pausing music
+      if (currentAudioRef) {
+        currentAudioRef.pause();
+        currentAudioRef.currentTime = 0;
+        setCurrentAudioRef(null);
+        setAudioPlaying(false);
+      }
     }
-  }, [gamePaused]);
+  }, [gamePaused, currentAudioRef]);
 
   // Cleanup auto-calling interval on unmount
   useEffect(() => {
@@ -575,29 +586,30 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         const letter = getLetterForNumber(newNumber);
         setAudioPlaying(true);
         
-        // Mark previous number immediately when new number starts playing
-        if (lastCalledNumber && !markedNumbers.includes(lastCalledNumber)) {
-          setMarkedNumbers(prev => [...prev, lastCalledNumber]);
-        }
-        
+        // Don't mark anything immediately - wait for audio to finish
         const audioResetTimer = setTimeout(() => {
           setAudioPlaying(false);
-          // Mark current number after timeout
+          setCurrentAudioRef(null);
+          // Mark current number only after audio timeout
           setMarkedNumbers(prev => [...prev, newNumber]);
         }, 2500);
         
         try {
           const audio = new Audio(`/attached_assets/${letter}${newNumber}.mp3`);
           audio.volume = 0.8;
+          setCurrentAudioRef(audio);
+          
           audio.onended = () => {
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
+            setCurrentAudioRef(null);
             // Mark the current number only after audio finishes
             setMarkedNumbers(prev => [...prev, newNumber]);
           };
           audio.onerror = () => {
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
+            setCurrentAudioRef(null);
             // Mark immediately if audio fails
             setMarkedNumbers(prev => [...prev, newNumber]);
           };
@@ -605,6 +617,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             console.log(`Audio for ${letter}${newNumber} not available`);
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
+            setCurrentAudioRef(null);
             // Mark immediately if audio fails
             setMarkedNumbers(prev => [...prev, newNumber]);
           });
@@ -612,6 +625,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           console.log('Audio playback error');
           clearTimeout(audioResetTimer);
           setAudioPlaying(false);
+          setCurrentAudioRef(null);
           // Mark immediately if audio fails
           setMarkedNumbers(prev => [...prev, newNumber]);
         }
@@ -1218,6 +1232,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           currentAudio.currentTime = 0;
                           setCurrentAudio(null);
                         }
+                        // Clear current audio reference
+                        if (currentAudioRef) {
+                          currentAudioRef.pause();
+                          currentAudioRef.currentTime = 0;
+                          setCurrentAudioRef(null);
+                        }
+                        setAudioPlaying(false);
                         setIsAutoCall(false);
                         setIsPaused(false);
                         setIsShuffling(false);
