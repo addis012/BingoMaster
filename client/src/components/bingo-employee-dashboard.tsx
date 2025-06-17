@@ -570,26 +570,56 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Reset game mutation - only clears data when manually starting new game
   const resetGameMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/games/${activeGameId}/complete`, {
+      // Use activeGame.id if activeGameId is null
+      const gameId = activeGameId || activeGame?.id;
+      if (!gameId) {
+        throw new Error('No active game to end');
+      }
+      
+      const response = await fetch(`/api/games/${gameId}/complete`, {
         method: 'PATCH'
       });
       if (!response.ok) throw new Error('Failed to reset game');
       return response.json();
     },
     onSuccess: () => {
-      // Only reset state when manually starting new game, not during winner declaration
-      if (!gameFinished) {
-        setGameActive(false);
-        setGameFinished(false);
-        setCalledNumbers([]);
-        setLastCalledNumber(null);
-        setActiveGameId(null);
-        setBookedCartelas(new Set());
+      // Stop any ongoing audio and animations immediately
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setCurrentAudio(null);
       }
+      
+      // Clear any pending timers
+      if (numberCallTimer.current) {
+        clearTimeout(numberCallTimer.current);
+        numberCallTimer.current = null;
+      }
+      
+      // Reset all game state
+      setGameActive(false);
+      setGameFinished(false);
+      setGamePaused(false);
+      setCalledNumbers([]);
+      setLastCalledNumber(null);
+      setActiveGameId(null);
+      setBookedCartelas(new Set());
+      setIsShuffling(false);
+      setIsHovering(false);
+      setNextNumber(null);
+      setAudioPlaying(false);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       toast({
-        title: "Game Reset",
+        title: "Game Ended",
         description: "Game has been completed and reset"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to end game",
+        variant: "destructive"
       });
     }
   });
