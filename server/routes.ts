@@ -2001,13 +2001,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Super Admin revenue tracking routes
   app.get("/api/super-admin/revenues", async (req, res) => {
     try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(403).json({ message: "Super admin access required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user || user.role !== 'super_admin') {
+      const sessionUser = (req.session as any)?.user;
+      if (!sessionUser || sessionUser.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
 
@@ -2026,13 +2021,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/super-admin/revenue-total", async (req, res) => {
     try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(403).json({ message: "Super admin access required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user || user.role !== 'super_admin') {
+      const sessionUser = (req.session as any)?.user;
+      if (!sessionUser || sessionUser.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
 
@@ -2050,13 +2040,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/super-admin/daily-summaries", async (req, res) => {
     try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(403).json({ message: "Super admin access required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user || user.role !== 'super_admin') {
+      const sessionUser = (req.session as any)?.user;
+      if (!sessionUser || sessionUser.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
 
@@ -2113,13 +2098,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Super Admin - Admin Management
   app.get("/api/super-admin/admins", async (req, res) => {
     try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(403).json({ message: "Super admin access required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user || user.role !== 'super_admin') {
+      const sessionUser = (req.session as any)?.user;
+      if (!sessionUser || sessionUser.role !== 'super_admin') {
         return res.status(403).json({ message: "Super admin access required" });
       }
 
