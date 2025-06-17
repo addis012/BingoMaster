@@ -121,9 +121,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Sync with active game data
   useEffect(() => {
     if (activeGame) {
-      setActiveGameId((activeGame as any).id);
-      setGameActive((activeGame as any).status === 'active');
-      setGameFinished((activeGame as any).status === 'completed');
+      // Only sync if this is a different game or if we don't have a current game
+      const incomingGameId = (activeGame as any).id;
+      const incomingStatus = (activeGame as any).status;
+      
+      // If the incoming game is completed, don't set it as active
+      if (incomingStatus === 'completed') {
+        return;
+      }
+      
+      setActiveGameId(incomingGameId);
+      setGameActive(incomingStatus === 'active');
+      setGameFinished(incomingStatus === 'completed');
       
       // Convert string array to number array for proper number tracking
       const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
@@ -596,7 +605,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         numberCallTimer.current = null;
       }
       
-      // Reset all game state
+      // Reset all game state immediately
       setGameActive(false);
       setGameFinished(false);
       setGamePaused(false);
@@ -609,11 +618,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setNextNumber(null);
       setAudioPlaying(false);
       
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       toast({
         title: "Game Ended",
         description: "Game has been completed and reset"
       });
+      
+      // Delay the query invalidation to prevent immediate game pickup
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      }, 1000);
     },
     onError: (error: any) => {
       toast({
