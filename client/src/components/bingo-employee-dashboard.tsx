@@ -856,47 +856,47 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <div className="flex justify-center items-center mb-4">
                     {/* Show next number if hovering, otherwise show last called number */}
                     {isHovering && nextNumber ? (
-                      <div className={`relative w-24 h-24 bg-gradient-to-br ${getBallColor(nextNumber)} rounded-full shadow-lg transform scale-110 animate-pulse transition-all duration-300`}>
+                      <div className={`relative w-48 h-48 bg-gradient-to-br ${getBallColor(nextNumber)} rounded-full shadow-lg transform scale-110 animate-pulse transition-all duration-300`}>
                         {/* Ball shine effect */}
-                        <div className="absolute top-2 left-3 w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
-                        <div className="absolute top-1 left-2 w-2 h-2 bg-white/50 rounded-full"></div>
+                        <div className="absolute top-4 left-6 w-8 h-8 bg-white/30 rounded-full blur-sm"></div>
+                        <div className="absolute top-2 left-4 w-4 h-4 bg-white/50 rounded-full"></div>
                         
                         {/* Letter */}
-                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-white font-black text-sm">
+                        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white font-black text-lg">
                           {getLetterForNumber(nextNumber)}
                         </div>
                         
                         {/* Inner white circle for number background */}
-                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                          <span className="text-gray-900 font-black text-xl">
+                        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-white rounded-full flex items-center justify-center">
+                          <span className="text-gray-900 font-black text-4xl">
                             {nextNumber}
                           </span>
                         </div>
                       </div>
                     ) : lastCalledNumber ? (
-                      <div className={`relative w-24 h-24 bg-gradient-to-br ${getBallColor(lastCalledNumber)} rounded-full shadow-lg transform ${isShuffling ? 'animate-bounce scale-110' : 'hover:scale-105'} transition-all duration-300`}>
+                      <div className={`relative w-48 h-48 bg-gradient-to-br ${getBallColor(lastCalledNumber)} rounded-full shadow-lg transform ${isShuffling ? 'animate-bounce scale-110' : 'hover:scale-105'} transition-all duration-300`}>
                         {/* Ball shine effect */}
-                        <div className="absolute top-2 left-3 w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
-                        <div className="absolute top-1 left-2 w-2 h-2 bg-white/50 rounded-full"></div>
+                        <div className="absolute top-4 left-6 w-8 h-8 bg-white/30 rounded-full blur-sm"></div>
+                        <div className="absolute top-2 left-4 w-4 h-4 bg-white/50 rounded-full"></div>
                         
                         {/* Letter */}
-                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-white font-black text-sm">
+                        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white font-black text-lg">
                           {getLetterForNumber(lastCalledNumber)}
                         </div>
                         
                         {/* Inner white circle for number background */}
-                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                          <span className="text-gray-900 font-black text-xl">
+                        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-white rounded-full flex items-center justify-center">
+                          <span className="text-gray-900 font-black text-4xl">
                             {lastCalledNumber}
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div className="relative w-24 h-24 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full shadow-lg">
-                        <div className="absolute top-2 left-3 w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
-                        <div className="absolute top-1 left-2 w-2 h-2 bg-white/50 rounded-full"></div>
+                      <div className="relative w-48 h-48 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full shadow-lg">
+                        <div className="absolute top-4 left-6 w-8 h-8 bg-white/30 rounded-full blur-sm"></div>
+                        <div className="absolute top-2 left-4 w-4 h-4 bg-white/50 rounded-full"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-white font-black text-lg">?</span>
+                          <span className="text-white font-black text-2xl">?</span>
                         </div>
                       </div>
                     )}
@@ -1101,12 +1101,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
                                 ? 'bg-red-500 text-white' 
-                                : 'bg-gray-100 text-gray-700 border'
+                                : 'bg-gray-100 text-black border'
                           }`}
                         >
                           {shuffledNum}
@@ -1127,12 +1127,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
                                 ? 'bg-blue-500 text-white' 
-                                : 'bg-gray-100 text-gray-700 border'
+                                : 'bg-gray-100 text-black border'
                           }`}
                         >
                           {shuffledNum}
@@ -1153,12 +1153,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
                                 ? 'bg-green-500 text-white' 
-                                : 'bg-gray-100 text-gray-700 border'
+                                : 'bg-gray-100 text-black border'
                           }`}
                         >
                           {shuffledNum}
@@ -1179,12 +1179,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
                                 ? 'bg-yellow-500 text-white' 
-                                : 'bg-gray-100 text-gray-700 border'
+                                : 'bg-gray-100 text-black border'
                           }`}
                         >
                           {shuffledNum}
@@ -1205,12 +1205,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div 
                           key={num} 
-                          className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                          className={`h-16 w-16 rounded flex items-center justify-center text-lg font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : calledNumbers.includes(num) 
                                 ? 'bg-purple-500 text-white' 
-                                : 'bg-gray-100 text-gray-700 border'
+                                : 'bg-gray-100 text-black border'
                           }`}
                         >
                           {shuffledNum}
