@@ -832,15 +832,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           
           {/* Center - Winner Amount */}
           <div className="text-center">
-            <div className="text-lg font-bold text-green-600">
-              Winner Gets: {(() => {
+            <div className="text-6xl font-bold text-green-600">
+              Winner Gets: <span className="text-8xl">{(() => {
                 const totalAmount = activeGameId ? 
                   bookedCartelas.size * parseFloat(gameAmount) : 
                   selectedCartelas.size * parseFloat(gameAmount);
                 const profitMargin = ((shopData as any)?.profitMargin || 20) / 100;
                 const winnerAmount = totalAmount * (1 - profitMargin);
                 return `${winnerAmount.toFixed(2)} Birr`;
-              })()}
+              })()}</span>
             </div>
           </div>
 
@@ -972,18 +972,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                         #{num}
                       </Badge>
                     ))}
-                  </div>
-
-                  
-                  {/* Winner Amount Display - Always Visible */}
-                  <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-green-800 mb-1">Winner Gets</div>
-                      <div className="text-2xl font-bold text-green-600">
-                        {calculateAmounts().winnerAmount.toFixed(2)} Birr
-                      </div>
-
-                    </div>
                   </div>
                 </div>
 
