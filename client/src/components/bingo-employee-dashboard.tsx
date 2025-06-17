@@ -24,6 +24,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [gameFinished, setGameFinished] = useState(false);
   const [gamePaused, setGamePaused] = useState(false);
   const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
+  const [markedNumbers, setMarkedNumbers] = useState<number[]>([]); // Numbers shown as marked on board
   const [lastCalledNumber, setLastCalledNumber] = useState<number | null>(null);
   const [gameAmount, setGameAmount] = useState("20");
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
@@ -140,6 +141,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Always update called numbers to reflect the current game state
       setCalledNumbers(gameCalledNumbers);
+      setMarkedNumbers(gameCalledNumbers); // Sync marked numbers with game state
       
       setBookedCartelas(new Set((activeGame as any).cartelas || []));
       
@@ -151,6 +153,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setGameActive(false);
       setGameFinished(false);
       setCalledNumbers([]);
+      setMarkedNumbers([]);
       setLastCalledNumber(null);
       setBookedCartelas(new Set());
     }
@@ -552,27 +555,35 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     onSuccess: (data) => {
-      // Don't process if game is paused
-      if (gamePaused) {
-        return;
-      }
-      
       const newNumber = data.calledNumber;
       setLastCalledNumber(newNumber);
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      
+      // Update the full called numbers list
+      const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
+      setCalledNumbers(updatedNumbers);
+
+      // Don't process audio or set timers if game is paused
+      if (gamePaused) {
+        setMarkedNumbers(updatedNumbers);
+        return;
+      }
       
       // Play number audio if available and no other audio is playing
       if (newNumber && !audioPlaying) {
         const letter = getLetterForNumber(newNumber);
         setAudioPlaying(true);
         
-        // Set a fallback timeout to reset audio state in case audio events fail
+        // Mark previous number immediately when new number starts playing
+        if (lastCalledNumber && !markedNumbers.includes(lastCalledNumber)) {
+          setMarkedNumbers(prev => [...prev, lastCalledNumber]);
+        }
+        
         const audioResetTimer = setTimeout(() => {
           setAudioPlaying(false);
-          // Mark the number only after audio finishes
-          const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
-          setCalledNumbers(updatedNumbers);
-        }, 2500); // Reset audio state after 2.5 seconds max
+          // Mark current number after timeout
+          setMarkedNumbers(prev => [...prev, newNumber]);
+        }, 2500);
         
         try {
           const audio = new Audio(`/attached_assets/${letter}${newNumber}.mp3`);
@@ -580,41 +591,35 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           audio.onended = () => {
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
-            // Mark the number only after audio finishes
-            const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
-            setCalledNumbers(updatedNumbers);
+            // Mark the current number only after audio finishes
+            setMarkedNumbers(prev => [...prev, newNumber]);
           };
           audio.onerror = () => {
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
-            // Mark the number immediately if audio fails
-            const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
-            setCalledNumbers(updatedNumbers);
+            // Mark immediately if audio fails
+            setMarkedNumbers(prev => [...prev, newNumber]);
           };
           audio.play().catch(() => {
             console.log(`Audio for ${letter}${newNumber} not available`);
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
-            // Mark the number immediately if audio fails
-            const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
-            setCalledNumbers(updatedNumbers);
+            // Mark immediately if audio fails
+            setMarkedNumbers(prev => [...prev, newNumber]);
           });
         } catch (error) {
           console.log('Audio playback error');
           clearTimeout(audioResetTimer);
           setAudioPlaying(false);
-          // Mark the number immediately if audio fails
-          const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
-          setCalledNumbers(updatedNumbers);
+          // Mark immediately if audio fails
+          setMarkedNumbers(prev => [...prev, newNumber]);
         }
       } else {
-        // If no audio, mark immediately
-        const updatedNumbers = (data.calledNumbers || []).map((n: string) => parseInt(n));
-        setCalledNumbers(updatedNumbers);
+        // If no audio or audio already playing, mark immediately
+        setMarkedNumbers(updatedNumbers);
       }
       
-      // Always set timer for next number call (don't depend on audio state)
-      // Only set timer if game is truly active and not paused
+      // Only set timer if game is active and not paused
       if (gameActive && !gameFinished && !gamePaused && activeGameId) {
         // Clear any existing timer first
         if (numberCallTimer.current) {
@@ -622,17 +627,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         }
         
         numberCallTimer.current = setTimeout(() => {
-          // Double-check all conditions before calling
+          // Triple-check conditions before calling (pause state might have changed)
           if (gameActive && !gameFinished && !gamePaused && activeGameId) {
             callNumberMutation.mutate();
           }
-        }, autoPlaySpeed * 1000); // Use adjustable speed
-      } else {
-        // Clear timer if game is paused, finished, or not active
-        if (numberCallTimer.current) {
-          clearTimeout(numberCallTimer.current);
-          numberCallTimer.current = null;
-        }
+        }, autoPlaySpeed * 1000);
       }
     }
   });
@@ -1294,7 +1293,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
-                              : calledNumbers.includes(num) 
+                              : markedNumbers.includes(num) 
                                 ? 'bg-red-500 text-white' 
                                 : 'bg-gray-100 text-black border'
                           }`}
@@ -1320,7 +1319,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
-                              : calledNumbers.includes(num) 
+                              : markedNumbers.includes(num) 
                                 ? 'bg-blue-500 text-white' 
                                 : 'bg-gray-100 text-black border'
                           }`}
