@@ -336,9 +336,11 @@ export const insertCommissionPaymentSchema = createInsertSchema(commissionPaymen
   amount: z.string(),
 });
 
-export const insertGameHistorySchema = createInsertSchema(gameHistory).omit({
-  id: true,
-  createdAt: true,
+export const insertGameHistorySchema = createInsertSchema(gameHistory, {
+  totalRevenue: z.string(),
+  prizeAmount: z.string(),
+  adminProfit: z.string(),
+  superAdminCommission: z.string(),
 });
 
 // Types
