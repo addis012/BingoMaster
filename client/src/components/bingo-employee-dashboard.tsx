@@ -833,14 +833,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           {/* Center - Winner Amount */}
           <div className="text-center">
             <div className="text-6xl font-bold text-green-600">
-              Winner Gets: <span className="text-8xl">{(() => {
-                const totalCartelas = activeGameId ? bookedCartelas.size : selectedCartelas.size;
-                const amountPerCartela = parseFloat(gameAmount) || 20;
-                const totalCollected = totalCartelas * amountPerCartela;
-                const profitMargin = (shopData?.profitMargin || 10) / 100;
-                const winnerAmount = totalCollected * (1 - profitMargin);
-                return `${winnerAmount.toFixed(2)} Birr`;
-              })()}</span>
+              Winner Gets: <span className="text-8xl">{calculateAmounts().winnerAmount.toFixed(2)} Birr</span>
             </div>
           </div>
 
