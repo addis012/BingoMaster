@@ -122,10 +122,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Convert string array to number array for proper number tracking
       const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
       
-      // Only update called numbers if game is not finished to preserve numbers during winner verification
-      if ((activeGame as any).status !== 'completed') {
-        setCalledNumbers(gameCalledNumbers);
-      }
+      // Always update called numbers to reflect the current game state
+      setCalledNumbers(gameCalledNumbers);
       
       setBookedCartelas(new Set((activeGame as any).cartelas || []));
       
@@ -1034,6 +1032,24 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                         setSelectedCartelas(new Set());
                         setWinnerResult({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] });
                         setShowWinnerResult(false);
+                        setGamePaused(false);
+                        
+                        // Clear any auto-calling states
+                        if (autoCallInterval) {
+                          clearInterval(autoCallInterval);
+                          setAutoCallInterval(null);
+                        }
+                        if (currentAudio) {
+                          currentAudio.pause();
+                          currentAudio.currentTime = 0;
+                          setCurrentAudio(null);
+                        }
+                        setIsAutoCall(false);
+                        setIsPaused(false);
+                        setIsShuffling(false);
+                        setIsHovering(false);
+                        setNextNumber(null);
+                        
                         queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
                       }}
                       className="bg-blue-500 hover:bg-blue-600 text-white"
