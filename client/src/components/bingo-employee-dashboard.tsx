@@ -186,7 +186,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return availableNumbers[randomIndex];
   };
 
-  // Call a single number with hover effect and audio
+  // Call a single number with blink then fully mark sequence
   const callNumber = async () => {
     if (!activeGameId || isPaused || gamePaused) return;
 
@@ -198,18 +198,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
 
-    // Set hovering state for preview
-    setNextNumber(numberToCall);
-    setIsHovering(true);
-    
     // Clear any existing timers
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
     if (callingTimer.current) clearTimeout(callingTimer.current);
+
+    // Phase 1: Blink/pulse preview (750ms)
+    setNextNumber(numberToCall);
+    setIsHovering(true);
     
-    // Hover effect duration
     hoverTimer.current = setTimeout(() => {
       if (gamePaused || isPaused) return; // Check pause state before proceeding
       
+      // Phase 2: Start calling animation and sound
       setIsHovering(false);
       setIsShuffling(true);
       
@@ -225,7 +225,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         console.log('Audio playback error for calling sound');
       }
 
-      // Call the API to add the number
+      // Phase 3: Complete the call and mark the number (1200ms)
       callingTimer.current = setTimeout(async () => {
         if (gamePaused || isPaused) return; // Check pause state before API call
         
@@ -245,10 +245,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           console.error('Failed to call number:', error);
         }
         
+        // Phase 4: Clean up animation states
         setIsShuffling(false);
         setNextNumber(null);
-      }, 1500);
-    }, 800); // Hover duration
+        
+        // Stop audio after number is fully marked
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          setCurrentAudio(null);
+        }
+      }, 1200);
+    }, 750); // Blink duration
   };
 
   // Start auto-calling
@@ -1140,6 +1148,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : nextNumber === num && isHovering
+                                ? 'animate-pulse bg-blue-400 text-white transform scale-110 shadow-lg' 
+                              : nextNumber === num && isShuffling
+                                ? 'animate-bounce bg-red-400 text-white transform scale-110 shadow-lg'
                               : calledNumbers.includes(num) 
                                 ? 'bg-red-500 text-white' 
                                 : 'bg-gray-100 text-gray-700 border'
@@ -1166,6 +1178,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : nextNumber === num && isHovering
+                                ? 'animate-pulse bg-blue-400 text-white transform scale-110 shadow-lg' 
+                              : nextNumber === num && isShuffling
+                                ? 'animate-bounce bg-red-400 text-white transform scale-110 shadow-lg'
                               : calledNumbers.includes(num) 
                                 ? 'bg-blue-500 text-white' 
                                 : 'bg-gray-100 text-gray-700 border'
@@ -1192,6 +1208,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : nextNumber === num && isHovering
+                                ? 'animate-pulse bg-blue-400 text-white transform scale-110 shadow-lg' 
+                              : nextNumber === num && isShuffling
+                                ? 'animate-bounce bg-red-400 text-white transform scale-110 shadow-lg'
                               : calledNumbers.includes(num) 
                                 ? 'bg-green-500 text-white' 
                                 : 'bg-gray-100 text-gray-700 border'
@@ -1218,6 +1238,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : nextNumber === num && isHovering
+                                ? 'animate-pulse bg-blue-400 text-white transform scale-110 shadow-lg' 
+                              : nextNumber === num && isShuffling
+                                ? 'animate-bounce bg-red-400 text-white transform scale-110 shadow-lg'
                               : calledNumbers.includes(num) 
                                 ? 'bg-yellow-500 text-white' 
                                 : 'bg-gray-100 text-gray-700 border'
@@ -1244,6 +1268,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              : nextNumber === num && isHovering
+                                ? 'animate-pulse bg-blue-400 text-white transform scale-110 shadow-lg' 
+                              : nextNumber === num && isShuffling
+                                ? 'animate-bounce bg-red-400 text-white transform scale-110 shadow-lg'
                               : calledNumbers.includes(num) 
                                 ? 'bg-purple-500 text-white' 
                                 : 'bg-gray-100 text-gray-700 border'
