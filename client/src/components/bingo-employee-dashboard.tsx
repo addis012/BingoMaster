@@ -142,7 +142,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Always update called numbers to reflect the current game state
       setCalledNumbers(gameCalledNumbers);
-      setMarkedNumbers(gameCalledNumbers); // Sync marked numbers with game state
+      // Only sync marked numbers if this is a fresh game load (not during active play)
+      if (gameCalledNumbers.length === 0 || !markedNumbers.length) {
+        const numbersToMark = gameCalledNumbers.slice(0, -1);
+        console.log(`🔄 Game sync: Called=${gameCalledNumbers.length}, Marking=${numbersToMark.length}`);
+        setMarkedNumbers(numbersToMark); // All except last number
+      }
       
       setBookedCartelas(new Set((activeGame as any).cartelas || []));
       
@@ -588,6 +593,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         
         // Mark all numbers from called numbers EXCEPT the current one being spoken
         const numbersToMark = updatedNumbers.slice(0, -1); // All except the last (current) number
+        console.log(`🎯 Marking logic: Called=${updatedNumbers.length}, Marking=${numbersToMark.length}, Current=${newNumber}`);
         setMarkedNumbers(numbersToMark);
         
         // Don't mark the current number - it will be marked when the NEXT number starts
