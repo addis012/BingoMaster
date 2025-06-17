@@ -58,8 +58,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Speed control
   const [autoPlaySpeed, setAutoPlaySpeed] = useState(3); // seconds between numbers
   
-  // Timer reference for instant pause control
+  // Timer references for instant pause control
   const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
+  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+  const callingTimer = useRef<NodeJS.Timeout | null>(null);
   
   // Active game query
   const { data: activeGame } = useQuery({
@@ -186,7 +188,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Call a single number with hover effect and audio
   const callNumber = async () => {
-    if (!activeGameId || isPaused) return;
+    if (!activeGameId || isPaused || gamePaused) return;
 
     const numberToCall = getNextNumber();
     if (!numberToCall) {
@@ -200,8 +202,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setNextNumber(numberToCall);
     setIsHovering(true);
     
+    // Clear any existing timers
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    if (callingTimer.current) clearTimeout(callingTimer.current);
+    
     // Hover effect duration
-    setTimeout(() => {
+    hoverTimer.current = setTimeout(() => {
+      if (gamePaused || isPaused) return; // Check pause state before proceeding
+      
       setIsHovering(false);
       setIsShuffling(true);
       
@@ -218,7 +226,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
 
       // Call the API to add the number
-      setTimeout(async () => {
+      callingTimer.current = setTimeout(async () => {
+        if (gamePaused || isPaused) return; // Check pause state before API call
+        
         try {
           const response = await fetch(`/api/games/${activeGameId}/numbers`, {
             method: 'PATCH',
@@ -678,10 +688,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const pauseGame = () => {
     setGamePaused(true);
     
-    // Clear the timer immediately to stop number calling
+    // Clear all timers immediately to stop number calling
     if (numberCallTimer.current) {
       clearTimeout(numberCallTimer.current);
       numberCallTimer.current = null;
+    }
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+    if (callingTimer.current) {
+      clearTimeout(callingTimer.current);
+      callingTimer.current = null;
     }
     
     // Stop any currently playing audio immediately
