@@ -2499,6 +2499,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Pause/Resume game
+  app.patch("/api/games/:gameId/pause", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const gameId = parseInt(req.params.gameId);
+      const { isPaused } = req.body;
+      
+      const currentGame = await storage.getGame(gameId);
+      if (!currentGame) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      // Update the paused state in the database
+      const newStatus = isPaused ? 'paused' : 'active';
+      const game = await storage.updateGameStatus(gameId, newStatus);
+      
+      res.json({ ...game, isPaused });
+    } catch (error) {
+      console.error("Pause/Resume game error:", error);
+      res.status(500).json({ message: "Failed to pause/resume game" });
+    }
+  });
+
   // Update called numbers
   app.patch("/api/games/:gameId/numbers", async (req, res) => {
     try {
@@ -2515,8 +2547,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameId = parseInt(req.params.gameId);
       const game = await storage.getGame(gameId);
       
-      if (!game || game.status !== 'active') {
+      if (!game || (game.status !== 'active' && game.status !== 'paused')) {
         return res.status(400).json({ message: "Game not active" });
+      }
+      
+      if (game.status === 'paused') {
+        return res.status(400).json({ message: "Game is paused" });
       }
 
       // Generate next random number

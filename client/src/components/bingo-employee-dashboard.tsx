@@ -311,27 +311,45 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   };
 
   // Enhanced pause game function for immediate stop
-  const enhancedPauseGame = () => {
-    setGamePaused(true);
-    
-    // Immediately stop all audio and animations
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-      setCurrentAudio(null);
+  const enhancedPauseGame = async () => {
+    try {
+      // Call backend to pause the game
+      const response = await fetch(`/api/games/${activeGameId}/pause`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPaused: true })
+      });
+      
+      if (response.ok) {
+        setGamePaused(true);
+        
+        // Immediately stop all audio and animations
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          setCurrentAudio(null);
+        }
+        
+        // Clear any pending timers
+        if (numberCallTimer.current) {
+          clearTimeout(numberCallTimer.current);
+          numberCallTimer.current = null;
+        }
+        
+        // Stop all animations immediately
+        setIsShuffling(false);
+        setIsHovering(false);
+        setNextNumber(null);
+        setAudioPlaying(false);
+        
+        toast({
+          title: "Game Paused",
+          description: "Game has been paused immediately"
+        });
+      }
+    } catch (error) {
+      console.error('Failed to pause game:', error);
     }
-    
-    // Clear any pending timers
-    if (numberCallTimer.current) {
-      clearTimeout(numberCallTimer.current);
-      numberCallTimer.current = null;
-    }
-    
-    // Stop all animations immediately
-    setIsShuffling(false);
-    setIsHovering(false);
-    setNextNumber(null);
-    setAudioPlaying(false);
   };
 
   // Board shuffle animation - purely visual entertainment
@@ -567,6 +585,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Always set timer for next number call (don't depend on audio state)
       if (gameActive && !gameFinished && !gamePaused) {
+        // Clear any existing timer first
+        if (numberCallTimer.current) {
+          clearTimeout(numberCallTimer.current);
+        }
+        
         numberCallTimer.current = setTimeout(() => {
           if (gameActive && !gameFinished && !gamePaused && activeGameId) {
             callNumberMutation.mutate();
@@ -815,11 +838,32 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   };
 
   // Resume game function - continues number calling
-  const resumeGame = () => {
-    setGamePaused(false);
-    // Resume calling numbers if game is still active
-    if (gameActive && !gameFinished && activeGameId) {
-      callNumberMutation.mutate();
+  const resumeGame = async () => {
+    try {
+      // Call backend to resume the game
+      const response = await fetch(`/api/games/${activeGameId}/pause`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPaused: false })
+      });
+      
+      if (response.ok) {
+        setGamePaused(false);
+        
+        toast({
+          title: "Game Resumed",
+          description: "Game has been resumed"
+        });
+        
+        // Resume calling numbers if game is still active
+        if (gameActive && !gameFinished && activeGameId) {
+          setTimeout(() => {
+            callNumberMutation.mutate();
+          }, 500);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to resume game:', error);
     }
   };
 
