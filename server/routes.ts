@@ -6,7 +6,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import session from "express-session";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
-import { insertUserSchema, insertShopSchema, insertGameSchema, insertGamePlayerSchema, insertTransactionSchema } from "@shared/schema";
+import { insertUserSchema, insertShopSchema, insertGameSchema, insertGamePlayerSchema, insertTransactionSchema, insertEmployeeProfitMarginSchema } from "@shared/schema";
 import { z } from "zod";
 import { getFixedCartelaPattern as getFixedPattern, getCartelaNumbers } from "./fixed-cartelas";
 
@@ -1359,6 +1359,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(usersWithoutPasswords);
     } catch (error) {
       res.status(500).json({ message: "Failed to get shop users" });
+    }
+  });
+
+  // Admin Employee Management API Endpoints
+
+  // Update employee password
+  app.patch("/api/admin/employees/:id/password", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const employeeId = parseInt(req.params.id);
+      const { newPassword } = req.body;
+
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+
+      // Verify employee belongs to admin's shop
+      const employee = await storage.getUser(employeeId);
+      if (!employee || employee.role !== 'employee' || employee.shopId !== user.shopId) {
+        return res.status(404).json({ message: "Employee not found in your shop" });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await storage.updateUserPassword(employeeId, hashedPassword);
+
+      res.json({ success: true, message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Failed to update employee password:", error);
+      res.status(500).json({ message: "Failed to update password" });
+    }
+  });
+
+  // Get employee profit margins for admin's shops
+  app.get("/api/admin/employee-profit-margins", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const margins = await storage.getEmployeeProfitMarginsByAdmin(user.id);
+      res.json(margins);
+    } catch (error) {
+      console.error("Failed to get employee profit margins:", error);
+      res.status(500).json({ message: "Failed to get profit margins" });
+    }
+  });
+
+  // Set employee profit margin for a specific shop
+  app.post("/api/admin/employee-profit-margins", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const marginData = insertEmployeeProfitMarginSchema.parse(req.body);
+
+      // Verify shop belongs to admin
+      const shop = await storage.getShop(marginData.shopId);
+      if (!shop || shop.adminId !== user.id) {
+        return res.status(404).json({ message: "Shop not found or not owned by you" });
+      }
+
+      // Verify employee exists and belongs to a shop under this admin
+      const employee = await storage.getUser(marginData.employeeId);
+      if (!employee || employee.role !== 'employee') {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+
+      const margin = await storage.setEmployeeProfitMargin(marginData);
+      res.json(margin);
+    } catch (error) {
+      console.error("Failed to set employee profit margin:", error);
+      res.status(500).json({ message: "Failed to set profit margin" });
+    }
+  });
+
+  // Update employee profit margin
+  app.patch("/api/admin/employee-profit-margins/:id", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const marginId = parseInt(req.params.id);
+      const { profitMargin } = req.body;
+
+      if (!profitMargin || parseFloat(profitMargin) < 0 || parseFloat(profitMargin) > 100) {
+        return res.status(400).json({ message: "Invalid profit margin" });
+      }
+
+      const updatedMargin = await storage.updateEmployeeProfitMargin(marginId, profitMargin, user.id);
+      res.json(updatedMargin);
+    } catch (error) {
+      console.error("Failed to update employee profit margin:", error);
+      res.status(500).json({ message: "Failed to update profit margin" });
+    }
+  });
+
+  // Get admin's shops for management
+  app.get("/api/admin/shops", async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const shops = await storage.getShopsByAdmin(user.id);
+      res.json(shops);
+    } catch (error) {
+      console.error("Failed to get admin shops:", error);
+      res.status(500).json({ message: "Failed to get shops" });
     }
   });
 

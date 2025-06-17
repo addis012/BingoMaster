@@ -1,7 +1,7 @@
 import { 
   users, shops, games, gamePlayers, transactions, commissionPayments, gameHistory,
   creditTransfers, creditLoads, referralCommissions, withdrawalRequests,
-  superAdminRevenues, dailyRevenueSummary,
+  superAdminRevenues, dailyRevenueSummary, employeeProfitMargins,
   type User, type InsertUser, type Shop, type InsertShop, 
   type Game, type InsertGame, type GamePlayer, type InsertGamePlayer,
   type Transaction, type InsertTransaction, type CommissionPayment, type InsertCommissionPayment,
@@ -9,7 +9,8 @@ import {
   type CreditLoad, type InsertCreditLoad, type ReferralCommission, type InsertReferralCommission,
   type WithdrawalRequest, type InsertWithdrawalRequest,
   type SuperAdminRevenue, type InsertSuperAdminRevenue,
-  type DailyRevenueSummary, type InsertDailyRevenueSummary
+  type DailyRevenueSummary, type InsertDailyRevenueSummary,
+  type EmployeeProfitMargin, type InsertEmployeeProfitMargin
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, gte, lte, sum, count } from "drizzle-orm";
@@ -124,6 +125,12 @@ export interface IStorage {
   createOrUpdateDailyRevenueSummary(summary: InsertDailyRevenueSummary): Promise<DailyRevenueSummary>;
   getDailyRevenueSummary(date: string): Promise<DailyRevenueSummary | undefined>;
   getDailyRevenueSummaries(dateFrom?: string, dateTo?: string): Promise<DailyRevenueSummary[]>;
+  
+  // Employee profit margin methods
+  setEmployeeProfitMargin(margin: InsertEmployeeProfitMargin): Promise<EmployeeProfitMargin>;
+  getEmployeeProfitMarginsByAdmin(adminId: number): Promise<any[]>;
+  updateEmployeeProfitMargin(marginId: number, profitMargin: string, adminId: number): Promise<EmployeeProfitMargin>;
+  updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
   
   // EAT time zone utility methods
   getCurrentEATDate(): string;
@@ -1308,6 +1315,61 @@ export class DatabaseStorage implements IStorage {
       totalGamesPlayed: totalGames,
       totalPlayersRegistered: totalPlayers,
     });
+  }
+
+  // Employee profit margin methods
+  async setEmployeeProfitMargin(margin: InsertEmployeeProfitMargin): Promise<EmployeeProfitMargin> {
+    const [result] = await db
+      .insert(employeeProfitMargins)
+      .values(margin)
+      .onConflictDoUpdate({
+        target: [employeeProfitMargins.employeeId, employeeProfitMargins.shopId],
+        set: { profitMargin: margin.profitMargin }
+      })
+      .returning();
+    return result;
+  }
+
+  async getEmployeeProfitMarginsByAdmin(adminId: number): Promise<any[]> {
+    const result = await db
+      .select({
+        id: employeeProfitMargins.id,
+        employeeId: employeeProfitMargins.employeeId,
+        shopId: employeeProfitMargins.shopId,
+        profitMargin: employeeProfitMargins.profitMargin,
+        employeeName: users.name,
+        employeeUsername: users.username,
+        shopName: shops.name
+      })
+      .from(employeeProfitMargins)
+      .leftJoin(users, eq(employeeProfitMargins.employeeId, users.id))
+      .leftJoin(shops, eq(employeeProfitMargins.shopId, shops.id))
+      .where(eq(shops.adminId, adminId));
+    return result;
+  }
+
+  async updateEmployeeProfitMargin(marginId: number, profitMargin: string, adminId: number): Promise<EmployeeProfitMargin> {
+    // Verify ownership through shop admin
+    const [result] = await db
+      .update(employeeProfitMargins)
+      .set({ profitMargin })
+      .from(shops)
+      .where(
+        and(
+          eq(employeeProfitMargins.id, marginId),
+          eq(employeeProfitMargins.shopId, shops.id),
+          eq(shops.adminId, adminId)
+        )
+      )
+      .returning();
+    return result;
+  }
+
+  async updateUserPassword(userId: number, hashedPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ password: hashedPassword })
+      .where(eq(users.id, userId));
   }
 
   // Admin management methods for Super Admin
