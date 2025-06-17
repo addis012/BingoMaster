@@ -1198,6 +1198,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                         setGameActive(false);
                         setGameFinished(false);
                         setCalledNumbers([]);
+                        setMarkedNumbers([]);
                         setLastCalledNumber(null);
                         setActiveGameId(null);
                         setBookedCartelas(new Set());
@@ -1345,7 +1346,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
-                              : calledNumbers.includes(num) 
+                              : markedNumbers.includes(num) 
                                 ? 'bg-green-500 text-white' 
                                 : 'bg-gray-100 text-black border'
                           }`}
@@ -1371,7 +1372,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
-                              : calledNumbers.includes(num) 
+                              : markedNumbers.includes(num) 
                                 ? 'bg-yellow-500 text-white' 
                                 : 'bg-gray-100 text-black border'
                           }`}
@@ -1397,7 +1398,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
-                              : calledNumbers.includes(num) 
+                              : markedNumbers.includes(num) 
                                 ? 'bg-purple-500 text-white' 
                                 : 'bg-gray-100 text-black border'
                           }`}
