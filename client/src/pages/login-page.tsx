@@ -108,6 +108,47 @@ export default function LoginPage() {
             </Button>
           </form>
           
+          <div className="mt-6 pt-4 border-t">
+            <p className="text-sm text-gray-600 mb-3">Test Credentials:</p>
+            <div className="space-y-3 text-xs">
+              <div className="bg-purple-50 p-2 rounded">
+                <p className="font-medium text-purple-800">Super Admin Account:</p>
+                <p className="text-purple-600">Username: bingomaster</p>
+                <p className="text-purple-600">Password: 123456</p>
+              </div>
+              <div className="bg-blue-50 p-2 rounded">
+                <p className="font-medium text-blue-800">Admin Account:</p>
+                <p className="text-blue-600">Username: admin</p>
+                <p className="text-blue-600">Password: 123456</p>
+              </div>
+              <div className="bg-gray-50 p-2 rounded">
+                <p className="font-medium text-gray-800">Employee accounts can be created in admin dashboard</p>
+              </div>
+            </div>
+            <div className="space-y-2 mt-4">
+              <Button 
+                onClick={() => setLocation("/dashboard/super-admin")} 
+                variant="outline"
+                className="w-full"
+              >
+                Go Directly to Super Admin Dashboard
+              </Button>
+              <Button 
+                onClick={() => setLocation("/dashboard/admin")} 
+                variant="outline"
+                className="w-full"
+              >
+                Go Directly to Admin Dashboard
+              </Button>
+              <Button 
+                onClick={() => setLocation("/dashboard/employee")} 
+                variant="outline"
+                className="w-full"
+              >
+                Go Directly to Employee Dashboard
+              </Button>
+            </div>
+          </div>
 
         </CardContent>
       </Card>
