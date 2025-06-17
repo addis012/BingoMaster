@@ -443,7 +443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameData = insertGameSchema.parse({
         ...req.body,
         employeeId: user.id,  // Force use of authenticated user's ID
-        shopId: user.shopId,  // Force use of authenticated user's shop
+        shopId: user.shopId || 1,  // Default to shop 1 for super admin
         status: "waiting",    // Default status for new games
         entryFee: String(req.body.amount || "20.00") // Convert to string for entryFee
       });
