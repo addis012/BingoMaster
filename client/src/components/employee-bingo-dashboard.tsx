@@ -342,64 +342,76 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   };
 
   // Check for BINGO win patterns
-  function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { isWinner: boolean; pattern?: string } {
+  function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { isWinner: boolean; pattern?: string; winningCells?: number[] } {
     if (cartelaPattern.length !== 5) return { isWinner: false };
     
     // Check horizontal lines
     for (let row = 0; row < 5; row++) {
       let hasAllNumbers = true;
+      const winningCells = [];
       for (let col = 0; col < 5; col++) {
+        const cellIndex = row * 5 + col;
         const num = cartelaPattern[row][col];
         if (num !== 0 && !calledNumbers.includes(num)) {
           hasAllNumbers = false;
           break;
         }
+        winningCells.push(cellIndex);
       }
       if (hasAllNumbers) {
-        return { isWinner: true, pattern: `Horizontal Row ${row + 1}` };
+        return { isWinner: true, pattern: `Horizontal Row ${row + 1}`, winningCells };
       }
     }
     
     // Check vertical lines
     for (let col = 0; col < 5; col++) {
       let hasAllNumbers = true;
+      const winningCells = [];
       for (let row = 0; row < 5; row++) {
+        const cellIndex = row * 5 + col;
         const num = cartelaPattern[row][col];
         if (num !== 0 && !calledNumbers.includes(num)) {
           hasAllNumbers = false;
           break;
         }
+        winningCells.push(cellIndex);
       }
       if (hasAllNumbers) {
         const letters = ['B', 'I', 'N', 'G', 'O'];
-        return { isWinner: true, pattern: `Vertical ${letters[col]} Column` };
+        return { isWinner: true, pattern: `Vertical ${letters[col]} Column`, winningCells };
       }
     }
     
     // Check diagonal (top-left to bottom-right)
     let hasAllNumbers = true;
+    const diagonalCells1 = [];
     for (let i = 0; i < 5; i++) {
+      const cellIndex = i * 5 + i;
       const num = cartelaPattern[i][i];
       if (num !== 0 && !calledNumbers.includes(num)) {
         hasAllNumbers = false;
         break;
       }
+      diagonalCells1.push(cellIndex);
     }
     if (hasAllNumbers) {
-      return { isWinner: true, pattern: "Diagonal (Top-Left to Bottom-Right)" };
+      return { isWinner: true, pattern: "Diagonal (Top-Left to Bottom-Right)", winningCells: diagonalCells1 };
     }
     
     // Check diagonal (top-right to bottom-left)
     hasAllNumbers = true;
+    const diagonalCells2 = [];
     for (let i = 0; i < 5; i++) {
+      const cellIndex = i * 5 + (4 - i);
       const num = cartelaPattern[i][4 - i];
       if (num !== 0 && !calledNumbers.includes(num)) {
         hasAllNumbers = false;
         break;
       }
+      diagonalCells2.push(cellIndex);
     }
     if (hasAllNumbers) {
-      return { isWinner: true, pattern: "Diagonal (Top-Right to Bottom-Left)" };
+      return { isWinner: true, pattern: "Diagonal (Top-Right to Bottom-Left)", winningCells: diagonalCells2 };
     }
     
     return { isWinner: false };
@@ -831,26 +843,62 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
 
       {/* Winner Result Dialog */}
       <Dialog open={showWinnerResult} onOpenChange={setShowWinnerResult}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Winner Check Result</DialogTitle>
           </DialogHeader>
-          <div className="text-center py-6">
+          <div className="py-6">
             {winnerResult.isWinner ? (
-              <div className="space-y-4">
-                <div className="text-6xl mb-4">🎉</div>
-                <div className="text-xl font-bold text-green-600">
-                  Cartela #{winnerResult.cartela}
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">🎉</div>
+                  <div className="text-xl font-bold text-green-600">
+                    Cartela #{winnerResult.cartela}
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">
+                    BINGO! WINNER!
+                  </div>
+                  <div className="text-lg text-gray-600">
+                    Pattern: {winnerResult.pattern}
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-green-600">
-                  BINGO! WINNER!
-                </div>
-                <div className="text-lg text-gray-600">
-                  Pattern: {winnerResult.pattern}
+
+                {/* Visual Cartela Grid */}
+                <div className="bg-white p-4 rounded-lg border">
+                  <div className="text-center mb-4">
+                    <div className="text-md font-medium text-green-700 mb-2">Cartela Grid:</div>
+                    <div className="grid grid-cols-5 gap-2 max-w-sm mx-auto">
+                      {/* Header */}
+                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">B</div>
+                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">I</div>
+                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">N</div>
+                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">G</div>
+                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">O</div>
+                      
+                      {/* Cartela pattern */}
+                      {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => {
+                        const isWinningCell = winnerResult.winningCells?.includes(index);
+                        const isCalled = num !== 0 && calledNumbers.includes(num);
+                        const isFree = index === 12;
+                        
+                        return (
+                          <div key={index} className={`text-center text-sm p-2 border-2 rounded ${
+                            isWinningCell 
+                              ? 'bg-yellow-200 border-yellow-400 font-bold text-yellow-800' 
+                              : isCalled || isFree
+                                ? 'bg-green-200 border-green-400 text-green-800'
+                                : 'bg-gray-50 border-gray-200 text-gray-600'
+                          }`}>
+                            {isFree ? 'FREE' : num}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 text-center">
                 <div className="text-6xl mb-4">❌</div>
                 <div className="text-xl font-bold text-red-600">
                   Cartela #{winnerResult.cartela}
