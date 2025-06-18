@@ -175,7 +175,24 @@ export const superAdminRevenues = pgTable("super_admin_revenues", {
   dateEAT: text("date_eat").notNull(), // Date in EAT format (YYYY-MM-DD) for filtering
 });
 
-// Custom cartelas created by admins
+// Unified cartelas table for both hardcoded and dynamic cartelas
+export const cartelas = pgTable("cartelas", {
+  id: serial("id").primaryKey(),
+  shopId: integer("shop_id").notNull().references(() => shops.id),
+  adminId: integer("admin_id").notNull().references(() => users.id),
+  cartelaNumber: integer("cartela_number").notNull(),
+  name: text("name").notNull(),
+  pattern: jsonb("pattern").$type<number[][]>().notNull(), // 5x5 grid of numbers
+  numbers: jsonb("numbers").$type<number[]>().notNull(), // Flattened 25 numbers for easy display
+  isHardcoded: boolean("is_hardcoded").default(false).notNull(), // Track original hardcoded status
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  shopCartelaUnique: unique().on(table.shopId, table.cartelaNumber),
+}));
+
+// Keep old table for backward compatibility during migration
 export const customCartelas = pgTable("custom_cartelas", {
   id: serial("id").primaryKey(),
   adminId: integer("admin_id").references(() => users.id).notNull(),
@@ -243,6 +260,7 @@ export const shopsRelations = relations(shops, ({ one, many }) => ({
   commissionPayments: many(commissionPayments),
   employeeProfitMargins: many(employeeProfitMargins),
   customCartelas: many(customCartelas),
+  cartelas: many(cartelas),
 }));
 
 export const gamesRelations = relations(games, ({ one, many }) => ({
@@ -383,6 +401,12 @@ export const insertEmployeeProfitMarginSchema = createInsertSchema(employeeProfi
   createdAt: true,
 });
 
+export const insertCartelaSchema = createInsertSchema(cartelas).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertCustomCartelaSchema = createInsertSchema(customCartelas).omit({
   id: true,
   createdAt: true,
@@ -405,6 +429,8 @@ export type GameHistory = typeof gameHistory.$inferSelect;
 export type InsertGameHistory = z.infer<typeof insertGameHistorySchema>;
 export type EmployeeProfitMargin = typeof employeeProfitMargins.$inferSelect;
 export type InsertEmployeeProfitMargin = z.infer<typeof insertEmployeeProfitMarginSchema>;
+export type Cartela = typeof cartelas.$inferSelect;
+export type InsertCartela = z.infer<typeof insertCartelaSchema>;
 export type CustomCartela = typeof customCartelas.$inferSelect;
 export type InsertCustomCartela = z.infer<typeof insertCustomCartelaSchema>;
 
