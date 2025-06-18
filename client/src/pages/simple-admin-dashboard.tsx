@@ -346,7 +346,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                   ) : (
                     <>
                       <div className="text-2xl font-bold">
-                        ETB {stats.totalRevenue || '0'}
+                        ETB {shopStats?.totalRevenue || '0'}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         This month
@@ -396,7 +396,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                   <GamepadIcon className="h-4 w-4 text-purple-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalGames || 0}</div>
+                  <div className="text-2xl font-bold">{shopStats?.totalGames || 0}</div>
                   <p className="text-xs text-muted-foreground">
                     Total games played
                   </p>
@@ -437,15 +437,15 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center p-4 border rounded-lg">
                     <h4 className="font-medium">Today's Revenue</h4>
-                    <p className="text-2xl font-bold text-green-600">ETB {stats.todayRevenue || '0'}</p>
+                    <p className="text-2xl font-bold text-green-600">ETB {shopStats?.todayRevenue || '0'}</p>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
                     <h4 className="font-medium">Active Games</h4>
-                    <p className="text-2xl font-bold text-blue-600">{stats.activeGames || 0}</p>
+                    <p className="text-2xl font-bold text-blue-600">{shopStats?.activeGames || 0}</p>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
                     <h4 className="font-medium">Players Today</h4>
-                    <p className="text-2xl font-bold text-purple-600">{stats.todayPlayers || 0}</p>
+                    <p className="text-2xl font-bold text-purple-600">{shopStats?.todayPlayers || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -822,9 +822,9 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {statsData && (
+                {user && user.shopId && (
                   <CustomCartelaBuilder 
-                    shopId={statsData.shop.id} 
+                    shopId={user.shopId} 
                     adminId={user.id}
                   />
                 )}
