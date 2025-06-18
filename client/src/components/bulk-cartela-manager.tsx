@@ -71,13 +71,18 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
       return;
     }
 
+    console.log("Starting to save cards...", cardsData);
+
     try {
       const lines = cardsData.trim().split('\n').filter(line => line.trim());
       let successCount = 0;
       let errorCount = 0;
       const errors: string[] = [];
 
+      console.log("Processing lines:", lines);
+
       for (const line of lines) {
+        console.log("Processing line:", line);
         try {
           const [cardNumStr, numbersStr] = line.split(':');
           if (!cardNumStr || !numbersStr) {
@@ -108,12 +113,17 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           }
 
           // Validate individual numbers are within BINGO range
+          let hasInvalidNumbers = false;
           for (const num of numbers) {
             if (num !== 0 && (num < 1 || num > 75)) {
               errors.push(`Card ${cardNumber}: Number ${num} is outside valid BINGO range (1-75)`);
-              errorCount++;
-              continue;
+              hasInvalidNumbers = true;
             }
+          }
+          
+          if (hasInvalidNumbers) {
+            errorCount++;
+            continue;
           }
 
           // Convert flat array to 5x5 grid
@@ -182,8 +192,10 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             });
           }
 
+          console.log(`Successfully processed card ${cardNumber}`);
           successCount++;
         } catch (error) {
+          console.error("Card processing error:", error);
           errors.push(`Card parsing error: ${error}`);
           errorCount++;
         }
