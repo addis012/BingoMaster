@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { FIXED_CARTELAS, getCartelaNumbers, getFixedCartelaPattern } from "@/data/fixed-cartelas";
+import { AlertTriangle } from "lucide-react";
 
 interface BingoEmployeeDashboardProps {
   onLogout: () => void;
