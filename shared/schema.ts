@@ -175,6 +175,18 @@ export const superAdminRevenues = pgTable("super_admin_revenues", {
   dateEAT: text("date_eat").notNull(), // Date in EAT format (YYYY-MM-DD) for filtering
 });
 
+// Custom cartelas created by admins
+export const customCartelas = pgTable("custom_cartelas", {
+  id: serial("id").primaryKey(),
+  adminId: integer("admin_id").references(() => users.id).notNull(),
+  shopId: integer("shop_id").references(() => shops.id).notNull(),
+  cartelaNumber: integer("cartela_number").notNull(),
+  name: text("name").notNull(), // Custom name for the cartela
+  pattern: jsonb("pattern").$type<number[][]>().notNull(), // 5x5 grid of numbers
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Daily revenue summary for performance tracking
 export const dailyRevenueSummary = pgTable("daily_revenue_summary", {
   id: serial("id").primaryKey(),
@@ -230,6 +242,7 @@ export const shopsRelations = relations(shops, ({ one, many }) => ({
   transactions: many(transactions),
   commissionPayments: many(commissionPayments),
   employeeProfitMargins: many(employeeProfitMargins),
+  customCartelas: many(customCartelas),
 }));
 
 export const gamesRelations = relations(games, ({ one, many }) => ({
@@ -370,6 +383,11 @@ export const insertEmployeeProfitMarginSchema = createInsertSchema(employeeProfi
   createdAt: true,
 });
 
+export const insertCustomCartelaSchema = createInsertSchema(customCartelas).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -387,6 +405,8 @@ export type GameHistory = typeof gameHistory.$inferSelect;
 export type InsertGameHistory = z.infer<typeof insertGameHistorySchema>;
 export type EmployeeProfitMargin = typeof employeeProfitMargins.$inferSelect;
 export type InsertEmployeeProfitMargin = z.infer<typeof insertEmployeeProfitMarginSchema>;
+export type CustomCartela = typeof customCartelas.$inferSelect;
+export type InsertCustomCartela = z.infer<typeof insertCustomCartelaSchema>;
 
 // Credit system types
 export const insertCreditTransferSchema = createInsertSchema(creditTransfers, {
