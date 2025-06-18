@@ -23,6 +23,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3 } from "lucide-react";
 import CustomCartelaBuilder from "@/components/custom-cartela-builder";
+import UnifiedCartelaManager from "@/components/unified-cartela-manager";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
@@ -303,6 +304,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
             <TabsTrigger value="credits">Credits</TabsTrigger>
             <TabsTrigger value="credit-history">Credit History</TabsTrigger>
             <TabsTrigger value="referrals">Referrals</TabsTrigger>
+            <TabsTrigger value="cartelas">Cartelas</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -850,6 +852,12 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="cartelas" className="space-y-6">
+            {user && (
+              <UnifiedCartelaManager shopId={user.shopId} adminId={user.id} />
+            )}
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
