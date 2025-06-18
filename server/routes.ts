@@ -3650,8 +3650,9 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
-  // Mount cartela routes
-  const { cartelasRouter } = await import("./cartela-routes");
+  // Mount cartela routes with WebSocket access
+  const { cartelasRouter, setGlobalWebSocketServer } = await import("./cartela-routes");
+  setGlobalWebSocketServer(wss);
   app.use("/api/cartelas", cartelasRouter);
 
   return { server: httpServer, wss };
