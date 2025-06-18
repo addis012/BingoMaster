@@ -475,7 +475,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         userId: userId,
         authenticatedUser: user.username,
         authenticatedEmployeeName: user.name,
-        employeeBalance: employeeBalance,
+        adminBalance: adminBalance,
         totalCost: totalCost,
         timestamp: new Date().toISOString()
       });
