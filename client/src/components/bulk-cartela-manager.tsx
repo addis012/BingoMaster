@@ -182,10 +182,16 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           for (let col = 0; col < 5; col++) {
             for (let row = 0; row < 5; row++) {
               const num = pattern[row][col];
-              if (num === 0 && row === 2 && col === 2) continue; // FREE space
+              console.log(`Checking position [${row}][${col}] = ${num}`);
+              
+              if (num === 0 && row === 2 && col === 2) {
+                console.log("FREE space found at center, skipping");
+                continue; // FREE space
+              }
               
               const range = columnRanges[col];
               if (num < range.min || num > range.max) {
+                console.log(`Invalid: ${num} in ${range.name} column (${range.min}-${range.max})`);
                 errors.push(`Card ${cardNumber}: Number ${num} in ${range.name} column must be between ${range.min}-${range.max}`);
                 validPattern = false;
                 break;
@@ -194,10 +200,15 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             if (!validPattern) break;
           }
 
+          console.log("Column validation result:", validPattern);
+
           if (!validPattern) {
+            console.log("Pattern invalid, incrementing error count");
             errorCount++;
             continue;
           }
+
+          console.log("Pattern validation passed, proceeding with save");
 
           // Check if cartela already exists (either fixed or custom)
           const existingCustom = customCartelas?.find((c: CustomCartela) => c.cartelaNumber === cardNumber);
