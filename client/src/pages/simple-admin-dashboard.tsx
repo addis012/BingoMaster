@@ -52,6 +52,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const [showCartelaPreview, setShowCartelaPreview] = useState(false);
   const [previewCartelaNumber, setPreviewCartelaNumber] = useState<number | null>(null);
   const [showAllCartelas, setShowAllCartelas] = useState(false);
+  const [showCustomCartelas, setShowCustomCartelas] = useState(true);
 
   // Move all hooks before conditional returns to avoid hooks error
   const { data: employees = [], refetch: refetchEmployees, error: employeesError, isLoading: employeesLoading } = useQuery({
@@ -226,6 +227,19 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const balance = creditBalance as any || {};
   const employeeList = employees as any[] || [];
   const userAccountNumber = (user as any).accountNumber || `ACC${String(user.id).padStart(6, '0')}`;
+
+  // Fetch custom cartelas for this shop
+  const { data: customCartelas = [] } = useQuery({
+    queryKey: [`/api/custom-cartelas/${user?.shopId}`],
+    queryFn: async () => {
+      if (!user?.shopId) return [];
+      const response = await fetch(`/api/custom-cartelas/${user.shopId}`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!user?.shopId,
+    refetchInterval: 5000
+  });
 
   // Employee management handlers
   const handlePasswordChange = async (employee: any) => {
@@ -862,10 +876,10 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Grid3X3 className="h-5 w-5" />
-                  Fixed Cartelas Preview (1-75)
+                  Cartelas Preview - Shop #{user?.shopId}
                 </CardTitle>
                 <CardDescription>
-                  View all fixed cartela patterns available in the system
+                  View all available cartela patterns: fixed (1-75) and custom cartelas for your shop
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -881,19 +895,49 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                           setPreviewCartelaNumber(null);
                         } else {
                           const num = parseInt(value);
-                          if (!isNaN(num) && num >= 1 && num <= 75) {
+                          if (!isNaN(num)) {
                             setPreviewCartelaNumber(num);
                           }
                         }
                       }}
                       className="max-w-xs"
                     />
-                    <Button
-                      variant={showAllCartelas ? "secondary" : "outline"}
-                      onClick={() => setShowAllCartelas(!showAllCartelas)}
-                    >
-                      {showAllCartelas ? "Show Single" : "Show All (1-75)"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant={showAllCartelas ? "secondary" : "outline"}
+                        onClick={() => setShowAllCartelas(!showAllCartelas)}
+                        className="whitespace-nowrap"
+                      >
+                        {showAllCartelas ? "Hide All" : "Show All"}
+                      </Button>
+                      <Button
+                        variant={showCustomCartelas ? "secondary" : "outline"}
+                        onClick={() => setShowCustomCartelas(!showCustomCartelas)}
+                        className="whitespace-nowrap"
+                      >
+                        Custom ({customCartelas.length})
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Summary Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-red-700">75</div>
+                      <div className="text-sm text-red-600">Fixed Cartelas</div>
+                    </div>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-blue-700">{customCartelas.length}</div>
+                      <div className="text-sm text-blue-600">Custom Cartelas</div>
+                    </div>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-green-700">{75 + customCartelas.length}</div>
+                      <div className="text-sm text-green-600">Total Available</div>
+                    </div>
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-purple-700">{user?.shopId || 0}</div>
+                      <div className="text-sm text-purple-600">Shop ID</div>
+                    </div>
                   </div>
 
                   {/* Single Cartela Preview */}
@@ -1024,12 +1068,13 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                   {!previewCartelaNumber && !showAllCartelas && (
                     <div className="text-center py-12 text-gray-500">
                       <Grid3X3 className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                      <h3 className="text-lg font-medium mb-2">Cartela Preview</h3>
-                      <p className="mb-4">Enter a cartela number (1-75) to preview or view all cartelas</p>
+                      <h3 className="text-lg font-medium mb-2">Cartela Preview - Shop #{user?.shopId}</h3>
+                      <p className="mb-4">Search cartela numbers or view all available cartelas for your shop</p>
                       <div className="space-y-2">
-                        <p className="text-sm">• Search for specific cartela numbers</p>
+                        <p className="text-sm">• Search for specific cartela numbers (1-75 + custom)</p>
                         <p className="text-sm">• View individual cartela patterns</p>
-                        <p className="text-sm">• Browse all 75 fixed cartelas</p>
+                        <p className="text-sm">• Browse all {75 + customCartelas.length} available cartelas</p>
+                        <p className="text-sm">• {customCartelas.length} custom cartelas for shop #{user?.shopId}</p>
                       </div>
                     </div>
                   )}
