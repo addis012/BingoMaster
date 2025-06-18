@@ -133,30 +133,39 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           console.log("Numbers parsed:", numbers);
 
           if (numbers.length !== 25) {
+            console.log(`Invalid length: ${numbers.length}, expected 25`);
             errors.push(`Card ${cardNumber}: Must have exactly 25 numbers, got ${numbers.length}. Numbers: ${numbersStr}`);
             errorCount++;
             continue;
           }
 
+          console.log("Length validation passed");
+
           // Validate individual numbers are within BINGO range
           let hasInvalidNumbers = false;
           for (const num of numbers) {
             if (num !== 0 && (num < 1 || num > 75)) {
+              console.log(`Invalid number found: ${num}`);
               errors.push(`Card ${cardNumber}: Number ${num} is outside valid BINGO range (1-75)`);
               hasInvalidNumbers = true;
             }
           }
           
           if (hasInvalidNumbers) {
+            console.log("Has invalid numbers, skipping");
             errorCount++;
             continue;
           }
+
+          console.log("Number range validation passed");
 
           // Convert flat array to 5x5 grid
           const pattern: number[][] = [];
           for (let i = 0; i < 5; i++) {
             pattern.push(numbers.slice(i * 5, (i + 1) * 5));
           }
+
+          console.log("Pattern created:", pattern);
 
           // Validate BINGO column ranges
           const columnRanges = [
@@ -166,6 +175,8 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             { min: 46, max: 60, name: 'G' },  // G column
             { min: 61, max: 75, name: 'O' }   // O column
           ];
+
+          console.log("Starting column validation");
 
           let validPattern = true;
           for (let col = 0; col < 5; col++) {

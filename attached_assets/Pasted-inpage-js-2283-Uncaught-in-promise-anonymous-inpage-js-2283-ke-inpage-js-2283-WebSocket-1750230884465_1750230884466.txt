@@ -1,0 +1,113 @@
+inpage.js:2283 Uncaught (in promise) 
+(anonymous) @ inpage.js:2283
+ke @ inpage.js:2283
+ WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=Xuz5SPkuItLW' failed: 
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ WebSocket connection to 'wss://localhost:5173/?token=Xuz5SPkuItLW' failed: 
+createConnection @ client:815
+connect @ client:437
+connect @ client:822
+ [vite] failed to connect to websocket.
+your current setup:
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:830
+ [vite] 
+error @ client:882
+(anonymous) @ client:137
+ Auth state updated: Object
+ BulkCartelaManager rendered with: Object
+ BulkCartelaManager rendered with: Object
+ Textarea onChange: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ BulkCartelaManager rendered with: Object
+ === SAVE BUTTON CLICKED ===
+ Event: SyntheticBaseEvent
+ cardsData: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ cardsData length: 74
+ Button disabled state: false
+ createCartelaMutation.isPending: false
+ Starting to save cards... 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Processing lines: Array(1)
+ Processing line: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Split result: Object
+ Card number parsed: 2
+ Processing numbers string: 5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Numbers parsed: Array(25)
+ BulkCartelaManager rendered with: Object
+ === SAVE BUTTON CLICKED ===
+ Event: SyntheticBaseEvent
+ cardsData: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ cardsData length: 74
+ Button disabled state: false
+ createCartelaMutation.isPending: false
+ Starting to save cards... 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Processing lines: Array(1)
+ Processing line: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Split result: Object
+ Card number parsed: 2
+ Processing numbers string: 5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Numbers parsed: Array(25)
+ BulkCartelaManager rendered with: Object
+ === SAVE BUTTON CLICKED ===
+ Event: SyntheticBaseEvent
+ cardsData: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ cardsData length: 74
+ Button disabled state: false
+ createCartelaMutation.isPending: false
+ Starting to save cards... 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Processing lines: Array(1)
+ Processing line: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Split result: Object
+ Card number parsed: 2
+ Processing numbers string: 5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+ Numbers parsed: Array(25)
+ BulkCartelaManager rendered with: Object
+ === SAVE BUTTON CLICKED ===
+bulk-cartela-manager.tsx:364 Event: SyntheticBaseEvent
+bulk-cartela-manager.tsx:365 cardsData: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:366 cardsData length: 74
+bulk-cartela-manager.tsx:367 Button disabled state: false
+bulk-cartela-manager.tsx:368 createCartelaMutation.isPending: false
+bulk-cartela-manager.tsx:91 Starting to save cards... 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:99 Processing lines: Array(1)
+bulk-cartela-manager.tsx:102 Processing line: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:105 Split result: Object
+bulk-cartela-manager.tsx:115 Card number parsed: 2
+bulk-cartela-manager.tsx:124 Processing numbers string: 5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:133 Numbers parsed: Array(25)
+bulk-cartela-manager.tsx:32 BulkCartelaManager rendered with: Object
+bulk-cartela-manager.tsx:363 === SAVE BUTTON CLICKED ===
+bulk-cartela-manager.tsx:364 Event: SyntheticBaseEvent
+bulk-cartela-manager.tsx:365 cardsData: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:366 cardsData length: 74
+bulk-cartela-manager.tsx:367 Button disabled state: false
+bulk-cartela-manager.tsx:368 createCartelaMutation.isPending: false
+bulk-cartela-manager.tsx:91 Starting to save cards... 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:99 Processing lines: Array(1)
+bulk-cartela-manager.tsx:102 Processing line: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:105 Split result: Object
+bulk-cartela-manager.tsx:115 Card number parsed: 2
+bulk-cartela-manager.tsx:124 Processing numbers string: 5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:133 Numbers parsed: Array(25)
+bulk-cartela-manager.tsx:32 BulkCartelaManager rendered with: Object
+bulk-cartela-manager.tsx:363 === SAVE BUTTON CLICKED ===
+bulk-cartela-manager.tsx:364 Event: SyntheticBaseEvent
+bulk-cartela-manager.tsx:365 cardsData: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:366 cardsData length: 74
+bulk-cartela-manager.tsx:367 Button disabled state: false
+bulk-cartela-manager.tsx:368 createCartelaMutation.isPending: false
+bulk-cartela-manager.tsx:91 Starting to save cards... 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:99 Processing lines: Array(1)
+bulk-cartela-manager.tsx:102 Processing line: 2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:105 Split result: Object
+bulk-cartela-manager.tsx:115 Card number parsed: 2
+bulk-cartela-manager.tsx:124 Processing numbers string: 5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+bulk-cartela-manager.tsx:133 Numbers parsed: Array(25)
+bulk-cartela-manager.tsx:32 BulkCartelaManager rendered with: Object
