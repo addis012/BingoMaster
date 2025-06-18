@@ -1762,7 +1762,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">O</div>
                     
                     {/* Cartela pattern */}
-                    {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => {
+                    {(winnerResult.cartelaPattern || getFixedCartelaPattern(winnerResult.cartela)).flat().map((num, index) => {
                       const isWinningCell = winnerResult.winningCells?.includes(index);
                       const isCalled = num !== 0 && calledNumbers.includes(num);
                       const isFree = index === 12;

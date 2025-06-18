@@ -2829,6 +2829,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         cartelaNumber,
         isWinner: winResult.isWinner,
         winningPattern: winResult.pattern,
+        cartelaPattern: cartelaPattern,
         message: winResult.isWinner 
           ? `Cartela Number: ${cartelaNumber}\nWinner ✓\nPattern: ${winResult.pattern}`
           : `Cartela Number: ${cartelaNumber}\nNot a Winner`
