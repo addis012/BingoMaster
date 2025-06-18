@@ -593,18 +593,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         const letter = getLetterForNumber(newNumber);
         setAudioPlaying(true);
         
+        // If there was a previous blinking number, mark it fully now
+        if (blinkingNumber !== null) {
+          setMarkedNumbers(prev => [...prev, blinkingNumber]);
+        }
+        
         // Mark all numbers from called numbers EXCEPT the current one being spoken
         const numbersToMark = updatedNumbers.slice(0, -1); // All except the last (current) number
         setMarkedNumbers(numbersToMark);
         
         // Start blinking the current number immediately
         setBlinkingNumber(newNumber);
-        
-        // After 1 second, stop blinking and mark it fully
-        setTimeout(() => {
-          setBlinkingNumber(null);
-          setMarkedNumbers(prev => [...prev, newNumber]);
-        }, 1000);
         
         // Don't mark the current number - it will be marked when the NEXT number starts
         const audioResetTimer = setTimeout(() => {
@@ -1355,7 +1354,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : blinkingNumber === num
-                                ? 'bg-red-300 text-white animate-pulse' 
+                                ? 'bg-red-500 text-white slow-blink' 
                               : markedNumbers.includes(num) 
                                 ? 'bg-red-500 text-white' 
                                 : 'bg-gray-100 text-black border'
@@ -1383,7 +1382,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : blinkingNumber === num
-                                ? 'bg-blue-300 text-white animate-pulse' 
+                                ? 'bg-blue-500 text-white slow-blink' 
                               : markedNumbers.includes(num) 
                                 ? 'bg-blue-500 text-white' 
                                 : 'bg-gray-100 text-black border'
@@ -1411,7 +1410,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : blinkingNumber === num
-                                ? 'bg-green-300 text-white animate-pulse' 
+                                ? 'bg-green-500 text-white slow-blink' 
                               : markedNumbers.includes(num) 
                                 ? 'bg-green-500 text-white' 
                                 : 'bg-gray-100 text-black border'
@@ -1439,7 +1438,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : blinkingNumber === num
-                                ? 'bg-yellow-300 text-white animate-pulse' 
+                                ? 'bg-yellow-500 text-white slow-blink' 
                               : markedNumbers.includes(num) 
                                 ? 'bg-yellow-500 text-white' 
                                 : 'bg-gray-100 text-black border'
@@ -1467,7 +1466,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                             isBoardShuffling 
                               ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : blinkingNumber === num
-                                ? 'bg-purple-300 text-white animate-pulse' 
+                                ? 'bg-purple-500 text-white slow-blink' 
                               : markedNumbers.includes(num) 
                                 ? 'bg-purple-500 text-white' 
                                 : 'bg-gray-100 text-black border'
