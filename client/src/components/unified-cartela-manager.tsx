@@ -191,7 +191,9 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
                     id="bulk-input"
                     value={bulkInput}
                     onChange={(e) => setBulkInput(e.target.value)}
-                    placeholder="1:15,22,37,56,65,2,27,41,52,68,7,17,free,23,65,43,45,65,54,34,56,54,56,76,78&#10;2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71"
+                    placeholder="1:15,22,37,56,65,2,27,41,52,68,7,17,free,23,65,43,45,65,54,34,56,54,56,76,78
+2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
+99:11,12,13,14,15,16,17,18,19,20,21,22,free,24,25,26,27,28,29,30,31,32,33,34,35"
                     rows={8}
                     className="font-mono text-sm"
                   />
@@ -249,27 +251,48 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
                 </div>
                 <div>
                   <Label>Cartela Pattern (5x5 Grid)</Label>
-                  <div className="grid grid-cols-5 gap-1 mt-2">
-                    {pattern.map((row, rowIndex) =>
-                      row.map((value, colIndex) => (
-                        <Input
-                          key={`${rowIndex}-${colIndex}`}
-                          type="number"
-                          min="0"
-                          max="75"
-                          value={rowIndex === 2 && colIndex === 2 ? "FREE" : value || ""}
-                          onChange={(e) => {
-                            if (rowIndex === 2 && colIndex === 2) return; // Keep center as FREE
-                            const newPattern = [...pattern];
-                            newPattern[rowIndex][colIndex] = parseInt(e.target.value) || 0;
-                            setPattern(newPattern);
-                          }}
-                          disabled={rowIndex === 2 && colIndex === 2}
-                          className="text-center h-12 text-sm"
-                          placeholder={rowIndex === 2 && colIndex === 2 ? "FREE" : "0"}
-                        />
-                      ))
-                    )}
+                  <div className="mt-2">
+                    <div className="grid grid-cols-5 gap-1 mb-2">
+                      <div className="text-center font-bold text-sm bg-blue-100 p-1 rounded">B</div>
+                      <div className="text-center font-bold text-sm bg-red-100 p-1 rounded">I</div>
+                      <div className="text-center font-bold text-sm bg-green-100 p-1 rounded">N</div>
+                      <div className="text-center font-bold text-sm bg-yellow-100 p-1 rounded">G</div>
+                      <div className="text-center font-bold text-sm bg-purple-100 p-1 rounded">O</div>
+                    </div>
+                    <div className="grid grid-cols-5 gap-1">
+                      {pattern.map((row, rowIndex) =>
+                        row.map((value, colIndex) => (
+                          <Input
+                            key={`${rowIndex}-${colIndex}`}
+                            type="number"
+                            min="0"
+                            max="75"
+                            value={rowIndex === 2 && colIndex === 2 ? "FREE" : value || ""}
+                            onChange={(e) => {
+                              if (rowIndex === 2 && colIndex === 2) return; // Keep center as FREE
+                              const newPattern = [...pattern];
+                              newPattern[rowIndex][colIndex] = parseInt(e.target.value) || 0;
+                              setPattern(newPattern);
+                            }}
+                            disabled={rowIndex === 2 && colIndex === 2}
+                            className={`text-center h-10 text-sm ${
+                              rowIndex === 2 && colIndex === 2 
+                                ? "bg-green-100 font-bold" 
+                                : colIndex === 0 
+                                  ? "border-blue-300" 
+                                  : colIndex === 1 
+                                    ? "border-red-300" 
+                                    : colIndex === 2 
+                                      ? "border-green-300" 
+                                      : colIndex === 3 
+                                        ? "border-yellow-300" 
+                                        : "border-purple-300"
+                            }`}
+                            placeholder={rowIndex === 2 && colIndex === 2 ? "FREE" : "0"}
+                          />
+                        ))
+                      )}
+                    </div>
                   </div>
                   <p className="text-sm text-gray-600 mt-2">
                     Enter numbers 1-75. Center cell is automatically set to FREE.
@@ -315,9 +338,35 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 font-mono">
-                    {formatCartelaDisplay(cartela)}
-                  </p>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600 font-mono mb-2">
+                      {formatCartelaDisplay(cartela)}
+                    </p>
+                    <div className="grid grid-cols-5 gap-1 text-xs">
+                      {cartela.pattern.map((row, rowIndex) =>
+                        row.map((value, colIndex) => (
+                          <div
+                            key={`${rowIndex}-${colIndex}`}
+                            className={`text-center p-1 rounded ${
+                              rowIndex === 2 && colIndex === 2 
+                                ? "bg-green-100 font-bold" 
+                                : colIndex === 0 
+                                  ? "bg-blue-50" 
+                                  : colIndex === 1 
+                                    ? "bg-red-50" 
+                                    : colIndex === 2 
+                                      ? "bg-green-50" 
+                                      : colIndex === 3 
+                                        ? "bg-yellow-50" 
+                                        : "bg-purple-50"
+                            }`}
+                          >
+                            {rowIndex === 2 && colIndex === 2 ? "FREE" : value}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button

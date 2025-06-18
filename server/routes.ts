@@ -3646,5 +3646,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mount cartela routes
+  const { cartelasRouter } = await import("./cartela-routes");
+  app.use("/api/cartelas", cartelasRouter);
+
   return httpServer;
 }
