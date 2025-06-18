@@ -1038,7 +1038,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Check if admin has low credit balance
   const adminCreditBalance = parseFloat((adminData as any)?.creditBalance || '0');
-  const showLowCreditWarning = adminData && adminCreditBalance < 100;
+  const showLowCreditWarning = adminData && adminCreditBalance < 500;
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-y-auto">
@@ -1055,7 +1055,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <p className="text-sm text-orange-700">
                 <strong>⚠ Admin Low Credit Balance</strong>
                 <br />
-                Shop admin balance is low ({adminCreditBalance.toFixed(2)} ETB). Contact admin to add more credits.
+                Shop admin balance is low. Contact admin to add more credits.
               </p>
             </div>
           </div>
