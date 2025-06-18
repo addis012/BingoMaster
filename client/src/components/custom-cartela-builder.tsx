@@ -29,11 +29,21 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
 
   const { data: customCartelas = [], refetch } = useQuery({
     queryKey: ["/api/custom-cartelas", shopId],
-    queryFn: () => apiRequest(`/api/custom-cartelas/${shopId}`),
+    queryFn: async () => {
+      const response = await fetch(`/api/custom-cartelas/${shopId}`);
+      return response.json();
+    },
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/custom-cartelas", { method: "POST", body: data }),
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/custom-cartelas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
     onSuccess: () => {
       toast({ title: "Custom cartela created successfully!" });
       queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
@@ -46,8 +56,14 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/custom-cartelas/${id}`, { method: "PATCH", body: data }),
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/custom-cartelas/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
     onSuccess: () => {
       toast({ title: "Custom cartela updated successfully!" });
       queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
@@ -60,7 +76,12 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/custom-cartelas/${id}`, { method: "DELETE" }),
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/custom-cartelas/${id}`, {
+        method: "DELETE",
+      });
+      return response.json();
+    },
     onSuccess: () => {
       toast({ title: "Custom cartela deleted successfully!" });
       queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });

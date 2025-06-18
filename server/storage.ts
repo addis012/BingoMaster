@@ -1509,6 +1509,36 @@ export class DatabaseStorage implements IStorage {
         eq(users.role, 'employee')
       ));
   }
+
+  // Custom cartela methods implementation
+  async getCustomCartelas(shopId: number): Promise<CustomCartela[]> {
+    return await db.select().from(customCartelas)
+      .where(eq(customCartelas.shopId, shopId))
+      .orderBy(customCartelas.cartelaNumber);
+  }
+
+  async getCustomCartela(id: number): Promise<CustomCartela | undefined> {
+    const [cartela] = await db.select().from(customCartelas).where(eq(customCartelas.id, id));
+    return cartela;
+  }
+
+  async createCustomCartela(cartela: InsertCustomCartela): Promise<CustomCartela> {
+    const [newCartela] = await db.insert(customCartelas).values(cartela).returning();
+    return newCartela;
+  }
+
+  async updateCustomCartela(id: number, updates: Partial<InsertCustomCartela>): Promise<CustomCartela | undefined> {
+    const [updatedCartela] = await db.update(customCartelas)
+      .set(updates)
+      .where(eq(customCartelas.id, id))
+      .returning();
+    return updatedCartela;
+  }
+
+  async deleteCustomCartela(id: number): Promise<boolean> {
+    const result = await db.delete(customCartelas).where(eq(customCartelas.id, id));
+    return result.rowCount > 0;
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -21,7 +21,8 @@ import { ErrorDisplay, LoadingState } from "@/components/error-display";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent } from "lucide-react";
+import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3 } from "lucide-react";
+import CustomCartelaBuilder from "@/components/custom-cartela-builder";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
@@ -805,6 +806,28 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
               </CardHeader>
               <CardContent>
                 <AdminReferralCommissions adminId={user.id} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="cartelas" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Grid3X3 className="w-5 h-5" />
+                  Custom Cartela Management
+                </CardTitle>
+                <CardDescription>
+                  Create and manage custom cartela patterns for your shop
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {shopData && (
+                  <CustomCartelaBuilder 
+                    shopId={shopData.shop.id} 
+                    adminId={user.id}
+                  />
+                )}
               </CardContent>
             </Card>
           </TabsContent>
