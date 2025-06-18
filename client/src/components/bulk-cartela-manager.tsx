@@ -3,7 +3,9 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Eye } from 'lucide-react';
 
 interface BulkCartelaManagerProps {
   shopId: number;
@@ -22,6 +24,8 @@ interface CustomCartela {
 
 export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps) {
   const [cardsData, setCardsData] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewCartela, setPreviewCartela] = useState<CustomCartela | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -212,9 +216,39 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           />
         </div>
         
-        <div className="text-sm text-gray-600">
-          <div>Current custom cartelas: {customCartelas?.length || 0}</div>
-          <div>Re-entering same cartela number will UPDATE existing cartela</div>
+        <div className="space-y-4">
+          <div className="text-sm text-gray-600">
+            <div>Current custom cartelas: {customCartelas?.length || 0}</div>
+            <div>Re-entering same cartela number will UPDATE existing cartela</div>
+          </div>
+
+          {/* Existing Cartelas Preview */}
+          {customCartelas && customCartelas.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium mb-2">Existing Custom Cartelas:</h4>
+              <div className="grid grid-cols-8 gap-2">
+                {customCartelas.map((cartela: CustomCartela) => (
+                  <div key={cartela.id} className="text-center">
+                    <div className="bg-green-50 border border-green-200 rounded p-2 text-sm font-medium text-green-800">
+                      #{cartela.cartelaNumber}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs mt-1 p-0 h-auto"
+                      onClick={() => {
+                        setPreviewCartela(cartela);
+                        setShowPreview(true);
+                      }}
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <Button 
@@ -225,6 +259,51 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           {createCartelaMutation.isPending ? 'Processing...' : 'Save Cartelas'}
         </Button>
       </CardContent>
+
+      {/* Cartela Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cartela #{previewCartela?.cartelaNumber} Preview</DialogTitle>
+            <DialogDescription>
+              Custom cartela pattern - {previewCartela?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {previewCartela && (
+            <div className="space-y-4">
+              {/* BINGO Headers */}
+              <div className="grid grid-cols-5 gap-1">
+                {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                  const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                  return (
+                    <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-sm`}>
+                      {letter}
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Custom Cartela Grid */}
+              <div className="grid grid-cols-5 gap-1">
+                {previewCartela.pattern.map((row, rowIndex) =>
+                  row.map((cell, colIndex) => (
+                    <div
+                      key={`${rowIndex}-${colIndex}`}
+                      className="h-8 bg-green-50 border border-green-200 rounded flex items-center justify-center text-xs font-medium text-green-800"
+                    >
+                      {rowIndex === 2 && colIndex === 2 ? "★" : cell}
+                    </div>
+                  ))
+                )}
+              </div>
+              
+              <div className="text-xs text-gray-500 text-center">
+                Created: {new Date(previewCartela.createdAt).toLocaleDateString()}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
