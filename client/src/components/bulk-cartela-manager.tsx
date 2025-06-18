@@ -166,63 +166,16 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           }
 
           console.log("Pattern created:", pattern);
+          console.log("Skipping column validation - allowing custom arrangements");
 
-          // Validate BINGO column ranges
-          const columnRanges = [
-            { min: 1, max: 15, name: 'B' },   // B column
-            { min: 16, max: 30, name: 'I' },  // I column
-            { min: 31, max: 45, name: 'N' },  // N column
-            { min: 46, max: 60, name: 'G' },  // G column
-            { min: 61, max: 75, name: 'O' }   // O column
-          ];
-
-          console.log("Starting column validation");
-
-          let validPattern = true;
-          for (let col = 0; col < 5; col++) {
-            for (let row = 0; row < 5; row++) {
-              const num = pattern[row][col];
-              console.log(`Checking position [${row}][${col}] = ${num}`);
-              
-              if (num === 0 && row === 2 && col === 2) {
-                console.log("FREE space found at center, skipping");
-                continue; // FREE space
-              }
-              
-              const range = columnRanges[col];
-              if (num < range.min || num > range.max) {
-                console.log(`Invalid: ${num} in ${range.name} column (${range.min}-${range.max})`);
-                errors.push(`Card ${cardNumber}: Number ${num} in ${range.name} column must be between ${range.min}-${range.max}`);
-                validPattern = false;
-                break;
-              }
-            }
-            if (!validPattern) break;
-          }
-
-          console.log("Column validation result:", validPattern);
-
-          if (!validPattern) {
-            console.log("Pattern invalid, incrementing error count");
-            errorCount++;
-            continue;
-          }
-
-          console.log("Pattern validation passed, proceeding with save");
-
+          console.log("Checking existing cartelas");
+          
           // Check if cartela already exists (either fixed or custom)
           const existingCustom = customCartelas?.find((c: CustomCartela) => c.cartelaNumber === cardNumber);
+          console.log("Existing custom cartela:", existingCustom);
           
-          if (cardNumber >= 1 && cardNumber <= 200 && !existingCustom) {
-            // This would override a fixed cartela, create custom one
-            await createCartelaMutation.mutateAsync({
-              name: `Custom Card ${cardNumber}`,
-              cartelaNumber: cardNumber,
-              pattern,
-              shopId,
-              adminId,
-            });
-          } else if (existingCustom) {
+          if (existingCustom) {
+            console.log("Updating existing cartela");
             // Update existing custom cartela
             const response = await apiRequest('PATCH', `/api/custom-cartelas/${existingCustom.id}`, {
               name: `Custom Card ${cardNumber}`,
@@ -230,6 +183,7 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             });
             if (!response.ok) throw new Error('Failed to update cartela');
           } else {
+            console.log("Creating new cartela");
             // Create new custom cartela
             await createCartelaMutation.mutateAsync({
               name: `Custom Card ${cardNumber}`,
