@@ -1,13 +1,9 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Save, RotateCcw, Trash2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { FIXED_CARTELAS, getCartelaNumbers } from '@/data/fixed-cartelas';
 
 interface BulkCartelaManagerProps {
   shopId: number;
@@ -28,100 +24,74 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
   const [cardsData, setCardsData] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  console.log("BulkCartelaManager rendered with:", { shopId, adminId, cardsData });
 
   // Fetch existing custom cartelas
-  const { data: customCartelas, isLoading } = useQuery({
+  const { data: customCartelas } = useQuery({
     queryKey: [`/api/custom-cartelas/${shopId}`],
-    queryFn: async () => {
-      const response = await fetch(`/api/custom-cartelas/${shopId}`);
-      if (!response.ok) throw new Error('Failed to fetch custom cartelas');
-      return response.json();
-    },
+    enabled: !!shopId,
   });
 
-  // Create custom cartela mutation
   const createCartelaMutation = useMutation({
-    mutationFn: async (data: {
-      name: string;
-      cartelaNumber: number;
-      pattern: number[][];
-      shopId: number;
-      adminId: number;
-    }) => {
-      console.log("Creating cartela with data:", data);
-      const response = await apiRequest('POST', '/api/custom-cartelas', data);
-      console.log("Create response:", response);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+    mutationFn: async (cartela: any) => {
+      const response = await fetch('/api/custom-cartelas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cartela),
+      });
+      if (!response.ok) throw new Error('Failed to create cartela');
       return response.json();
-    },
-    onSuccess: () => {
-      console.log("Create mutation successful, invalidating queries");
-      queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
-    },
-    onError: (error) => {
-      console.error("Create mutation error:", error);
     },
   });
 
-  // Delete custom cartela mutation
-  const deleteCartelaMutation = useMutation({
-    mutationFn: async (cartelaId: number) => {
-      const response = await apiRequest('DELETE', `/api/custom-cartelas/${cartelaId}`);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
-    },
-  });
-
-  const handleSaveCards = async () => {
+  const handleSave = async () => {
     if (!cardsData.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter cards data",
+        title: "No Data",
+        description: "Please enter cartela data",
         variant: "destructive",
       });
       return;
     }
 
-    console.log("Starting to save cards...", cardsData);
-
     try {
+      // Get fresh cartelas data
+      const cartelasResponse = await fetch(`/api/custom-cartelas/${shopId}`);
+      const latestCartelas = cartelasResponse.ok ? await cartelasResponse.json() : [];
+
       const lines = cardsData.trim().split('\n').filter(line => line.trim());
       let successCount = 0;
       let errorCount = 0;
+      let updateCount = 0;
+      let createCount = 0;
       const errors: string[] = [];
-
-      console.log("Processing lines:", lines);
+      const processedNumbers = new Set<number>();
 
       for (const line of lines) {
-        console.log("Processing line:", line);
         try {
           const [cardNumStr, numbersStr] = line.split(':');
-          console.log("Split result:", { cardNumStr, numbersStr });
           
           if (!cardNumStr || !numbersStr) {
-            console.log("Invalid format detected");
             errors.push(`Invalid format: ${line}`);
             errorCount++;
             continue;
           }
 
           const cardNumber = parseInt(cardNumStr.trim());
-          console.log("Card number parsed:", cardNumber);
           
-          if (isNaN(cardNumber)) {
-            console.log("Invalid card number");
-            errors.push(`Invalid card number: ${cardNumStr}`);
+          if (isNaN(cardNumber) || cardNumber <= 0) {
+            errors.push(`Invalid cartela number: ${cardNumStr}`);
             errorCount++;
             continue;
           }
 
-          console.log("Processing numbers string:", numbersStr);
+          // Check for duplicates in this batch
+          if (processedNumbers.has(cardNumber)) {
+            errors.push(`Duplicate cartela number ${cardNumber} in input`);
+            errorCount++;
+            continue;
+          }
+          processedNumbers.add(cardNumber);
+
           const numbers = numbersStr.split(',').map(n => {
             const num = n.trim().toLowerCase();
             if (num === 'free') return 0;
@@ -129,54 +99,33 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             if (isNaN(parsed)) throw new Error(`Invalid number: ${n}`);
             return parsed;
           });
-          
-          console.log("Numbers parsed:", numbers);
 
           if (numbers.length !== 25) {
-            console.log(`Invalid length: ${numbers.length}, expected 25`);
-            errors.push(`Card ${cardNumber}: Must have exactly 25 numbers, got ${numbers.length}. Numbers: ${numbersStr}`);
+            errors.push(`Cartela ${cardNumber}: Must have exactly 25 numbers, got ${numbers.length}`);
             errorCount++;
             continue;
           }
 
-          console.log("Length validation passed");
-
-          // Validate individual numbers are within BINGO range
-          let hasInvalidNumbers = false;
-          for (const num of numbers) {
-            if (num !== 0 && (num < 1 || num > 75)) {
-              console.log(`Invalid number found: ${num}`);
-              errors.push(`Card ${cardNumber}: Number ${num} is outside valid BINGO range (1-75)`);
-              hasInvalidNumbers = true;
-            }
-          }
-          
-          if (hasInvalidNumbers) {
-            console.log("Has invalid numbers, skipping");
+          // Validate numbers are within range
+          const invalidNumbers = numbers.filter(num => num !== 0 && (num < 1 || num > 75));
+          if (invalidNumbers.length > 0) {
+            errors.push(`Cartela ${cardNumber}: Invalid numbers ${invalidNumbers.join(', ')} (must be 1-75)`);
             errorCount++;
             continue;
           }
 
-          console.log("Number range validation passed");
-
-          // Convert flat array to 5x5 grid
+          // Convert to 5x5 pattern
           const pattern: number[][] = [];
           for (let i = 0; i < 5; i++) {
             pattern.push(numbers.slice(i * 5, (i + 1) * 5));
           }
 
-          console.log("Pattern created:", pattern);
-          console.log("Skipping column validation - allowing custom arrangements");
-
-          console.log("Checking existing cartelas");
-          
-          // Check if cartela already exists (either fixed or custom)
-          const existingCustom = customCartelas?.find((c: CustomCartela) => c.cartelaNumber === cardNumber);
-          console.log("Existing custom cartela:", existingCustom);
+          // Check if cartela already exists
+          const existingCustom = latestCartelas.find((c: any) => c.cartelaNumber === cardNumber);
           
           if (existingCustom) {
-            console.log(`Updating existing custom cartela ${cardNumber} with ID ${existingCustom.id}`);
-            // Update existing custom cartela using fetch directly
+            // UPDATE existing cartela
+            console.log(`UPDATING existing cartela ${cardNumber} (ID: ${existingCustom.id})`);
             const response = await fetch(`/api/custom-cartelas/${existingCustom.id}`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
@@ -185,14 +134,16 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
                 pattern,
               }),
             });
+            
             if (!response.ok) {
               const errorText = await response.text();
-              throw new Error(`Failed to update cartela: ${errorText}`);
+              throw new Error(`Failed to update cartela ${cardNumber}: ${errorText}`);
             }
-            console.log(`Successfully updated cartela ${cardNumber}`);
+            
+            updateCount++;
           } else {
-            console.log(`Creating new cartela ${cardNumber}`);
-            // Create new custom cartela
+            // CREATE new cartela
+            console.log(`CREATING new cartela ${cardNumber}`);
             await createCartelaMutation.mutateAsync({
               name: `Custom Card ${cardNumber}`,
               cartelaNumber: cardNumber,
@@ -200,22 +151,21 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
               shopId,
               adminId,
             });
-            console.log(`Successfully created cartela ${cardNumber}`);
+            
+            createCount++;
           }
 
-          console.log(`Successfully processed card ${cardNumber}`);
           successCount++;
         } catch (error) {
-          console.error("Card processing error:", error);
-          errors.push(`Card parsing error: ${error}`);
+          console.error("Processing error:", error);
+          errors.push(`Cartela ${line.split(':')[0]}: ${error}`);
           errorCount++;
         }
       }
 
-      // Show results with detailed breakdown
+      // Show results
       if (successCount > 0) {
         await queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas/${shopId}`] });
-        await queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas`] });
         
         toast({
           title: "Cartela Processing Complete",
@@ -225,7 +175,6 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
       }
       
       if (errors.length > 0) {
-        console.error("Processing errors:", errors);
         toast({
           title: "Some cartelas failed",
           description: `${errorCount} cartelas had errors. Check format and try again.`,
@@ -235,223 +184,47 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save cards",
+        description: "Failed to save cartelas",
         variant: "destructive",
       });
     }
   };
-
-  const handleDeleteCard = async (cartelaId: number) => {
-    try {
-      await deleteCartelaMutation.mutateAsync(cartelaId);
-      toast({
-        title: "Card Deleted",
-        description: "Card has been deleted successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete card",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleReset = () => {
-    setCardsData('');
-  };
-
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
-  };
-
-  // Get current cartela list that employees see
-  const getCurrentCartelaList = () => {
-    const allCartelas = [];
-    
-    // Add fixed cartelas (1-200)
-    for (let i = 1; i <= 200; i++) {
-      const numbers = getCartelaNumbers(i);
-      allCartelas.push({
-        number: i,
-        type: 'Fixed',
-        numbers: numbers,
-        source: 'System'
-      });
-    }
-    
-    // Add custom cartelas
-    if (customCartelas) {
-      customCartelas.forEach((cartela: CustomCartela) => {
-        allCartelas.push({
-          number: cartela.cartelaNumber,
-          type: 'Custom',
-          numbers: cartela.pattern.flat(),
-          source: 'Admin'
-        });
-      });
-    }
-    
-    return allCartelas.sort((a, b) => a.number - b.number);
-  };
-
-  const cartelaList = getCurrentCartelaList();
 
   return (
-    <div className="space-y-6">
-      {/* Bulk Cards Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Bingo Cards Management</span>
-            <Button onClick={handleRefresh} variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-sm text-gray-600 space-y-2">
-            <p>Manage your bingo cartelas using the format below. Each line represents one cartela.</p>
-            <div>
-              <strong>Format:</strong> cartelaNumber:number1,number2,...,number25
-            </div>
-            <div>
-              <strong>Example:</strong>
-            </div>
-            <div className="bg-gray-50 p-2 rounded font-mono text-xs">
-              2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
-            </div>
-            <div className="space-y-1">
-              <div className="text-blue-600">
-                <strong>Rules:</strong>
-              </div>
-              <ul className="text-xs space-y-1 list-disc list-inside">
-                <li>Each cartela must have exactly 25 values (5x5 grid)</li>
-                <li>Position 13 (center) must be "free"</li>
-                <li>B column: 1-15, I column: 16-30, N column: 31-45, G column: 46-60, O column: 61-75</li>
-                <li>No duplicate numbers within a cartela</li>
-                <li>If cartela number exists, it will be updated (overwritten)</li>
-                <li>If cartela number is new, it will be created</li>
-              </ul>
-            </div>
-          </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Bulk Cartela Manager</CardTitle>
+        <p className="text-sm text-gray-600">
+          Add or update multiple cartelas at once. Format: CardNumber: num1,num2,...,num25
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Cartela Data (one per line)
+          </label>
+          <Textarea
+            value={cardsData}
+            onChange={(e) => setCardsData(e.target.value)}
+            placeholder={`1: 1,16,31,46,61,2,17,32,47,62,3,18,free,48,63,4,19,33,49,64,5,20,34,50,65
+2: 6,21,36,51,66,7,22,37,52,67,8,23,free,53,68,9,24,38,54,69,10,25,39,55,70`}
+            className="min-h-[200px] font-mono text-sm"
+          />
+        </div>
+        
+        <div className="text-sm text-gray-600">
+          <div>Current custom cartelas: {customCartelas?.length || 0}</div>
+          <div>Re-entering same cartela number will UPDATE existing cartela</div>
+        </div>
 
-          <div>
-            <label htmlFor="cardsData" className="block text-sm font-medium mb-2">
-              Cards Data
-            </label>
-            <Textarea
-              id="cardsData"
-              value={cardsData}
-              onChange={(e) => {
-                console.log("Textarea onChange:", e.target.value);
-                setCardsData(e.target.value);
-              }}
-              placeholder="Enter cards data in the format:&#10;cardNumber:number1,number2,number3,..."
-              className="min-h-[200px] font-mono text-sm"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Button onClick={handleReset} variant="outline">
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Reset
-            </Button>
-            <Button 
-              onClick={(e) => {
-                e.preventDefault();
-                console.log("=== SAVE BUTTON CLICKED ===");
-                console.log("Event:", e);
-                console.log("cardsData:", cardsData);
-                console.log("cardsData length:", cardsData.length);
-                console.log("Button disabled state:", !cardsData.trim() || createCartelaMutation.isPending);
-                console.log("createCartelaMutation.isPending:", createCartelaMutation.isPending);
-                handleSaveCards();
-              }}
-              disabled={!cardsData.trim() || createCartelaMutation.isPending}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {createCartelaMutation.isPending ? "Saving..." : "Save Cards"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Current Cartela List - What Employees See */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Cartela List ({cartelaList.length} total)</CardTitle>
-          <div className="text-sm text-gray-600">
-            This shows all cartelas that employees can select from when creating games
-          </div>
-        </CardHeader>
-        <CardContent>
-          {cartelaList.length > 0 ? (
-            <div className="space-y-4">
-              {/* Summary */}
-              <div className="flex gap-4 text-sm">
-                <Badge variant="outline">
-                  Fixed: {cartelaList.filter(c => c.type === 'Fixed').length}
-                </Badge>
-                <Badge variant="outline">
-                  Custom: {cartelaList.filter(c => c.type === 'Custom').length}
-                </Badge>
-              </div>
-
-              {/* Cartela Grid */}
-              <div className="grid gap-3 max-h-[400px] overflow-y-auto">
-                {cartelaList.map((cartela) => (
-                  <div key={`${cartela.type}-${cartela.number}`} className="border rounded-lg p-3">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold">Cartela #{cartela.number}</span>
-                        <Badge 
-                          variant={cartela.type === 'Fixed' ? 'secondary' : 'default'}
-                          className={cartela.type === 'Custom' ? 'bg-blue-100 text-blue-800' : ''}
-                        >
-                          {cartela.type}
-                        </Badge>
-                      </div>
-                      {cartela.type === 'Custom' && (
-                        <Button
-                          onClick={() => {
-                            const customCartela = customCartelas?.find((c: CustomCartela) => c.cartelaNumber === cartela.number);
-                            if (customCartela) handleDeleteCard(customCartela.id);
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                    
-                    {/* Mini Bingo Grid */}
-                    <div className="grid grid-cols-5 gap-1 text-xs">
-                      <div className="text-center font-bold text-blue-600 py-1 bg-blue-50">B</div>
-                      <div className="text-center font-bold text-red-600 py-1 bg-red-50">I</div>
-                      <div className="text-center font-bold text-green-600 py-1 bg-green-50">N</div>
-                      <div className="text-center font-bold text-yellow-600 py-1 bg-yellow-50">G</div>
-                      <div className="text-center font-bold text-purple-600 py-1 bg-purple-50">O</div>
-                      
-                      {cartela.numbers.map((num, idx) => (
-                        <div key={idx} className="text-center py-1 border border-gray-200 text-xs">
-                          {num === 0 ? 'FREE' : num}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="text-gray-500">No cartelas found.</p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+        <Button 
+          onClick={handleSave}
+          disabled={!cardsData.trim() || createCartelaMutation.isPending}
+          className="w-full"
+        >
+          {createCartelaMutation.isPending ? 'Processing...' : 'Save Cartelas'}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
