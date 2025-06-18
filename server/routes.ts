@@ -6,7 +6,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import session from "express-session";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
-import { insertUserSchema, insertShopSchema, insertGameSchema, insertGamePlayerSchema, insertTransactionSchema, insertEmployeeProfitMarginSchema } from "@shared/schema";
+import { insertUserSchema, insertShopSchema, insertGameSchema, insertGamePlayerSchema, insertTransactionSchema, insertEmployeeProfitMarginSchema, insertCustomCartelaSchema } from "@shared/schema";
 import { z } from "zod";
 import { getFixedCartelaPattern as getFixedPattern, getCartelaNumbers } from "./fixed-cartelas";
 

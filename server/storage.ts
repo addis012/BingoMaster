@@ -10,7 +10,8 @@ import {
   type WithdrawalRequest, type InsertWithdrawalRequest,
   type SuperAdminRevenue, type InsertSuperAdminRevenue,
   type DailyRevenueSummary, type InsertDailyRevenueSummary,
-  type EmployeeProfitMargin, type InsertEmployeeProfitMargin
+  type EmployeeProfitMargin, type InsertEmployeeProfitMargin,
+  customCartelas, type CustomCartela, type InsertCustomCartela
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, gte, lte, sum, count } from "drizzle-orm";
