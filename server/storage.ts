@@ -11,8 +11,7 @@ import {
   type SuperAdminRevenue, type InsertSuperAdminRevenue,
   type DailyRevenueSummary, type InsertDailyRevenueSummary,
   type EmployeeProfitMargin, type InsertEmployeeProfitMargin,
-  customCartelas, type CustomCartela, type InsertCustomCartela,
-  cartelas, type Cartela, type InsertCartela
+  customCartelas, type CustomCartela, type InsertCustomCartela
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, gte, lte, sum, count } from "drizzle-orm";
@@ -137,22 +136,6 @@ export interface IStorage {
   // EAT time zone utility methods
   getCurrentEATDate(): string;
   performDailyReset(): Promise<void>;
-  
-  // Unified cartela management methods
-  getCartelas(shopId: number): Promise<Cartela[]>;
-  createCartela(cartela: InsertCartela): Promise<Cartela>;
-  updateCartela(id: number, updates: Partial<InsertCartela>): Promise<Cartela | undefined>;
-  deleteCartela(id: number): Promise<boolean>;
-  bulkUpsertCartelas(shopId: number, adminId: number, cartelasData: string): Promise<{
-    updated: number;
-    added: number;
-    skipped: number;
-    errors: string[];
-  }>;
-  migrateFixedCartelas(shopId: number, adminId: number): Promise<{
-    migrated: number;
-    skipped: number;
-  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1555,144 +1538,6 @@ export class DatabaseStorage implements IStorage {
   async deleteCustomCartela(id: number): Promise<boolean> {
     const result = await db.delete(customCartelas).where(eq(customCartelas.id, id));
     return result.rowCount > 0;
-  }
-
-  // Unified cartela management methods
-  async getCartelas(shopId: number): Promise<Cartela[]> {
-    const result = await db.select().from(cartelas).where(eq(cartelas.shopId, shopId));
-    return result;
-  }
-
-  async createCartela(cartela: InsertCartela): Promise<Cartela> {
-    const [result] = await db.insert(cartelas).values(cartela).returning();
-    return result;
-  }
-
-  async updateCartela(id: number, updates: Partial<InsertCartela>): Promise<Cartela | undefined> {
-    const [result] = await db.update(cartelas)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(cartelas.id, id))
-      .returning();
-    return result;
-  }
-
-  async deleteCartela(id: number): Promise<boolean> {
-    const result = await db.delete(cartelas).where(eq(cartelas.id, id));
-    return result.rowCount > 0;
-  }
-
-  async bulkUpsertCartelas(shopId: number, adminId: number, cartelasData: string): Promise<{
-    updated: number;
-    added: number;
-    skipped: number;
-    errors: string[];
-  }> {
-    const lines = cartelasData.trim().split('\n');
-    let updated = 0;
-    let added = 0;
-    let skipped = 0;
-    const errors: string[] = [];
-
-    for (const line of lines) {
-      try {
-        const trimmedLine = line.trim();
-        if (!trimmedLine) continue;
-
-        const [cartelaNumberStr, numbersStr] = trimmedLine.split(':');
-        const cartelaNumber = parseInt(cartelaNumberStr);
-        
-        if (isNaN(cartelaNumber) || !numbersStr) {
-          errors.push(`Invalid format for line: ${line}`);
-          skipped++;
-          continue;
-        }
-
-        const numbers = numbersStr.split(',').map(n => n.trim());
-        
-        // Validate 25 numbers with "free" in center position (index 12)
-        if (numbers.length !== 25) {
-          errors.push(`Cartela ${cartelaNumber}: Must have exactly 25 numbers`);
-          skipped++;
-          continue;
-        }
-
-        if (numbers[12].toLowerCase() !== 'free') {
-          errors.push(`Cartela ${cartelaNumber}: Missing 'free' in center position`);
-          skipped++;
-          continue;
-        }
-
-        const numbersString = numbers.join(',');
-        const name = `Cartela ${cartelaNumber}`;
-
-        // Check if cartela exists
-        const existing = await db.select().from(cartelas)
-          .where(and(eq(cartelas.cartelaNumber, cartelaNumber), eq(cartelas.shopId, shopId)));
-
-        if (existing.length > 0) {
-          // Update existing
-          await db.update(cartelas)
-            .set({ numbers: numbersString, name, updatedAt: new Date() })
-            .where(eq(cartelas.id, existing[0].id));
-          updated++;
-        } else {
-          // Insert new
-          await db.insert(cartelas).values({
-            cartelaNumber,
-            shopId,
-            adminId,
-            name,
-            numbers: numbersString,
-          });
-          added++;
-        }
-      } catch (error) {
-        errors.push(`Error processing line "${line}": ${error.message}`);
-        skipped++;
-      }
-    }
-
-    return { updated, added, skipped, errors };
-  }
-
-  async migrateFixedCartelas(shopId: number, adminId: number): Promise<{
-    migrated: number;
-    skipped: number;
-  }> {
-    const { getCartelaNumbers } = await import('./fixed-cartelas');
-    let migrated = 0;
-    let skipped = 0;
-
-    for (let i = 1; i <= 75; i++) {
-      try {
-        // Check if already exists
-        const existing = await db.select().from(cartelas)
-          .where(and(eq(cartelas.cartelaNumber, i), eq(cartelas.shopId, shopId)));
-
-        if (existing.length > 0) {
-          skipped++;
-          continue;
-        }
-
-        const numbers = getCartelaNumbers(i);
-        const numbersString = numbers.join(',');
-        
-        await db.insert(cartelas).values({
-          cartelaNumber: i,
-          shopId,
-          adminId,
-          name: `Cartela ${i}`,
-          numbers: numbersString,
-        });
-        
-        migrated++;
-      } catch (error) {
-        console.error(`Error migrating cartela ${i}:`, error);
-        skipped++;
-      }
-    }
-
-    return { migrated, skipped };
   }
 }
 

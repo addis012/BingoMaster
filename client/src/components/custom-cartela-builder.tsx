@@ -352,7 +352,6 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
                   variant="outline"
                   size="sm"
                   onClick={() => openBuilder(cartela)}
-                  title="Edit cartela"
                 >
                   <Edit2 className="w-3 h-3" />
                 </Button>
@@ -360,7 +359,6 @@ export default function CustomCartelaBuilder({ shopId, adminId }: CustomCartelaB
                   variant="outline"
                   size="sm"
                   onClick={() => deleteMutation.mutate(cartela.id)}
-                  title="Delete cartela"
                 >
                   <Trash2 className="w-3 h-3" />
                 </Button>

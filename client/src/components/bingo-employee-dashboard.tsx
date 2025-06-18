@@ -10,7 +10,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { FIXED_CARTELAS, getCartelaNumbers, getFixedCartelaPattern } from "@/data/fixed-cartelas";
-import { AlertTriangle } from "lucide-react";
 
 interface BingoEmployeeDashboardProps {
   onLogout: () => void;
@@ -48,7 +47,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [isShuffling, setIsShuffling] = useState(false);
   const [showCartelaPreview, setShowCartelaPreview] = useState(false);
   const [previewCartela, setPreviewCartela] = useState<number | null>(null);
-  const [previewCartelaData, setPreviewCartelaData] = useState<any>(null);
   const [isBoardShuffling, setIsBoardShuffling] = useState(false);
   const [shuffledPositions, setShuffledPositions] = useState<number[]>([]);
   
@@ -87,15 +85,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 5000 // Refresh every 5 seconds to catch admin changes
   });
 
-
-
   // Calculate amounts based on selected cartelas and profit margin
   const calculateAmounts = () => {
     const totalCartelas = selectedCartelas.size;
     const amountPerCartela = parseFloat(gameAmount) || 20;
     const totalCollected = totalCartelas * amountPerCartela;
     // Use shop's actual profit margin from shopData
-    const profitMargin = ((shopData as any)?.profitMargin || 10) / 100;
+    const profitMargin = (shopData?.profitMargin || 10) / 100;
     const winnerAmount = totalCollected * (1 - profitMargin);
     const profitAmount = totalCollected * profitMargin;
     
@@ -107,20 +103,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     };
   };
 
-  // Fetch custom cartelas for this shop with auto-refresh
-  const { data: customCartelas = [] } = useQuery({
-    queryKey: [`/api/custom-cartelas/${user?.shopId}`],
-    queryFn: async () => {
-      if (!user?.shopId) return [];
-      const response = await fetch(`/api/custom-cartelas/${user.shopId}`);
-      if (!response.ok) return [];
-      return response.json();
-    },
-    enabled: !!user?.shopId,
-    refetchInterval: 5000, // Auto-refresh every 5 seconds to detect admin changes
-    refetchOnWindowFocus: true
-  });
-
   // Game history query for admin connection
   const { data: gameHistory } = useQuery({
     queryKey: ['/api/analytics/shop', user?.shopId],
@@ -128,19 +110,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 10000 // Refresh every 10 seconds for live updates
   });
 
-
-
-  // Fetch admin balance for low balance warning
+  // Admin credit balance query
   const { data: adminData } = useQuery({
-    queryKey: [`/api/users/${(shopData as any)?.adminId}`],
+    queryKey: ['/api/users', shopData?.adminId],
     queryFn: async () => {
-      if (!(shopData as any)?.adminId) return null;
-      const response = await fetch(`/api/users/${(shopData as any).adminId}`);
-      if (!response.ok) throw new Error('Failed to fetch admin data');
+      if (!shopData?.adminId) return null;
+      const response = await fetch(`/api/users/${shopData.adminId}`);
+      if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!(shopData as any)?.adminId,
-    refetchInterval: 30000 // Refresh every 30 seconds
+    enabled: !!shopData?.adminId,
+    refetchInterval: 30000 // Check admin balance every 30 seconds
   });
 
   // Sync with active game data
@@ -1056,23 +1036,26 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return { isWinner: false };
   }
 
-  // Remove admin balance warning for employees
+  // Check if admin has low credit balance
+  const adminCreditBalance = parseFloat((adminData as any)?.creditBalance || '0');
+  const showLowCreditWarning = adminData && adminCreditBalance < 100;
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-y-auto">
-
-
-      {/* Low Balance Warning for Employees */}
-      {adminData && parseFloat(adminData.creditBalance || '0') < 500 && (
-        <div className="bg-yellow-50 border border-yellow-200 p-4">
-          <div className="flex items-center">
-            <AlertTriangle className="h-5 w-5 text-yellow-600 mr-3" />
-            <div>
-              <p className="font-medium text-yellow-800">
-                ⚠ Admin Low Credit Balance
-              </p>
-              <p className="text-sm text-yellow-700">
-                Contact admin to add more credits.
+      {/* Admin Low Credit Warning */}
+      {showLowCreditWarning && (
+        <div className="bg-orange-100 border-l-4 border-orange-500 p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-orange-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-orange-700">
+                <strong>⚠ Admin Low Credit Balance</strong>
+                <br />
+                Shop admin balance is low ({adminCreditBalance.toFixed(2)} ETB). Contact admin to add more credits.
               </p>
             </div>
           </div>
@@ -1527,13 +1510,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Select Cartelas</DialogTitle>
+            <DialogTitle>Select Fixed Cartelas (1-75)</DialogTitle>
             <DialogDescription>
-              Choose from available cartelas. Fixed (1-75) in red, Custom in blue. Selected: {selectedCartelas.size} cartelas
+              Choose from 75 official fixed cartelas. Selected: {selectedCartelas.size} cartelas
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-10 gap-4 p-6">
-            {/* Fixed Cartelas */}
             {FIXED_CARTELAS.map((cartela) => (
               <div key={cartela.Board} className="text-center">
                 <div
@@ -1571,64 +1553,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 </Button>
               </div>
             ))}
-            
-            {/* Custom Cartelas */}
-            {customCartelas && customCartelas.length > 0 && customCartelas.map((cartela: any) => (
-              <div key={`custom-${cartela.cartelaNumber}`} className="text-center">
-                <div
-                  className={`p-4 border rounded cursor-pointer text-center mb-2 text-2xl font-bold border-2 ${
-                    selectedCartelas.has(cartela.cartelaNumber)
-                      ? 'bg-blue-400 text-white border-blue-500'
-                      : bookedCartelas.has(cartela.cartelaNumber)
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-yellow-100 hover:bg-yellow-200 border-yellow-400'
-                  }`}
-                  onClick={() => {
-                    if (!bookedCartelas.has(cartela.cartelaNumber)) {
-                      const newSelected = new Set(selectedCartelas);
-                      if (newSelected.has(cartela.cartelaNumber)) {
-                        newSelected.delete(cartela.cartelaNumber);
-                      } else {
-                        newSelected.add(cartela.cartelaNumber);
-                      }
-                      setSelectedCartelas(newSelected);
-                    }
-                  }}
-                >
-                  {cartela.cartelaNumber}
-                </div>
-                <div className="text-xs text-yellow-600 font-semibold mb-1">CUSTOM</div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-xs px-2 py-1 h-5"
-                  onClick={() => {
-                    setPreviewCartela(cartela.cartelaNumber);
-                    setPreviewCartelaData(cartela);
-                    setShowCartelaPreview(true);
-                  }}
-                >
-                  View
-                </Button>
-              </div>
-            ))}
           </div>
-          <div className="flex justify-between items-center p-4 border-t bg-gray-50">
-            <div className="text-sm">
-              <span className="font-medium">Selected: {selectedCartelas.size} cartelas</span>
-              <div className="text-gray-600">
-                Fixed: {Array.from(selectedCartelas).filter(num => num <= 75).length} | 
-                Custom: {Array.from(selectedCartelas).filter(num => customCartelas.some((c: any) => c.cartelaNumber === num)).length}
-              </div>
-            </div>
-            <div className="space-x-2">
-              <Button variant="outline" onClick={() => setSelectedCartelas(new Set())}>
-                Clear All
-              </Button>
-              <Button onClick={() => setShowCartelaSelector(false)} className="bg-green-600 hover:bg-green-700">
-                Done ({selectedCartelas.size})
-              </Button>
-            </div>
+          <div className="flex justify-between items-center p-4 border-t">
+            <span>Selected: {selectedCartelas.size} cartelas</span>
+            <Button onClick={() => setShowCartelaSelector(false)}>
+              Done
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -1639,10 +1569,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           <DialogHeader>
             <DialogTitle>Cartela #{previewCartela} Preview</DialogTitle>
             <DialogDescription>
-              {customCartelas?.find((c: any) => c.cartelaNumber === previewCartela) 
-                ? "Custom cartela pattern created by admin" 
-                : "Standard fixed cartela pattern"
-              }
+              Fixed cartela pattern with predefined numbers
             </DialogDescription>
           </DialogHeader>
           {previewCartela && (
@@ -1662,47 +1589,29 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               {/* Cartela Grid */}
               <div className="grid grid-cols-5 gap-1">
                 {(() => {
-                  // Check if this is a custom cartela
-                  if (previewCartelaData && previewCartelaData.pattern) {
-                    const pattern = previewCartelaData.pattern;
-                    const grid = [];
-                    for (let row = 0; row < 5; row++) {
-                      for (let col = 0; col < 5; col++) {
-                        const value = pattern[row][col];
-                        grid.push(
-                          <div key={`${row}-${col}`} className="h-8 bg-yellow-50 border border-yellow-200 rounded flex items-center justify-center text-sm font-medium">
-                            {value === 0 ? "★" : value}
-                          </div>
-                        );
+                  const cartela = FIXED_CARTELAS.find(c => c.Board === previewCartela);
+                  if (!cartela) return null;
+                  
+                  const grid = [];
+                  for (let row = 0; row < 5; row++) {
+                    for (let col = 0; col < 5; col++) {
+                      let value;
+                      switch (col) {
+                        case 0: value = cartela.B[row]; break;
+                        case 1: value = cartela.I[row]; break;
+                        case 2: value = cartela.N[row]; break;
+                        case 3: value = cartela.G[row]; break;
+                        case 4: value = cartela.O[row]; break;
                       }
+                      
+                      grid.push(
+                        <div key={`${row}-${col}`} className="h-8 bg-gray-100 border rounded flex items-center justify-center text-sm font-medium">
+                          {value === "FREE" ? "★" : value}
+                        </div>
+                      );
                     }
-                    return grid;
-                  } else {
-                    // Fixed cartela
-                    const cartela = FIXED_CARTELAS.find(c => c.Board === previewCartela);
-                    if (!cartela) return null;
-                    
-                    const grid = [];
-                    for (let row = 0; row < 5; row++) {
-                      for (let col = 0; col < 5; col++) {
-                        let value;
-                        switch (col) {
-                          case 0: value = cartela.B[row]; break;
-                          case 1: value = cartela.I[row]; break;
-                          case 2: value = cartela.N[row]; break;
-                          case 3: value = cartela.G[row]; break;
-                          case 4: value = cartela.O[row]; break;
-                        }
-                        
-                        grid.push(
-                          <div key={`${row}-${col}`} className="h-8 bg-gray-100 border rounded flex items-center justify-center text-sm font-medium">
-                            {value === "FREE" ? "★" : value}
-                          </div>
-                        );
-                      }
-                    }
-                    return grid;
                   }
+                  return grid;
                 })()}
               </div>
             </div>

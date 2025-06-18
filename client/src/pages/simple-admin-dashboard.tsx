@@ -21,10 +21,8 @@ import { ErrorDisplay, LoadingState } from "@/components/error-display";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3, AlertTriangle } from "lucide-react";
-import { BulkCartelaManager } from "@/components/bulk-cartela-manager";
-import { UnifiedCartelaManager } from "@/components/unified-cartela-manager";
-import { FIXED_CARTELAS } from "@/data/fixed-cartelas";
+import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3 } from "lucide-react";
+import CustomCartelaBuilder from "@/components/custom-cartela-builder";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
@@ -48,12 +46,6 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const [transferScreenshot, setTransferScreenshot] = useState("");
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
-  
-  // Cartela preview states
-  const [showCartelaPreview, setShowCartelaPreview] = useState(false);
-  const [previewCartelaNumber, setPreviewCartelaNumber] = useState<number | null>(null);
-  const [showAllCartelas, setShowAllCartelas] = useState(false);
-  const [showCustomCartelas, setShowCustomCartelas] = useState(true);
 
   // Move all hooks before conditional returns to avoid hooks error
   const { data: employees = [], refetch: refetchEmployees, error: employeesError, isLoading: employeesLoading } = useQuery({
@@ -224,7 +216,6 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     });
   };
 
-  // Data processing after hooks
   const stats = shopStats as any || {};
   const balance = creditBalance as any || {};
   const employeeList = employees as any[] || [];
@@ -304,30 +295,11 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
           <p className="text-gray-600 mt-2">Manage your shop operations and employees</p>
         </div>
 
-        {/* Low Credit Balance Warning */}
-        {balance && parseFloat(balance.balance) < 500 && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 mr-3" />
-              <div>
-                <p className="font-medium text-yellow-800">
-                  ⚠ Admin Low Credit Balance
-                </p>
-                <p className="text-sm text-yellow-700">
-                  Contact admin to add more credits.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="finance">Finance</TabsTrigger>
-            <TabsTrigger value="cartelas">Cartelas</TabsTrigger>
-            <TabsTrigger value="preview">Preview (1-75)</TabsTrigger>
             <TabsTrigger value="credits">Credits</TabsTrigger>
             <TabsTrigger value="credit-history">Credit History</TabsTrigger>
             <TabsTrigger value="referrals">Referrals</TabsTrigger>
@@ -843,359 +815,19 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Grid3X3 className="w-5 h-5" />
-                  Unified Cartela Management
+                  Custom Cartela Management
                 </CardTitle>
                 <CardDescription>
-                  Manage all cartelas for your shop - edit, update, and delete any cartela including previously fixed ones
+                  Create and manage custom cartela patterns for your shop
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {user && user.shopId && (
-                  <UnifiedCartelaManager 
-                    shopId={user.shopId} 
+                {statsData && (
+                  <CustomCartelaBuilder 
+                    shopId={statsData.shop.id} 
                     adminId={user.id}
                   />
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="preview" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Grid3X3 className="h-5 w-5" />
-                  Cartelas Preview - Shop #{user?.shopId}
-                </CardTitle>
-                <CardDescription>
-                  View all available cartela patterns: fixed (1-75) and custom cartelas for your shop
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Search and Filter */}
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Input
-                      placeholder="Search cartela number..."
-                      value={previewCartelaNumber ? previewCartelaNumber.toString() : ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === '') {
-                          setPreviewCartelaNumber(null);
-                        } else {
-                          const num = parseInt(value);
-                          if (!isNaN(num)) {
-                            setPreviewCartelaNumber(num);
-                          }
-                        }
-                      }}
-                      className="max-w-xs"
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        variant={showAllCartelas ? "secondary" : "outline"}
-                        onClick={() => setShowAllCartelas(!showAllCartelas)}
-                        className="whitespace-nowrap"
-                      >
-                        {showAllCartelas ? "Hide All" : "Show All"}
-                      </Button>
-                      <Button
-                        variant={showCustomCartelas ? "secondary" : "outline"}
-                        onClick={() => setShowCustomCartelas(!showCustomCartelas)}
-                        className="whitespace-nowrap"
-                      >
-                        Custom ({customCartelas.length})
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Summary Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-red-700">75</div>
-                      <div className="text-sm text-red-600">Fixed Cartelas</div>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-blue-700">{customCartelas.length}</div>
-                      <div className="text-sm text-blue-600">Custom Cartelas</div>
-                    </div>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-green-700">{75 + customCartelas.length}</div>
-                      <div className="text-sm text-green-600">Total Available</div>
-                    </div>
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-purple-700">{user?.shopId || 0}</div>
-                      <div className="text-sm text-purple-600">Shop ID</div>
-                    </div>
-                  </div>
-
-                  {/* Single Cartela Preview */}
-                  {previewCartelaNumber && !showAllCartelas && (
-                    <div className="border rounded-lg p-6 bg-white">
-                      {(() => {
-                        const isCustom = customCartelas.find((c: any) => c.cartelaNumber === previewCartelaNumber);
-                        const isFixed = FIXED_CARTELAS.find(c => c.Board === previewCartelaNumber);
-                        
-                        return (
-                          <h3 className="text-xl font-bold mb-4 text-center">
-                            Cartela #{previewCartelaNumber} Preview
-                            <span className={`ml-2 px-2 py-1 text-xs rounded ${isCustom ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
-                              {isCustom ? 'CUSTOM' : 'FIXED'}
-                            </span>
-                          </h3>
-                        );
-                      })()}
-                      
-                      {/* BINGO Headers */}
-                      <div className="grid grid-cols-5 gap-2 mb-3">
-                        {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                          const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
-                          return (
-                            <div key={letter} className={`h-12 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-lg`}>
-                              {letter}
-                            </div>
-                          );
-                        })}
-                      </div>
-                      
-                      {/* Cartela Grid */}
-                      <div className="grid grid-cols-5 gap-2">
-                        {(() => {
-                          const isCustom = customCartelas.find((c: any) => c.cartelaNumber === previewCartelaNumber);
-                          const isFixed = FIXED_CARTELAS.find(c => c.Board === previewCartelaNumber);
-                          
-                          if (!isCustom && !isFixed) {
-                            return (
-                              <div className="col-span-5 text-center py-8 text-gray-500">
-                                <h3 className="text-xl font-bold mb-2">Cartela #{previewCartelaNumber} Not Found</h3>
-                                <p>This cartela number is not available in fixed (1-75) or custom cartelas.</p>
-                              </div>
-                            );
-                          }
-
-                          const grid = [];
-                          
-                          if (isCustom) {
-                            // Custom cartela pattern
-                            const pattern = isCustom.pattern;
-                            for (let row = 0; row < 5; row++) {
-                              for (let col = 0; col < 5; col++) {
-                                let value = pattern[row][col];
-                                if (value === 0) {
-                                  value = 'FREE';
-                                }
-                                grid.push(
-                                  <div
-                                    key={`${row}-${col}`}
-                                    className={`h-12 border-2 rounded flex items-center justify-center font-bold text-lg ${
-                                      value === 'FREE'
-                                        ? 'bg-green-100 border-green-400 text-green-800' 
-                                        : 'bg-blue-50 border-blue-300'
-                                    }`}
-                                  >
-                                    {value}
-                                  </div>
-                                );
-                              }
-                            }
-                          } else {
-                            // Fixed cartela pattern  
-                            const cartela = isFixed;
-                            for (let row = 0; row < 5; row++) {
-                              for (let col = 0; col < 5; col++) {
-                                let value = cartela[`${col}${row}`];
-                                if (row === 2 && col === 2) {
-                                  value = 'FREE';
-                                }
-                                grid.push(
-                                  <div
-                                    key={`${row}-${col}`}
-                                    className={`h-12 border-2 rounded flex items-center justify-center font-bold text-lg ${
-                                      row === 2 && col === 2 
-                                        ? 'bg-green-100 border-green-400 text-green-800' 
-                                        : 'bg-red-50 border-red-300'
-                                    }`}
-                                  >
-                                    {value}
-                                  </div>
-                                );
-                              }
-                            }
-                          }
-                          return grid;
-                        })()}
-                      </div>
-                      
-                      <div className="mt-4 text-center text-sm text-gray-600">
-                        Fixed pattern - same numbers every time
-                      </div>
-                    </div>
-                  )}
-
-                  {/* All Cartelas Grid View */}
-                  {showAllCartelas && (
-                    <div className="space-y-6">
-                      <h3 className="text-xl font-bold text-center">
-                        All Available Cartelas for Shop #{user?.shopId}
-                      </h3>
-                      
-                      {/* Fixed Cartelas Section */}
-                      <div className="space-y-4">
-                        <h4 className="text-lg font-semibold text-red-700 border-b border-red-200 pb-2">
-                          Fixed Cartelas (1-75)
-                        </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                          {FIXED_CARTELAS.map((cartela) => (
-                            <div key={cartela.Board} className="border border-red-200 rounded-lg p-3 bg-red-50 hover:bg-red-100 transition-colors">
-                              <h5 className="text-sm font-bold text-center mb-2 text-red-700">
-                                #{cartela.Board}
-                              </h5>
-                              
-                              {/* Mini BINGO Headers */}
-                              <div className="grid grid-cols-5 gap-1 mb-2">
-                                {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                                  const colors = ['bg-red-400', 'bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-purple-400'];
-                                  return (
-                                    <div key={letter} className={`h-4 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
-                                      {letter}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                              
-                              {/* Mini Cartela Grid */}
-                              <div className="grid grid-cols-5 gap-1 mb-2">
-                                {(() => {
-                                  const grid = [];
-                                  for (let row = 0; row < 5; row++) {
-                                    for (let col = 0; col < 5; col++) {
-                                      let value = cartela[`${col}${row}`];
-                                      if (row === 2 && col === 2) {
-                                        value = 'F';
-                                      }
-                                      grid.push(
-                                        <div
-                                          key={`${row}-${col}`}
-                                          className={`h-4 border rounded flex items-center justify-center text-xs font-medium ${
-                                            row === 2 && col === 2 
-                                              ? 'bg-green-100 border-green-300 text-green-800' 
-                                              : 'bg-white border-gray-300'
-                                          }`}
-                                        >
-                                          {value}
-                                        </div>
-                                      );
-                                    }
-                                  }
-                                  return grid;
-                                })()}
-                              </div>
-                              
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-full text-xs"
-                                onClick={() => {
-                                  setPreviewCartelaNumber(cartela.Board);
-                                  setShowAllCartelas(false);
-                                }}
-                              >
-                                View Full
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Custom Cartelas Section */}
-                      {showCustomCartelas && customCartelas.length > 0 && (
-                        <div className="space-y-4">
-                          <h4 className="text-lg font-semibold text-blue-700 border-b border-blue-200 pb-2">
-                            Custom Cartelas ({customCartelas.length}) - Shop #{user?.shopId}
-                          </h4>
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                            {customCartelas.map((cartela: any) => (
-                              <div key={cartela.id} className="border border-blue-200 rounded-lg p-3 bg-blue-50 hover:bg-blue-100 transition-colors">
-                                <h5 className="text-sm font-bold text-center mb-1 text-blue-700">
-                                  #{cartela.cartelaNumber}
-                                </h5>
-                                <p className="text-xs text-blue-600 text-center mb-2">{cartela.name}</p>
-                                
-                                {/* Mini BINGO Headers */}
-                                <div className="grid grid-cols-5 gap-1 mb-2">
-                                  {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                                    const colors = ['bg-red-400', 'bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-purple-400'];
-                                    return (
-                                      <div key={letter} className={`h-4 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
-                                        {letter}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                                
-                                {/* Mini Cartela Grid */}
-                                <div className="grid grid-cols-5 gap-1 mb-2">
-                                  {(() => {
-                                    const pattern = cartela.pattern;
-                                    const grid = [];
-                                    for (let row = 0; row < 5; row++) {
-                                      for (let col = 0; col < 5; col++) {
-                                        let value = pattern[row][col];
-                                        if (value === 0) {
-                                          value = 'F';
-                                        }
-                                        grid.push(
-                                          <div
-                                            key={`${row}-${col}`}
-                                            className={`h-4 border rounded flex items-center justify-center text-xs font-medium ${
-                                              value === 'F'
-                                                ? 'bg-green-100 border-green-300 text-green-800' 
-                                                : 'bg-white border-gray-300'
-                                            }`}
-                                          >
-                                            {value}
-                                          </div>
-                                        );
-                                      }
-                                    }
-                                    return grid;
-                                  })()}
-                                </div>
-                                
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full text-xs"
-                                  onClick={() => {
-                                    setPreviewCartelaNumber(cartela.cartelaNumber);
-                                    setShowAllCartelas(false);
-                                  }}
-                                >
-                                  View Full
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Default State */}
-                  {!previewCartelaNumber && !showAllCartelas && (
-                    <div className="text-center py-12 text-gray-500">
-                      <Grid3X3 className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                      <h3 className="text-lg font-medium mb-2">Cartela Preview - Shop #{user?.shopId}</h3>
-                      <p className="mb-4">Search cartela numbers or view all available cartelas for your shop</p>
-                      <div className="space-y-2">
-                        <p className="text-sm">• Search for specific cartela numbers (1-75 + custom)</p>
-                        <p className="text-sm">• View individual cartela patterns</p>
-                        <p className="text-sm">• Browse all {75 + customCartelas.length} available cartelas</p>
-                        <p className="text-sm">• {customCartelas.length} custom cartelas for shop #{user?.shopId}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
