@@ -18,6 +18,7 @@ interface BingoEmployeeDashboardProps {
 export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashboardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Game state
   const [gameActive, setGameActive] = useState(false);
@@ -65,6 +66,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   
   // Timer reference for instant pause control
   const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
   
   // Store previous game setup for restart functionality
   const [previousGameSetup, setPreviousGameSetup] = useState<{

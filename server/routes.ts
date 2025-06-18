@@ -109,7 +109,7 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { i
   return { isWinner: false, pattern: null };
 }
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<{ server: Server; wss: WebSocketServer }> {
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static('attached_assets'));
   
@@ -3650,5 +3650,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { cartelasRouter } = await import("./cartela-routes");
   app.use("/api/cartelas", cartelasRouter);
 
-  return httpServer;
+  return { server: httpServer, wss };
 }
