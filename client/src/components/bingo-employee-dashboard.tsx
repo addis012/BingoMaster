@@ -87,6 +87,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 5000 // Refresh every 5 seconds to catch admin changes
   });
 
+  // Custom cartelas query for dynamic cartela selection
+  const { data: customCartelas, refetch: refetchCustomCartelas } = useQuery({
+    queryKey: [`/api/custom-cartelas/${user?.shopId}`],
+    enabled: !!user?.shopId,
+    refetchInterval: 3000 // Refresh every 3 seconds for real-time updates
+  });
+
   // Calculate amounts based on selected cartelas and profit margin
   const calculateAmounts = () => {
     const totalCartelas = selectedCartelas.size;
@@ -1525,7 +1532,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           <DialogHeader>
             <DialogTitle>Select Cartelas</DialogTitle>
             <DialogDescription>
-              Choose from fixed cartelas (1-75) and custom cartelas. Selected: {selectedCartelas.size} cartelas
+              Choose from available cartelas. Fixed (1-75) in red, Custom in blue. Selected: {selectedCartelas.size} cartelas
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-10 gap-4 p-6">
@@ -1609,11 +1616,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               </div>
             ))}
           </div>
-          <div className="flex justify-between items-center p-4 border-t">
-            <span>Selected: {selectedCartelas.size} cartelas</span>
-            <Button onClick={() => setShowCartelaSelector(false)}>
-              Done
-            </Button>
+          <div className="flex justify-between items-center p-4 border-t bg-gray-50">
+            <div className="text-sm">
+              <span className="font-medium">Selected: {selectedCartelas.size} cartelas</span>
+              <div className="text-gray-600">
+                Fixed: {Array.from(selectedCartelas).filter(num => num <= 75).length} | 
+                Custom: {Array.from(selectedCartelas).filter(num => customCartelas?.some((c: any) => c.cartelaNumber === num)).length}
+              </div>
+            </div>
+            <div className="space-x-2">
+              <Button variant="outline" onClick={() => setSelectedCartelas(new Set())}>
+                Clear All
+              </Button>
+              <Button onClick={() => setShowCartelaSelector(false)} className="bg-green-600 hover:bg-green-700">
+                Done ({selectedCartelas.size})
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

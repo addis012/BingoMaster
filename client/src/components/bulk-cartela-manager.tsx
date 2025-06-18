@@ -134,19 +134,41 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           }
           processedNumbers.add(cardNumber);
 
-          const numbers = numbersStr.split(',').map(n => {
+          const numbersArray = numbersStr.split(',').map(n => n.trim());
+          
+          if (numbersArray.length !== 25) {
+            errors.push(`Cartela ${cardNumber}: Must have exactly 25 numbers, got ${numbersArray.length}`);
+            errorCount++;
+            continue;
+          }
+
+          // Validate 13th position is "free"
+          if (numbersArray[12].toLowerCase() !== 'free') {
+            errors.push(`Cartela ${cardNumber}: 13th position must be "free", found "${numbersArray[12]}"`);
+            errorCount++;
+            continue;
+          }
+
+          // Check for duplicate numbers (excluding FREE)
+          const numericValues = numbersArray
+            .map((n, idx) => idx === 12 ? null : parseInt(n.trim()))
+            .filter(n => n !== null && !isNaN(n as number)) as number[];
+          
+          const uniqueValues = new Set(numericValues);
+          if (uniqueValues.size !== numericValues.length) {
+            errors.push(`Cartela ${cardNumber}: Contains duplicate numbers`);
+            errorCount++;
+            continue;
+          }
+
+          // Convert to numbers array for pattern
+          const numbers = numbersArray.map(n => {
             const num = n.trim().toLowerCase();
             if (num === 'free') return 0;
             const parsed = parseInt(num);
             if (isNaN(parsed)) throw new Error(`Invalid number: ${n}`);
             return parsed;
           });
-
-          if (numbers.length !== 25) {
-            errors.push(`Cartela ${cardNumber}: Must have exactly 25 numbers, got ${numbers.length}`);
-            errorCount++;
-            continue;
-          }
 
           // Validate numbers are within range
           const invalidNumbers = numbers.filter(num => num !== 0 && (num < 1 || num > 75));
