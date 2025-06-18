@@ -617,9 +617,45 @@ export const FIXED_CARTELAS = [
   }
 ];
 
+// Generate dynamic cartela pattern for any number
+function generateDynamicCartelaPattern(cartelaNum: number): any {
+  // Use cartela number as seed for consistent pattern generation
+  const seed = cartelaNum;
+  
+  // Simple seeded random function
+  function seededRandom(seed: number): number {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+  
+  // Generate numbers for each column with proper ranges
+  const generateColumnNumbers = (min: number, max: number, count: number, seedOffset: number): number[] => {
+    const numbers: number[] = [];
+    const available = Array.from({length: max - min + 1}, (_, i) => min + i);
+    
+    for (let i = 0; i < count; i++) {
+      const randomIndex = Math.floor(seededRandom(seed + seedOffset + i) * available.length);
+      numbers.push(available.splice(randomIndex, 1)[0]);
+    }
+    return numbers;
+  };
+  
+  return {
+    Board: cartelaNum,
+    B: generateColumnNumbers(1, 15, 5, 0),
+    I: generateColumnNumbers(16, 30, 5, 10),
+    N: generateColumnNumbers(31, 45, 4, 20), // 4 numbers since middle is FREE
+    G: generateColumnNumbers(46, 60, 5, 30),
+    O: generateColumnNumbers(61, 75, 5, 40)
+  };
+}
+
 export function getCartelaNumbers(cartelaNum: number): number[] {
-  const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
-  if (!cartela) return [];
+  let cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
+  if (!cartela) {
+    // Generate dynamic pattern for cartela numbers beyond predefined ones
+    cartela = generateDynamicCartelaPattern(cartelaNum);
+  }
   
   const numbers: number[] = [];
   
@@ -652,8 +688,11 @@ export function getCartelaNumbers(cartelaNum: number): number[] {
 }
 
 export function getFixedCartelaPattern(cartelaNum: number): number[][] {
-  const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
-  if (!cartela) return [];
+  let cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
+  if (!cartela) {
+    // Generate dynamic pattern for cartela numbers beyond predefined ones
+    cartela = generateDynamicCartelaPattern(cartelaNum);
+  }
   
   const pattern: number[][] = [];
   
@@ -670,8 +709,14 @@ export function getFixedCartelaPattern(cartelaNum: number): number[][] {
     rowNumbers.push(typeof iVal === 'number' ? iVal : 0);
     
     // N column
-    const nVal = cartela.N[row];
-    rowNumbers.push(nVal === "FREE" ? 0 : (typeof nVal === 'number' ? nVal : 0));
+    if (row === 2) {
+      rowNumbers.push(0); // FREE space
+    } else {
+      // Handle N column for dynamic cartelas (4 numbers, skip middle)
+      const nIndex = row < 2 ? row : row - 1;
+      const nVal = cartela.N[nIndex];
+      rowNumbers.push(typeof nVal === 'number' ? nVal : 0);
+    }
     
     // G column
     const gVal = cartela.G[row];

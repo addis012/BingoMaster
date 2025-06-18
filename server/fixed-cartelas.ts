@@ -618,11 +618,45 @@ export const FIXED_CARTELAS = [
   }
 ];
 
+// Generate dynamic cartela pattern for any number
+function generateDynamicCartelaPattern(cartelaNum: number): any {
+  // Use cartela number as seed for consistent pattern generation
+  const seed = cartelaNum;
+  
+  // Simple seeded random function
+  function seededRandom(seed: number): number {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+  
+  // Generate numbers for each column with proper ranges
+  const generateColumnNumbers = (min: number, max: number, count: number, seedOffset: number): number[] => {
+    const numbers: number[] = [];
+    const available = Array.from({length: max - min + 1}, (_, i) => min + i);
+    
+    for (let i = 0; i < count; i++) {
+      const randomIndex = Math.floor(seededRandom(seed + seedOffset + i) * available.length);
+      numbers.push(available.splice(randomIndex, 1)[0]);
+    }
+    return numbers;
+  };
+  
+  return {
+    Board: cartelaNum,
+    B: generateColumnNumbers(1, 15, 5, 0),
+    I: generateColumnNumbers(16, 30, 5, 10),
+    N: generateColumnNumbers(31, 45, 4, 20), // 4 numbers since middle is FREE
+    G: generateColumnNumbers(46, 60, 5, 30),
+    O: generateColumnNumbers(61, 75, 5, 40)
+  };
+}
+
 // Helper function to get fixed cartela pattern
 export function getFixedCartelaPattern(cartelaNum: number): number[][] {
-  const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
+  let cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
   if (!cartela) {
-    throw new Error(`Cartela ${cartelaNum} not found in fixed cartelas`);
+    // Generate dynamic pattern for cartela numbers beyond predefined ones
+    cartela = generateDynamicCartelaPattern(cartelaNum);
   }
 
   const card: number[][] = [[], [], [], [], []];
@@ -638,7 +672,9 @@ export function getFixedCartelaPattern(cartelaNum: number): number[][] {
         if (row === 2) {
           card[row].push(0); // FREE space
         } else {
-          card[row].push(cartela.N[row] as number);
+          // Handle N column for dynamic cartelas (4 numbers, skip middle)
+          const nIndex = row < 2 ? row : row - 1;
+          card[row].push(cartela.N[nIndex] as number);
         }
       } else if (col === 3) {
         card[row].push(cartela.G[row]);
@@ -653,9 +689,10 @@ export function getFixedCartelaPattern(cartelaNum: number): number[][] {
 
 // Helper function to get all numbers from a cartela (excluding FREE)
 export function getCartelaNumbers(cartelaNum: number): number[] {
-  const cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
+  let cartela = FIXED_CARTELAS.find(c => c.Board === cartelaNum);
   if (!cartela) {
-    throw new Error(`Cartela ${cartelaNum} not found`);
+    // Generate dynamic pattern for cartela numbers beyond predefined ones
+    cartela = generateDynamicCartelaPattern(cartelaNum);
   }
 
   const numbers: number[] = [];
