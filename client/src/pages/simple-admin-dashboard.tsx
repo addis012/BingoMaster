@@ -23,6 +23,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3, AlertTriangle } from "lucide-react";
 import { BulkCartelaManager } from "@/components/bulk-cartela-manager";
+import { UnifiedCartelaManager } from "@/components/unified-cartela-manager";
 import { FIXED_CARTELAS } from "@/data/fixed-cartelas";
 
 interface SimpleAdminDashboardProps {

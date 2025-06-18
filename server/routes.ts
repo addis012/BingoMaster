@@ -3715,5 +3715,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Unified cartela management routes
+  app.get("/api/cartelas/:shopId", async (req: Request, res: Response) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const cartelas = await storage.getCartelas(shopId);
+      res.json(cartelas);
+    } catch (error) {
+      console.error("Error fetching cartelas:", error);
+      res.status(500).json({ message: "Failed to fetch cartelas" });
+    }
+  });
+
+  app.post("/api/cartelas", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertCartelaSchema.parse(req.body);
+      const cartela = await storage.createCartela(validatedData);
+      res.json(cartela);
+    } catch (error) {
+      console.error("Error creating cartela:", error);
+      res.status(500).json({ message: "Failed to create cartela" });
+    }
+  });
+
+  app.patch("/api/cartelas/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertCartelaSchema.partial().parse(req.body);
+      const cartela = await storage.updateCartela(id, validatedData);
+      res.json(cartela);
+    } catch (error) {
+      console.error("Error updating cartela:", error);
+      res.status(500).json({ message: "Failed to update cartela" });
+    }
+  });
+
+  app.delete("/api/cartelas/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCartela(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting cartela:", error);
+      res.status(500).json({ message: "Failed to delete cartela" });
+    }
+  });
+
+  // Bulk cartela operations
+  app.post("/api/cartelas/bulk-upsert", async (req: Request, res: Response) => {
+    try {
+      const { shopId, adminId, cartelas: cartelasData } = req.body;
+      const result = await storage.bulkUpsertCartelas(shopId, adminId, cartelasData);
+      res.json(result);
+    } catch (error) {
+      console.error("Error bulk upserting cartelas:", error);
+      res.status(500).json({ message: "Failed to bulk upsert cartelas" });
+    }
+  });
+
+  // Migration route to populate hardcoded cartelas
+  app.post("/api/cartelas/migrate-fixed", async (req: Request, res: Response) => {
+    try {
+      const { shopId, adminId } = req.body;
+      const result = await storage.migrateFixedCartelas(shopId, adminId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error migrating fixed cartelas:", error);
+      res.status(500).json({ message: "Failed to migrate fixed cartelas" });
+    }
+  });
+
   return httpServer;
 }
