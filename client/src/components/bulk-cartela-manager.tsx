@@ -298,9 +298,9 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm text-gray-600 space-y-2">
-            <p>Manage your bingo cards by entering them in the format below. Each line represents one card.</p>
+            <p>Manage your bingo cartelas using the format below. Each line represents one cartela.</p>
             <div>
-              <strong>Format:</strong> cardNumber:number1,number2,number3,...
+              <strong>Format:</strong> cartelaNumber:number1,number2,...,number25
             </div>
             <div>
               <strong>Example:</strong>
@@ -308,8 +308,18 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             <div className="bg-gray-50 p-2 rounded font-mono text-xs">
               2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
             </div>
-            <div className="text-red-600">
-              <strong>Note:</strong> Each card must have exactly 25 numbers representing a 5x5 grid.
+            <div className="space-y-1">
+              <div className="text-blue-600">
+                <strong>Rules:</strong>
+              </div>
+              <ul className="text-xs space-y-1 list-disc list-inside">
+                <li>Each cartela must have exactly 25 values (5x5 grid)</li>
+                <li>Position 13 (center) must be "free"</li>
+                <li>B column: 1-15, I column: 16-30, N column: 31-45, G column: 46-60, O column: 61-75</li>
+                <li>No duplicate numbers within a cartela</li>
+                <li>If cartela number exists, it will be updated (overwritten)</li>
+                <li>If cartela number is new, it will be created</li>
+              </ul>
             </div>
           </div>
 

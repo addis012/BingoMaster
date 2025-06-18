@@ -112,7 +112,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 10000 // Refresh every 10 seconds for live updates
   });
 
-  // Fetch existing custom cartelas for this shop
+  // Fetch existing custom cartelas for this shop with auto-refresh
   const { data: customCartelas } = useQuery({
     queryKey: [`/api/custom-cartelas/${user?.shopId}`],
     queryFn: async () => {
@@ -122,6 +122,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     enabled: !!user?.shopId,
+    refetchInterval: 5000, // Auto-refresh every 5 seconds to detect admin changes
+    refetchOnWindowFocus: true, // Refresh when window gains focus
   });
 
   // Fetch admin balance for low balance warning
@@ -1622,7 +1624,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           <DialogHeader>
             <DialogTitle>Cartela #{previewCartela} Preview</DialogTitle>
             <DialogDescription>
-              Fixed cartela pattern with predefined numbers
+              {customCartelas?.find((c: any) => c.cartelaNumber === previewCartela) 
+                ? "Custom cartela pattern created by admin" 
+                : "Standard fixed cartela pattern"
+              }
             </DialogDescription>
           </DialogHeader>
           {previewCartela && (
