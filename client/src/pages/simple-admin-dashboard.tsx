@@ -855,15 +855,15 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Grid3X3 className="w-5 h-5" />
-                  Custom Cartela Management
+                  Unified Cartela Management
                 </CardTitle>
                 <CardDescription>
-                  Create and manage custom cartela patterns for your shop
+                  Manage all cartelas for your shop - edit, update, and delete any cartela including previously fixed ones
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {user && user.shopId && (
-                  <BulkCartelaManager 
+                  <UnifiedCartelaManager 
                     shopId={user.shopId} 
                     adminId={user.id}
                   />
