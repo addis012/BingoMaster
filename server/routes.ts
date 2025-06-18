@@ -2486,6 +2486,51 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
 
   // Game Management API for Employee Dashboard
   
+  // Check winner endpoint for cartela verification
+  app.post("/api/games/check-winner", async (req: Request, res) => {
+    try {
+      const { cartelaNumber, calledNumbers } = req.body;
+      
+      if (!cartelaNumber || !calledNumbers) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get cartela pattern from database or generate it
+      let cartelaPattern;
+      const cartelas = await storage.getCartelas(user.shopId || 1);
+      const cartela = cartelas.find((c: any) => c.cartelaNumber === cartelaNumber);
+      
+      if (cartela && cartela.pattern) {
+        cartelaPattern = cartela.pattern;
+      } else {
+        // Generate pattern for cartelas not in database
+        cartelaPattern = getFixedPattern(cartelaNumber);
+      }
+
+      // Check for winning patterns
+      const winResult = checkBingoWin(cartelaPattern, calledNumbers);
+      
+      res.json({
+        isWinner: winResult.isWinner,
+        winningPattern: winResult.pattern || "",
+        cartelaPattern: cartelaPattern
+      });
+    } catch (error) {
+      console.error('Error checking winner:', error);
+      res.status(500).json({ error: "Failed to check winner" });
+    }
+  });
+  
   // Create a new game
   app.post("/api/games", async (req, res) => {
     try {

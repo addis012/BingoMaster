@@ -36,7 +36,16 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   const [showWinnerResult, setShowWinnerResult] = useState(false);
-  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] as number[], cartelaPattern: undefined as number[][] | undefined });
+  interface WinnerResult {
+    isWinner: boolean;
+    cartela: number;
+    message: string;
+    pattern: string;
+    winningCells: number[];
+    cartelaPattern?: number[][];
+  }
+  
+  const [winnerResult, setWinnerResult] = useState<WinnerResult>({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [], cartelaPattern: undefined });
   
   // Animation states
   const [isShuffling, setIsShuffling] = useState(false);
@@ -319,10 +328,8 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
 
       const result = await response.json();
       
-      // Get the actual cartela pattern from database for display
-      const cartelas = queryClient.getQueryData(['/api/cartelas', user?.shopId]) as any[];
-      const cartela = cartelas?.find(c => c.cartelaNumber === cartelaNum);
-      const cartelaPattern = cartela?.pattern || getFixedCartelaPattern(cartelaNum);
+      // Use the cartela pattern returned by the API
+      const cartelaPattern = result.cartelaPattern || getFixedCartelaPattern(cartelaNum);
       
       // Calculate winning cells for highlighting if it's a winner
       let winningCells: number[] = [];
