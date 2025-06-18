@@ -80,7 +80,18 @@ export async function loadHardcodedCartelas(shopId: number, adminId: number): Pr
 
 // Ensure all shops have hardcoded cartelas loaded
 export async function ensureHardcodedCartelasLoaded(): Promise<void> {
-  // This can be called during app startup or when a new shop is created
-  // For now, we'll implement this as a manual trigger
-  console.log("Hardcoded cartela loader ready");
+  console.log("Loading hardcoded cartelas for all shops...");
+  
+  try {
+    const { shops } = await import("@shared/schema");
+    const allShops = await db.select().from(shops);
+    
+    for (const shop of allShops) {
+      await loadHardcodedCartelas(shop.id, shop.adminId);
+    }
+    
+    console.log("Hardcoded cartelas loaded successfully for all shops");
+  } catch (error) {
+    console.error("Error loading hardcoded cartelas:", error);
+  }
 }

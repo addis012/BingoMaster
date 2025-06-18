@@ -173,6 +173,27 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
           Cartela Preview & Management
         </h3>
         <div className="flex gap-2">
+          <Button 
+            onClick={() => {
+              fetch(`/api/cartelas/initialize/${shopId}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                  if (data.loaded) {
+                    toast({ title: "Success", description: "Default cartelas loaded successfully" });
+                    queryClient.invalidateQueries({ queryKey: ["/api/cartelas", shopId] });
+                  } else {
+                    toast({ title: "Info", description: "Cartelas already exist for this shop" });
+                  }
+                })
+                .catch(() => {
+                  toast({ title: "Error", description: "Failed to load default cartelas", variant: "destructive" });
+                });
+            }}
+            variant="outline"
+          >
+            Load Default Cartelas
+          </Button>
+          
           <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
