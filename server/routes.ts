@@ -3646,5 +3646,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Custom Cartelas API endpoints
+  app.get("/api/custom-cartelas/:shopId", async (req: Request, res) => {
+    try {
+      const shopId = parseInt(req.params.shopId);
+      const cartelas = await storage.getCustomCartelas(shopId);
+      res.json(cartelas);
+    } catch (error) {
+      console.error("Error fetching custom cartelas:", error);
+      res.status(500).json({ message: "Failed to fetch custom cartelas" });
+    }
+  });
+
+  app.post("/api/custom-cartelas", async (req: Request, res) => {
+    try {
+      if (!req.session?.user || (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin')) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const validation = insertCustomCartelaSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Invalid cartela data", errors: validation.error.errors });
+      }
+
+      const newCartela = await storage.createCustomCartela(validation.data);
+      res.status(201).json(newCartela);
+    } catch (error) {
+      console.error("Error creating custom cartela:", error);
+      res.status(500).json({ message: "Failed to create custom cartela" });
+    }
+  });
+
+  app.patch("/api/custom-cartelas/:id", async (req: Request, res) => {
+    try {
+      if (!req.session?.user || (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin')) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const id = parseInt(req.params.id);
+      const updatedCartela = await storage.updateCustomCartela(id, req.body);
+      res.json(updatedCartela);
+    } catch (error) {
+      console.error("Error updating custom cartela:", error);
+      res.status(500).json({ message: "Failed to update custom cartela" });
+    }
+  });
+
+  app.delete("/api/custom-cartelas/:id", async (req: Request, res) => {
+    try {
+      if (!req.session?.user || (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin')) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const id = parseInt(req.params.id);
+      await storage.deleteCustomCartela(id);
+      res.json({ message: "Custom cartela deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting custom cartela:", error);
+      res.status(500).json({ message: "Failed to delete custom cartela" });
+    }
+  });
+
   return httpServer;
 }

@@ -296,10 +296,11 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="finance">Finance</TabsTrigger>
+            <TabsTrigger value="cartelas">Cartelas</TabsTrigger>
             <TabsTrigger value="credits">Credits</TabsTrigger>
             <TabsTrigger value="credit-history">Credit History</TabsTrigger>
             <TabsTrigger value="referrals">Referrals</TabsTrigger>
@@ -822,9 +823,9 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {statsData && (
+                {user && user.shopId && (
                   <CustomCartelaBuilder 
-                    shopId={statsData.shop.id} 
+                    shopId={user.shopId} 
                     adminId={user.id}
                   />
                 )}
