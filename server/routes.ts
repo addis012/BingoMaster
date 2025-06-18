@@ -448,17 +448,22 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         return res.status(401).json({ message: "User not found" });
       }
 
-      // Check employee's credit balance first
-      const employeeBalance = parseFloat(user.creditBalance || '0');
+      // Check admin's credit balance (employees use admin's credits)
+      const adminUser = await storage.getUserByShopId(user.shopId!);
+      if (!adminUser) {
+        return res.status(400).json({ message: "Shop admin not found" });
+      }
+
+      const adminBalance = parseFloat(adminUser.creditBalance || '0');
       const cartelas = req.body.cartelas || [];
       const entryFee = parseFloat(req.body.amount || '20');
       const totalCost = cartelas.length * entryFee;
       
-      if (employeeBalance < totalCost) {
-        console.log(`❌ INSUFFICIENT CREDITS: Employee ${user.name} has ${employeeBalance} ETB but needs ${totalCost} ETB`);
+      if (adminBalance < totalCost) {
+        console.log(`❌ INSUFFICIENT ADMIN CREDITS: Admin ${adminUser.name} has ${adminBalance} ETB but needs ${totalCost} ETB for employee ${user.name}`);
         return res.status(400).json({ 
-          message: `Insufficient credit balance. You have ${employeeBalance.toFixed(2)} ETB but need ${totalCost.toFixed(2)} ETB to start this game.`,
-          balance: employeeBalance.toFixed(2),
+          message: `Insufficient admin credit balance. Admin has ${adminBalance.toFixed(2)} ETB but needs ${totalCost.toFixed(2)} ETB to start this game.`,
+          balance: adminBalance.toFixed(2),
           required: totalCost.toFixed(2),
           cartelas: cartelas.length,
           entryFee: entryFee
