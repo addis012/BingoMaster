@@ -22,7 +22,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3 } from "lucide-react";
-import CustomCartelaBuilder from "@/components/custom-cartela-builder";
+import { BulkCartelaManager } from "@/components/bulk-cartela-manager";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
@@ -824,7 +824,7 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
               </CardHeader>
               <CardContent>
                 {user && user.shopId && (
-                  <CustomCartelaBuilder 
+                  <BulkCartelaManager 
                     shopId={user.shopId} 
                     adminId={user.id}
                   />
