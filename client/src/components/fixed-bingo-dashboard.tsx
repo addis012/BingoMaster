@@ -302,10 +302,10 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   const checkWinner = async () => {
     const cartelaNum = parseInt(winnerCartelaNumber);
     
-    if (!cartelaNum || cartelaNum < 1 || cartelaNum > 75) {
+    if (!cartelaNum || cartelaNum < 1) {
       toast({
         title: "Invalid Cartela",
-        description: "Please enter a cartela number between 1 and 75",
+        description: "Please enter a valid cartela number",
         variant: "destructive"
       });
       return;

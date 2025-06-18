@@ -2790,7 +2790,13 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       });
     } catch (error) {
       console.error("Check winner error:", error);
-      res.status(500).json({ message: "Failed to check winner" });
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ 
+        message: "Failed to check winner",
+        cartelaNumber,
+        isWinner: false,
+        error: error.message 
+      });
     }
   });
 
