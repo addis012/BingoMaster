@@ -41,7 +41,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   const [showWinnerResult, setShowWinnerResult] = useState(false);
-  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] as number[] });
+  interface WinnerResult {
+    isWinner: boolean;
+    cartela: number;
+    message: string;
+    pattern: string;
+    winningCells: number[];
+    cartelaPattern?: number[][];
+  }
+  
+  const [winnerResult, setWinnerResult] = useState<WinnerResult>({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [], cartelaPattern: undefined });
   
   // Animation states
   const [isShuffling, setIsShuffling] = useState(false);
@@ -799,7 +808,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           cartela: cartelaNum,
           message: "This Cartela Did Not Win",
           pattern: "",
-          winningCells: []
+          winningCells: [],
+          cartelaPattern: result.cartelaPattern
         });
         
         // Clear any existing timer to prevent audio overlap
@@ -842,7 +852,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           cartela: cartelaNum,
           message: "Congratulations! This Cartela Has Won!",
           pattern: result.winningPattern || "",
-          winningCells: []
+          winningCells: [],
+          cartelaPattern: result.cartelaPattern
         });
         
         setShowWinnerResult(true);
@@ -1302,7 +1313,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                         setActiveGameId(null);
                         setBookedCartelas(new Set());
                         setSelectedCartelas(new Set());
-                        setWinnerResult({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] });
+                        setWinnerResult({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [], cartelaPattern: undefined });
                         setShowWinnerResult(false);
                         setGamePaused(false);
                         
