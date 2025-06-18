@@ -224,23 +224,11 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
     });
   };
 
+  // Data processing after hooks
   const stats = shopStats as any || {};
   const balance = creditBalance as any || {};
   const employeeList = employees as any[] || [];
   const userAccountNumber = (user as any).accountNumber || `ACC${String(user.id).padStart(6, '0')}`;
-
-  // Fetch custom cartelas for this shop
-  const { data: customCartelas = [] } = useQuery({
-    queryKey: [`/api/custom-cartelas/${user?.shopId}`],
-    queryFn: async () => {
-      if (!user?.shopId) return [];
-      const response = await fetch(`/api/custom-cartelas/${user.shopId}`);
-      if (!response.ok) return [];
-      return response.json();
-    },
-    enabled: !!user?.shopId,
-    refetchInterval: 5000
-  });
 
   // Employee management handlers
   const handlePasswordChange = async (employee: any) => {
