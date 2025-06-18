@@ -2760,12 +2760,14 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       const { cartelaNumber, calledNumbers } = req.body;
 
       console.log(`Checking winner for cartela #${cartelaNumber} in shop ${user.shopId}`);
+      console.log(`Called numbers:`, calledNumbers);
 
       // Get the cartela pattern from database instead of static data
       const cartela = await storage.getCartelaByNumber(user.shopId!, cartelaNumber);
-      console.log(`Found cartela:`, cartela ? `ID ${cartela.id}` : 'Not found');
+      console.log(`Found cartela:`, cartela ? `ID ${cartela.id}, pattern: ${JSON.stringify(cartela.pattern)}` : 'Not found');
       
       if (!cartela) {
+        console.log(`Cartela #${cartelaNumber} not found in shop ${user.shopId}`);
         return res.status(404).json({ 
           message: "Cartela not found",
           cartelaNumber,
