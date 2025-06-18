@@ -670,7 +670,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
+                        <span style={{ transform: 'scaleY(3)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
@@ -686,7 +686,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
+                        <span style={{ transform: 'scaleY(3)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
@@ -702,7 +702,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
+                        <span style={{ transform: 'scaleY(3)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
@@ -718,7 +718,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
+                        <span style={{ transform: 'scaleY(3)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
@@ -734,7 +734,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
+                        <span style={{ transform: 'scaleY(3)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
