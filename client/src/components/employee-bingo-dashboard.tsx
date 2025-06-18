@@ -849,69 +849,38 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
             <DialogTitle>Winner Check Result</DialogTitle>
           </DialogHeader>
           <div className="py-6">
-            {winnerResult.isWinner ? (
-              <div className="space-y-6">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">🎉</div>
-                  <div className="text-xl font-bold text-green-600">
-                    Cartela #{winnerResult.cartela}
-                  </div>
-                  <div className="text-2xl font-bold text-green-600">
-                    BINGO! WINNER!
-                  </div>
-                  <div className="text-lg text-gray-600">
-                    Pattern: {winnerResult.pattern}
-                  </div>
-                </div>
-
-                {/* Visual Cartela Grid */}
-                <div className="bg-white p-4 rounded-lg border">
-                  <div className="text-center mb-4">
-                    <div className="text-md font-medium text-green-700 mb-2">Cartela Grid:</div>
-                    <div className="grid grid-cols-5 gap-2 max-w-sm mx-auto">
-                      {/* Header */}
-                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">B</div>
-                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">I</div>
-                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">N</div>
-                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">G</div>
-                      <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">O</div>
-                      
-                      {/* Cartela pattern */}
-                      {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => {
-                        const isWinningCell = winnerResult.winningCells?.includes(index);
-                        const isCalled = num !== 0 && calledNumbers.includes(num);
-                        const isFree = index === 12;
-                        
-                        return (
-                          <div key={index} className={`text-center text-sm p-2 border-2 rounded ${
-                            isWinningCell 
-                              ? 'bg-yellow-200 border-yellow-400 font-bold text-yellow-800' 
-                              : isCalled || isFree
-                                ? 'bg-green-200 border-green-400 text-green-800'
-                                : 'bg-gray-50 border-gray-200 text-gray-600'
-                          }`}>
-                            {isFree ? 'FREE' : num}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+            {/* Visual Cartela Grid Only */}
+            <div className="bg-white p-4 rounded-lg border">
+              <div className="text-center">
+                <div className="grid grid-cols-5 gap-2 max-w-sm mx-auto">
+                  {/* Header */}
+                  <div className="text-center font-bold text-lg bg-blue-100 p-3 rounded">B</div>
+                  <div className="text-center font-bold text-lg bg-blue-100 p-3 rounded">I</div>
+                  <div className="text-center font-bold text-lg bg-blue-100 p-3 rounded">N</div>
+                  <div className="text-center font-bold text-lg bg-blue-100 p-3 rounded">G</div>
+                  <div className="text-center font-bold text-lg bg-blue-100 p-3 rounded">O</div>
+                  
+                  {/* Cartela pattern */}
+                  {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => {
+                    const isWinningCell = winnerResult.winningCells?.includes(index);
+                    const isCalled = num !== 0 && calledNumbers.includes(num);
+                    const isFree = index === 12;
+                    
+                    return (
+                      <div key={index} className={`text-center text-base p-3 border-2 rounded font-medium ${
+                        isWinningCell 
+                          ? 'bg-yellow-200 border-yellow-400 font-bold text-yellow-800' 
+                          : isCalled || isFree
+                            ? 'bg-green-200 border-green-400 text-green-800'
+                            : 'bg-gray-50 border-gray-200 text-gray-600'
+                      }`}>
+                        {isFree ? 'FREE' : num}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            ) : (
-              <div className="space-y-4 text-center">
-                <div className="text-6xl mb-4">❌</div>
-                <div className="text-xl font-bold text-red-600">
-                  Cartela #{winnerResult.cartela}
-                </div>
-                <div className="text-2xl font-bold text-red-600">
-                  Not a Winner
-                </div>
-                <div className="text-gray-600 mt-4">
-                  Game continues...
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
