@@ -332,7 +332,10 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             <Textarea
               id="cardsData"
               value={cardsData}
-              onChange={(e) => setCardsData(e.target.value)}
+              onChange={(e) => {
+                console.log("Textarea onChange:", e.target.value);
+                setCardsData(e.target.value);
+              }}
               placeholder="Enter cards data in the format:&#10;cardNumber:number1,number2,number3,..."
               className="min-h-[200px] font-mono text-sm"
             />
@@ -345,8 +348,15 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             </Button>
             <Button 
               onClick={() => {
-                console.log("Save button clicked");
-                handleSaveCards();
+                console.log("Save button clicked, cardsData:", cardsData);
+                console.log("Button disabled:", !cardsData.trim() || createCartelaMutation.isPending);
+                try {
+                  handleSaveCards().catch(error => {
+                    console.error("Error in handleSaveCards:", error);
+                  });
+                } catch (error) {
+                  console.error("Sync error in handleSaveCards:", error);
+                }
               }}
               disabled={!cardsData.trim() || createCartelaMutation.isPending}
               className="bg-green-600 hover:bg-green-700"
