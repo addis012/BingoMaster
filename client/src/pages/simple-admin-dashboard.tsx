@@ -943,9 +943,19 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                   {/* Single Cartela Preview */}
                   {previewCartelaNumber && !showAllCartelas && (
                     <div className="border rounded-lg p-6 bg-white">
-                      <h3 className="text-xl font-bold mb-4 text-center">
-                        Cartela #{previewCartelaNumber} Preview
-                      </h3>
+                      {(() => {
+                        const isCustom = customCartelas.find((c: any) => c.cartelaNumber === previewCartelaNumber);
+                        const isFixed = FIXED_CARTELAS.find(c => c.Board === previewCartelaNumber);
+                        
+                        return (
+                          <h3 className="text-xl font-bold mb-4 text-center">
+                            Cartela #{previewCartelaNumber} Preview
+                            <span className={`ml-2 px-2 py-1 text-xs rounded ${isCustom ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
+                              {isCustom ? 'CUSTOM' : 'FIXED'}
+                            </span>
+                          </h3>
+                        );
+                      })()}
                       
                       {/* BINGO Headers */}
                       <div className="grid grid-cols-5 gap-2 mb-3">
@@ -962,29 +972,65 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                       {/* Cartela Grid */}
                       <div className="grid grid-cols-5 gap-2">
                         {(() => {
-                          const cartela = FIXED_CARTELAS.find(c => c.Board === previewCartelaNumber);
-                          if (!cartela) return null;
+                          const isCustom = customCartelas.find((c: any) => c.cartelaNumber === previewCartelaNumber);
+                          const isFixed = FIXED_CARTELAS.find(c => c.Board === previewCartelaNumber);
                           
+                          if (!isCustom && !isFixed) {
+                            return (
+                              <div className="col-span-5 text-center py-8 text-gray-500">
+                                <h3 className="text-xl font-bold mb-2">Cartela #{previewCartelaNumber} Not Found</h3>
+                                <p>This cartela number is not available in fixed (1-75) or custom cartelas.</p>
+                              </div>
+                            );
+                          }
+
                           const grid = [];
-                          for (let row = 0; row < 5; row++) {
-                            for (let col = 0; col < 5; col++) {
-                              let value;
-                              if (col === 0) value = cartela.B[row];
-                              else if (col === 1) value = cartela.I[row];
-                              else if (col === 2) value = cartela.N[row];
-                              else if (col === 3) value = cartela.G[row];
-                              else value = cartela.O[row];
-                              
-                              grid.push(
-                                <div
-                                  key={`${row}-${col}`}
-                                  className={`h-12 border-2 border-gray-400 flex items-center justify-center text-lg font-bold ${
-                                    value === "FREE" ? 'bg-yellow-200 text-yellow-800' : 'bg-white text-gray-800'
-                                  }`}
-                                >
-                                  {value === "FREE" ? "★" : value}
-                                </div>
-                              );
+                          
+                          if (isCustom) {
+                            // Custom cartela pattern
+                            const pattern = isCustom.pattern;
+                            for (let row = 0; row < 5; row++) {
+                              for (let col = 0; col < 5; col++) {
+                                let value = pattern[row][col];
+                                if (value === 0) {
+                                  value = 'FREE';
+                                }
+                                grid.push(
+                                  <div
+                                    key={`${row}-${col}`}
+                                    className={`h-12 border-2 rounded flex items-center justify-center font-bold text-lg ${
+                                      value === 'FREE'
+                                        ? 'bg-green-100 border-green-400 text-green-800' 
+                                        : 'bg-blue-50 border-blue-300'
+                                    }`}
+                                  >
+                                    {value}
+                                  </div>
+                                );
+                              }
+                            }
+                          } else {
+                            // Fixed cartela pattern  
+                            const cartela = isFixed;
+                            for (let row = 0; row < 5; row++) {
+                              for (let col = 0; col < 5; col++) {
+                                let value = cartela[`${col}${row}`];
+                                if (row === 2 && col === 2) {
+                                  value = 'FREE';
+                                }
+                                grid.push(
+                                  <div
+                                    key={`${row}-${col}`}
+                                    className={`h-12 border-2 rounded flex items-center justify-center font-bold text-lg ${
+                                      row === 2 && col === 2 
+                                        ? 'bg-green-100 border-green-400 text-green-800' 
+                                        : 'bg-red-50 border-red-300'
+                                    }`}
+                                  >
+                                    {value}
+                                  </div>
+                                );
+                              }
                             }
                           }
                           return grid;
@@ -999,68 +1045,150 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
 
                   {/* All Cartelas Grid View */}
                   {showAllCartelas && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">All Fixed Cartelas (1-75)</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {FIXED_CARTELAS.slice(0, 75).map((cartela) => (
-                          <div key={cartela.Board} className="border rounded-lg p-3 bg-white hover:shadow-md transition-shadow">
-                            <h4 className="text-sm font-bold text-center mb-2">Cartela #{cartela.Board}</h4>
-                            
-                            {/* Mini BINGO Headers */}
-                            <div className="grid grid-cols-5 gap-0.5 mb-1">
-                              {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                                const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
-                                return (
-                                  <div key={letter} className={`h-6 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
-                                    {letter}
-                                  </div>
-                                );
-                              })}
+                    <div className="space-y-6">
+                      <h3 className="text-xl font-bold text-center">
+                        All Available Cartelas for Shop #{user?.shopId}
+                      </h3>
+                      
+                      {/* Fixed Cartelas Section */}
+                      <div className="space-y-4">
+                        <h4 className="text-lg font-semibold text-red-700 border-b border-red-200 pb-2">
+                          Fixed Cartelas (1-75)
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                          {FIXED_CARTELAS.map((cartela) => (
+                            <div key={cartela.Board} className="border border-red-200 rounded-lg p-3 bg-red-50 hover:bg-red-100 transition-colors">
+                              <h5 className="text-sm font-bold text-center mb-2 text-red-700">
+                                #{cartela.Board}
+                              </h5>
+                              
+                              {/* Mini BINGO Headers */}
+                              <div className="grid grid-cols-5 gap-1 mb-2">
+                                {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                                  const colors = ['bg-red-400', 'bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-purple-400'];
+                                  return (
+                                    <div key={letter} className={`h-4 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
+                                      {letter}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              
+                              {/* Mini Cartela Grid */}
+                              <div className="grid grid-cols-5 gap-1 mb-2">
+                                {(() => {
+                                  const grid = [];
+                                  for (let row = 0; row < 5; row++) {
+                                    for (let col = 0; col < 5; col++) {
+                                      let value = cartela[`${col}${row}`];
+                                      if (row === 2 && col === 2) {
+                                        value = 'F';
+                                      }
+                                      grid.push(
+                                        <div
+                                          key={`${row}-${col}`}
+                                          className={`h-4 border rounded flex items-center justify-center text-xs font-medium ${
+                                            row === 2 && col === 2 
+                                              ? 'bg-green-100 border-green-300 text-green-800' 
+                                              : 'bg-white border-gray-300'
+                                          }`}
+                                        >
+                                          {value}
+                                        </div>
+                                      );
+                                    }
+                                  }
+                                  return grid;
+                                })()}
+                              </div>
+                              
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-full text-xs"
+                                onClick={() => {
+                                  setPreviewCartelaNumber(cartela.Board);
+                                  setShowAllCartelas(false);
+                                }}
+                              >
+                                View Full
+                              </Button>
                             </div>
-                            
-                            {/* Mini Grid */}
-                            <div className="grid grid-cols-5 gap-0.5">
-                              {(() => {
-                                const grid = [];
-                                for (let row = 0; row < 5; row++) {
-                                  for (let col = 0; col < 5; col++) {
-                                    let value;
-                                    if (col === 0) value = cartela.B[row];
-                                    else if (col === 1) value = cartela.I[row];
-                                    else if (col === 2) value = cartela.N[row];
-                                    else if (col === 3) value = cartela.G[row];
-                                    else value = cartela.O[row];
-                                    
-                                    grid.push(
-                                      <div
-                                        key={`${row}-${col}`}
-                                        className={`aspect-square border border-gray-300 flex items-center justify-center text-xs font-medium ${
-                                          value === "FREE" ? 'bg-yellow-200 text-yellow-800' : 'bg-white text-gray-800'
-                                        }`}
-                                      >
-                                        {value === "FREE" ? "★" : value}
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Custom Cartelas Section */}
+                      {showCustomCartelas && customCartelas.length > 0 && (
+                        <div className="space-y-4">
+                          <h4 className="text-lg font-semibold text-blue-700 border-b border-blue-200 pb-2">
+                            Custom Cartelas ({customCartelas.length}) - Shop #{user?.shopId}
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            {customCartelas.map((cartela: any) => (
+                              <div key={cartela.id} className="border border-blue-200 rounded-lg p-3 bg-blue-50 hover:bg-blue-100 transition-colors">
+                                <h5 className="text-sm font-bold text-center mb-1 text-blue-700">
+                                  #{cartela.cartelaNumber}
+                                </h5>
+                                <p className="text-xs text-blue-600 text-center mb-2">{cartela.name}</p>
+                                
+                                {/* Mini BINGO Headers */}
+                                <div className="grid grid-cols-5 gap-1 mb-2">
+                                  {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                                    const colors = ['bg-red-400', 'bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-purple-400'];
+                                    return (
+                                      <div key={letter} className={`h-4 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
+                                        {letter}
                                       </div>
                                     );
-                                  }
-                                }
-                                return grid;
-                              })()}
-                            </div>
-                            
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="w-full mt-2 text-xs"
-                              onClick={() => {
-                                setPreviewCartelaNumber(cartela.Board);
-                                setShowAllCartelas(false);
-                              }}
-                            >
-                              View Full Size
-                            </Button>
+                                  })}
+                                </div>
+                                
+                                {/* Mini Cartela Grid */}
+                                <div className="grid grid-cols-5 gap-1 mb-2">
+                                  {(() => {
+                                    const pattern = cartela.pattern;
+                                    const grid = [];
+                                    for (let row = 0; row < 5; row++) {
+                                      for (let col = 0; col < 5; col++) {
+                                        let value = pattern[row][col];
+                                        if (value === 0) {
+                                          value = 'F';
+                                        }
+                                        grid.push(
+                                          <div
+                                            key={`${row}-${col}`}
+                                            className={`h-4 border rounded flex items-center justify-center text-xs font-medium ${
+                                              value === 'F'
+                                                ? 'bg-green-100 border-green-300 text-green-800' 
+                                                : 'bg-white border-gray-300'
+                                            }`}
+                                          >
+                                            {value}
+                                          </div>
+                                        );
+                                      }
+                                    }
+                                    return grid;
+                                  })()}
+                                </div>
+                                
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full text-xs"
+                                  onClick={() => {
+                                    setPreviewCartelaNumber(cartela.cartelaNumber);
+                                    setShowAllCartelas(false);
+                                  }}
+                                >
+                                  View Full
+                                </Button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
