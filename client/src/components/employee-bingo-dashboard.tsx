@@ -36,7 +36,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   const [showWinnerResult, setShowWinnerResult] = useState(false);
-  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] as number[] });
+  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] as number[], cartelaPattern: undefined as number[][] | undefined });
   
   // Animation states
   const [isShuffling, setIsShuffling] = useState(false);
@@ -302,43 +302,91 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
       return;
     }
 
-    // Get cartela pattern and check for win
-    const cartelaPattern = getFixedCartelaPattern(cartelaNum);
-    const cartelaNumbers = getCartelaNumbers(cartelaNum);
-    
-    // Check if all numbers in any winning pattern are called
-    const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
-    
-    setWinnerResult({
-      isWinner: isWinner.isWinner,
-      cartela: cartelaNum,
-      message: isWinner.isWinner ? "BINGO! Winner found!" : "Not a winner yet",
-      pattern: isWinner.pattern || "",
-      winningCells: isWinner.winningCells || []
-    });
-    
-    setShowWinnerResult(true);
-    setShowWinnerChecker(false);
-    
-    if (isWinner.isWinner) {
-      setGameActive(false);
-      setGameFinished(true);
-      
-      // Submit winner to backend
-      try {
-        await fetch(`/api/games/${activeGameId}/declare-winner`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cartelaNumber: cartelaNum,
-            pattern: isWinner.pattern
-          })
-        });
-        
-        queryClient.invalidateQueries({ queryKey: ['/api/credit/balance'] });
-      } catch (error) {
-        console.error('Failed to declare winner:', error);
+    // Check winner using API with actual cartela data from database
+    try {
+      const response = await fetch('/api/games/check-winner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartelaNumber: cartelaNum,
+          calledNumbers: calledNumbers
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check winner');
       }
+
+      const result = await response.json();
+      
+      // Get the actual cartela pattern from database for display
+      const cartelas = queryClient.getQueryData(['/api/cartelas', user?.shopId]) as any[];
+      const cartela = cartelas?.find(c => c.cartelaNumber === cartelaNum);
+      const cartelaPattern = cartela?.pattern || getFixedCartelaPattern(cartelaNum);
+      
+      // Calculate winning cells for highlighting if it's a winner
+      let winningCells: number[] = [];
+      if (result.isWinner && cartelaPattern) {
+        const winResult = checkBingoWin(cartelaPattern, calledNumbers);
+        winningCells = winResult.winningCells || [];
+      }
+      
+      setWinnerResult({
+        isWinner: result.isWinner,
+        cartela: cartelaNum,
+        message: result.isWinner ? "BINGO! Winner found!" : "Not a winner yet",
+        pattern: result.winningPattern || "",
+        winningCells: winningCells,
+        cartelaPattern: cartelaPattern
+      });
+      
+      setShowWinnerResult(true);
+      setShowWinnerChecker(false);
+      
+      if (result.isWinner) {
+        setGameActive(false);
+        setGameFinished(true);
+        
+        // Submit winner to backend
+        try {
+          await fetch(`/api/games/${activeGameId}/declare-winner`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              cartelaNumber: cartelaNum,
+              pattern: result.winningPattern
+            })
+          });
+          
+          queryClient.invalidateQueries({ queryKey: ['/api/credit/balance'] });
+        } catch (error) {
+          console.error('Failed to declare winner:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check winner:', error);
+      
+      // Fallback to local check if API fails
+      const cartelaPattern = getFixedCartelaPattern(cartelaNum);
+      const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
+      
+      setWinnerResult({
+        isWinner: isWinner.isWinner,
+        cartela: cartelaNum,
+        message: isWinner.isWinner ? "BINGO! Winner found!" : "Not a winner yet",
+        pattern: isWinner.pattern || "",
+        winningCells: isWinner.winningCells || [],
+        cartelaPattern: cartelaPattern
+      });
+      
+      setShowWinnerResult(true);
+      setShowWinnerChecker(false);
+      
+      toast({
+        title: "Warning",
+        description: "Using fallback verification. Pattern may not match database.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -877,7 +925,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                       <div className="text-center font-bold text-sm bg-green-100 p-2 rounded">O</div>
                       
                       {/* Cartela pattern */}
-                      {getFixedCartelaPattern(winnerResult.cartela).flat().map((num, index) => {
+                      {(winnerResult.cartelaPattern || getFixedCartelaPattern(winnerResult.cartela)).flat().map((num, index) => {
                         const isWinningCell = winnerResult.winningCells?.includes(index);
                         const isCalled = num !== 0 && calledNumbers.includes(num);
                         const isFree = index === 12;
