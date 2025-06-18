@@ -87,12 +87,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 5000 // Refresh every 5 seconds to catch admin changes
   });
 
-  // Custom cartelas query for dynamic cartela selection
-  const { data: customCartelas, refetch: refetchCustomCartelas } = useQuery({
-    queryKey: [`/api/custom-cartelas/${user?.shopId}`],
-    enabled: !!user?.shopId,
-    refetchInterval: 3000 // Refresh every 3 seconds for real-time updates
-  });
+
 
   // Calculate amounts based on selected cartelas and profit margin
   const calculateAmounts = () => {
@@ -119,19 +114,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 10000 // Refresh every 10 seconds for live updates
   });
 
-  // Fetch existing custom cartelas for this shop with auto-refresh
-  const { data: customCartelas } = useQuery({
-    queryKey: [`/api/custom-cartelas/${user?.shopId}`],
-    queryFn: async () => {
-      if (!user?.shopId) return [];
-      const response = await fetch(`/api/custom-cartelas/${user.shopId}`);
-      if (!response.ok) throw new Error('Failed to fetch custom cartelas');
-      return response.json();
-    },
-    enabled: !!user?.shopId,
-    refetchInterval: 5000, // Auto-refresh every 5 seconds to detect admin changes
-    refetchOnWindowFocus: true, // Refresh when window gains focus
-  });
+
 
   // Fetch admin balance for low balance warning
   const { data: adminData } = useQuery({
@@ -1621,7 +1604,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <span className="font-medium">Selected: {selectedCartelas.size} cartelas</span>
               <div className="text-gray-600">
                 Fixed: {Array.from(selectedCartelas).filter(num => num <= 75).length} | 
-                Custom: {Array.from(selectedCartelas).filter(num => customCartelas?.some((c: any) => c.cartelaNumber === num)).length}
+                Custom: {Array.from(selectedCartelas).filter(num => customCartelas.some((c: any) => c.cartelaNumber === num)).length}
               </div>
             </div>
             <div className="space-x-2">
