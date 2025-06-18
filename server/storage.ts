@@ -1522,6 +1522,21 @@ export class DatabaseStorage implements IStorage {
     return cartela;
   }
 
+  async getCartelaByNumber(shopId: number, cartelaNumber: number): Promise<any | null> {
+    const results = await db.select().from(customCartelas).where(
+      and(eq(customCartelas.shopId, shopId), eq(customCartelas.cartelaNumber, cartelaNumber))
+    ).limit(1);
+    
+    if (results.length === 0) return null;
+    
+    const cartela = results[0];
+    return {
+      ...cartela,
+      pattern: typeof cartela.pattern === 'string' ? JSON.parse(cartela.pattern) : cartela.pattern,
+      numbers: typeof cartela.numbers === 'string' ? JSON.parse(cartela.numbers) : cartela.numbers,
+    };
+  }
+
   async createCustomCartela(cartela: InsertCustomCartela): Promise<CustomCartela> {
     const [newCartela] = await db.insert(customCartelas).values(cartela).returning();
     return newCartela;
