@@ -822,9 +822,9 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {shopData && (
+                {statsData && (
                   <CustomCartelaBuilder 
-                    shopId={shopData.shop.id} 
+                    shopId={statsData.shop.id} 
                     adminId={user.id}
                   />
                 )}
