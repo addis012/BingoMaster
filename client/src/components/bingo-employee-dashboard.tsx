@@ -1530,36 +1530,36 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-10 gap-4 p-6">
-            {FIXED_CARTELAS.map((cartela) => (
-              <div key={cartela.Board} className="text-center">
+            {(cartelas || []).map((cartela: any) => (
+              <div key={cartela.cartelaNumber} className="text-center">
                 <div
                   className={`p-4 border rounded cursor-pointer text-center mb-2 text-2xl font-bold ${
-                    selectedCartelas.has(cartela.Board)
+                    selectedCartelas.has(cartela.cartelaNumber)
                       ? 'bg-red-400 text-white border-red-500'
-                      : bookedCartelas.has(cartela.Board)
+                      : bookedCartelas.has(cartela.cartelaNumber)
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-gray-100 hover:bg-gray-200'
                   }`}
                   onClick={() => {
-                    if (!bookedCartelas.has(cartela.Board)) {
+                    if (!bookedCartelas.has(cartela.cartelaNumber)) {
                       const newSelected = new Set(selectedCartelas);
-                      if (newSelected.has(cartela.Board)) {
-                        newSelected.delete(cartela.Board);
+                      if (newSelected.has(cartela.cartelaNumber)) {
+                        newSelected.delete(cartela.cartelaNumber);
                       } else {
-                        newSelected.add(cartela.Board);
+                        newSelected.add(cartela.cartelaNumber);
                       }
                       setSelectedCartelas(newSelected);
                     }
                   }}
                 >
-                  {cartela.Board}
+                  {cartela.cartelaNumber}
                 </div>
                 <Button
                   size="sm"
                   variant="outline"
                   className="text-xs px-2 py-1 h-5"
                   onClick={() => {
-                    setPreviewCartela(cartela.Board);
+                    setPreviewCartela(cartela.cartelaNumber);
                     setShowCartelaPreview(true);
                   }}
                 >
@@ -1581,9 +1581,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       <Dialog open={showCartelaPreview} onOpenChange={setShowCartelaPreview}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Cartela #{previewCartela} Preview</DialogTitle>
+            <DialogTitle>
+              {(() => {
+                const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === previewCartela);
+                return cartela ? `${cartela.name} (#${previewCartela})` : `Cartela #${previewCartela} Preview`;
+              })()}
+            </DialogTitle>
             <DialogDescription>
-              Fixed cartela pattern with predefined numbers
+              Real-time updated cartela pattern
             </DialogDescription>
           </DialogHeader>
           {previewCartela && (
@@ -1603,24 +1608,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               {/* Cartela Grid */}
               <div className="grid grid-cols-5 gap-1">
                 {(() => {
-                  const cartela = FIXED_CARTELAS.find(c => c.Board === previewCartela);
+                  const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === previewCartela);
                   if (!cartela) return null;
                   
                   const grid = [];
                   for (let row = 0; row < 5; row++) {
                     for (let col = 0; col < 5; col++) {
-                      let value;
-                      switch (col) {
-                        case 0: value = cartela.B[row]; break;
-                        case 1: value = cartela.I[row]; break;
-                        case 2: value = cartela.N[row]; break;
-                        case 3: value = cartela.G[row]; break;
-                        case 4: value = cartela.O[row]; break;
-                      }
+                      const value = cartela.pattern[row][col];
                       
                       grid.push(
                         <div key={`${row}-${col}`} className="h-8 bg-gray-100 border rounded flex items-center justify-center text-sm font-medium">
-                          {value === "FREE" ? "★" : value}
+                          {value === 0 ? "★" : value}
                         </div>
                       );
                     }
