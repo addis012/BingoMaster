@@ -902,12 +902,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
     } catch (error) {
       console.error('Failed to check winner:', error);
+      
+      // Show error popup similar to "not winner" popup
+      setWinnerResult({
+        isWinner: false,
+        cartela: cartelaNum,
+        message: "Error checking cartela. Please try again.",
+        pattern: "",
+        winningCells: []
+      });
+      setShowWinnerResult(true);
+      setShowWinnerChecker(false);
+      
       toast({
         title: "Error",
         description: "Failed to check winner. Please try again.",
         variant: "destructive"
       });
-      setShowWinnerChecker(false);
     }
   };
 

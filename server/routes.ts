@@ -2759,14 +2759,24 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       const gameId = parseInt(req.params.gameId);
       const { cartelaNumber, calledNumbers } = req.body;
 
+      console.log(`Checking winner for cartela #${cartelaNumber} in shop ${user.shopId}`);
+
       // Get the cartela pattern from database instead of static data
       const cartela = await storage.getCartelaByNumber(user.shopId!, cartelaNumber);
+      console.log(`Found cartela:`, cartela ? `ID ${cartela.id}` : 'Not found');
+      
       if (!cartela) {
-        return res.status(404).json({ message: "Cartela not found" });
+        return res.status(404).json({ 
+          message: "Cartela not found",
+          cartelaNumber,
+          isWinner: false 
+        });
       }
 
       const cartelaPattern = cartela.pattern;
       const winResult = checkBingoWin(cartelaPattern, calledNumbers);
+      
+      console.log(`Winner check result for cartela #${cartelaNumber}:`, winResult);
       
       res.json({ 
         cartelaNumber,
