@@ -1523,13 +1523,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCartelaByNumber(shopId: number, cartelaNumber: number): Promise<any | null> {
-    const results = await db.select().from(customCartelas).where(
+    // First check cartelas table (where new cartelas are added)
+    const cartelasResults = await db.select().from(cartelas).where(
+      and(eq(cartelas.shopId, shopId), eq(cartelas.cartelaNumber, cartelaNumber))
+    ).limit(1);
+    
+    if (cartelasResults.length > 0) {
+      const cartela = cartelasResults[0];
+      return {
+        ...cartela,
+        pattern: typeof cartela.pattern === 'string' ? JSON.parse(cartela.pattern) : cartela.pattern,
+        numbers: typeof cartela.numbers === 'string' ? JSON.parse(cartela.numbers) : cartela.numbers,
+      };
+    }
+    
+    // Then check customCartelas table as fallback
+    const customResults = await db.select().from(customCartelas).where(
       and(eq(customCartelas.shopId, shopId), eq(customCartelas.cartelaNumber, cartelaNumber))
     ).limit(1);
     
-    if (results.length === 0) return null;
+    if (customResults.length === 0) return null;
     
-    const cartela = results[0];
+    const cartela = customResults[0];
     return {
       ...cartela,
       pattern: typeof cartela.pattern === 'string' ? JSON.parse(cartela.pattern) : cartela.pattern,
