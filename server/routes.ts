@@ -2951,9 +2951,23 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         return res.status(403).json({ message: "Employee access required" });
       }
 
-      const { entryFee } = req.body;
+      const { entryFee, selectedCartelas } = req.body;
       if (!entryFee) {
         return res.status(400).json({ message: "Entry fee is required" });
+      }
+
+      // Check employee's credit balance first
+      const employeeBalance = parseFloat(user.creditBalance || '0');
+      const totalCost = (selectedCartelas || []).length * parseFloat(entryFee);
+      
+      if (employeeBalance < totalCost) {
+        return res.status(400).json({ 
+          message: `Insufficient employee credit balance. You have ${employeeBalance.toFixed(2)} ETB but need ${totalCost.toFixed(2)} ETB to start this game.`,
+          balance: employeeBalance.toFixed(2),
+          required: totalCost.toFixed(2),
+          cartelas: (selectedCartelas || []).length,
+          entryFee: parseFloat(entryFee)
+        });
       }
 
       // Check admin's credit balance before allowing game creation
