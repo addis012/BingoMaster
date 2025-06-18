@@ -21,7 +21,7 @@ import { ErrorDisplay, LoadingState } from "@/components/error-display";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3 } from "lucide-react";
+import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3, AlertTriangle } from "lucide-react";
 import { BulkCartelaManager } from "@/components/bulk-cartela-manager";
 
 interface SimpleAdminDashboardProps {
@@ -294,6 +294,23 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2">Manage your shop operations and employees</p>
         </div>
+
+        {/* Low Credit Balance Warning */}
+        {balance && parseFloat(balance.balance) < 500 && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <AlertTriangle className="h-5 w-5 text-yellow-600 mr-3" />
+              <div>
+                <p className="font-medium text-yellow-800">
+                  ⚠ Admin Low Credit Balance
+                </p>
+                <p className="text-sm text-yellow-700">
+                  Contact admin to add more credits.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-8">
