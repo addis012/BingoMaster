@@ -757,9 +757,8 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                 type="number"
                 value={winnerCartelaNumber}
                 onChange={(e) => setWinnerCartelaNumber(e.target.value)}
-                placeholder="Enter cartela number (1-75)"
+                placeholder="Enter cartela number"
                 min="1"
-                max="75"
               />
             </div>
             <Button onClick={checkWinner} className="w-full">
