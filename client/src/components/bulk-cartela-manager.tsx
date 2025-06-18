@@ -102,9 +102,18 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           });
 
           if (numbers.length !== 25) {
-            errors.push(`Card ${cardNumber}: Must have exactly 25 numbers, got ${numbers.length}`);
+            errors.push(`Card ${cardNumber}: Must have exactly 25 numbers, got ${numbers.length}. Numbers: ${numbersStr}`);
             errorCount++;
             continue;
+          }
+
+          // Validate individual numbers are within BINGO range
+          for (const num of numbers) {
+            if (num !== 0 && (num < 1 || num > 75)) {
+              errors.push(`Card ${cardNumber}: Number ${num} is outside valid BINGO range (1-75)`);
+              errorCount++;
+              continue;
+            }
           }
 
           // Convert flat array to 5x5 grid
@@ -143,14 +152,35 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             continue;
           }
 
-          // Create cartela
-          await createCartelaMutation.mutateAsync({
-            name: `Card ${cardNumber}`,
-            cartelaNumber: cardNumber,
-            pattern,
-            shopId,
-            adminId,
-          });
+          // Check if cartela already exists (either fixed or custom)
+          const existingCustom = customCartelas?.find((c: CustomCartela) => c.cartelaNumber === cardNumber);
+          
+          if (cardNumber >= 1 && cardNumber <= 200 && !existingCustom) {
+            // This would override a fixed cartela, create custom one
+            await createCartelaMutation.mutateAsync({
+              name: `Custom Card ${cardNumber}`,
+              cartelaNumber: cardNumber,
+              pattern,
+              shopId,
+              adminId,
+            });
+          } else if (existingCustom) {
+            // Update existing custom cartela
+            const response = await apiRequest('PATCH', `/api/custom-cartelas/${existingCustom.id}`, {
+              name: `Custom Card ${cardNumber}`,
+              pattern,
+            });
+            if (!response.ok) throw new Error('Failed to update cartela');
+          } else {
+            // Create new custom cartela
+            await createCartelaMutation.mutateAsync({
+              name: `Custom Card ${cardNumber}`,
+              cartelaNumber: cardNumber,
+              pattern,
+              shopId,
+              adminId,
+            });
+          }
 
           successCount++;
         } catch (error) {
@@ -261,7 +291,7 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
               <strong>Example:</strong>
             </div>
             <div className="bg-gray-50 p-2 rounded font-mono text-xs">
-              1:15,22,37,56,65,2,27,41,52,68,7,17,free,23,65,43,45,65,54,34,56,54,56,76,78
+              2:5,19,38,51,64,3,24,42,58,69,12,18,free,26,62,4,46,63,55,33,1,53,47,65,71
             </div>
             <div className="text-red-600">
               <strong>Note:</strong> Each card must have exactly 25 numbers representing a 5x5 grid.
