@@ -47,6 +47,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [isShuffling, setIsShuffling] = useState(false);
   const [showCartelaPreview, setShowCartelaPreview] = useState(false);
   const [previewCartela, setPreviewCartela] = useState<number | null>(null);
+  const [previewCartelaData, setPreviewCartelaData] = useState<any>(null);
   const [isBoardShuffling, setIsBoardShuffling] = useState(false);
   const [shuffledPositions, setShuffledPositions] = useState<number[]>([]);
   
@@ -110,7 +111,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 10000 // Refresh every 10 seconds for live updates
   });
 
-  // Remove admin balance check for employees - they shouldn't see admin's balance
+  // Fetch existing custom cartelas for this shop
+  const { data: customCartelas } = useQuery({
+    queryKey: [`/api/custom-cartelas/${user?.shopId}`],
+    queryFn: async () => {
+      if (!user?.shopId) return [];
+      const response = await fetch(`/api/custom-cartelas/${user.shopId}`);
+      if (!response.ok) throw new Error('Failed to fetch custom cartelas');
+      return response.json();
+    },
+    enabled: !!user?.shopId,
+  });
 
   // Sync with active game data
   useEffect(() => {

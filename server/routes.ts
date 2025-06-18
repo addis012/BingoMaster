@@ -3684,7 +3684,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const id = parseInt(req.params.id);
+      console.log("Updating custom cartela:", id, "with data:", req.body);
+      
       const updatedCartela = await storage.updateCustomCartela(id, req.body);
+      console.log("Updated cartela result:", updatedCartela);
+      
+      if (!updatedCartela) {
+        return res.status(404).json({ message: "Cartela not found" });
+      }
+      
       res.json(updatedCartela);
     } catch (error) {
       console.error("Error updating custom cartela:", error);

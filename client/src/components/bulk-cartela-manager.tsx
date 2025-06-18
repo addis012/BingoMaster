@@ -210,6 +210,7 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
         });
         setCardsData('');
         queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas/${shopId}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas`] });
       } else {
         toast({
           title: "Save Failed",
