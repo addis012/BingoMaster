@@ -41,12 +41,27 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
 
   // Create custom cartela mutation
   const createCartelaMutation = useMutation({
-    mutationFn: async (cartelaData: any) => {
-      const response = await apiRequest('POST', '/api/custom-cartelas', cartelaData);
+    mutationFn: async (data: {
+      name: string;
+      cartelaNumber: number;
+      pattern: number[][];
+      shopId: number;
+      adminId: number;
+    }) => {
+      console.log("Creating cartela with data:", data);
+      const response = await apiRequest('POST', '/api/custom-cartelas', data);
+      console.log("Create response:", response);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas/${shopId}`] });
+      console.log("Create mutation successful, invalidating queries");
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
+    },
+    onError: (error) => {
+      console.error("Create mutation error:", error);
     },
   });
 
@@ -57,7 +72,7 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas/${shopId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
     },
   });
 
@@ -245,7 +260,7 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
   };
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas/${shopId}`] });
+    queryClient.invalidateQueries({ queryKey: ["/api/custom-cartelas", shopId] });
   };
 
   // Get current cartela list that employees see
@@ -329,12 +344,15 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
               Reset
             </Button>
             <Button 
-              onClick={handleSaveCards}
+              onClick={() => {
+                console.log("Save button clicked");
+                handleSaveCards();
+              }}
               disabled={!cardsData.trim() || createCartelaMutation.isPending}
               className="bg-green-600 hover:bg-green-700"
             >
               <Save className="w-4 h-4 mr-2" />
-              Save Cards
+              {createCartelaMutation.isPending ? "Saving..." : "Save Cards"}
             </Button>
           </div>
         </CardContent>
