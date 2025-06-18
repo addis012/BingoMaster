@@ -1502,7 +1502,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 <Button
                   size="sm"
                   variant="outline"
-                  className="w-full text-xs py-1 h-6"
+                  className="text-xs px-2 py-1 h-5"
                   onClick={() => {
                     setPreviewCartela(cartela.Board);
                     setShowCartelaPreview(true);
