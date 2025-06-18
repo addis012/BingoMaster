@@ -107,13 +107,8 @@ app.use((req, res, next) => {
   server.listen(port, "0.0.0.0", async () => {
     log(`serving on port ${port}`);
     
-    // Load hardcoded cartelas after server starts
-    try {
-      const { ensureHardcodedCartelasLoaded } = await import("./cartela-loader");
-      await ensureHardcodedCartelasLoaded();
-    } catch (error) {
-      console.error("Failed to load hardcoded cartelas:", error);
-    }
+    // Hardcoded cartela loading disabled - admins manage their own cartelas
+    console.log("Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.");
   }).on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
       log(`Port ${port} is already in use. Trying to find an alternative port...`);
