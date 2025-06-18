@@ -89,7 +89,14 @@ router.get("/:shopId", async (req, res) => {
       .where(eq(cartelas.shopId, shopId))
       .orderBy(cartelas.cartelaNumber);
 
-    res.json(shopCartelas);
+    // Parse JSON strings back to arrays for frontend
+    const parsedCartelas = shopCartelas.map(cartela => ({
+      ...cartela,
+      pattern: typeof cartela.pattern === 'string' ? JSON.parse(cartela.pattern) : cartela.pattern,
+      numbers: typeof cartela.numbers === 'string' ? JSON.parse(cartela.numbers) : cartela.numbers,
+    }));
+
+    res.json(parsedCartelas);
   } catch (error) {
     console.error("Error fetching cartelas:", error);
     res.status(500).json({ error: "Failed to fetch cartelas" });
@@ -114,7 +121,9 @@ router.post("/", async (req, res) => {
       .limit(1);
 
     if (existing.length > 0) {
-      return res.status(400).json({ error: "Cartela number already exists for this shop" });
+      return res.status(400).json({ 
+        error: "Cartela number already exists for this shop. Use the edit function to update existing cartelas." 
+      });
     }
 
     const [newCartela] = await db
@@ -124,8 +133,8 @@ router.post("/", async (req, res) => {
         adminId,
         cartelaNumber,
         name,
-        pattern,
-        numbers,
+        pattern: JSON.stringify(pattern),
+        numbers: JSON.stringify(numbers),
         isHardcoded: false,
         isActive: true,
       })

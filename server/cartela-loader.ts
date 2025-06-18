@@ -56,22 +56,40 @@ export async function loadHardcodedCartelas(shopId: number, adminId: number): Pr
       )
       .limit(1);
     
+    const converted = convertHardcodedCartela(hardcodedCartela);
+    
     if (existing.length === 0) {
-      // Convert and insert hardcoded cartela
-      const converted = convertHardcodedCartela(hardcodedCartela);
-      
+      // Insert new hardcoded cartela
       await db.insert(cartelas).values({
         shopId,
         adminId,
         cartelaNumber,
         name: converted.name,
-        pattern: converted.pattern,
-        numbers: converted.numbers,
+        pattern: JSON.stringify(converted.pattern),
+        numbers: JSON.stringify(converted.numbers),
         isHardcoded: true,
         isActive: true,
       });
       
       console.log(`Loaded hardcoded cartela ${cartelaNumber} for shop ${shopId}`);
+    } else {
+      // Update existing cartela if adding same cartela number
+      await db
+        .update(cartelas)
+        .set({
+          pattern: JSON.stringify(converted.pattern),
+          numbers: JSON.stringify(converted.numbers),
+          name: converted.name,
+          isHardcoded: true,
+        })
+        .where(
+          and(
+            eq(cartelas.shopId, shopId),
+            eq(cartelas.cartelaNumber, cartelaNumber)
+          )
+        );
+      
+      console.log(`Updated existing cartela ${cartelaNumber} for shop ${shopId} with default values`);
     }
   }
   
