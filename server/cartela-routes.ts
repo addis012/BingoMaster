@@ -6,31 +6,9 @@ import { loadHardcodedCartelas } from "./cartela-loader";
 
 const router = Router();
 
-// Global WebSocket server reference for broadcasting
-let globalWss: any = null;
-
-// Function to broadcast cartela updates to shop employees
-function broadcastCartelaUpdate(shopId: number, wss?: any) {
-  const wsServer = wss || globalWss;
-  if (wsServer && wsServer.clients) {
-    const message = JSON.stringify({
-      type: 'cartela_update',
-      shopId: shopId,
-      timestamp: new Date().toISOString()
-    });
-    
-    wsServer.clients.forEach((client: WebSocket) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    });
-    console.log(`Broadcasted cartela update for shop ${shopId}`);
-  }
-}
-
-// Function to set global WebSocket server
-export function setGlobalWebSocketServer(wss: any) {
-  globalWss = wss;
+// Function to log cartela updates (WebSocket temporarily disabled)
+function logCartelaUpdate(shopId: number) {
+  console.log(`Cartela updated for shop ${shopId} at ${new Date().toISOString()}`);
 }
 
 // Parse bulk cartela input
@@ -167,8 +145,8 @@ router.post("/", async (req, res) => {
         numbers: typeof updatedCartela.numbers === 'string' ? JSON.parse(updatedCartela.numbers) : updatedCartela.numbers,
       };
 
-      // Broadcast update to employees in this shop
-      broadcastCartelaUpdate(shopId);
+      // Log cartela update
+      logCartelaUpdate(shopId);
       
       return res.json(parsedCartela);
     }
@@ -187,8 +165,8 @@ router.post("/", async (req, res) => {
       })
       .returning();
 
-    // Broadcast update to employees in this shop
-    broadcastCartelaUpdate(shopId);
+    // Log cartela update
+    logCartelaUpdate(shopId);
     
     res.json(newCartela);
   } catch (error) {
