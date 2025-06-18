@@ -175,15 +175,23 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
           console.log("Existing custom cartela:", existingCustom);
           
           if (existingCustom) {
-            console.log("Updating existing cartela");
-            // Update existing custom cartela
-            const response = await apiRequest('PATCH', `/api/custom-cartelas/${existingCustom.id}`, {
-              name: `Custom Card ${cardNumber}`,
-              pattern,
+            console.log(`Updating existing custom cartela ${cardNumber} with ID ${existingCustom.id}`);
+            // Update existing custom cartela using fetch directly
+            const response = await fetch(`/api/custom-cartelas/${existingCustom.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: `Custom Card ${cardNumber}`,
+                pattern,
+              }),
             });
-            if (!response.ok) throw new Error('Failed to update cartela');
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Failed to update cartela: ${errorText}`);
+            }
+            console.log(`Successfully updated cartela ${cardNumber}`);
           } else {
-            console.log("Creating new cartela");
+            console.log(`Creating new cartela ${cardNumber}`);
             // Create new custom cartela
             await createCartelaMutation.mutateAsync({
               name: `Custom Card ${cardNumber}`,
@@ -192,6 +200,7 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
               shopId,
               adminId,
             });
+            console.log(`Successfully created cartela ${cardNumber}`);
           }
 
           console.log(`Successfully processed card ${cardNumber}`);
@@ -203,18 +212,23 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
         }
       }
 
+      // Show results with detailed breakdown
       if (successCount > 0) {
+        await queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas/${shopId}`] });
+        await queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas`] });
+        
         toast({
-          title: "Cards Saved Successfully",
-          description: `Saved ${successCount} cards successfully${errorCount > 0 ? `. ${errorCount} errors occurred.` : '.'}`,
+          title: "Cartela Processing Complete",
+          description: `${createCount} created, ${updateCount} updated${errorCount > 0 ? `, ${errorCount} errors` : ''}`,
         });
         setCardsData('');
-        queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas/${shopId}`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/custom-cartelas`] });
-      } else {
+      }
+      
+      if (errors.length > 0) {
+        console.error("Processing errors:", errors);
         toast({
-          title: "Save Failed",
-          description: errors.slice(0, 3).join('. ') + (errors.length > 3 ? '...' : ''),
+          title: "Some cartelas failed",
+          description: `${errorCount} cartelas had errors. Check format and try again.`,
           variant: "destructive",
         });
       }
