@@ -2759,8 +2759,13 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       const gameId = parseInt(req.params.gameId);
       const { cartelaNumber, calledNumbers } = req.body;
 
-      // Get the cartela pattern for checking
-      const cartelaPattern = getFixedPattern(cartelaNumber);
+      // Get the cartela pattern from database instead of static data
+      const cartela = await storage.getCartelaByNumber(user.shopId!, cartelaNumber);
+      if (!cartela) {
+        return res.status(404).json({ message: "Cartela not found" });
+      }
+
+      const cartelaPattern = cartela.pattern;
       const winResult = checkBingoWin(cartelaPattern, calledNumbers);
       
       res.json({ 
@@ -3053,8 +3058,17 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         return res.status(400).json({ message: "Winner cartela number is required" });
       }
 
-      // Verify if this cartela is actually a winner
-      const cartelaPattern = getFixedPattern(winnerCartelaNumber);
+      // Verify if this cartela is actually a winner using database data
+      const cartela = await storage.getCartelaByNumber(user.shopId!, winnerCartelaNumber);
+      if (!cartela) {
+        console.log('❌ CARTELA NOT FOUND:', { cartelaNumber: winnerCartelaNumber, shopId: user.shopId });
+        return res.status(404).json({ 
+          message: "Cartela not found",
+          cartelaNumber: winnerCartelaNumber
+        });
+      }
+
+      const cartelaPattern = cartela.pattern;
       const winResult = checkBingoWin(cartelaPattern, calledNumbers);
       
       if (!winResult.isWinner) {
