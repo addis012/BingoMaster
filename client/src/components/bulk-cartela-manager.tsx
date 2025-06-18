@@ -28,6 +28,8 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
   const [cardsData, setCardsData] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  console.log("BulkCartelaManager rendered with:", { shopId, adminId, cardsData });
 
   // Fetch existing custom cartelas
   const { data: customCartelas, isLoading } = useQuery({
@@ -347,16 +349,15 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
               Reset
             </Button>
             <Button 
-              onClick={() => {
-                console.log("Save button clicked, cardsData:", cardsData);
-                console.log("Button disabled:", !cardsData.trim() || createCartelaMutation.isPending);
-                try {
-                  handleSaveCards().catch(error => {
-                    console.error("Error in handleSaveCards:", error);
-                  });
-                } catch (error) {
-                  console.error("Sync error in handleSaveCards:", error);
-                }
+              onClick={(e) => {
+                e.preventDefault();
+                console.log("=== SAVE BUTTON CLICKED ===");
+                console.log("Event:", e);
+                console.log("cardsData:", cardsData);
+                console.log("cardsData length:", cardsData.length);
+                console.log("Button disabled state:", !cardsData.trim() || createCartelaMutation.isPending);
+                console.log("createCartelaMutation.isPending:", createCartelaMutation.isPending);
+                handleSaveCards();
               }}
               disabled={!cardsData.trim() || createCartelaMutation.isPending}
               className="bg-green-600 hover:bg-green-700"
