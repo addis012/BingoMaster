@@ -448,11 +448,30 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         return res.status(401).json({ message: "User not found" });
       }
 
+      // Check employee's credit balance first
+      const employeeBalance = parseFloat(user.creditBalance || '0');
+      const cartelas = req.body.cartelas || [];
+      const entryFee = parseFloat(req.body.amount || '20');
+      const totalCost = cartelas.length * entryFee;
+      
+      if (employeeBalance < totalCost) {
+        console.log(`❌ INSUFFICIENT CREDITS: Employee ${user.name} has ${employeeBalance} ETB but needs ${totalCost} ETB`);
+        return res.status(400).json({ 
+          message: `Insufficient credit balance. You have ${employeeBalance.toFixed(2)} ETB but need ${totalCost.toFixed(2)} ETB to start this game.`,
+          balance: employeeBalance.toFixed(2),
+          required: totalCost.toFixed(2),
+          cartelas: cartelas.length,
+          entryFee: entryFee
+        });
+      }
+
       console.log("🎮 BACKEND GAME CREATION REQUEST:", {
         body: req.body,
         userId: userId,
         authenticatedUser: user.username,
         authenticatedEmployeeName: user.name,
+        employeeBalance: employeeBalance,
+        totalCost: totalCost,
         timestamp: new Date().toISOString()
       });
       
