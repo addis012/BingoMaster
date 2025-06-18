@@ -124,6 +124,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 30000 // Check admin balance every 30 seconds
   });
 
+  // Cartelas query for real-time updates
+  const { data: cartelas, refetch: refetchCartelas } = useQuery({
+    queryKey: ['/api/cartelas', user?.shopId],
+    queryFn: async () => {
+      if (!user?.shopId) return [];
+      const response = await fetch(`/api/cartelas/${user.shopId}`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!user?.shopId,
+    refetchInterval: 2000 // Refresh every 2 seconds for real-time updates
+  });
+
   // Sync with active game data
   useEffect(() => {
     if (activeGame) {
