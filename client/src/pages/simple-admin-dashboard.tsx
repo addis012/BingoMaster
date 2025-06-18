@@ -23,6 +23,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Users, DollarSign, GamepadIcon, BarChart3, UserPlus, CreditCard, Plus, ArrowRight, History, AlertCircle, Gift, Settings, Lock, Percent, Grid3X3, AlertTriangle } from "lucide-react";
 import { BulkCartelaManager } from "@/components/bulk-cartela-manager";
+import { FIXED_CARTELAS } from "@/data/fixed-cartelas";
 
 interface SimpleAdminDashboardProps {
   onLogout: () => void;
@@ -46,6 +47,11 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
   const [transferScreenshot, setTransferScreenshot] = useState("");
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
+  
+  // Cartela preview states
+  const [showCartelaPreview, setShowCartelaPreview] = useState(false);
+  const [previewCartelaNumber, setPreviewCartelaNumber] = useState<number | null>(null);
+  const [showAllCartelas, setShowAllCartelas] = useState(false);
 
   // Move all hooks before conditional returns to avoid hooks error
   const { data: employees = [], refetch: refetchEmployees, error: employeesError, isLoading: employeesLoading } = useQuery({
@@ -313,11 +319,12 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="finance">Finance</TabsTrigger>
             <TabsTrigger value="cartelas">Cartelas</TabsTrigger>
+            <TabsTrigger value="preview">Preview (1-75)</TabsTrigger>
             <TabsTrigger value="credits">Credits</TabsTrigger>
             <TabsTrigger value="credit-history">Credit History</TabsTrigger>
             <TabsTrigger value="referrals">Referrals</TabsTrigger>
@@ -846,6 +853,187 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
                     adminId={user.id}
                   />
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="preview" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Grid3X3 className="h-5 w-5" />
+                  Fixed Cartelas Preview (1-75)
+                </CardTitle>
+                <CardDescription>
+                  View all fixed cartela patterns available in the system
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Search and Filter */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Input
+                      placeholder="Search cartela number..."
+                      value={previewCartelaNumber ? previewCartelaNumber.toString() : ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          setPreviewCartelaNumber(null);
+                        } else {
+                          const num = parseInt(value);
+                          if (!isNaN(num) && num >= 1 && num <= 75) {
+                            setPreviewCartelaNumber(num);
+                          }
+                        }
+                      }}
+                      className="max-w-xs"
+                    />
+                    <Button
+                      variant={showAllCartelas ? "secondary" : "outline"}
+                      onClick={() => setShowAllCartelas(!showAllCartelas)}
+                    >
+                      {showAllCartelas ? "Show Single" : "Show All (1-75)"}
+                    </Button>
+                  </div>
+
+                  {/* Single Cartela Preview */}
+                  {previewCartelaNumber && !showAllCartelas && (
+                    <div className="border rounded-lg p-6 bg-white">
+                      <h3 className="text-xl font-bold mb-4 text-center">
+                        Cartela #{previewCartelaNumber} Preview
+                      </h3>
+                      
+                      {/* BINGO Headers */}
+                      <div className="grid grid-cols-5 gap-2 mb-3">
+                        {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                          const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                          return (
+                            <div key={letter} className={`h-12 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-lg`}>
+                              {letter}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Cartela Grid */}
+                      <div className="grid grid-cols-5 gap-2">
+                        {(() => {
+                          const cartela = FIXED_CARTELAS.find(c => c.Board === previewCartelaNumber);
+                          if (!cartela) return null;
+                          
+                          const grid = [];
+                          for (let row = 0; row < 5; row++) {
+                            for (let col = 0; col < 5; col++) {
+                              let value;
+                              if (col === 0) value = cartela.B[row];
+                              else if (col === 1) value = cartela.I[row];
+                              else if (col === 2) value = cartela.N[row];
+                              else if (col === 3) value = cartela.G[row];
+                              else value = cartela.O[row];
+                              
+                              grid.push(
+                                <div
+                                  key={`${row}-${col}`}
+                                  className={`h-12 border-2 border-gray-400 flex items-center justify-center text-lg font-bold ${
+                                    value === "FREE" ? 'bg-yellow-200 text-yellow-800' : 'bg-white text-gray-800'
+                                  }`}
+                                >
+                                  {value === "FREE" ? "★" : value}
+                                </div>
+                              );
+                            }
+                          }
+                          return grid;
+                        })()}
+                      </div>
+                      
+                      <div className="mt-4 text-center text-sm text-gray-600">
+                        Fixed pattern - same numbers every time
+                      </div>
+                    </div>
+                  )}
+
+                  {/* All Cartelas Grid View */}
+                  {showAllCartelas && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">All Fixed Cartelas (1-75)</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {FIXED_CARTELAS.slice(0, 75).map((cartela) => (
+                          <div key={cartela.Board} className="border rounded-lg p-3 bg-white hover:shadow-md transition-shadow">
+                            <h4 className="text-sm font-bold text-center mb-2">Cartela #{cartela.Board}</h4>
+                            
+                            {/* Mini BINGO Headers */}
+                            <div className="grid grid-cols-5 gap-0.5 mb-1">
+                              {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
+                                const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                                return (
+                                  <div key={letter} className={`h-6 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-xs`}>
+                                    {letter}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            
+                            {/* Mini Grid */}
+                            <div className="grid grid-cols-5 gap-0.5">
+                              {(() => {
+                                const grid = [];
+                                for (let row = 0; row < 5; row++) {
+                                  for (let col = 0; col < 5; col++) {
+                                    let value;
+                                    if (col === 0) value = cartela.B[row];
+                                    else if (col === 1) value = cartela.I[row];
+                                    else if (col === 2) value = cartela.N[row];
+                                    else if (col === 3) value = cartela.G[row];
+                                    else value = cartela.O[row];
+                                    
+                                    grid.push(
+                                      <div
+                                        key={`${row}-${col}`}
+                                        className={`aspect-square border border-gray-300 flex items-center justify-center text-xs font-medium ${
+                                          value === "FREE" ? 'bg-yellow-200 text-yellow-800' : 'bg-white text-gray-800'
+                                        }`}
+                                      >
+                                        {value === "FREE" ? "★" : value}
+                                      </div>
+                                    );
+                                  }
+                                }
+                                return grid;
+                              })()}
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full mt-2 text-xs"
+                              onClick={() => {
+                                setPreviewCartelaNumber(cartela.Board);
+                                setShowAllCartelas(false);
+                              }}
+                            >
+                              View Full Size
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Default State */}
+                  {!previewCartelaNumber && !showAllCartelas && (
+                    <div className="text-center py-12 text-gray-500">
+                      <Grid3X3 className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                      <h3 className="text-lg font-medium mb-2">Cartela Preview</h3>
+                      <p className="mb-4">Enter a cartela number (1-75) to preview or view all cartelas</p>
+                      <div className="space-y-2">
+                        <p className="text-sm">• Search for specific cartela numbers</p>
+                        <p className="text-sm">• View individual cartela patterns</p>
+                        <p className="text-sm">• Browse all 75 fixed cartelas</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
