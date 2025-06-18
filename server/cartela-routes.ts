@@ -6,21 +6,31 @@ import { loadHardcodedCartelas } from "./cartela-loader";
 
 const router = Router();
 
+// Global WebSocket server reference for broadcasting
+let globalWss: any = null;
+
 // Function to broadcast cartela updates to shop employees
-function broadcastCartelaUpdate(shopId: number, wss: any) {
-  if (wss && wss.clients) {
+function broadcastCartelaUpdate(shopId: number, wss?: any) {
+  const wsServer = wss || globalWss;
+  if (wsServer && wsServer.clients) {
     const message = JSON.stringify({
       type: 'cartela_update',
       shopId: shopId,
       timestamp: new Date().toISOString()
     });
     
-    wss.clients.forEach((client: WebSocket) => {
+    wsServer.clients.forEach((client: WebSocket) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(message);
       }
     });
+    console.log(`Broadcasted cartela update for shop ${shopId}`);
   }
+}
+
+// Function to set global WebSocket server
+export function setGlobalWebSocketServer(wss: any) {
+  globalWss = wss;
 }
 
 // Parse bulk cartela input
@@ -158,7 +168,7 @@ router.post("/", async (req, res) => {
       };
 
       // Broadcast update to employees in this shop
-      broadcastCartelaUpdate(shopId, router.locals?.wss);
+      broadcastCartelaUpdate(shopId);
       
       return res.json(parsedCartela);
     }
@@ -178,7 +188,7 @@ router.post("/", async (req, res) => {
       .returning();
 
     // Broadcast update to employees in this shop
-    broadcastCartelaUpdate(shopId, router.locals?.wss);
+    broadcastCartelaUpdate(shopId);
     
     res.json(newCartela);
   } catch (error) {

@@ -1270,8 +1270,12 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
 
   const httpServer = createServer(app);
 
-  // WebSocket server for real-time game updates
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  // WebSocket server for real-time game updates on a separate path to avoid Vite HMR conflicts
+  const wss = new WebSocketServer({ 
+    server: httpServer, 
+    path: '/game-ws',
+    clientTracking: true
+  });
 
   wss.on('connection', (ws, req) => {
     const url = new URL(req.url!, `http://${req.headers.host}`);
