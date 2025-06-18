@@ -775,117 +775,139 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
 
-    // Get cartela pattern and check for win
-    const cartelaPattern = getFixedCartelaPattern(cartelaNum);
-    const isWinner = checkBingoWin(cartelaPattern, calledNumbers);
-    
-    if (!isWinner.isWinner) {
-      // NOT A WINNER - Show red popup and resume game
-      setWinnerResult({
-        isWinner: false,
-        cartela: cartelaNum,
-        message: "This Cartela Did Not Win",
-        pattern: "",
-        winningCells: []
+    // Check winner using API with actual cartela data
+    try {
+      const response = await fetch(`/api/games/${activeGameId}/check-winner`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartelaNumber: cartelaNum,
+          calledNumbers: calledNumbers
+        })
       });
-      
-      // Clear any existing timer to prevent audio overlap
-      if (numberCallTimer.current) {
-        clearTimeout(numberCallTimer.current);
-        numberCallTimer.current = null;
+
+      if (!response.ok) {
+        throw new Error('Failed to check winner');
       }
+
+      const result = await response.json();
       
-      // Play loser sound with proper state management
-      if (!audioPlaying) {
-        setAudioPlaying(true);
-        setTimeout(() => {
-          try {
-            const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
-            audio.volume = 0.8;
-            audio.onended = () => setAudioPlaying(false);
-            audio.onerror = () => setAudioPlaying(false);
-            audio.play().catch(() => {
-              console.log('Loser sound not available');
-              setAudioPlaying(false);
-            });
-          } catch (error) {
-            console.log('Loser audio playback error');
-            setAudioPlaying(false);
-          }
-        }, 500);
-      }
-      
-      setShowWinnerResult(true);
-      setShowWinnerChecker(false);
-      
-    } else {
-      // IS A WINNER - Pause game completely and show green popup
-      setGamePaused(true);
-      setGameActive(false);
-      setGameFinished(true);
-      
-      setWinnerResult({
-        isWinner: true,
-        cartela: cartelaNum,
-        message: "Congratulations! This Cartela Has Won!",
-        pattern: isWinner.pattern || "",
-        winningCells: isWinner.winningCells || []
-      });
-      
-      setShowWinnerResult(true);
-      setShowWinnerChecker(false);
-      
-      // Submit winner to backend and complete the game
-      try {
-        await fetch(`/api/games/${activeGameId}/declare-winner`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            winnerCartelaNumber: cartelaNum,
-            totalPlayers: selectedCartelas.size,
-            entryFeePerPlayer: parseFloat(gameAmount),
-            allCartelaNumbers: Array.from(selectedCartelas),
-            calledNumbers: calledNumbers,
-            pattern: isWinner.pattern
-          })
+      if (!result.isWinner) {
+        // NOT A WINNER - Show red popup and resume game
+        setWinnerResult({
+          isWinner: false,
+          cartela: cartelaNum,
+          message: "This Cartela Did Not Win",
+          pattern: "",
+          winningCells: []
         });
         
-        // Mark game as completed to save to history
-        await fetch(`/api/games/${activeGameId}/complete`, {
-          method: 'PATCH'
-        });
-        
-        // Invalidate all related queries to update admin dashboard
-        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/analytics/shop'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/analytics/trends'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/analytics/profit-distribution'] });
-        
-        // Play winner sound
-        try {
-          const audio = new Audio('/attached_assets/winner_1750069128882.mp3');
-          audio.volume = 0.8;
-          audio.play().catch(() => {
-            console.log('Winner sound not available');
-          });
-        } catch (error) {
-          console.log('Winner audio playback error');
+        // Clear any existing timer to prevent audio overlap
+        if (numberCallTimer.current) {
+          clearTimeout(numberCallTimer.current);
+          numberCallTimer.current = null;
         }
         
-        toast({
-          title: "Winner Confirmed!",
-          description: `Cartela #${cartelaNum} wins with ${isWinner.pattern}`,
-          duration: 5000
+        // Play loser sound with proper state management
+        if (!audioPlaying) {
+          setAudioPlaying(true);
+          setTimeout(() => {
+            try {
+              const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
+              audio.volume = 0.8;
+              audio.onended = () => setAudioPlaying(false);
+              audio.onerror = () => setAudioPlaying(false);
+              audio.play().catch(() => {
+                console.log('Loser sound not available');
+                setAudioPlaying(false);
+              });
+            } catch (error) {
+              console.log('Loser audio playback error');
+              setAudioPlaying(false);
+            }
+          }, 500);
+        }
+        
+        setShowWinnerResult(true);
+        setShowWinnerChecker(false);
+        
+      } else {
+        // IS A WINNER - Pause game completely and show green popup
+        setGamePaused(true);
+        setGameActive(false);
+        setGameFinished(true);
+        
+        setWinnerResult({
+          isWinner: true,
+          cartela: cartelaNum,
+          message: "Congratulations! This Cartela Has Won!",
+          pattern: result.winningPattern || "",
+          winningCells: []
         });
         
-      } catch (error) {
-        console.error('Failed to declare winner:', error);
-        toast({
-          title: "Error",
-          description: "Failed to process winner. Please try again.",
-          variant: "destructive"
-        });
+        setShowWinnerResult(true);
+        setShowWinnerChecker(false);
+        
+        // Submit winner to backend and complete the game
+        try {
+          await fetch(`/api/games/${activeGameId}/declare-winner`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              winnerCartelaNumber: cartelaNum,
+              totalPlayers: selectedCartelas.size,
+              entryFeePerPlayer: parseFloat(gameAmount),
+              allCartelaNumbers: Array.from(selectedCartelas),
+              calledNumbers: calledNumbers,
+              pattern: result.winningPattern
+            })
+          });
+          
+          // Mark game as completed to save to history
+          await fetch(`/api/games/${activeGameId}/complete`, {
+            method: 'PATCH'
+          });
+          
+          // Invalidate all related queries to update admin dashboard
+          queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/analytics/shop'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/analytics/trends'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/analytics/profit-distribution'] });
+          
+          // Play winner sound
+          try {
+            const audio = new Audio('/attached_assets/winner_1750069128882.mp3');
+            audio.volume = 0.8;
+            audio.play().catch(() => {
+              console.log('Winner sound not available');
+            });
+          } catch (error) {
+            console.log('Winner audio playback error');
+          }
+          
+          toast({
+            title: "Winner Confirmed!",
+            description: `Cartela #${cartelaNum} wins with ${result.winningPattern}`,
+            duration: 5000
+          });
+          
+        } catch (error) {
+          console.error('Failed to declare winner:', error);
+          toast({
+            title: "Error",
+            description: "Failed to process winner. Please try again.",
+            variant: "destructive"
+          });
+        }
       }
+    } catch (error) {
+      console.error('Failed to check winner:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check winner. Please try again.",
+        variant: "destructive"
+      });
+      setShowWinnerChecker(false);
     }
   };
 
