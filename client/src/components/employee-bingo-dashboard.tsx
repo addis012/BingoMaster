@@ -664,13 +664,13 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                     {Array.from({length: 15}, (_, i) => i + 1).map(num => (
                       <div 
                         key={num} 
-                        className={`h-10 rounded flex items-center justify-center text-3xl font-bold ${
+                        className={`h-10 rounded flex items-center justify-center text-lg font-bold ${
                           calledNumbers.includes(num) 
                             ? 'bg-red-500 text-white border-2 border-red-600' + (isShuffling ? ' shuffle-animation' : '')
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        {num}
+                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
@@ -680,13 +680,13 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                     {Array.from({length: 15}, (_, i) => i + 16).map(num => (
                       <div 
                         key={num} 
-                        className={`h-10 rounded flex items-center justify-center text-3xl font-bold ${
+                        className={`h-10 rounded flex items-center justify-center text-lg font-bold ${
                           calledNumbers.includes(num) 
                             ? 'bg-blue-500 text-white border-2 border-blue-600' + (isShuffling ? ' shuffle-animation' : '')
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        {num}
+                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
@@ -696,13 +696,13 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                     {Array.from({length: 15}, (_, i) => i + 31).map(num => (
                       <div 
                         key={num} 
-                        className={`h-10 rounded flex items-center justify-center text-3xl font-bold ${
+                        className={`h-10 rounded flex items-center justify-center text-lg font-bold ${
                           calledNumbers.includes(num) 
                             ? 'bg-green-500 text-white border-2 border-green-600' + (isShuffling ? ' shuffle-animation' : '')
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        {num}
+                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
@@ -712,13 +712,13 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                     {Array.from({length: 15}, (_, i) => i + 46).map(num => (
                       <div 
                         key={num} 
-                        className={`h-10 rounded flex items-center justify-center text-3xl font-bold ${
+                        className={`h-10 rounded flex items-center justify-center text-lg font-bold ${
                           calledNumbers.includes(num) 
                             ? 'bg-yellow-500 text-white border-2 border-yellow-600' + (isShuffling ? ' shuffle-animation' : '')
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        {num}
+                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
@@ -728,13 +728,13 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
                     {Array.from({length: 15}, (_, i) => i + 61).map(num => (
                       <div 
                         key={num} 
-                        className={`h-10 rounded flex items-center justify-center text-3xl font-bold ${
+                        className={`h-10 rounded flex items-center justify-center text-lg font-bold ${
                           calledNumbers.includes(num) 
                             ? 'bg-purple-500 text-white border-2 border-purple-600' + (isShuffling ? ' shuffle-animation' : '')
                             : 'bg-gray-100 text-gray-700 border border-gray-300'
                         }`}
                       >
-                        {num}
+                        <span style={{ transform: 'scaleY(1.5)', display: 'inline-block' }}>{num}</span>
                       </div>
                     ))}
                   </div>
