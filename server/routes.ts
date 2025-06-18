@@ -23,7 +23,7 @@ const gameClients = new Map<number, Set<WebSocket>>();
 // Fixed cartela patterns are now handled by imported functions from fixed-cartelas.ts
 
 // Helper function to check if cartela has bingo
-function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { isWinner: boolean; pattern?: string } {
+function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { isWinner: boolean; pattern?: string; winningCells?: number[] } {
   const calledSet = new Set(calledNumbers);
   
   console.log('🔍 DETAILED BINGO CHECK:', {
@@ -47,7 +47,11 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { i
     console.log(`Row ${row + 1}:`, { rowDetails, rowComplete });
     if (rowComplete) {
       console.log(`🎯 WINNER FOUND: Horizontal Row ${row + 1}`);
-      return { isWinner: true, pattern: `Horizontal Row ${row + 1}` };
+      const winningCells = [];
+      for (let col = 0; col < 5; col++) {
+        winningCells.push(row * 5 + col);
+      }
+      return { isWinner: true, pattern: `Horizontal Row ${row + 1}`, winningCells };
     }
   }
   
@@ -67,7 +71,11 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { i
     if (colComplete) {
       const columnNames = ['B', 'I', 'N', 'G', 'O'];
       console.log(`🎯 WINNER FOUND: Vertical Column ${columnNames[col]}`);
-      return { isWinner: true, pattern: `Vertical Column ${columnNames[col]}` };
+      const winningCells = [];
+      for (let row = 0; row < 5; row++) {
+        winningCells.push(row * 5 + col);
+      }
+      return { isWinner: true, pattern: `Vertical Column ${columnNames[col]}`, winningCells };
     }
   }
   
@@ -85,7 +93,11 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { i
   console.log('Diagonal 1:', { diag1Details, diag1Complete });
   if (diag1Complete) {
     console.log('🎯 WINNER FOUND: Diagonal (Top-Left to Bottom-Right)');
-    return { isWinner: true, pattern: 'Diagonal (Top-Left to Bottom-Right)' };
+    const winningCells = [];
+    for (let i = 0; i < 5; i++) {
+      winningCells.push(i * 5 + i);
+    }
+    return { isWinner: true, pattern: 'Diagonal (Top-Left to Bottom-Right)', winningCells };
   }
   
   // Check diagonal 2 (top-right to bottom-left)
@@ -102,7 +114,11 @@ function checkBingoWin(cartelaPattern: number[][], calledNumbers: number[]): { i
   console.log('Diagonal 2:', { diag2Details, diag2Complete });
   if (diag2Complete) {
     console.log('🎯 WINNER FOUND: Diagonal (Top-Right to Bottom-Left)');
-    return { isWinner: true, pattern: 'Diagonal (Top-Right to Bottom-Left)' };
+    const winningCells = [];
+    for (let i = 0; i < 5; i++) {
+      winningCells.push(i * 5 + (4 - i));
+    }
+    return { isWinner: true, pattern: 'Diagonal (Top-Right to Bottom-Left)', winningCells };
   }
   
   console.log('❌ NO WINNER FOUND');
@@ -2830,6 +2846,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         isWinner: winResult.isWinner,
         winningPattern: winResult.pattern,
         cartelaPattern: cartelaPattern,
+        winningCells: winResult.winningCells || [],
         message: winResult.isWinner 
           ? `Cartela Number: ${cartelaNumber}\nWinner ✓\nPattern: ${winResult.pattern}`
           : `Cartela Number: ${cartelaNumber}\nNot a Winner`
