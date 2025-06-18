@@ -102,19 +102,26 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
         console.log("Processing line:", line);
         try {
           const [cardNumStr, numbersStr] = line.split(':');
+          console.log("Split result:", { cardNumStr, numbersStr });
+          
           if (!cardNumStr || !numbersStr) {
+            console.log("Invalid format detected");
             errors.push(`Invalid format: ${line}`);
             errorCount++;
             continue;
           }
 
           const cardNumber = parseInt(cardNumStr.trim());
+          console.log("Card number parsed:", cardNumber);
+          
           if (isNaN(cardNumber)) {
+            console.log("Invalid card number");
             errors.push(`Invalid card number: ${cardNumStr}`);
             errorCount++;
             continue;
           }
 
+          console.log("Processing numbers string:", numbersStr);
           const numbers = numbersStr.split(',').map(n => {
             const num = n.trim().toLowerCase();
             if (num === 'free') return 0;
@@ -122,6 +129,8 @@ export function BulkCartelaManager({ shopId, adminId }: BulkCartelaManagerProps)
             if (isNaN(parsed)) throw new Error(`Invalid number: ${n}`);
             return parsed;
           });
+          
+          console.log("Numbers parsed:", numbers);
 
           if (numbers.length !== 25) {
             errors.push(`Card ${cardNumber}: Must have exactly 25 numbers, got ${numbers.length}. Numbers: ${numbersStr}`);
