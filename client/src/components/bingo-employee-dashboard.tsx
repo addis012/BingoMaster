@@ -1770,7 +1770,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       return (
                         <div key={index} className={`text-center text-sm p-2 border-2 rounded ${
                           isWinningCell 
-                            ? 'bg-yellow-300 border-yellow-500 font-bold shadow-lg animate-pulse' 
+                            ? 'winner-cell-animation' 
                             : isFree
                               ? 'bg-yellow-200 border-yellow-300 font-medium' 
                               : isCalled
