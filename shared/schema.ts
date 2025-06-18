@@ -175,7 +175,20 @@ export const superAdminRevenues = pgTable("super_admin_revenues", {
   dateEAT: text("date_eat").notNull(), // Date in EAT format (YYYY-MM-DD) for filtering
 });
 
-// Custom cartelas created by admins
+// Unified cartelas table - includes both hardcoded and custom cartelas
+export const cartelas = pgTable("cartelas", {
+  id: serial("id").primaryKey(),
+  cartelaNumber: integer("cartela_number").notNull().unique(), // Unique cartela number (1-999999)
+  shopId: integer("shop_id").references(() => shops.id).notNull(),
+  adminId: integer("admin_id").references(() => users.id).notNull(),
+  name: text("name").notNull(), // Display name for the cartela
+  numbers: text("numbers").notNull(), // Comma-separated string of 25 numbers
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Keep old table for migration purposes (will be removed later)
 export const customCartelas = pgTable("custom_cartelas", {
   id: serial("id").primaryKey(),
   adminId: integer("admin_id").references(() => users.id).notNull(),
@@ -383,6 +396,13 @@ export const insertEmployeeProfitMarginSchema = createInsertSchema(employeeProfi
   createdAt: true,
 });
 
+// Unified cartelas schema
+export const insertCartelaSchema = createInsertSchema(cartelas).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertCustomCartelaSchema = createInsertSchema(customCartelas).omit({
   id: true,
   createdAt: true,
@@ -405,6 +425,10 @@ export type GameHistory = typeof gameHistory.$inferSelect;
 export type InsertGameHistory = z.infer<typeof insertGameHistorySchema>;
 export type EmployeeProfitMargin = typeof employeeProfitMargins.$inferSelect;
 export type InsertEmployeeProfitMargin = z.infer<typeof insertEmployeeProfitMarginSchema>;
+// Unified cartela types
+export type Cartela = typeof cartelas.$inferSelect;
+export type InsertCartela = z.infer<typeof insertCartelaSchema>;
+
 export type CustomCartela = typeof customCartelas.$inferSelect;
 export type InsertCustomCartela = z.infer<typeof insertCustomCartelaSchema>;
 
