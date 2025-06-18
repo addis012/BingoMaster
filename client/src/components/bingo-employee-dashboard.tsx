@@ -1042,6 +1042,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     <div className="min-h-screen bg-gray-50 overflow-y-auto">
 
 
+      {/* Low Balance Warning for Employees */}
+      {shopData && parseFloat(shopData.adminBalance || '0') < 500 && (
+        <div className="bg-yellow-50 border border-yellow-200 p-4">
+          <div className="flex items-center">
+            <AlertTriangle className="h-5 w-5 text-yellow-600 mr-3" />
+            <div>
+              <p className="font-medium text-yellow-800">
+                ⚠ Admin Low Credit Balance
+              </p>
+              <p className="text-sm text-yellow-700">
+                Contact admin to add more credits.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b p-4">
         <div className="flex justify-between items-center">
