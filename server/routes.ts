@@ -2791,9 +2791,10 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     } catch (error) {
       console.error("Check winner error:", error);
       console.error("Error stack:", error.stack);
+      const { cartelaNumber } = req.body || {};
       res.status(500).json({ 
         message: "Failed to check winner",
-        cartelaNumber,
+        cartelaNumber: cartelaNumber || "unknown",
         isWinner: false,
         error: error.message 
       });
