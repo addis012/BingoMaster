@@ -31,12 +31,14 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
   const queryClient = useQueryClient();
 
   // Load all cartelas for this shop
-  const { data: cartelas = [], refetch } = useQuery({
+  const { data: cartelas = [], refetch, isLoading } = useQuery({
     queryKey: ["/api/cartelas", shopId],
     queryFn: async () => {
       const response = await fetch(`/api/cartelas/${shopId}`);
       if (!response.ok) throw new Error("Failed to load cartelas");
-      return response.json();
+      const data = await response.json();
+      console.log('Fetched cartelas:', data.length, 'items');
+      return data;
     },
   });
 

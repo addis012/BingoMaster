@@ -121,9 +121,26 @@ router.post("/", async (req, res) => {
       .limit(1);
 
     if (existing.length > 0) {
-      return res.status(400).json({ 
-        error: "Cartela number already exists for this shop. Use the edit function to update existing cartelas." 
-      });
+      // Update existing cartela instead of creating new one
+      const [updatedCartela] = await db
+        .update(cartelas)
+        .set({
+          name,
+          pattern: JSON.stringify(pattern),
+          numbers: JSON.stringify(numbers),
+          isHardcoded: false, // Mark as custom when updated
+        })
+        .where(eq(cartelas.id, existing[0].id))
+        .returning();
+
+      // Parse the response back to arrays
+      const parsedCartela = {
+        ...updatedCartela,
+        pattern: typeof updatedCartela.pattern === 'string' ? JSON.parse(updatedCartela.pattern) : updatedCartela.pattern,
+        numbers: typeof updatedCartela.numbers === 'string' ? JSON.parse(updatedCartela.numbers) : updatedCartela.numbers,
+      };
+
+      return res.json(parsedCartela);
     }
 
     const [newCartela] = await db
