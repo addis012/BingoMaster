@@ -54,6 +54,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [autoCallInterval, setAutoCallInterval] = useState<NodeJS.Timeout | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [pausedAudio, setPausedAudio] = useState<HTMLAudioElement | null>(null);
+  const [pausedAudioTime, setPausedAudioTime] = useState<number>(0);
   const [nextNumber, setNextNumber] = useState<number | null>(null);
   const [isHovering, setIsHovering] = useState(false);
   
@@ -874,10 +876,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       numberCallTimer.current = null;
     }
     
-    // Stop any currently playing audio immediately
-    if (currentAudio) {
+    // Preserve audio state if currently playing
+    if (currentAudio && !currentAudio.paused) {
+      setPausedAudio(currentAudio);
+      setPausedAudioTime(currentAudio.currentTime);
       currentAudio.pause();
-      currentAudio.currentTime = 0;
       setCurrentAudio(null);
     }
     
@@ -908,13 +911,27 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       if (response.ok) {
         setGamePaused(false);
         
+        // Resume paused audio if it exists
+        if (pausedAudio && pausedAudioTime > 0) {
+          pausedAudio.currentTime = pausedAudioTime;
+          pausedAudio.play().then(() => {
+            setCurrentAudio(pausedAudio);
+            setPausedAudio(null);
+            setPausedAudioTime(0);
+          }).catch((error) => {
+            console.log('Failed to resume audio:', error);
+            setPausedAudio(null);
+            setPausedAudioTime(0);
+          });
+        }
+        
         toast({
           title: "Game Resumed",
           description: "Game has been resumed"
         });
         
-        // Resume calling numbers if game is still active
-        if (gameActive && !gameFinished && activeGameId) {
+        // Resume calling numbers if game is still active and no audio is playing
+        if (gameActive && !gameFinished && activeGameId && !pausedAudio) {
           setTimeout(() => {
             callNumberMutation.mutate();
           }, 500);
@@ -922,6 +939,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
     } catch (error) {
       console.error('Failed to resume game:', error);
+      toast({
+        title: "Error",
+        description: "Failed to resume game",
+        variant: "destructive"
+      });
     }
   };
 
