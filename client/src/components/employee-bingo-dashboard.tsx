@@ -36,7 +36,7 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   const [showWinnerResult, setShowWinnerResult] = useState(false);
-  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "" });
+  const [winnerResult, setWinnerResult] = useState({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [] as number[] });
   
   // Animation states
   const [isShuffling, setIsShuffling] = useState(false);
@@ -313,7 +313,8 @@ export default function EmployeeBingoDashboard({ onLogout }: EmployeeBingoDashbo
       isWinner: isWinner.isWinner,
       cartela: cartelaNum,
       message: isWinner.isWinner ? "BINGO! Winner found!" : "Not a winner yet",
-      pattern: isWinner.pattern || ""
+      pattern: isWinner.pattern || "",
+      winningCells: isWinner.winningCells || []
     });
     
     setShowWinnerResult(true);
