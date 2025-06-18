@@ -95,7 +95,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const amountPerCartela = parseFloat(gameAmount) || 20;
     const totalCollected = totalCartelas * amountPerCartela;
     // Use shop's actual profit margin from shopData
-    const profitMargin = (shopData?.profitMargin || 10) / 100;
+    const profitMargin = ((shopData as any)?.profitMargin || 10) / 100;
     const winnerAmount = totalCollected * (1 - profitMargin);
     const profitAmount = totalCollected * profitMargin;
     
@@ -106,6 +106,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       totalCartelas
     };
   };
+
+  // Fetch custom cartelas for this shop with auto-refresh
+  const { data: customCartelas = [] } = useQuery({
+    queryKey: [`/api/custom-cartelas/${user?.shopId}`],
+    queryFn: async () => {
+      if (!user?.shopId) return [];
+      const response = await fetch(`/api/custom-cartelas/${user.shopId}`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!user?.shopId,
+    refetchInterval: 5000, // Auto-refresh every 5 seconds to detect admin changes
+    refetchOnWindowFocus: true
+  });
 
   // Game history query for admin connection
   const { data: gameHistory } = useQuery({
@@ -118,14 +132,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Fetch admin balance for low balance warning
   const { data: adminData } = useQuery({
-    queryKey: [`/api/users/${shopData?.adminId}`],
+    queryKey: [`/api/users/${(shopData as any)?.adminId}`],
     queryFn: async () => {
-      if (!shopData?.adminId) return null;
-      const response = await fetch(`/api/users/${shopData.adminId}`);
+      if (!(shopData as any)?.adminId) return null;
+      const response = await fetch(`/api/users/${(shopData as any).adminId}`);
       if (!response.ok) throw new Error('Failed to fetch admin data');
       return response.json();
     },
-    enabled: !!shopData?.adminId,
+    enabled: !!(shopData as any)?.adminId,
     refetchInterval: 30000 // Refresh every 30 seconds
   });
 
