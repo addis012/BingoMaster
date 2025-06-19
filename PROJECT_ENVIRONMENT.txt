@@ -1,0 +1,402 @@
+================================================================================
+                        BINGOMASTER PROJECT ENVIRONMENT
+================================================================================
+
+PROJECT TYPE: Full-Stack Web Application (SaaS Bingo Management System)
+DEPLOYMENT: Replit Environment
+STATUS: Production Ready
+
+================================================================================
+                              ARCHITECTURE
+================================================================================
+
+PATTERN: Modern Full-Stack JavaScript Application
+- Backend: RESTful API with Express.js
+- Frontend: Single Page Application with React
+- Database: PostgreSQL with ORM
+- Real-time: WebSocket connections for live gameplay
+- Authentication: Session-based with secure cookies
+
+================================================================================
+                              BACKEND STACK
+================================================================================
+
+RUNTIME & FRAMEWORK:
+- Node.js 20.x
+- Express.js 4.x
+- TypeScript for type safety
+
+SERVER CONFIGURATION:
+- Port: 5000 (binds to 0.0.0.0 for Replit)
+- Environment: NODE_ENV=development
+- Session Management: express-session with MemoryStore
+- CORS: Configured for frontend integration
+
+DATABASE LAYER:
+- PostgreSQL (Neon-backed, managed by Replit)
+- ORM: Drizzle ORM with drizzle-kit
+- Connection: @neondatabase/serverless
+- Schema: TypeScript-first with Zod validation
+- Migrations: Push-based (npm run db:push)
+
+AUTHENTICATION:
+- Strategy: Session-based authentication
+- Library: Passport.js with passport-local
+- Password Hashing: bcrypt
+- Session Store: connect-pg-simple (PostgreSQL sessions)
+- Cookie Security: httpOnly, secure in production
+
+REAL-TIME FEATURES:
+- WebSocket Server: ws library
+- Game State Broadcasting: Live number calls, winner announcements
+- Connection Management: User session tracking
+
+API STRUCTURE:
+- Authentication: /api/auth/*
+- Game Management: /api/games/*
+- Cartela Management: /api/cartelas/*
+- Credit System: /api/credit/*
+- Admin Functions: /api/admin/*
+- Super Admin: /api/super-admin/*
+- Analytics: /api/analytics/*
+
+MIDDLEWARE STACK:
+1. express.json() - JSON body parsing
+2. express-session - Session management
+3. passport.initialize() - Authentication setup
+4. passport.session() - Session serialization
+5. Custom auth middleware - Route protection
+6. Error handling middleware
+
+================================================================================
+                              FRONTEND STACK
+================================================================================
+
+BUILD TOOL & BUNDLER:
+- Vite 5.x (Fast development and optimized builds)
+- TypeScript configuration
+- Hot Module Replacement (HMR)
+
+FRAMEWORK & LIBRARIES:
+- React 18.x with TypeScript
+- Routing: wouter (lightweight React router)
+- State Management: @tanstack/react-query v5
+- Forms: react-hook-form with @hookform/resolvers
+- UI Framework: shadcn/ui components
+
+STYLING & THEMING:
+- Tailwind CSS 3.x with custom configuration
+- PostCSS for processing
+- CSS Variables for theme management
+- Dark mode support with class-based toggling
+- Custom animations with tailwindcss-animate
+
+UI COMPONENT LIBRARY:
+- shadcn/ui components (Radix UI primitives)
+- Lucide React icons
+- React Icons for brand logos
+- Form components with Zod validation integration
+
+DATA FETCHING:
+- TanStack Query for server state management
+- Custom apiRequest utility for API calls
+- Optimistic updates and cache invalidation
+- Loading states and error handling
+
+ASSET MANAGEMENT:
+- Vite asset handling with @assets/ imports
+- Audio files for bingo number calls
+- Image optimization and lazy loading
+
+PAGE STRUCTURE:
+/
+├── Authentication (Login/Register)
+├── Super Admin Dashboard
+├── Admin Dashboard  
+├── Employee Dashboard
+└── Game Interface
+
+================================================================================
+                              DATABASE SCHEMA
+================================================================================
+
+CORE TABLES:
+- users: Multi-role user management (super_admin, admin, employee)
+- shops: Business locations managed by admins
+- cartelas: Bingo cards with patterns and numbers
+- games: Game sessions with state management
+- game_players: Player participation tracking
+- game_history: Completed game records
+
+FINANCIAL TABLES:
+- credit_loads: Admin credit purchase requests
+- transactions: Financial transaction logging
+- daily_summaries: Aggregated daily revenue
+- withdrawal_requests: Admin withdrawal requests
+- referral_commissions: Commission tracking
+
+RELATIONSHIPS:
+- Users belong to shops (except super_admin)
+- Cartelas belong to shops and admins
+- Games belong to shops and employees
+- Complex referral and commission relationships
+
+================================================================================
+                              SECURITY FEATURES
+================================================================================
+
+AUTHENTICATION & AUTHORIZATION:
+- Bcrypt password hashing (salt rounds: 12)
+- Session-based authentication with secure cookies
+- Role-based access control (RBAC)
+- Route-level permission checks
+
+DATA VALIDATION:
+- Zod schemas for runtime type checking
+- Frontend form validation with react-hook-form
+- Backend request validation middleware
+- SQL injection prevention with parameterized queries
+
+SESSION MANAGEMENT:
+- Secure session configuration
+- Session timeout handling
+- Cross-site request forgery (CSRF) protection
+- HttpOnly cookies for session storage
+
+================================================================================
+                              BUSINESS LOGIC
+================================================================================
+
+CREDIT SYSTEM:
+- Admin-based credit management
+- Employees use admin's credit balance
+- Real-time credit validation before game creation
+- Automatic credit deduction on game start
+
+GAME FLOW:
+1. Employee creates game (validates admin credits)
+2. Players join with cartela selection
+3. Game starts with number calling
+4. Winner verification with pattern checking
+5. Prize distribution and credit settlement
+
+WINNING PATTERNS:
+- Single line wins: Horizontal, Vertical, Diagonal
+- Visual winner highlighting with blue blinking animation
+- Real-time winner verification and announcement
+
+CARTELA MANAGEMENT:
+- Admin-specific cartela libraries
+- Custom cartela creation and editing
+- Hardcoded cartela system disabled
+- Pattern validation and number verification
+
+================================================================================
+                              DEVELOPMENT WORKFLOW
+================================================================================
+
+PACKAGE MANAGEMENT:
+- npm as primary package manager
+- package-lock.json for dependency locking
+- Script-based development workflow
+
+DEVELOPMENT SCRIPTS:
+- npm run dev: Start development server
+- npm run build: Production build
+- npm run db:push: Database schema deployment
+- npm run db:generate: Drizzle schema generation
+
+FILE STRUCTURE:
+/
+├── client/           # React frontend
+│   ├── src/
+│   │   ├── components/   # Reusable UI components
+│   │   ├── pages/       # Route components
+│   │   ├── lib/         # Utilities and configurations
+│   │   └── hooks/       # Custom React hooks
+├── server/           # Express backend
+│   ├── routes.ts        # API route definitions
+│   ├── storage.ts       # Database operations
+│   ├── index.ts         # Server entry point
+│   └── db.ts           # Database connection
+├── shared/           # Shared TypeScript types
+│   └── schema.ts        # Drizzle schema definitions
+└── Configuration files
+
+ENVIRONMENT VARIABLES:
+- DATABASE_URL: PostgreSQL connection string
+- NODE_ENV: Environment mode (development/production)
+- Session secrets and security keys
+
+================================================================================
+                              REPLIT INTEGRATION
+================================================================================
+
+WORKFLOW CONFIGURATION:
+- Primary workflow: "Start application" (npm run dev)
+- Automatic restart on file changes
+- Port binding to 0.0.0.0 for external access
+
+DEPLOYMENT FEATURES:
+- Built-in PostgreSQL database
+- Automatic environment variable management
+- Integrated file system and shell access
+- Zero-configuration deployment ready
+
+DEVELOPMENT TOOLS:
+- Integrated terminal and console
+- Real-time log streaming
+- Database management interface
+- Automatic package installation
+
+================================================================================
+                              PERFORMANCE OPTIMIZATIONS
+================================================================================
+
+FRONTEND:
+- Vite fast build system with ESBuild
+- Code splitting and lazy loading
+- TanStack Query caching and background updates
+- Optimized bundle size with tree shaking
+
+BACKEND:
+- Connection pooling for database
+- Efficient SQL queries with Drizzle ORM
+- Session optimization with PostgreSQL storage
+- WebSocket connection management
+
+DATABASE:
+- Indexed columns for fast queries
+- Optimized schema relationships
+- Efficient aggregation queries for analytics
+- Connection pooling for concurrent requests
+
+================================================================================
+                              MONITORING & LOGGING
+================================================================================
+
+APPLICATION LOGGING:
+- Express request/response logging
+- Game event tracking with detailed logs
+- Error logging with stack traces
+- Authentication event logging
+
+PERFORMANCE MONITORING:
+- API response time tracking
+- Database query performance
+- Real-time connection monitoring
+- Resource usage optimization
+
+ERROR HANDLING:
+- Global error middleware
+- Client-side error boundaries
+- Graceful degradation for network issues
+- User-friendly error messages
+
+================================================================================
+                              PRODUCTION READINESS
+================================================================================
+
+SCALABILITY:
+- Stateless server design
+- Database connection pooling
+- Efficient caching strategies
+- WebSocket connection optimization
+
+RELIABILITY:
+- Comprehensive error handling
+- Data validation at all layers
+- Transaction safety for financial operations
+- Session persistence across restarts
+
+MAINTAINABILITY:
+- TypeScript for type safety
+- Modular architecture
+- Clear separation of concerns
+- Comprehensive documentation
+
+================================================================================
+                              API ENDPOINTS SUMMARY
+================================================================================
+
+AUTHENTICATION:
+POST   /api/auth/login
+POST   /api/auth/register  
+POST   /api/auth/logout
+GET    /api/auth/me
+
+GAME MANAGEMENT:
+POST   /api/games
+GET    /api/games/active
+PATCH  /api/games/:id/start
+PATCH  /api/games/:id/numbers
+POST   /api/games/:id/players
+PATCH  /api/games/:id/complete
+
+CARTELA MANAGEMENT:
+GET    /api/cartelas/:shopId
+POST   /api/cartelas
+PUT    /api/cartelas/:id
+DELETE /api/cartelas/:id
+
+CREDIT SYSTEM:
+GET    /api/credit/balance
+POST   /api/credit/load
+GET    /api/credit/transfers
+
+ADMIN FUNCTIONS:
+GET    /api/admin/employees
+POST   /api/admin/employees
+GET    /api/admin/shop-stats
+GET    /api/analytics/shop/:shopId
+
+SUPER ADMIN:
+GET    /api/super-admin/admins
+GET    /api/super-admin/revenues
+POST   /api/admin/credit-loads/:id/process
+
+================================================================================
+                              CURRENT STATUS
+================================================================================
+
+COMPLETED FEATURES:
+✓ Multi-role authentication system
+✓ Credit validation with admin balance checking
+✓ Custom cartela management system
+✓ Real-time bingo gameplay
+✓ Winner verification with pattern highlighting
+✓ Financial transaction tracking
+✓ Admin and employee dashboards
+✓ WebSocket real-time communication
+
+SYSTEM HEALTH:
+✓ Database connected and operational
+✓ Server running on port 5000
+✓ Frontend development server active
+✓ Authentication working correctly
+✓ Credit validation preventing unauthorized games
+✓ Hardcoded cartela auto-loading disabled
+
+RECENT FIXES:
+✓ Fixed credit validation to use admin balance instead of employee balance
+✓ Removed automatic hardcoded cartela loading (77 default cartelas)
+✓ Fixed undefined variable bug in game creation
+✓ Implemented proper winner cell highlighting with blue blinking animation
+
+================================================================================
+                              NEXT STEPS
+================================================================================
+
+DEPLOYMENT:
+- Ready for Replit deployment
+- Environment variables configured
+- Database schema deployed
+- Application fully functional
+
+POTENTIAL ENHANCEMENTS:
+- Email notifications for important events
+- Advanced analytics and reporting
+- Mobile-responsive optimizations
+- Performance monitoring dashboard
+
+================================================================================
