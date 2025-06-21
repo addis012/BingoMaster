@@ -1,0 +1,106 @@
+root@aradabingo:/opt/aradabingo# pm2 logs aradabingo --lines 50
+[TAILING] Tailing last 50 lines for [aradabingo] process (change the value with --lines option)
+/root/.pm2/logs/aradabingo-out-0.log last 50 lines:
+0|aradabin | 11:17:44 PM [express] POST /api/v1/validate/code 200 in 3ms
+0|aradabin | 11:37:10 PM [express] POST /api/v1/validate/code 200 in 1ms
+0|aradabin | 1:09:33 AM [express] GET /api/auth/me 401 in 3ms :: {"message":"Not authenticated"}
+0|aradabin | 5:55:55 AM [express] serving on port 5000
+0|aradabin | Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.
+0|aradabin | 5:57:58 AM [express] serving on port 5000
+0|aradabin | Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.
+0|aradabin | 5:59:03 AM [express] GET /api/auth/me 401 in 5ms :: {"message":"Not authenticated"}
+0|aradabin | 5:59:13 AM [express] POST /api/auth/login 500 in 62ms :: {"message":"Login failed","error":""}
+0|aradabin | 5:59:21 AM [express] POST /api/auth/login 500 in 11ms :: {"message":"Login failed","error":""}
+0|aradabin | 5:59:21 AM [express] GET /api/auth/me 401 in 2ms :: {"message":"Not authenticated"}
+0|aradabin | 5:59:30 AM [express] POST /api/auth/login 500 in 5ms :: {"message":"Login failed","error":""}
+0|aradabin | 5:59:57 AM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+0|aradabin | 6:13:27 AM [express] serving on port 5000
+0|aradabin | Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.
+0|aradabin | 6:13:47 AM [express] GET /api/auth/me 401 in 9ms :: {"message":"Not authenticated"}
+0|aradabin | 6:13:50 AM [express] GET /api/auth/me 401 in 2ms :: {"message":"Not authenticated"}
+0|aradabin | 6:13:58 AM [express] POST /api/auth/login 500 in 64ms :: {"message":"Login failed","error":""}
+0|aradabin | 6:14:45 AM [express] serving on port 5000
+0|aradabin | Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.
+0|aradabin | 6:16:04 AM [express] GET /api/auth/me 401 in 5ms :: {"message":"Not authenticated"}
+0|aradabin | 6:16:06 AM [express] POST /api/auth/login 500 in 67ms :: {"message":"Login failed","error":""}
+0|aradabin | 6:16:07 AM [express] POST /api/auth/login 500 in 10ms :: {"message":"Login failed","error":""}
+0|aradabin | 6:16:07 AM [express] POST /api/auth/login 500 in 9ms :: {"message":"Login failed","error":""}
+0|aradabin | 12:39:06 PM [express] GET /api/auth/me 401 in 3ms :: {"message":"Not authenticated"}
+0|aradabin | 12:39:08 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+0|aradabin | 12:39:15 PM [express] POST /api/auth/login 500 in 10ms :: {"message":"Login failed","error":""}
+0|aradabin | 1:01:29 PM [express] serving on port 5000
+0|aradabin | Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.
+0|aradabin | 1:01:55 PM [express] GET /api/auth/me 401 in 5ms :: {"message":"Not authenticated"}
+0|aradabin | 1:01:57 PM [express] GET /api/auth/me 401 in 2ms :: {"message":"Not authenticated"}
+0|aradabin | 1:02:06 PM [express] GET /api/auth/me 401 in 2ms :: {"message":"Not authenticated"}
+0|aradabin | 1:02:17 PM [express] POST /api/auth/login 500 in 63ms :: {"message":"Login failed","error":""}
+0|aradabin | 1:07:19 PM [express] GET /api/auth/me 401 in 3ms :: {"message":"Not authenticated"}
+0|aradabin | 1:07:21 PM [express] POST /api/auth/login 500 in 9ms :: {"message":"Login failed","error":""}
+0|aradabin | 1:18:56 PM [express] GET /api/auth/me 401 in 3ms :: {"message":"Not authenticated"}
+0|aradabin | 1:22:28 PM [express] serving on port 5000
+0|aradabin | Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.
+0|aradabin | 1:22:50 PM [express] GET /api/auth/me 401 in 3ms :: {"message":"Not authenticated"}
+0|aradabin | 1:22:54 PM [express] POST /api/auth/login 500 in 62ms :: {"message":"Login failed","error":""}
+0|aradabin | 1:24:02 PM [express] GET /api/auth/me 401 in 2ms :: {"message":"Not authenticated"}
+0|aradabin | 1:26:38 PM [express] GET /api/auth/me 401 in 2ms :: {"message":"Not authenticated"}
+0|aradabin | 1:26:42 PM [express] POST /api/auth/login 500 in 11ms :: {"message":"Login failed","error":""}
+0|aradabin | 1:26:57 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+0|aradabin | 1:27:07 PM [express] POST /api/auth/login 500 in 10ms :: {"message":"Login failed","error":""}
+0|aradabin | 1:27:41 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+0|aradabin | 1:27:48 PM [express] POST /api/auth/login 500 in 8ms :: {"message":"Login failed","error":""}
+0|aradabin | 1:59:42 PM [express] GET /api/auth/me 401 in 3ms :: {"message":"Not authenticated"}
+0|aradabin | 1:59:46 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+0|aradabin | 1:59:56 PM [express] POST /api/auth/login 500 in 10ms :: {"message":"Login failed","error":""}
+
+/root/.pm2/logs/aradabingo-error-0.log last 50 lines:
+0|aradabin |   [Symbol(kError)]: AggregateError [ECONNREFUSED]:
+0|aradabin |       at internalConnectMultiple (node:net:1122:18)
+0|aradabin |       at afterConnectMultiple (node:net:1689:7) {
+0|aradabin |     code: 'ECONNREFUSED',
+0|aradabin |     [errors]: [ [Error], [Error] ]
+0|aradabin |   },
+0|aradabin |   [Symbol(kMessage)]: ''
+0|aradabin | }
+0|aradabin | Login error: ErrorEvent {
+0|aradabin |   [Symbol(kTarget)]: WebSocket {
+0|aradabin |     _events: [Object: null prototype] {
+0|aradabin |       error: [Function],
+0|aradabin |       message: [Function],
+0|aradabin |       close: [Function],
+0|aradabin |       open: [Function]
+0|aradabin |     },
+0|aradabin |     _eventsCount: 4,
+0|aradabin |     _maxListeners: undefined,
+0|aradabin |     _binaryType: 'arraybuffer',
+0|aradabin |     _closeCode: 1006,
+0|aradabin |     _closeFrameReceived: false,
+0|aradabin |     _closeFrameSent: false,
+0|aradabin |     _closeMessage: <Buffer >,
+0|aradabin |     _closeTimer: null,
+0|aradabin |     _errorEmitted: true,
+0|aradabin |     _extensions: {},
+0|aradabin |     _paused: false,
+0|aradabin |     _protocol: '',
+0|aradabin |     _readyState: 3,
+0|aradabin |     _receiver: null,
+0|aradabin |     _sender: null,
+0|aradabin |     _socket: null,
+0|aradabin |     _bufferedAmount: 0,
+0|aradabin |     _isServer: false,
+0|aradabin |     _redirects: 0,
+0|aradabin |     _autoPong: true,
+0|aradabin |     _url: 'wss://localhost/v2',
+0|aradabin |     _req: null,
+0|aradabin |     [Symbol(shapeMode)]: false,
+0|aradabin |     [Symbol(kCapture)]: false
+0|aradabin |   },
+0|aradabin |   [Symbol(kType)]: 'error',
+0|aradabin |   [Symbol(kError)]: AggregateError [ECONNREFUSED]:
+0|aradabin |       at internalConnectMultiple (node:net:1122:18)
+0|aradabin |       at afterConnectMultiple (node:net:1689:7) {
+0|aradabin |     code: 'ECONNREFUSED',
+0|aradabin |     [errors]: [ [Error], [Error] ]
+0|aradabin |   },
+0|aradabin |   [Symbol(kMessage)]: ''
+0|aradabin | }
+
