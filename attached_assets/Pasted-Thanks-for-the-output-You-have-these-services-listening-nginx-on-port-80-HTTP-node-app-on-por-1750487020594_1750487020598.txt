@@ -1,0 +1,84 @@
+Thanks for the output.
+
+You have these services listening:
+
+nginx on port 80 (HTTP)
+
+node app on port 5000
+
+postgres on 5432
+
+SSH on 22
+
+No service is listening on port 443 (HTTPS), which is required for wss:// (secure WebSocket) on default HTTPS port.
+
+What to do next:
+If your WebSocket server is supposed to run on port 443 for wss://localhost/v2, it is currently not running.
+
+Options:
+
+Start a WebSocket server that listens on port 443 (needs root or appropriate permissions).
+
+Or configure your app to connect over unsecure WS (e.g., ws://localhost:5000/v2) if you are on localhost and HTTPS is not mandatory.
+
+Or configure your app and nginx to proxy WebSocket connections properly if you want secure WS through nginx on 443.
+
+Quick checks/questions:
+Are you running nginx with HTTPS (TLS) configured on your server?
+
+If not, you cannot have wss://localhost/v2 unless you configure TLS and a WebSocket service behind it.
+
+Does your app or infrastructure expect nginx to reverse proxy WebSocket connections on port 443?
+
+If yes, check your nginx config.
+
+How to test changing your config:
+If you have access to your environment variables or config file, try changing the WS URL from:
+
+text
+Copy
+Edit
+wss://localhost/v2
+to
+
+text
+Copy
+Edit
+ws://localhost:5000/v2
+or
+
+text
+Copy
+Edit
+ws://127.0.0.1:5000/v2
+Because your node app is listening on port 5000, so WS connection on ws://localhost:5000/v2 may work if the WS server is on the same port.
+
+Nginx WebSocket proxy example (if you want to proxy ws on 443):
+nginx
+Copy
+Edit
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location /v2 {
+        proxy_pass http://localhost:5000/v2;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+    }
+}
+If you want, share your WS connection config or relevant .env variables and nginx config — I can help you tailor the fix!
+
+
+
+
+
+
+
+
+
