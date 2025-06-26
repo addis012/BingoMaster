@@ -262,6 +262,20 @@ export class DatabaseStorage implements IStorage {
     return game || undefined;
   }
 
+  async getActiveGameByShop(shopId: number): Promise<Game | undefined> {
+    const [game] = await db.select().from(games)
+      .where(and(
+        eq(games.shopId, shopId),
+        or(
+          eq(games.status, 'waiting'),
+          eq(games.status, 'pending'),
+          eq(games.status, 'active')
+        )
+      ))
+      .orderBy(desc(games.id));
+    return game || undefined;
+  }
+
   async createGame(insertGame: InsertGame): Promise<Game> {
     const [game] = await db.insert(games).values(insertGame).returning();
     return game;

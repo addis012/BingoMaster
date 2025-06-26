@@ -2627,7 +2627,8 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         return res.status(403).json({ message: "Employee access required" });
       }
 
-      const activeGame = await storage.getActiveGameByEmployee(user.id);
+      // Get active game by shop instead of by employee
+      const activeGame = await storage.getActiveGameByShop(user.shopId!);
       res.json(activeGame);
     } catch (error) {
       console.error("Get active game error:", error);
@@ -2956,24 +2957,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
   // Employee Game Management API Endpoints
 
   // Get active game for employee
-  app.get("/api/games/active", async (req: Request, res) => {
-    try {
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
 
-      const user = await storage.getUser(userId);
-      if (!user || user.role !== 'employee') {
-        return res.status(403).json({ message: "Employee access required" });
-      }
-
-      const activeGame = await storage.getActiveGameByEmployee(userId);
-      res.json(activeGame);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get active game" });
-    }
-  });
 
   // Create new game
   app.post("/api/games", async (req: Request, res) => {
