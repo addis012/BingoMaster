@@ -1617,7 +1617,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           <DialogHeader>
             <DialogTitle>Select Fixed Cartelas (1-75)</DialogTitle>
             <DialogDescription>
-              Choose from 75 official fixed cartelas. Selected: {selectedCartelas.size} cartelas
+              Choose from 75 official fixed cartelas. Selected: {selectedCartelas.size} cartelas | Unavailable: {bookedCartelas.size} cartelas
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-10 gap-4 p-6">
