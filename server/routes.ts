@@ -3467,6 +3467,63 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
+  // Employee routes for cartela marking
+  app.post("/api/employees/mark-cartela", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const { cartelaId, employeeId } = req.body;
+      
+      if (!cartelaId || !employeeId) {
+        return res.status(400).json({ message: "Cartela ID and employee ID required" });
+      }
+
+      // Mark cartela as booked by this employee
+      await storage.markCartelaByEmployee(cartelaId, employeeId);
+      
+      res.json({ success: true, message: "Cartela marked successfully" });
+    } catch (error) {
+      console.error("Error marking cartela:", error);
+      res.status(500).json({ message: "Failed to mark cartela" });
+    }
+  });
+
+  app.post("/api/employees/unmark-cartela", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const { cartelaId, employeeId } = req.body;
+      
+      if (!cartelaId || !employeeId) {
+        return res.status(400).json({ message: "Cartela ID and employee ID required" });
+      }
+
+      // Unmark cartela
+      await storage.unmarkCartelaByEmployee(cartelaId, employeeId);
+      
+      res.json({ success: true, message: "Cartela unmarked successfully" });
+    } catch (error) {
+      console.error("Error unmarking cartela:", error);
+      res.status(500).json({ message: "Failed to unmark cartela" });
+    }
+  });
+
   app.get("/api/collectors/:collectorId/stats", async (req: Request, res) => {
     try {
       const userId = req.session?.userId;

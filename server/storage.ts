@@ -140,6 +140,10 @@ export interface IStorage {
   getCollectorStats(collectorId: number): Promise<any>;
   getCollectorsByEmployee(employeeId: number): Promise<User[]>;
   
+  // Employee cartela marking methods
+  markCartelaByEmployee(cartelaId: number, employeeId: number): Promise<void>;
+  unmarkCartelaByEmployee(cartelaId: number, employeeId: number): Promise<void>;
+  
   // EAT time zone utility methods
   getCurrentEATDate(): string;
   performDailyReset(): Promise<void>;
@@ -1665,6 +1669,29 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(users.supervisorId, employeeId),
         eq(users.role, 'collector')
+      ));
+  }
+
+  async markCartelaByEmployee(cartelaId: number, employeeId: number): Promise<void> {
+    await db.update(cartelas)
+      .set({
+        bookedBy: employeeId,
+        isBooked: true,
+        updatedAt: new Date()
+      })
+      .where(eq(cartelas.id, cartelaId));
+  }
+
+  async unmarkCartelaByEmployee(cartelaId: number, employeeId: number): Promise<void> {
+    await db.update(cartelas)
+      .set({
+        bookedBy: null,
+        isBooked: false,
+        updatedAt: new Date()
+      })
+      .where(and(
+        eq(cartelas.id, cartelaId),
+        eq(cartelas.bookedBy, employeeId)
       ));
   }
 }
