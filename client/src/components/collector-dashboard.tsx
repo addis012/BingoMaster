@@ -190,123 +190,139 @@ export function CollectorDashboard({ user }: { user: User }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div className="text-center flex-1 space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900">
+    <div className="min-h-screen bg-gray-50 p-2 sm:p-4">
+      <div className="max-w-md mx-auto space-y-4 sm:max-w-7xl sm:space-y-6">
+        {/* Mobile Header */}
+        <div className="flex flex-col space-y-3 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+          <div className="text-center sm:text-left flex-1">
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
               Collector Dashboard
             </h1>
-            <p className="text-gray-600">
-              Collector: {user.name} | Working under: {(supervisor as any)?.name || 'Loading...'} | Shop: {user.shopId}
-            </p>
+            <div className="text-xs sm:text-base text-gray-600 mt-1">
+              <div className="sm:hidden">
+                <div><strong>{user.name}</strong></div>
+                <div>Under: {(supervisor as any)?.name || 'Loading...'}</div>
+                <div>Shop: {user.shopId}</div>
+              </div>
+              <div className="hidden sm:block">
+                Collector: {user.name} | Working under: {(supervisor as any)?.name || 'Loading...'} | Shop: {user.shopId}
+              </div>
+            </div>
           </div>
-          <Button variant="outline" onClick={handleLogout} className="ml-4">
+          <Button variant="outline" onClick={handleLogout} className="w-full sm:w-auto sm:ml-4">
             <LogOut className="w-4 h-4 mr-2" />
             Logout
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Mobile Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Marked</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalMarked || 0}</div>
+            <CardContent className="pt-1 sm:pt-2">
+              <div className="text-lg sm:text-2xl font-bold">{stats?.totalMarked || 0}</div>
               <p className="text-xs text-muted-foreground">All time</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Today</CardTitle>
-              <TrendingUp className="h-4 w-4 text-blue-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Today</CardTitle>
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.todayMarked || 0}</div>
+            <CardContent className="pt-1 sm:pt-2">
+              <div className="text-lg sm:text-2xl font-bold">{stats?.todayMarked || 0}</div>
               <p className="text-xs text-muted-foreground">Today's count</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Available</CardTitle>
-              <Clock className="h-4 w-4 text-orange-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Available</CardTitle>
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{availableCartelas.length}</div>
-              <p className="text-xs text-muted-foreground">Ready to mark</p>
+            <CardContent className="pt-1 sm:pt-2">
+              <div className="text-lg sm:text-2xl font-bold">{availableCartelas.length}</div>
+              <p className="text-xs text-muted-foreground">Ready</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">My Marked</CardTitle>
-              <Users className="h-4 w-4 text-purple-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Mine</CardTitle>
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{myMarkedCartelas.length}</div>
+            <CardContent className="pt-1 sm:pt-2">
+              <div className="text-lg sm:text-2xl font-bold">{myMarkedCartelas.length}</div>
               <p className="text-xs text-muted-foreground">Collected</p>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="mark" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="mark">Mark Cartelas</TabsTrigger>
-            <TabsTrigger value="my-marked">My Marked ({myMarkedCartelas.length})</TabsTrigger>
-            <TabsTrigger value="available">Available ({availableCartelas.length})</TabsTrigger>
+        <Tabs defaultValue="mark" className="space-y-3 sm:space-y-4">
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="mark" className="text-xs sm:text-sm py-2 sm:py-3">
+              <span className="hidden sm:inline">Mark Cartelas</span>
+              <span className="sm:hidden">Mark</span>
+            </TabsTrigger>
+            <TabsTrigger value="my-marked" className="text-xs sm:text-sm py-2 sm:py-3">
+              <span className="hidden sm:inline">My Marked ({myMarkedCartelas.length})</span>
+              <span className="sm:hidden">Mine ({myMarkedCartelas.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="available" className="text-xs sm:text-sm py-2 sm:py-3">
+              <span className="hidden sm:inline">Available ({availableCartelas.length})</span>
+              <span className="sm:hidden">Free ({availableCartelas.length})</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="mark" className="space-y-4">
+          <TabsContent value="mark" className="space-y-3 sm:space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Available Cartelas for Collection</CardTitle>
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg">Available Cartelas</CardTitle>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       type="text"
-                      placeholder="Search cartela number..."
+                      placeholder="Search number..."
                       value={searchCartela}
                       onChange={(e) => setSearchCartela(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-sm sm:text-base"
                     />
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6">
                 {cartelasLoading ? (
                   <div className="text-center py-8">Loading cartelas...</div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="grid grid-cols-8 md:grid-cols-12 lg:grid-cols-16 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2 sm:gap-3">
                       {availableCartelas.map((cartela: Cartela) => (
-                        <div key={cartela.id} className="flex flex-col items-center">
+                        <div key={cartela.id} className="flex flex-col items-center space-y-1">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full h-12 text-xs flex flex-col gap-1 hover:bg-blue-50 hover:border-blue-300"
+                            className="w-full h-14 sm:h-12 text-xs flex flex-col gap-1 hover:bg-blue-50 hover:border-blue-300 active:bg-blue-100"
                             onClick={() => handleMarkCartela(cartela.id)}
                             disabled={markCartelaMutation.isPending}
                           >
-                            <span className="font-semibold">{cartela.cartelaNumber}</span>
-                            <span className="text-xs text-muted-foreground truncate w-full">
+                            <span className="font-bold text-sm sm:text-xs">{cartela.cartelaNumber}</span>
+                            <span className="text-xs text-muted-foreground truncate w-full hidden sm:block">
                               {cartela.name}
                             </span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-full mt-1 text-xs"
+                            className="h-5 w-full text-xs px-1 sm:h-6 sm:px-2"
                             onClick={() => handleViewCartela(cartela)}
                           >
                             <Eye className="h-3 w-3 mr-1" />
-                            View
+                            <span className="hidden sm:inline">View</span>
                           </Button>
                         </div>
                       ))}
@@ -322,45 +338,45 @@ export function CollectorDashboard({ user }: { user: User }) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="my-marked" className="space-y-4">
+          <TabsContent value="my-marked" className="space-y-3 sm:space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>My Marked Cartelas</CardTitle>
-                <p className="text-sm text-muted-foreground">Cartelas you have collected - click to unbook if needed</p>
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg">My Marked Cartelas</CardTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground">Tap to unbook if needed</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6">
                 <div className="space-y-2">
-                  <div className="grid grid-cols-8 md:grid-cols-12 lg:grid-cols-16 gap-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2 sm:gap-3">
                     {myMarkedCartelas.map((cartela: Cartela) => (
-                      <div key={cartela.id} className="flex flex-col items-center">
+                      <div key={cartela.id} className="flex flex-col items-center space-y-1">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full h-12 text-xs flex flex-col gap-1 bg-green-50 border-green-300 hover:bg-green-100"
+                          className="w-full h-14 sm:h-12 text-xs flex flex-col gap-1 bg-green-50 border-green-300 hover:bg-green-100 active:bg-green-200"
                         >
-                          <span className="font-semibold">{cartela.cartelaNumber}</span>
-                          <span className="text-xs text-muted-foreground truncate w-full">
+                          <span className="font-bold text-sm sm:text-xs">{cartela.cartelaNumber}</span>
+                          <span className="text-xs text-muted-foreground truncate w-full hidden sm:block">
                             {cartela.name}
                           </span>
                         </Button>
-                        <div className="flex gap-1 mt-1 w-full">
+                        <div className="flex gap-1 w-full">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 flex-1 text-xs"
+                            className="h-5 flex-1 text-xs px-1 sm:h-6 sm:px-2"
                             onClick={() => handleViewCartela(cartela)}
                           >
                             <Eye className="h-3 w-3 mr-1" />
-                            View
+                            <span className="hidden sm:inline">View</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 flex-1 text-xs text-red-600 hover:text-red-700"
+                            className="h-5 flex-1 text-xs text-red-600 hover:text-red-700 px-1 sm:h-6 sm:px-2"
                             onClick={() => handleUnmarkCartela(cartela.id)}
                             disabled={unmarkCartelaMutation.isPending}
                           >
-                            {unmarkCartelaMutation.isPending ? "..." : "Unbook"}
+                            {unmarkCartelaMutation.isPending ? "..." : "✕"}
                           </Button>
                         </div>
                       </div>
@@ -376,35 +392,35 @@ export function CollectorDashboard({ user }: { user: User }) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="available" className="space-y-4">
+          <TabsContent value="available" className="space-y-3 sm:space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>All Available Cartelas</CardTitle>
-                <p className="text-sm text-muted-foreground">Overview of all available cartelas in this shop</p>
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg">All Available Cartelas</CardTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground">View only - can't mark from here</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6">
                 <div className="space-y-2">
-                  <div className="grid grid-cols-8 md:grid-cols-12 lg:grid-cols-16 gap-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2 sm:gap-3">
                     {availableCartelas.map((cartela: Cartela) => (
-                      <div key={cartela.id} className="flex flex-col items-center">
+                      <div key={cartela.id} className="flex flex-col items-center space-y-1">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full h-12 text-xs flex flex-col gap-1 hover:bg-gray-50"
+                          className="w-full h-14 sm:h-12 text-xs flex flex-col gap-1 hover:bg-gray-50 active:bg-gray-100"
                         >
-                          <span className="font-semibold">{cartela.cartelaNumber}</span>
-                          <span className="text-xs text-muted-foreground truncate w-full">
+                          <span className="font-bold text-sm sm:text-xs">{cartela.cartelaNumber}</span>
+                          <span className="text-xs text-muted-foreground truncate w-full hidden sm:block">
                             {cartela.name}
                           </span>
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-full mt-1 text-xs"
+                          className="h-5 w-full text-xs px-1 sm:h-6 sm:px-2"
                           onClick={() => handleViewCartela(cartela)}
                         >
                           <Eye className="h-3 w-3 mr-1" />
-                          View
+                          <span className="hidden sm:inline">View</span>
                         </Button>
                       </div>
                     ))}
