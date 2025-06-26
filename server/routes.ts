@@ -3419,8 +3419,8 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       }
 
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'collector') {
-        return res.status(403).json({ message: "Collector access required" });
+      if (!user || (user.role !== 'collector' && user.role !== 'employee')) {
+        return res.status(403).json({ message: "Collector or employee access required" });
       }
 
       const { cartelaId, collectorId } = req.body;
@@ -3447,8 +3447,8 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       }
 
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'collector') {
-        return res.status(403).json({ message: "Collector access required" });
+      if (!user || (user.role !== 'collector' && user.role !== 'employee')) {
+        return res.status(403).json({ message: "Collector or employee access required" });
       }
 
       const { cartelaId, collectorId } = req.body;
