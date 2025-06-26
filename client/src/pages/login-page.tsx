@@ -36,6 +36,8 @@ export default function LoginPage() {
         setLocation("/dashboard/admin");
       } else if (user.role === "employee") {
         setLocation("/dashboard/employee");
+      } else if (user.role === "collector") {
+        setLocation("/dashboard/collector");
       }
     },
     onError: (error: any) => {
@@ -74,6 +76,8 @@ export default function LoginPage() {
               Admin users will be redirected to admin dashboard
               <br />
               Employee users will be redirected to employee dashboard
+              <br />
+              Collector users will be redirected to collector dashboard
             </span>
           </CardDescription>
         </CardHeader>
