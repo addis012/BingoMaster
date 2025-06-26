@@ -1600,6 +1600,18 @@ export class DatabaseStorage implements IStorage {
       ));
   }
 
+  async resetShopCartelas(shopId: number): Promise<void> {
+    await db.update(cartelas)
+      .set({
+        collectorId: null,
+        markedAt: null,
+        isBooked: false,
+        bookedBy: null,
+        updatedAt: new Date()
+      })
+      .where(eq(cartelas.shopId, shopId));
+  }
+
   async getCollectorStats(collectorId: number): Promise<any> {
     const today = new Date().toISOString().split('T')[0];
     

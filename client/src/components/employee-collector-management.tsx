@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Users, UserCheck, Clock } from "lucide-react";
+import { Plus, Users, UserCheck, Clock, RotateCcw } from "lucide-react";
 
 interface User {
   id: number;
@@ -45,6 +45,26 @@ export function EmployeeCollectorManagement({ user }: { user: User }) {
       password: "",
       name: "",
       email: "",
+    },
+  });
+
+  // Reset cartelas mutation
+  const resetCartelasMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/cartelas/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shopId: user.shopId }),
+      });
+      if (!response.ok) throw new Error("Failed to reset cartelas");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "All cartelas have been reset and are now available" });
+      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user.shopId}`] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -99,13 +119,27 @@ export function EmployeeCollectorManagement({ user }: { user: User }) {
           <p className="text-gray-600">Manage cartela collectors under your supervision</p>
         </div>
         
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => resetCartelasMutation.mutate()}
+            disabled={resetCartelasMutation.isPending}
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            {resetCartelasMutation.isPending ? "Resetting..." : "Reset All Cartelas"}
+          </Button>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Collector
+              </Button>
+            </DialogTrigger>
+          </Dialog>
+        </div>
+        
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Collector
-            </Button>
-          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create New Collector</DialogTitle>
