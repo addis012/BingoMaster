@@ -103,7 +103,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const amountPerCartela = parseFloat(gameAmount) || 20;
     const totalCollected = totalCartelas * amountPerCartela;
     // Use shop's actual profit margin from shopData
-    const profitMargin = (shopData?.profitMargin || 10) / 100;
+    const profitMargin = ((shopData as any)?.profitMargin || 10) / 100;
     const winnerAmount = totalCollected * (1 - profitMargin);
     const profitAmount = totalCollected * profitMargin;
     
@@ -124,14 +124,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Admin credit balance query
   const { data: adminData } = useQuery({
-    queryKey: ['/api/users', shopData?.adminId],
+    queryKey: ['/api/users', (shopData as any)?.adminId],
     queryFn: async () => {
-      if (!shopData?.adminId) return null;
-      const response = await fetch(`/api/users/${shopData.adminId}`);
+      if (!(shopData as any)?.adminId) return null;
+      const response = await fetch(`/api/users/${(shopData as any).adminId}`);
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!shopData?.adminId,
+    enabled: !!(shopData as any)?.adminId,
     refetchInterval: 30000 // Check admin balance every 30 seconds
   });
 
@@ -195,7 +195,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       console.log("Game cartelas:", Array.from(gameCartelas));
       console.log("Collector marked cartelas:", collectorMarkedCartelas);
       
-      setBookedCartelas(new Set([...gameCartelas, ...collectorMarkedCartelas]));
+      setBookedCartelas(new Set([...Array.from(gameCartelas), ...collectorMarkedCartelas]));
       
       const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
@@ -1964,7 +1964,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
         <TabsContent value="collectors" className="mt-0">
           <div className="p-6">
-            <EmployeeCollectorManagement user={user!} />
+            <EmployeeCollectorManagement user={user as any} />
           </div>
         </TabsContent>
       </Tabs>
