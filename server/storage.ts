@@ -134,6 +134,12 @@ export interface IStorage {
   updateEmployeeProfitMargin(marginId: number, profitMargin: string, adminId: number): Promise<EmployeeProfitMargin>;
   updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
   
+  // Collector methods
+  markCartelaByCollector(cartelaId: number, collectorId: number): Promise<void>;
+  unmarkCartelaByCollector(cartelaId: number, collectorId: number): Promise<void>;
+  getCollectorStats(collectorId: number): Promise<any>;
+  getCollectorsByEmployee(employeeId: number): Promise<User[]>;
+  
   // EAT time zone utility methods
   getCurrentEATDate(): string;
   performDailyReset(): Promise<void>;
@@ -1569,6 +1575,85 @@ export class DatabaseStorage implements IStorage {
   async deleteCustomCartela(id: number): Promise<boolean> {
     const result = await db.delete(customCartelas).where(eq(customCartelas.id, id));
     return result.rowCount > 0;
+  }
+
+  async markCartelaByCollector(cartelaId: number, collectorId: number): Promise<void> {
+    await db.update(cartelas)
+      .set({
+        collectorId,
+        markedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(cartelas.id, cartelaId));
+  }
+
+  async unmarkCartelaByCollector(cartelaId: number, collectorId: number): Promise<void> {
+    await db.update(cartelas)
+      .set({
+        collectorId: null,
+        markedAt: null,
+        updatedAt: new Date()
+      })
+      .where(and(
+        eq(cartelas.id, cartelaId),
+        eq(cartelas.collectorId, collectorId)
+      ));
+  }
+
+  async getCollectorStats(collectorId: number): Promise<any> {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Total cartelas marked by this collector
+    const totalMarked = await db.select({ count: count() })
+      .from(cartelas)
+      .where(eq(cartelas.collectorId, collectorId));
+    
+    // Today's marked cartelas
+    const todayMarked = await db.select({ count: count() })
+      .from(cartelas)
+      .where(and(
+        eq(cartelas.collectorId, collectorId),
+        gte(cartelas.markedAt, new Date(today))
+      ));
+
+    // Get collector's shop to count available cartelas
+    const collector = await this.getUser(collectorId);
+    if (!collector?.shopId) {
+      return { totalMarked: 0, todayMarked: 0, availableCartelas: 0, bookedCartelas: 0 };
+    }
+
+    // Available cartelas in the shop
+    const availableCartelas = await db.select({ count: count() })
+      .from(cartelas)
+      .where(and(
+        eq(cartelas.shopId, collector.shopId),
+        eq(cartelas.isBooked, false),
+        eq(cartelas.collectorId, null)
+      ));
+
+    // Booked cartelas in the shop
+    const bookedCartelas = await db.select({ count: count() })
+      .from(cartelas)
+      .where(and(
+        eq(cartelas.shopId, collector.shopId),
+        eq(cartelas.isBooked, true)
+      ));
+
+    return {
+      totalMarked: totalMarked[0]?.count || 0,
+      todayMarked: todayMarked[0]?.count || 0,
+      availableCartelas: availableCartelas[0]?.count || 0,
+      bookedCartelas: bookedCartelas[0]?.count || 0
+    };
+  }
+
+  async getCollectorsByEmployee(employeeId: number): Promise<User[]> {
+    return await db.select()
+      .from(users)
+      .where(and(
+        eq(users.supervisorId, employeeId),
+        eq(users.role, 'collector')
+      ));
   }
 }
 

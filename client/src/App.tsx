@@ -8,6 +8,7 @@ import SimpleAdminDashboard from "./pages/simple-admin-dashboard";
 import SuperAdminDashboard from "./pages/super-admin-dashboard";
 import EmployeeDashboard from "./pages/employee-dashboard";
 import AdminEmployeeManagement from "./pages/admin-employee-management";
+import { CollectorDashboard } from "./components/collector-dashboard";
 
 function AppRouter() {
   const { user } = useAuth();
@@ -35,6 +36,9 @@ function AppRouter() {
       </Route>
       <Route path="/dashboard/employee">
         <EmployeeDashboard onLogout={handleLogout} />
+      </Route>
+      <Route path="/dashboard/collector">
+        {user ? <CollectorDashboard user={user} /> : <LoginPage />}
       </Route>
       
       {/* Legacy Routes for backward compatibility */}

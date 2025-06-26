@@ -3410,6 +3410,153 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
+  // Collector routes for cartela marking
+  app.post("/api/collectors/mark-cartela", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'collector') {
+        return res.status(403).json({ message: "Collector access required" });
+      }
+
+      const { cartelaId, collectorId } = req.body;
+      
+      if (!cartelaId || !collectorId) {
+        return res.status(400).json({ message: "Cartela ID and collector ID required" });
+      }
+
+      // Mark cartela as collected by this collector
+      await storage.markCartelaByCollector(cartelaId, collectorId);
+      
+      res.json({ success: true, message: "Cartela marked successfully" });
+    } catch (error) {
+      console.error("Error marking cartela:", error);
+      res.status(500).json({ message: "Failed to mark cartela" });
+    }
+  });
+
+  app.post("/api/collectors/unmark-cartela", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'collector') {
+        return res.status(403).json({ message: "Collector access required" });
+      }
+
+      const { cartelaId, collectorId } = req.body;
+      
+      if (!cartelaId || !collectorId) {
+        return res.status(400).json({ message: "Cartela ID and collector ID required" });
+      }
+
+      // Unmark cartela
+      await storage.unmarkCartelaByCollector(cartelaId, collectorId);
+      
+      res.json({ success: true, message: "Cartela unmarked successfully" });
+    } catch (error) {
+      console.error("Error unmarking cartela:", error);
+      res.status(500).json({ message: "Failed to unmark cartela" });
+    }
+  });
+
+  app.get("/api/collectors/:collectorId/stats", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const collectorId = parseInt(req.params.collectorId);
+      const stats = await storage.getCollectorStats(collectorId);
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting collector stats:", error);
+      res.status(500).json({ message: "Failed to get collector stats" });
+    }
+  });
+
+  // Employee routes for managing collectors
+  app.post("/api/employees/create-collector", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const { username, password, name, email } = req.body;
+      
+      if (!username || !password || !name) {
+        return res.status(400).json({ message: "Username, password, and name required" });
+      }
+
+      // Create collector under this employee
+      const collectorData = {
+        username,
+        password: await bcrypt.hash(password, 12),
+        name,
+        email: email || null,
+        role: 'collector' as const,
+        shopId: user.shopId!,
+        supervisorId: user.id, // Set employee as supervisor
+        isBlocked: false,
+        creditBalance: "0.00",
+        accountNumber: null,
+        referredBy: null,
+        commissionRate: "0.00"
+      };
+
+      const collector = await storage.createUser(collectorData);
+      
+      res.json({ 
+        success: true, 
+        collector: {
+          id: collector.id,
+          username: collector.username,
+          name: collector.name,
+          role: collector.role
+        }
+      });
+    } catch (error) {
+      console.error("Error creating collector:", error);
+      if (error.message?.includes('duplicate key')) {
+        res.status(400).json({ message: "Username already exists" });
+      } else {
+        res.status(500).json({ message: "Failed to create collector" });
+      }
+    }
+  });
+
+  app.get("/api/employees/:employeeId/collectors", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const employeeId = parseInt(req.params.employeeId);
+      const collectors = await storage.getCollectorsByEmployee(employeeId);
+      
+      res.json(collectors);
+    } catch (error) {
+      console.error("Error getting collectors:", error);
+      res.status(500).json({ message: "Failed to get collectors" });
+    }
+  });
+
   // Advanced Analytics and Reporting API Endpoints
 
   // Get comprehensive shop analytics

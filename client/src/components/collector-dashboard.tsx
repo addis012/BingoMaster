@@ -64,13 +64,17 @@ export function CollectorDashboard({ user }: { user: User }) {
   // Mark cartela mutation
   const markCartelaMutation = useMutation({
     mutationFn: async (cartelaId: number) => {
-      return apiRequest(`/api/collectors/mark-cartela`, {
+      const response = await fetch(`/api/collectors/mark-cartela`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           cartelaId,
           collectorId: user.id,
         }),
       });
+      if (!response.ok) throw new Error("Failed to mark cartela");
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -94,13 +98,17 @@ export function CollectorDashboard({ user }: { user: User }) {
   // Unmark cartela mutation
   const unmarkCartelaMutation = useMutation({
     mutationFn: async (cartelaId: number) => {
-      return apiRequest(`/api/collectors/unmark-cartela`, {
+      const response = await fetch(`/api/collectors/unmark-cartela`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           cartelaId,
           collectorId: user.id,
         }),
       });
+      if (!response.ok) throw new Error("Failed to unmark cartela");
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -120,20 +128,20 @@ export function CollectorDashboard({ user }: { user: User }) {
   });
 
   // Filter cartelas based on search
-  const filteredCartelas = cartelas.filter((cartela: Cartela) =>
+  const filteredCartelas = Array.isArray(cartelas) ? cartelas.filter((cartela: Cartela) =>
     cartela.cartelaNumber.toString().includes(searchCartela) ||
     cartela.name.toLowerCase().includes(searchCartela.toLowerCase())
-  );
+  ) : [];
 
   // Get cartelas marked by this collector
-  const myMarkedCartelas = cartelas.filter((cartela: Cartela) => 
+  const myMarkedCartelas = Array.isArray(cartelas) ? cartelas.filter((cartela: Cartela) => 
     cartela.collectorId === user.id
-  );
+  ) : [];
 
   // Get available cartelas (not booked)
-  const availableCartelas = cartelas.filter((cartela: Cartela) => 
+  const availableCartelas = Array.isArray(cartelas) ? cartelas.filter((cartela: Cartela) => 
     !cartela.isBooked && !cartela.collectorId
-  );
+  ) : [];
 
   const handleMarkCartela = (cartelaId: number) => {
     markCartelaMutation.mutate(cartelaId);
@@ -169,7 +177,7 @@ export function CollectorDashboard({ user }: { user: User }) {
             Collector Dashboard
           </h1>
           <p className="text-gray-600">
-            Working under: {supervisor?.name} | Shop: {user.shopId}
+            Working under: {supervisor?.name || 'Loading...'} | Shop: {user.shopId}
           </p>
         </div>
 
