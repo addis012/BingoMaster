@@ -122,14 +122,18 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
-### June 26, 2025 - Cartela Synchronization Fix (COMPLETED)
+### June 26, 2025 - Complete Bidirectional Cartela Marking System (COMPLETED)
 - ✅ Fixed critical double-booking bug where cartelas could be marked by both collectors and employees
 - ✅ Updated employee dashboard to exclude collector-marked cartelas from available selections
 - ✅ Corrected collector dashboard API request parameter ordering for mark/unmark operations
 - ✅ Enhanced real-time cartela availability synchronization across dashboards
 - ✅ Implemented proper `collectorId` filtering to prevent cartela conflicts
 - ✅ Fixed useEffect dependency array to include 'cartelas' for proper filtering updates
-- ✅ Verified system correctly identifies and excludes collector-marked cartelas from employee selection
+- ✅ Added employee cartela marking API endpoints (/api/employees/mark-cartela and /api/employees/unmark-cartela)
+- ✅ Implemented database storage methods for employee cartela marking (markCartelaByEmployee and unmarkCartelaByEmployee)
+- ✅ Updated storage interface to include new employee marking methods
+- ✅ Complete bidirectional cartela blocking system verified working - employee manual selections persist to database
+- ✅ Real-time synchronization confirmed - cartelas marked by employees become unavailable to collectors and vice versa
 
 ### December 21, 2024 - Collector System Implementation
 - Added three-tier user hierarchy: Admin → Employee → Collector
