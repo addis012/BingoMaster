@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Search, CheckCircle, Clock, Users, TrendingUp, Eye } from "lucide-react";
+import { Search, CheckCircle, Clock, Users, TrendingUp, Eye, LogOut } from "lucide-react";
 
 interface User {
   id: number;
@@ -45,6 +45,20 @@ export function CollectorDashboard({ user }: { user: User }) {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Logout function
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/login";
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Get supervisor (employee) information
   const { data: supervisor } = useQuery({
@@ -166,13 +180,19 @@ export function CollectorDashboard({ user }: { user: User }) {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Collector Dashboard
-          </h1>
-          <p className="text-gray-600">
-            Working under: {(supervisor as any)?.name || 'Loading...'} | Shop: {user.shopId}
-          </p>
+        <div className="flex justify-between items-center">
+          <div className="text-center flex-1 space-y-2">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Collector Dashboard
+            </h1>
+            <p className="text-gray-600">
+              Working under: {(supervisor as any)?.name || 'Loading...'} | Shop: {user.shopId}
+            </p>
+          </div>
+          <Button variant="outline" onClick={handleLogout} className="ml-4">
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
         </div>
 
         {/* Stats Cards */}
