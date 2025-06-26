@@ -81,6 +81,7 @@ export function CollectorDashboard({ user }: { user: User }) {
   // Mark cartela mutation
   const markCartelaMutation = useMutation({
     mutationFn: async (cartelaId: number) => {
+      console.log("Marking cartela:", cartelaId, "for user:", user.id);
       return apiRequest(`/api/collectors/mark-cartela`, "POST", { cartelaId, collectorId: user.id });
     },
     onSuccess: () => {
@@ -92,6 +93,7 @@ export function CollectorDashboard({ user }: { user: User }) {
       queryClient.invalidateQueries({ queryKey: [`/api/collectors/${user.id}/stats`] });
     },
     onError: (error: any) => {
+      console.error("Mark cartela error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to mark cartela",
@@ -139,6 +141,7 @@ export function CollectorDashboard({ user }: { user: User }) {
   );
 
   const handleMarkCartela = (cartelaId: number) => {
+    console.log("Button clicked - marking cartela:", cartelaId);
     markCartelaMutation.mutate(cartelaId);
   };
 
