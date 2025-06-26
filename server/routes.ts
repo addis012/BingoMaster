@@ -3551,12 +3551,19 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         return res.status(403).json({ message: "Employee or admin access required" });
       }
 
-      const { shopId } = req.body;
+      const shopId = req.body.shopId || user.shopId;
       
       // Reset all marked cartelas in the shop to available state
-      await storage.resetShopCartelas(shopId || user.shopId);
+      await storage.resetShopCartelas(shopId);
       
-      res.json({ message: "All cartelas reset successfully" });
+      // Reset any active games in the shop (clear called numbers and set to waiting)
+      const activeGame = await storage.getActiveGameByShop(shopId);
+      if (activeGame) {
+        await storage.updateGameNumbers(activeGame.id, []);
+        await storage.updateGameStatus(activeGame.id, 'waiting');
+      }
+      
+      res.json({ message: "All cartelas and game state reset successfully" });
     } catch (error) {
       console.error("Error resetting cartelas:", error);
       res.status(500).json({ error: "Failed to reset cartelas" });

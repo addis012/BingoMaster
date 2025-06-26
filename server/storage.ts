@@ -1558,10 +1558,11 @@ export class DatabaseStorage implements IStorage {
     
     if (cartelasResults.length > 0) {
       const cartela = cartelasResults[0];
+      const parsedPattern = typeof cartela.pattern === 'string' ? JSON.parse(cartela.pattern) : cartela.pattern;
       return {
         ...cartela,
-        pattern: typeof cartela.pattern === 'string' ? JSON.parse(cartela.pattern) : cartela.pattern,
-        numbers: cartela.pattern.flat(),
+        pattern: parsedPattern,
+        numbers: Array.isArray(parsedPattern) ? parsedPattern.flat() : [],
       };
     }
     

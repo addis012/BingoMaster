@@ -78,6 +78,13 @@ export function CollectorDashboard({ user }: { user: User }) {
     refetchInterval: 5000,
   });
 
+  // Check for active games (collectors cannot mark cartelas during active games)  
+  const { data: activeGame } = useQuery({
+    queryKey: [`/api/games/active`],
+    refetchInterval: 2000,
+    retry: false
+  });
+
   // Mark cartela mutation
   const markCartelaMutation = useMutation({
     mutationFn: async (cartelaId: number) => {
@@ -301,31 +308,40 @@ export function CollectorDashboard({ user }: { user: User }) {
                 ) : (
                   <div className="space-y-2">
                     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2 sm:gap-3">
-                      {availableCartelas.map((cartela: Cartela) => (
-                        <div key={cartela.id} className="flex flex-col items-center space-y-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full h-14 sm:h-12 text-xs flex flex-col gap-1 hover:bg-blue-50 hover:border-blue-300 active:bg-blue-100"
-                            onClick={() => handleMarkCartela(cartela.id)}
-                            disabled={markCartelaMutation.isPending}
-                          >
-                            <span className="font-bold text-sm sm:text-xs">{cartela.cartelaNumber}</span>
-                            <span className="text-xs text-muted-foreground truncate w-full hidden sm:block">
-                              {cartela.name}
-                            </span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-5 w-full text-xs px-1 sm:h-6 sm:px-2"
-                            onClick={() => handleViewCartela(cartela)}
-                          >
-                            <Eye className="h-3 w-3 mr-1" />
-                            <span className="hidden sm:inline">View</span>
-                          </Button>
-                        </div>
-                      ))}
+                      {availableCartelas.map((cartela: Cartela) => {
+                        const isGameActive = activeGame && ((activeGame as any)?.status === 'active' || (activeGame as any)?.status === 'paused');
+                        const isDisabled = markCartelaMutation.isPending || isGameActive;
+                        
+                        return (
+                          <div key={cartela.id} className="flex flex-col items-center space-y-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`w-full h-14 sm:h-12 text-xs flex flex-col gap-1 ${
+                                isGameActive 
+                                  ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed" 
+                                  : "hover:bg-blue-50 hover:border-blue-300 active:bg-blue-100"
+                              }`}
+                              onClick={() => !isGameActive && handleMarkCartela(cartela.id)}
+                              disabled={isDisabled}
+                            >
+                              <span className="font-bold text-sm sm:text-xs">{cartela.cartelaNumber}</span>
+                              <span className="text-xs text-muted-foreground truncate w-full hidden sm:block">
+                                {cartela.name}
+                              </span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-5 w-full text-xs px-1 sm:h-6 sm:px-2"
+                              onClick={() => handleViewCartela(cartela)}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              <span className="hidden sm:inline">View</span>
+                            </Button>
+                          </div>
+                        );
+                      })}
                     </div>
                     {availableCartelas.length === 0 && (
                       <div className="text-center py-8 text-muted-foreground">
