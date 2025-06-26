@@ -860,7 +860,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
 
-    if (!selectedCartelas.has(cartelaNum)) {
+    // Check if cartela is selected by employee OR marked by collector
+    const isCartelaInGame = selectedCartelas.has(cartelaNum) || bookedCartelas.has(cartelaNum);
+    
+    if (!isCartelaInGame) {
       // Show red popup for not booked cartela
       setWinnerResult({
         isWinner: false,
