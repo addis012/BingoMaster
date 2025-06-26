@@ -261,7 +261,7 @@ export function CollectorDashboard({ user }: { user: User }) {
                             onClick={() => handleMarkCartela(cartela.id)}
                             disabled={markCartelaMutation.isPending}
                           >
-                            <span className="font-semibold">#{cartela.cartelaNumber}</span>
+                            <span className="font-semibold">{cartela.cartelaNumber}</span>
                             <span className="text-xs text-muted-foreground truncate w-full">
                               {cartela.name}
                             </span>

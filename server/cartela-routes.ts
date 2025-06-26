@@ -88,11 +88,18 @@ router.get("/:shopId", async (req, res) => {
   try {
     const shopId = parseInt(req.params.shopId);
     
+    // Disable caching to ensure fresh data
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    
     const shopCartelas = await db
       .select()
       .from(cartelas)
       .where(eq(cartelas.shopId, shopId))
       .orderBy(cartelas.cartelaNumber);
+
+    console.log(`Fetched ${shopCartelas.length} cartelas for shop ${shopId}`);
 
     // Parse JSON strings back to arrays for frontend
     const parsedCartelas = shopCartelas.map(cartela => ({
