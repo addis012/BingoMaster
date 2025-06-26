@@ -179,8 +179,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Include both game cartelas and collector-marked cartelas
       const gameCartelas = new Set((activeGame as any).cartelas || []);
       const collectorMarkedCartelas = (cartelas || [])
-        .filter((c: any) => c.collectorId !== null)
+        .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
         .map((c: any) => c.cartelaNumber);
+      
+      console.log("Game cartelas:", Array.from(gameCartelas));
+      console.log("Collector marked cartelas:", collectorMarkedCartelas);
       
       setBookedCartelas(new Set([...gameCartelas, ...collectorMarkedCartelas]));
       
@@ -197,9 +200,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Still show collector-marked cartelas as unavailable even when no active game
       const collectorMarkedCartelas = (cartelas || [])
-        .filter((c: any) => c.collectorId !== null)
+        .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
         .map((c: any) => c.cartelaNumber);
       
+      console.log("No active game - Collector marked cartelas:", collectorMarkedCartelas);
       setBookedCartelas(new Set(collectorMarkedCartelas));
     }
   }, [activeGame]);
