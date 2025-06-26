@@ -571,6 +571,64 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   });
 
+  // Mark cartela by employee mutation
+  const markCartelaByEmployeeMutation = useMutation({
+    mutationFn: async (cartelaNumber: number) => {
+      const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === cartelaNumber);
+      if (!cartela) throw new Error('Cartela not found');
+      
+      const response = await fetch('/api/employees/mark-cartela', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          cartelaId: cartela.id, 
+          employeeId: user?.id 
+        })
+      });
+      if (!response.ok) throw new Error('Failed to mark cartela');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to mark cartela",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Unmark cartela by employee mutation
+  const unmarkCartelaByEmployeeMutation = useMutation({
+    mutationFn: async (cartelaNumber: number) => {
+      const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === cartelaNumber);
+      if (!cartela) throw new Error('Cartela not found');
+      
+      const response = await fetch('/api/employees/unmark-cartela', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          cartelaId: cartela.id, 
+          employeeId: user?.id 
+        })
+      });
+      if (!response.ok) throw new Error('Failed to unmark cartela');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to unmark cartela",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Start game mutation
   const startGameMutation = useMutation({
     mutationFn: async () => {
@@ -1654,13 +1712,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   }`}
                   onClick={() => {
                     if (!bookedCartelas.has(cartela.cartelaNumber)) {
-                      const newSelected = new Set(selectedCartelas);
-                      if (newSelected.has(cartela.cartelaNumber)) {
+                      if (selectedCartelas.has(cartela.cartelaNumber)) {
+                        // Unmark cartela in database and local state
+                        unmarkCartelaByEmployeeMutation.mutate(cartela.cartelaNumber);
+                        const newSelected = new Set(selectedCartelas);
                         newSelected.delete(cartela.cartelaNumber);
+                        setSelectedCartelas(newSelected);
                       } else {
+                        // Mark cartela in database and local state
+                        markCartelaByEmployeeMutation.mutate(cartela.cartelaNumber);
+                        const newSelected = new Set(selectedCartelas);
                         newSelected.add(cartela.cartelaNumber);
+                        setSelectedCartelas(newSelected);
                       }
-                      setSelectedCartelas(newSelected);
                     }
                   }}
                 >
