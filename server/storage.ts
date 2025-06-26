@@ -1562,7 +1562,7 @@ export class DatabaseStorage implements IStorage {
     return {
       ...cartela,
       pattern: typeof cartela.pattern === 'string' ? JSON.parse(cartela.pattern) : cartela.pattern,
-      numbers: typeof cartela.numbers === 'string' ? JSON.parse(cartela.numbers) : cartela.numbers,
+      numbers: cartela.pattern.flat(),
     };
   }
 
