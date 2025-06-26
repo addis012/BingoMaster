@@ -789,7 +789,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const resetGameMutation = useMutation({
     mutationFn: async () => {
       // Use activeGame.id if activeGameId is null
-      const gameId = activeGameId || activeGame?.id;
+      const gameId = activeGameId || (activeGame as any)?.id;
       if (!gameId) {
         throw new Error('No active game to end');
       }
