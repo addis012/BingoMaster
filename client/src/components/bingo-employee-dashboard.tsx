@@ -1303,27 +1303,31 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   </div>
                 </div>
 
-                {/* Selected Cartelas */}
+                {/* Available Cartelas for Game */}
                 <div>
-                  <Label className="text-sm font-medium">Selected Cartelas</Label>
+                  <Label className="text-sm font-medium">Cartelas for Game</Label>
                   <div className="flex flex-wrap gap-1 mt-2 min-h-[2rem]">
-                    {selectedCartelas.size > 0 ? (
-                      Array.from(selectedCartelas).map(num => (
-                        <Badge key={num} className="bg-blue-500 text-white">
-                          #{num}
-                        </Badge>
-                      ))
-                    ) : (
+                    {/* Show collector-marked cartelas */}
+                    {Array.from(bookedCartelas).map(num => (
+                      <Badge key={num} className="bg-green-500 text-white">
+                        #{num} (Collector)
+                      </Badge>
+                    ))}
+                    {/* Show employee-selected cartelas */}
+                    {Array.from(selectedCartelas).map(num => (
+                      <Badge key={num} className="bg-blue-500 text-white">
+                        #{num} (Manual)
+                      </Badge>
+                    ))}
+                    {bookedCartelas.size === 0 && selectedCartelas.size === 0 && (
                       <span className="text-xs text-gray-500 italic">
-                        Click "Select" to choose cartelas for your game
+                        No cartelas ready - collectors can mark cartelas or you can select manually
                       </span>
                     )}
                   </div>
-                  {bookedCartelas.size > 0 && (
-                    <div className="text-xs text-yellow-600 mt-1">
-                      {bookedCartelas.size} cartela(s) unavailable (marked by collectors)
-                    </div>
-                  )}
+                  <div className="text-xs text-gray-600 mt-1">
+                    Total cartelas: {bookedCartelas.size + selectedCartelas.size}
+                  </div>
                 </div>
 
                 {/* Control Buttons */}
@@ -1346,7 +1350,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   {!activeGameId ? (
                     <Button 
                       onClick={() => createGameMutation.mutate()}
-                      disabled={selectedCartelas.size === 0 || createGameMutation.isPending}
+                      disabled={(selectedCartelas.size === 0 && bookedCartelas.size === 0) || createGameMutation.isPending}
                       className="bg-green-500 hover:bg-green-600 text-white"
                     >
                       {createGameMutation.isPending ? "Starting..." : "Start Game"}
