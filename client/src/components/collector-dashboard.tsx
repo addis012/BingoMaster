@@ -130,9 +130,15 @@ export function CollectorDashboard({ user }: { user: User }) {
     cartela.name.toLowerCase().includes(searchCartela.toLowerCase())
   );
 
-  // Available cartelas (not booked and not marked by any collector)
+  // Available cartelas (not booked by employees, not marked by any collector, and not in active game)
   const availableCartelas = filteredCartelas.filter(
-    (cartela: Cartela) => !cartela.collectorId && !cartela.isBooked
+    (cartela: Cartela) => {
+      const isAvailable = !cartela.collectorId && !cartela.isBooked && !cartela.bookedBy && !cartela.gameId;
+      if (!isAvailable && cartela.bookedBy) {
+        console.log(`Cartela ${cartela.cartelaNumber} unavailable - marked by employee ${cartela.bookedBy}`);
+      }
+      return isAvailable;
+    }
   );
 
   // Cartelas marked by this collector
