@@ -2888,7 +2888,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
-  // Complete game with winner
+  // Reset/End game completely (clears all selections)
   app.patch("/api/games/:gameId/complete", async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
@@ -2902,10 +2902,23 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       }
 
       const gameId = parseInt(req.params.gameId);
+      
+      // Get game details first
+      const game = await storage.getGame(gameId);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      console.log(`🔄 RESETTING GAME ${gameId} - Clearing all cartela selections`);
+
+      // Clear all collector-marked cartelas for this shop
+      await storage.resetCartelasForShop(user.shopId!);
+      
+      // Mark game as completed without winner details (reset scenario)
       const { winnerId, winnerName, winningCartela, prizeAmount } = req.body;
       
       // Complete the game
-      const game = await storage.completeGame(gameId, winnerId, prizeAmount);
+      const completedGame = await storage.completeGame(gameId, winnerId, prizeAmount);
       
       // Check if game history already exists (created by declare-winner endpoint)
       try {

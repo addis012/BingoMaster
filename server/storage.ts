@@ -144,6 +144,9 @@ export interface IStorage {
   markCartelaByEmployee(cartelaId: number, employeeId: number): Promise<void>;
   unmarkCartelaByEmployee(cartelaId: number, employeeId: number): Promise<void>;
   
+  // Game reset methods
+  resetCartelasForShop(shopId: number): Promise<void>;
+  
   // EAT time zone utility methods
   getCurrentEATDate(): string;
   performDailyReset(): Promise<void>;
@@ -1693,6 +1696,22 @@ export class DatabaseStorage implements IStorage {
         eq(cartelas.id, cartelaId),
         eq(cartelas.bookedBy, employeeId)
       ));
+  }
+
+  async resetCartelasForShop(shopId: number): Promise<void> {
+    console.log(`🔄 RESET: Clearing all cartela selections for shop ${shopId}`);
+    
+    // Clear all cartela bookings and selections for this shop
+    await db.update(cartelas)
+      .set({
+        isBooked: false,
+        bookedBy: null,
+        collectorId: null,
+        updatedAt: new Date()
+      })
+      .where(eq(cartelas.shopId, shopId));
+      
+    console.log(`✅ RESET: All cartela selections cleared for shop ${shopId}`);
   }
 }
 

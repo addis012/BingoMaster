@@ -950,7 +950,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           cartela: cartelaNum,
           message: "Congratulations! This Cartela Has Won!",
           pattern: result.winningPattern || "",
-          winningCells: [],
+          winningCells: result.winningCells || [],
           cartelaPattern: result.cartelaPattern
         });
         
