@@ -184,7 +184,6 @@ export const cartelas = pgTable("cartelas", {
   cartelaNumber: integer("cartela_number").notNull(),
   name: text("name").notNull(),
   pattern: jsonb("pattern").$type<number[][]>().notNull(), // 5x5 grid of numbers
-  numbers: jsonb("numbers").$type<number[]>().notNull(), // Flattened 25 numbers for easy display
   isHardcoded: boolean("is_hardcoded").default(false).notNull(), // Track original hardcoded status
   isActive: boolean("is_active").default(true).notNull(),
   isBooked: boolean("is_booked").default(false).notNull(), // Cartela booking status

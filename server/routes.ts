@@ -2925,7 +2925,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         const existingHistory = await storage.getGameHistory(gameId);
         if (!existingHistory) {
           // Only create game history if it doesn't exist
-          const totalCollected = parseFloat(game.prizePool || "0");
+          const totalCollected = parseFloat(completedGame.prizePool || "0");
           const prize = parseFloat(prizeAmount || "0");
           const adminProfit = isNaN(totalCollected) || isNaN(prize) ? 0 : totalCollected - prize;
           
@@ -2933,7 +2933,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
             gameId,
             shopId: user.shopId!,
             employeeId: user.id,
-            totalCollected: game.prizePool || "0.00",
+            totalCollected: completedGame.prizePool || "0.00",
             prizeAmount: prizeAmount || "0.00",
             adminProfit: adminProfit.toString(),
             superAdminCommission: "0.00",
@@ -2946,7 +2946,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         console.log('Game history may already exist, skipping duplicate creation');
       }
 
-      res.json(game);
+      res.json(completedGame);
     } catch (error) {
       console.error("Complete game error:", error);
       res.status(500).json({ message: "Failed to complete game" });
