@@ -176,19 +176,31 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setMarkedNumbers(numbersToMark); // All except last number
       }
       
-      setBookedCartelas(new Set((activeGame as any).cartelas || []));
+      // Include both game cartelas and collector-marked cartelas
+      const gameCartelas = new Set((activeGame as any).cartelas || []);
+      const collectorMarkedCartelas = (cartelas || [])
+        .filter((c: any) => c.collectorId !== null)
+        .map((c: any) => c.cartelaNumber);
+      
+      setBookedCartelas(new Set([...gameCartelas, ...collectorMarkedCartelas]));
       
       const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
     } else {
-      // Clear all game state when no active game
+      // Clear all game state when no active game but keep collector-marked cartelas unavailable
       setActiveGameId(null);
       setGameActive(false);
       setGameFinished(false);
       setCalledNumbers([]);
       setMarkedNumbers([]);
       setLastCalledNumber(null);
-      setBookedCartelas(new Set());
+      
+      // Still show collector-marked cartelas as unavailable even when no active game
+      const collectorMarkedCartelas = (cartelas || [])
+        .filter((c: any) => c.collectorId !== null)
+        .map((c: any) => c.cartelaNumber);
+      
+      setBookedCartelas(new Set(collectorMarkedCartelas));
     }
   }, [activeGame]);
 
