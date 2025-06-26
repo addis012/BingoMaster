@@ -1337,14 +1337,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     disabled={gameActive}
                     className="bg-blue-500 hover:bg-blue-600 text-white"
                   >
-                    Select
+                    Add More
                   </Button>
                   <Button 
                     onClick={() => setSelectedCartelas(new Set())}
                     disabled={gameActive}
                     variant="outline"
                   >
-                    Reset
+                    Clear Manual
                   </Button>
                   
                   {!activeGameId ? (
@@ -1630,14 +1630,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       <Dialog open={showCartelaSelector} onOpenChange={setShowCartelaSelector}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Select Fixed Cartelas (1-75)</DialogTitle>
+            <DialogTitle>Additional Manual Cartela Selection (Optional)</DialogTitle>
             <DialogDescription>
-              Choose from 75 official fixed cartelas. Selected: {selectedCartelas.size} cartelas | Unavailable: {bookedCartelas.size} cartelas
+              You can manually select additional cartelas if needed. Selected: {selectedCartelas.size} cartelas | Collector-marked: {bookedCartelas.size} cartelas
               <br />
               <span className="text-sm text-blue-600 font-medium">
-                • Click white/light cartelas to select them for your game
-                • Gray cartelas are marked by collectors and unavailable
-                • Red cartelas are your current selections
+                • White cartelas: Available for manual selection
+                • Gray cartelas: Already marked by collectors  
+                • Red cartelas: Your manual selections
               </span>
             </DialogDescription>
           </DialogHeader>
