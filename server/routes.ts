@@ -775,11 +775,16 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       await storage.processGameProfits(gameId, totalCollectedBirr.toString());
       console.log(`✅ Super Admin revenue logged from game ${gameId}`);
       
+      // Reset all collector cartela markings after game completion
+      await storage.resetCartelasForShop(game.shopId);
+      console.log(`✅ Collector cartela markings reset for shop ${game.shopId}`);
+      
       res.json({
         success: true,
         game: updatedGame,
         message: "Game completed successfully",
-        revenueLogged: true
+        revenueLogged: true,
+        cartelasReset: true
       });
     } catch (error) {
       console.error("Error completing game:", error);
@@ -2614,7 +2619,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
-  // Get active game for employee
+  // Get active game for any authenticated user in the shop
   app.get("/api/games/active", async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
@@ -2623,8 +2628,8 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       }
 
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'employee') {
-        return res.status(403).json({ message: "Employee access required" });
+      if (!user || !['employee', 'admin', 'collector'].includes(user.role)) {
+        return res.status(403).json({ message: "Access denied" });
       }
 
       // Get active game by shop instead of by employee
