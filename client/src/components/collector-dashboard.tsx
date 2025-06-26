@@ -89,10 +89,7 @@ export function CollectorDashboard({ user }: { user: User }) {
   // Unmark cartela mutation
   const unmarkCartelaMutation = useMutation({
     mutationFn: async (cartelaId: number) => {
-      return apiRequest(`/api/collectors/unmark-cartela`, {
-        method: "POST",
-        body: JSON.stringify({ cartelaId, collectorId: user.id }),
-      });
+      return apiRequest(`/api/collectors/unmark-cartela`, "POST", { cartelaId, collectorId: user.id });
     },
     onSuccess: () => {
       toast({
@@ -112,7 +109,7 @@ export function CollectorDashboard({ user }: { user: User }) {
   });
 
   // Filter cartelas based on search
-  const filteredCartelas = cartelas.filter((cartela: Cartela) =>
+  const filteredCartelas = (cartelas as Cartela[]).filter((cartela: Cartela) =>
     cartela.cartelaNumber.toString().includes(searchCartela) ||
     cartela.name.toLowerCase().includes(searchCartela.toLowerCase())
   );
@@ -296,7 +293,7 @@ export function CollectorDashboard({ user }: { user: User }) {
             <Card>
               <CardHeader>
                 <CardTitle>My Marked Cartelas</CardTitle>
-                <CardDescription>Cartelas you have collected - click to unbook if needed</CardDescription>
+                <p className="text-sm text-muted-foreground">Cartelas you have collected - click to unbook if needed</p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -350,7 +347,7 @@ export function CollectorDashboard({ user }: { user: User }) {
             <Card>
               <CardHeader>
                 <CardTitle>All Available Cartelas</CardTitle>
-                <CardDescription>Overview of all available cartelas in this shop</CardDescription>
+                <p className="text-sm text-muted-foreground">Overview of all available cartelas in this shop</p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
