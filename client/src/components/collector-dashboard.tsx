@@ -305,7 +305,7 @@ export function CollectorDashboard({ user }: { user: User }) {
                           size="sm"
                           className="w-full h-12 text-xs flex flex-col gap-1 bg-green-50 border-green-300 hover:bg-green-100"
                         >
-                          <span className="font-semibold">#{cartela.cartelaNumber}</span>
+                          <span className="font-semibold">{cartela.cartelaNumber}</span>
                           <span className="text-xs text-muted-foreground truncate w-full">
                             {cartela.name}
                           </span>
@@ -359,7 +359,7 @@ export function CollectorDashboard({ user }: { user: User }) {
                           size="sm"
                           className="w-full h-12 text-xs flex flex-col gap-1 hover:bg-gray-50"
                         >
-                          <span className="font-semibold">#{cartela.cartelaNumber}</span>
+                          <span className="font-semibold">{cartela.cartelaNumber}</span>
                           <span className="text-xs text-muted-foreground truncate w-full">
                             {cartela.name}
                           </span>

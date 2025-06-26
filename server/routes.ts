@@ -3484,6 +3484,31 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
+  // Reset cartelas - make all marked cartelas available again
+  app.post("/api/cartelas/reset", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'employee' && user.role !== 'admin')) {
+        return res.status(403).json({ message: "Employee or admin access required" });
+      }
+
+      const { shopId } = req.body;
+      
+      // Reset all marked cartelas in the shop to available state
+      await storage.resetShopCartelas(shopId || user.shopId);
+      
+      res.json({ message: "All cartelas reset successfully" });
+    } catch (error) {
+      console.error("Error resetting cartelas:", error);
+      res.status(500).json({ error: "Failed to reset cartelas" });
+    }
+  });
+
   // Employee routes for managing collectors
   app.post("/api/employees/create-collector", async (req: Request, res) => {
     try {
