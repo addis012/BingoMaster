@@ -7,11 +7,12 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  role: text("role").notNull(), // 'super_admin', 'admin', 'employee'
+  role: text("role").notNull(), // 'super_admin', 'admin', 'employee', 'collector'
   name: text("name").notNull(),
   email: text("email"),
   isBlocked: boolean("is_blocked").default(false),
   shopId: integer("shop_id").references(() => shops.id),
+  supervisorId: integer("supervisor_id").references(() => users.id), // For collectors - references the employee they work under
   creditBalance: decimal("credit_balance", { precision: 12, scale: 2 }).default("0.00"), // Admin credit balance
   accountNumber: text("account_number").unique(), // Unique bank-like account number for Admins
   referredBy: integer("referred_by").references(() => users.id), // Admin who referred this admin
@@ -186,6 +187,11 @@ export const cartelas = pgTable("cartelas", {
   numbers: jsonb("numbers").$type<number[]>().notNull(), // Flattened 25 numbers for easy display
   isHardcoded: boolean("is_hardcoded").default(false).notNull(), // Track original hardcoded status
   isActive: boolean("is_active").default(true).notNull(),
+  isBooked: boolean("is_booked").default(false).notNull(), // Cartela booking status
+  bookedBy: integer("booked_by").references(() => users.id), // Employee who booked it
+  collectorId: integer("collector_id").references(() => users.id), // Collector who marked this cartela
+  markedAt: timestamp("marked_at"), // When collector marked it
+  gameId: integer("game_id").references(() => games.id), // Associated game if booked
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
