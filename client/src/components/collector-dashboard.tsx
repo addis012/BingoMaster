@@ -82,7 +82,7 @@ export function CollectorDashboard({ user }: { user: User }) {
   const markCartelaMutation = useMutation({
     mutationFn: async (cartelaId: number) => {
       console.log("Marking cartela:", cartelaId, "for user:", user.id);
-      return apiRequest(`/api/collectors/mark-cartela`, "POST", { cartelaId, collectorId: user.id });
+      return apiRequest("POST", `/api/collectors/mark-cartela`, { cartelaId, collectorId: user.id });
     },
     onSuccess: () => {
       toast({
@@ -105,7 +105,7 @@ export function CollectorDashboard({ user }: { user: User }) {
   // Unmark cartela mutation
   const unmarkCartelaMutation = useMutation({
     mutationFn: async (cartelaId: number) => {
-      return apiRequest(`/api/collectors/unmark-cartela`, "POST", { cartelaId, collectorId: user.id });
+      return apiRequest("POST", `/api/collectors/unmark-cartela`, { cartelaId, collectorId: user.id });
     },
     onSuccess: () => {
       toast({
