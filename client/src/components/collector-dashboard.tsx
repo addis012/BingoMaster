@@ -199,7 +199,7 @@ export function CollectorDashboard({ user }: { user: User }) {
               Collector Dashboard
             </h1>
             <p className="text-gray-600">
-              Working under: {(supervisor as any)?.name || 'Loading...'} | Shop: {user.shopId}
+              Collector: {user.name} | Working under: {(supervisor as any)?.name || 'Loading...'} | Shop: {user.shopId}
             </p>
           </div>
           <Button variant="outline" onClick={handleLogout} className="ml-4">
