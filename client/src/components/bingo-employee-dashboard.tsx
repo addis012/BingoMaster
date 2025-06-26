@@ -795,7 +795,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       
       const response = await fetch(`/api/games/${gameId}/complete`, {
-        method: 'PATCH'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          winnerId: null,
+          winnerName: null,
+          winningCartela: null,
+          prizeAmount: "0.00"
+        })
       });
       if (!response.ok) throw new Error('Failed to reset game');
       return response.json();
