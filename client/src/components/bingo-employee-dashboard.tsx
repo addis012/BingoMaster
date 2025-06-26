@@ -1306,13 +1306,24 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 {/* Selected Cartelas */}
                 <div>
                   <Label className="text-sm font-medium">Selected Cartelas</Label>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {Array.from(selectedCartelas).map(num => (
-                      <Badge key={num} className="bg-blue-500 text-white">
-                        #{num}
-                      </Badge>
-                    ))}
+                  <div className="flex flex-wrap gap-1 mt-2 min-h-[2rem]">
+                    {selectedCartelas.size > 0 ? (
+                      Array.from(selectedCartelas).map(num => (
+                        <Badge key={num} className="bg-blue-500 text-white">
+                          #{num}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-500 italic">
+                        Click "Select" to choose cartelas for your game
+                      </span>
+                    )}
                   </div>
+                  {bookedCartelas.size > 0 && (
+                    <div className="text-xs text-yellow-600 mt-1">
+                      {bookedCartelas.size} cartela(s) unavailable (marked by collectors)
+                    </div>
+                  )}
                 </div>
 
                 {/* Control Buttons */}
@@ -1618,6 +1629,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             <DialogTitle>Select Fixed Cartelas (1-75)</DialogTitle>
             <DialogDescription>
               Choose from 75 official fixed cartelas. Selected: {selectedCartelas.size} cartelas | Unavailable: {bookedCartelas.size} cartelas
+              <br />
+              <span className="text-sm text-blue-600 font-medium">
+                • Click white/light cartelas to select them for your game
+                • Gray cartelas are marked by collectors and unavailable
+                • Red cartelas are your current selections
+              </span>
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-10 gap-4 p-6">
