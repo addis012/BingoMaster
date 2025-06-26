@@ -1401,11 +1401,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     Add More
                   </Button>
                   <Button 
-                    onClick={() => setSelectedCartelas(new Set())}
-                    disabled={gameActive}
+                    onClick={() => resetGameMutation.mutate()}
+                    disabled={!activeGameId || resetGameMutation.isPending}
                     variant="outline"
                   >
-                    Clear Manual
+                    {resetGameMutation.isPending ? "Resetting..." : "Reset"}
                   </Button>
                   
                   {!activeGameId ? (

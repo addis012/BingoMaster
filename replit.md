@@ -134,6 +134,10 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 - ✅ Updated storage interface to include new employee marking methods
 - ✅ Complete bidirectional cartela blocking system verified working - employee manual selections persist to database
 - ✅ Real-time synchronization confirmed - cartelas marked by employees become unavailable to collectors and vice versa
+- ✅ **CRITICAL FIX**: Winner verification system now properly recognizes cartelas marked by collectors
+- ✅ Modified checkWinner function to check both `selectedCartelas` (employee manual) AND `bookedCartelas` (includes collectors)
+- ✅ Fixed mobile UI optimization for collector dashboard with 4-column grid and larger touch targets
+- ✅ Changed "Clear Manual" button back to "Reset" per user preference
 
 ### December 21, 2024 - Collector System Implementation
 - Added three-tier user hierarchy: Admin → Employee → Collector
