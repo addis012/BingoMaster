@@ -1147,7 +1147,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         </div>
       </div>
 
-      <div className="flex">
+      {/* Main Content with Tabs */}
+      <Tabs defaultValue="game" className="w-full">
+        <div className="bg-white border-b px-4">
+          <TabsList className="grid w-fit grid-cols-2">
+            <TabsTrigger value="game">Bingo Game</TabsTrigger>
+            <TabsTrigger value="collectors">Collectors</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="game" className="mt-0">
+          <div className="flex">
         {/* Left Panel */}
         <div className="w-80 p-4">
           {/* Current Number Display */}
@@ -1827,6 +1837,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </TabsContent>
+
+        <TabsContent value="collectors" className="mt-0">
+          <div className="p-6">
+            <EmployeeCollectorManagement user={user!} />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
