@@ -178,8 +178,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Include both game cartelas and collector-marked cartelas
       const gameCartelas = new Set((activeGame as any).cartelas || []);
+      
+      // Debug: Log all cartelas to see their structure
+      console.log("All cartelas data:", cartelas?.slice(0, 3));
+      
       const collectorMarkedCartelas = (cartelas || [])
-        .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
+        .filter((c: any) => {
+          const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
+          if (hasCollector) {
+            console.log(`Cartela ${c.cartelaNumber} marked by collector ${c.collectorId}`);
+          }
+          return hasCollector;
+        })
         .map((c: any) => c.cartelaNumber);
       
       console.log("Game cartelas:", Array.from(gameCartelas));
@@ -199,14 +209,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setLastCalledNumber(null);
       
       // Still show collector-marked cartelas as unavailable even when no active game
+      // Debug: Log all cartelas to see their structure
+      console.log("No active game - All cartelas data:", cartelas?.slice(0, 3));
+      
       const collectorMarkedCartelas = (cartelas || [])
-        .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
+        .filter((c: any) => {
+          const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
+          if (hasCollector) {
+            console.log(`No active game - Cartela ${c.cartelaNumber} marked by collector ${c.collectorId}`);
+          }
+          return hasCollector;
+        })
         .map((c: any) => c.cartelaNumber);
       
       console.log("No active game - Collector marked cartelas:", collectorMarkedCartelas);
       setBookedCartelas(new Set(collectorMarkedCartelas));
     }
-  }, [activeGame]);
+  }, [activeGame, cartelas]);
 
   // Clear timers and stop audio immediately when game is paused
   useEffect(() => {
