@@ -141,7 +141,11 @@ export function CollectorDashboard({ user }: { user: User }) {
   );
 
   const handleMarkCartela = (cartelaId: number) => {
-    console.log("Button clicked - marking cartela:", cartelaId);
+    console.log("Button clicked - marking cartela:", cartelaId, "by user:", user.id);
+    if (markCartelaMutation.isPending) {
+      console.log("Mutation already pending, skipping");
+      return;
+    }
     markCartelaMutation.mutate(cartelaId);
   };
 
