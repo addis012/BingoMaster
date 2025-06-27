@@ -170,9 +170,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       
       setActiveGameId(incomingGameId);
-      setGameActive(incomingStatus === 'active');
-      setGameFinished(incomingStatus === 'completed');
-      setGamePaused(incomingStatus === 'paused');
+      
+      // Only update game state if it's a different game or if we're transitioning to a new state
+      if (incomingGameId !== activeGameId || 
+          (incomingStatus === 'active' && !gameActive) ||
+          (incomingStatus === 'paused' && !gamePaused) ||
+          (incomingStatus === 'waiting' && (gameActive || gamePaused))) {
+        console.log(`🎮 UPDATING GAME STATE: ${incomingStatus}`);
+        setGameActive(incomingStatus === 'active');
+        setGameFinished(incomingStatus === 'completed');
+        setGamePaused(incomingStatus === 'paused');
+      } else {
+        console.log(`🎮 PRESERVING LOCAL STATE - no sync needed`);
+      }
       
       // Convert string array to number array for proper number tracking
       const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
