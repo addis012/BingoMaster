@@ -964,15 +964,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Auto-continue game after 2 seconds if not a winner
         setTimeout(() => {
           setShowWinnerResult(false);
-          // Resume game if it was active before checking
-          if (activeGameId && !gameFinished) {
-            setGamePaused(false);
-            // Continue calling numbers if game is still active
-            setTimeout(() => {
-              if (!gameFinished && activeGameId) {
-                callNumberMutation.mutate();
-              }
-            }, 500);
+          // Simply continue the paused game without changing states
+          if (activeGameId && !gameFinished && gamePaused) {
+            // Game should remain paused - user can manually resume
+            // Don't auto-resume to prevent button state confusion
           }
         }, 2000);
         
