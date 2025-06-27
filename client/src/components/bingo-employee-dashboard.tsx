@@ -788,10 +788,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Reset game mutation - only clears data when manually starting new game
   const resetGameMutation = useMutation({
     mutationFn: async () => {
-      // Use activeGame.id if activeGameId is null
-      const gameId = activeGameId || (activeGame as any)?.id;
+      // Use activeGame.id if activeGameId is null, or find any completed game to reset
+      let gameId = activeGameId || (activeGame as any)?.id;
+      
+      // If no gameId but game is finished, find the most recent completed game
+      if (!gameId && gameFinished) {
+        const response = await fetch('/api/games/recent-completed');
+        if (response.ok) {
+          const recentGame = await response.json();
+          gameId = recentGame?.id;
+        }
+      }
+      
       if (!gameId) {
-        throw new Error('No active game to end');
+        throw new Error('No game found to reset');
       }
       
       const response = await fetch(`/api/games/${gameId}/complete`, {
@@ -1011,37 +1021,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             })
           });
           
-          // Automatically reset all game state after winner is processed
-          setTimeout(() => {
-            setGameActive(false);
-            setGameFinished(false);
-            setGamePaused(false);
-            setCalledNumbers([]);
-            setMarkedNumbers([]);
-            setLastCalledNumber(null);
-            setActiveGameId(null);
-            setBookedCartelas(new Set());
-            setSelectedCartelas(new Set());
-            setIsShuffling(false);
-            setIsHovering(false);
-            setNextNumber(null);
-            setAudioPlaying(false);
-            setShowWinnerResult(false);
-            setShowWinnerChecker(false);
-            
-            // Stop any ongoing audio
-            if (currentAudio) {
-              currentAudio.pause();
-              currentAudio.currentTime = 0;
-              setCurrentAudio(null);
-            }
-            
-            // Clear any pending timers
-            if (numberCallTimer.current) {
-              clearTimeout(numberCallTimer.current);
-              numberCallTimer.current = null;
-            }
-          }, 5000); // Auto-reset after 5 seconds
+          // Game completed with winner - keep game in finished state
+          // Manual reset required via reset button
           
           // Invalidate all related queries to update admin dashboard
           queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
@@ -1468,11 +1449,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   </Button>
                   <Button 
                     onClick={() => {
-                      if (!resetGameMutation.isPending && activeGameId) {
+                      if (!resetGameMutation.isPending && (activeGameId || gameFinished)) {
                         resetGameMutation.mutate();
                       }
                     }}
-                    disabled={!activeGameId || resetGameMutation.isPending}
+                    disabled={(!activeGameId && !gameFinished) || resetGameMutation.isPending}
                     variant="outline"
                   >
                     {resetGameMutation.isPending ? "Resetting..." : "Reset"}
