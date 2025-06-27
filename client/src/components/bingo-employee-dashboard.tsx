@@ -849,6 +849,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Immediately invalidate queries and refresh state
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+      
+      // Add a small delay to prevent immediate pickup of next active game
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/games/active'] });
+      }, 500);
     },
     onError: (error: any) => {
       toast({
@@ -1456,7 +1461,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 <div className="grid grid-cols-2 gap-2">
                   <Button 
                     onClick={() => setShowCartelaSelector(true)}
-                    disabled={gameActive}
+                    disabled={gameActive || resetGameMutation.isPending}
                     className="bg-blue-500 hover:bg-blue-600 text-white"
                   >
                     Add More
