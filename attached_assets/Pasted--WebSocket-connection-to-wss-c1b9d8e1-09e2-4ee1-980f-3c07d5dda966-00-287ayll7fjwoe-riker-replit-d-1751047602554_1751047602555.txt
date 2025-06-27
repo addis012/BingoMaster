@@ -1,0 +1,78 @@
+ WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=gqZSP3r0A-zH' failed: 
+createConnection @ client:802
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket connection to 'wss://localhost:5173/?token=gqZSP3r0A-zH' failed: 
+createConnection @ client:815
+ [vite] failed to connect to websocket.
+your current setup:
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:830
+ Attempting login with: Object
+ Login response: Object
+ No active game - All cartelas data: undefined
+ No active game - Collector marked cartelas: Array(0)
+ 🎮 GAME SYNC: Incoming game ID 14, status: paused
+ 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+ 🎮 UPDATING activeGameId from null to 14
+ All cartelas data: undefined
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+ 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+ 🎮 UPDATING activeGameId from null to 14
+ All cartelas data: undefined
+ Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: Array(0)
+use-auth.ts:91 Auth state updated: Object
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:169 🎮 UPDATING activeGameId from null to 14
+bingo-employee-dashboard.tsx:192 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:204 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:204 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:204 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:204 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:204 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:204 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:204 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:416 🛑 PAUSING GAME: activeGameId=14, gameActive=true
+bingo-employee-dashboard.tsx:426 ✅ PAUSE API SUCCESS - Setting gamePaused=true
+bingo-employee-dashboard.tsx:456 🛑 PAUSE COMPLETE: gamePaused=true, gameActive=true
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []

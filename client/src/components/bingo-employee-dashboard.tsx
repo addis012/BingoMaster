@@ -1594,15 +1594,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   ) : gameActive ? (
                     <Button 
                       onClick={() => {
+                        console.log(`🔘 BUTTON CLICKED: gamePaused=${gamePaused}, gameActive=${gameActive}`);
                         if (gamePaused) {
+                          console.log(`▶️ Calling resumeGame()`);
                           resumeGame();
                         } else {
+                          console.log(`⏸️ Calling enhancedPauseGame()`);
                           enhancedPauseGame();
                         }
                       }}
                       className={gamePaused ? "bg-green-500 hover:bg-green-600 text-white" : "bg-orange-500 hover:bg-orange-600 text-white"}
                     >
-                      {gamePaused ? "Resume Game" : "Pause Game"}
+                      {(() => {
+                        const buttonText = gamePaused ? "Resume Game" : "Pause Game";
+                        console.log(`🔘 BUTTON RENDER: gamePaused=${gamePaused} → "${buttonText}"`);
+                        return buttonText;
+                      })()}
                     </Button>
                   ) : null}
                   
