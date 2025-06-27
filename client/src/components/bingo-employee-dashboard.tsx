@@ -861,6 +861,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Check winner function - can be called anytime even when paused
   const checkWinner = async () => {
+    // Store current game state before checking to preserve it
+    const currentGameActive = gameActive;
+    const currentGamePaused = gamePaused;
+    const currentGameFinished = gameFinished;
+    
     // Prevent checking winner if game is already finished
     if (gameFinished) {
       toast({
@@ -964,10 +969,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Auto-continue game after 2 seconds if not a winner
         setTimeout(() => {
           setShowWinnerResult(false);
-          // Simply continue the paused game without changing states
-          if (activeGameId && !gameFinished && gamePaused) {
-            // Game should remain paused - user can manually resume
-            // Don't auto-resume to prevent button state confusion
+          // Restore the original game state
+          setGameActive(currentGameActive);
+          setGamePaused(currentGamePaused);
+          setGameFinished(currentGameFinished);
+          
+          // If game was active before checking, continue calling numbers
+          if (activeGameId && !currentGameFinished && currentGameActive) {
+            // Continue calling numbers automatically after 2 seconds
+            setTimeout(() => {
+              if (!gameFinished && activeGameId && gameActive) {
+                callNumberMutation.mutate();
+              }
+            }, 500);
           }
         }, 2000);
         
