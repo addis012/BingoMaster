@@ -122,25 +122,19 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
-### June 26, 2025 - Complete Bidirectional Cartela Marking System (COMPLETED)
-- ✅ Fixed critical double-booking bug where cartelas could be marked by both collectors and employees
-- ✅ Updated employee dashboard to exclude collector-marked cartelas from available selections
-- ✅ Corrected collector dashboard API request parameter ordering for mark/unmark operations
-- ✅ Enhanced real-time cartela availability synchronization across dashboards
-- ✅ Implemented proper `collectorId` filtering to prevent cartela conflicts
-- ✅ Fixed useEffect dependency array to include 'cartelas' for proper filtering updates
-- ✅ Added employee cartela marking API endpoints (/api/employees/mark-cartela and /api/employees/unmark-cartela)
-- ✅ Implemented database storage methods for employee cartela marking (markCartelaByEmployee and unmarkCartelaByEmployee)
-- ✅ Updated storage interface to include new employee marking methods
-- ✅ Complete bidirectional cartela blocking system verified working - employee manual selections persist to database
-- ✅ Real-time synchronization confirmed - cartelas marked by employees become unavailable to collectors and vice versa
-- ✅ **CRITICAL FIX**: Winner verification system now properly recognizes cartelas marked by collectors
-- ✅ Modified checkWinner function to check both `selectedCartelas` (employee manual) AND `bookedCartelas` (includes collectors)
-- ✅ Fixed mobile UI optimization for collector dashboard with 4-column grid and larger touch targets
-- ✅ Changed "Clear Manual" button back to "Reset" per user preference
-- ✅ **COMPILATION FIXES**: Resolved all TypeScript compilation errors and database schema mismatches
-- ✅ **RESET FUNCTIONALITY**: Implemented resetCartelasForShop method to clear all collector selections during game reset
-- ✅ **GAME HISTORY FIX**: Corrected missing financial data for game #245 (prize pool calculation bug)
+### June 27, 2025 - Complete Game State Management and Reset System (COMPLETED)
+- ✅ Fixed reset button functionality to properly end games and clear all cartela states
+- ✅ Modified backend `/api/games/:gameId/complete` endpoint to handle null winnerId for reset scenarios
+- ✅ Enhanced game completion logic to distinguish between winner completion and reset operations
+- ✅ Implemented proper state clearing for both employee manual selections and collector markings
+- ✅ Fixed frontend reset mutation to use correct POST method with proper payload structure
+- ✅ Added immediate query invalidation after reset to prevent state synchronization issues
+- ✅ Prevented multiple reset clicks from causing button availability problems
+- ✅ Enhanced winner detection to prevent check winner from being clicked after game ends
+- ✅ Implemented automatic game reset after winner is found (5-second delay)
+- ✅ Fixed cartela access control during active games (collectors see greyed-out, disabled cartelas)
+- ✅ Added "Reset All Cartelas" button functionality to collector dashboard
+- ✅ Completed comprehensive bidirectional cartela blocking system with proper role-based permissions
 
 ### December 21, 2024 - Collector System Implementation
 - Added three-tier user hierarchy: Admin → Employee → Collector

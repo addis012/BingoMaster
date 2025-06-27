@@ -846,10 +846,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         description: "Game has been completed and reset"
       });
       
-      // Delay the query invalidation to prevent immediate game pickup
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
-      }, 1000);
+      // Immediately invalidate queries and refresh state
+      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
     },
     onError: (error: any) => {
       toast({
@@ -1463,7 +1462,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     Add More
                   </Button>
                   <Button 
-                    onClick={() => resetGameMutation.mutate()}
+                    onClick={() => {
+                      if (!resetGameMutation.isPending && activeGameId) {
+                        resetGameMutation.mutate();
+                      }
+                    }}
                     disabled={!activeGameId || resetGameMutation.isPending}
                     variant="outline"
                   >
