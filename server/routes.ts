@@ -2655,6 +2655,27 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
+  // Get recent completed game for reset purposes
+  app.get("/api/games/recent-completed", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !['employee', 'admin'].includes(user.role)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const recentGame = await storage.getRecentCompletedGame(user.shopId!);
+      res.json(recentGame);
+    } catch (error) {
+      console.error("Get recent completed game error:", error);
+      res.status(500).json({ message: "Failed to get recent completed game" });
+    }
+  });
+
   // Add player to game with multiple cartelas
   app.post("/api/games/:gameId/players", async (req, res) => {
     try {
@@ -3298,7 +3319,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         prizeAmount: prizeAmount.toFixed(2),
         adminProfit: adminProfit.toFixed(2),
         superAdminCommission: superAdminCommission.toFixed(2),
-        playerCount: totalCartelas,
+        playerCount: existingPlayers.length,
         winnerName: winnerPlayer.playerName || `Player ${winnerCartelaNumber}`,
         winningCartela: `#${winnerCartelaNumber}`,
         completedAt: new Date()
@@ -3566,8 +3587,8 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       }
 
       const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'employee' && user.role !== 'admin')) {
-        return res.status(403).json({ message: "Employee or admin access required" });
+      if (!user || !['employee', 'admin', 'collector'].includes(user.role)) {
+        return res.status(403).json({ message: "Employee, admin, or collector access required" });
       }
 
       const shopId = req.body.shopId || user.shopId;

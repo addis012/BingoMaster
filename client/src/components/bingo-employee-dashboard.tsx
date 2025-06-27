@@ -788,35 +788,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Reset game mutation - only clears data when manually starting new game
   const resetGameMutation = useMutation({
     mutationFn: async () => {
-      // Use activeGame.id if activeGameId is null, or find any completed game to reset
-      let gameId = activeGameId || (activeGame as any)?.id;
-      
-      // If no gameId but game is finished, find the most recent completed game
-      if (!gameId && gameFinished) {
-        const response = await fetch('/api/games/recent-completed');
-        if (response.ok) {
-          const recentGame = await response.json();
-          gameId = recentGame?.id;
-        }
-      }
-      
-      if (!gameId) {
-        throw new Error('No game found to reset');
-      }
-      
-      const response = await fetch(`/api/games/${gameId}/complete`, {
+      // For reset operations, we don't need a specific game ID
+      // Just clear all cartela states and reset the frontend
+      const response = await fetch('/api/cartelas/reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          winnerId: null,
-          winnerName: null,
-          winningCartela: null,
-          prizeAmount: "0.00"
-        })
+        body: JSON.stringify({})
       });
-      if (!response.ok) throw new Error('Failed to reset game');
+      if (!response.ok) throw new Error('Failed to reset cartelas');
       return response.json();
     },
     onSuccess: () => {
