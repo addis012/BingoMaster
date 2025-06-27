@@ -269,7 +269,8 @@ export class DatabaseStorage implements IStorage {
         or(
           eq(games.status, 'waiting'),
           eq(games.status, 'pending'),
-          eq(games.status, 'active')
+          eq(games.status, 'active'),
+          eq(games.status, 'paused')
         )
       ))
       .orderBy(desc(games.id));
