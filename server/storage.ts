@@ -298,8 +298,10 @@ export class DatabaseStorage implements IStorage {
   async updateGameNumbers(gameId: number, calledNumbers: string[]): Promise<Game> {
     // Get current game to check if it's paused
     const currentGame = await this.getGame(gameId);
-    if (currentGame && currentGame.status === 'paused') {
-      throw new Error('Cannot update numbers for paused game');
+    if (currentGame && currentGame.status === 'paused' && calledNumbers.length > 0) {
+      // Only block if trying to ADD numbers to a paused game
+      // Allow clearing numbers (reset operation) even for paused games
+      throw new Error('Cannot add numbers to paused game');
     }
     
     const [game] = await db.update(games)
