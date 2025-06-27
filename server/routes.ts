@@ -2970,6 +2970,12 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
           const prize = parseFloat(prizeAmount || "0");
           const adminProfit = isNaN(totalCollected) || isNaN(prize) ? 0 : totalCollected - prize;
           
+          // Calculate total player count including both employee-selected and collector-marked cartelas
+          const dbPlayerCount = await storage.getGamePlayerCount(gameId);
+          const shopCartelas = await storage.getCartelasByShop(user.shopId!);
+          const collectorMarkedCount = shopCartelas.filter(c => c.collectorId !== null).length;
+          const totalPlayerCount = Math.max(dbPlayerCount, collectorMarkedCount);
+          
           await storage.recordGameHistory({
             gameId,
             shopId: user.shopId!,
@@ -2978,7 +2984,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
             prizeAmount: prizeAmount || "0.00",
             adminProfit: adminProfit.toString(),
             superAdminCommission: "0.00",
-            playerCount: await storage.getGamePlayerCount(gameId),
+            playerCount: totalPlayerCount,
             winnerName,
             winningCartela
           });
