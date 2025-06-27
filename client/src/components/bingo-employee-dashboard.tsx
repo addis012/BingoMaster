@@ -77,6 +77,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Timer reference for instant pause control
   const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const [pauseOperationInProgress, setPauseOperationInProgress] = useState(false);
   
   // Store previous game setup for restart functionality
   const [previousGameSetup, setPreviousGameSetup] = useState<{
@@ -170,6 +171,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       
       setActiveGameId(incomingGameId);
+      
+      // Skip state updates if pause operation is in progress
+      if (pauseOperationInProgress) {
+        console.log(`🚫 SKIPPING SYNC - pause operation in progress`);
+        return;
+      }
       
       // Only update game state if it's a different game or if we're transitioning to a new state
       if (incomingGameId !== activeGameId || 
@@ -425,6 +432,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     try {
       console.log(`🛑 PAUSING GAME: activeGameId=${activeGameId}, gameActive=${gameActive}`);
       
+      // Set operation flag to prevent state corruption from sync
+      setPauseOperationInProgress(true);
+      
       // Call backend to pause the game
       const response = await fetch(`/api/games/${activeGameId}/pause`, {
         method: 'PATCH',
@@ -469,6 +479,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
     } catch (error) {
       console.error('Failed to pause game:', error);
+    } finally {
+      // Always clear the operation flag
+      setTimeout(() => setPauseOperationInProgress(false), 1000);
     }
   };
 
