@@ -155,9 +155,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       const incomingGameId = (activeGame as any).id;
       const incomingStatus = (activeGame as any).status;
       
+      console.log(`🎮 GAME SYNC: Incoming game ID ${incomingGameId}, status: ${incomingStatus}`);
+      console.log(`🎮 CURRENT STATE: activeGameId=${activeGameId}, gameActive=${gameActive}, gamePaused=${gamePaused}`);
+      
       // If the incoming game is completed, don't set it as active
       if (incomingStatus === 'completed') {
+        console.log(`🎮 SKIPPING completed game ${incomingGameId}`);
         return;
+      }
+      
+      // Always sync the game ID to prevent mismatches
+      if (incomingGameId !== activeGameId) {
+        console.log(`🎮 UPDATING activeGameId from ${activeGameId} to ${incomingGameId}`);
       }
       
       setActiveGameId(incomingGameId);

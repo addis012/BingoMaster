@@ -1,0 +1,1012 @@
+ WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=D2eegqCwrDJg' failed: 
+createConnection @ client:802
+me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket connection to 'wss://localhost:5173/?token=D2eegqCwrDJg' failed: 
+createConnection @ client:815
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(2)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+/api/games/252/numbers:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ /@fs/home/runner/wor…6.js?v=ba3a0a77:332
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+/api/games/252/complete:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 7 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(2)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 10
+ Cartela 6 marked by collector 10
+ Cartela 7 marked by collector 10
+ Cartela 10 marked by collector 10
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(4)
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ /@fs/home/runner/wor…6.js?v=ba3a0a77:332
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(1)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(3)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ All cartelas data: Array(3)
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 9 marked by collector 26
+ Cartela 10 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(5)
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ /@fs/home/runner/wor…6.js?v=ba3a0a77:332
+ All cartelas data: Array(3)
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ /@fs/home/runner/wor…6.js?v=ba3a0a77:332
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+bingo-employee-dashboard.tsx:183 All cartelas data: Array(3)
+bingo-employee-dashboard.tsx:195 Game cartelas: Array(0)
+bingo-employee-dashboard.tsx:196 Collector marked cartelas: Array(0)
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ /@fs/home/runner/wor…6.js?v=ba3a0a77:332
