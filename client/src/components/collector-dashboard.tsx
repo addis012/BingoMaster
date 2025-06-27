@@ -131,6 +131,28 @@ export function CollectorDashboard({ user }: { user: User }) {
     },
   });
 
+  // Reset all cartelas mutation
+  const resetAllMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", `/api/cartelas/reset`, { shopId: user.shopId });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "All cartelas reset successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user.shopId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/collectors/${user.id}/stats`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset cartelas",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Filter cartelas based on search
   const filteredCartelas = (cartelas as Cartela[]).filter((cartela: Cartela) =>
     cartela.cartelaNumber.toString().includes(searchCartela) ||
@@ -164,6 +186,10 @@ export function CollectorDashboard({ user }: { user: User }) {
 
   const handleUnmarkCartela = (cartelaId: number) => {
     unmarkCartelaMutation.mutate(cartelaId);
+  };
+
+  const handleResetAllCartelas = () => {
+    resetAllMutation.mutate();
   };
 
   const handleViewCartela = (cartela: Cartela) => {
