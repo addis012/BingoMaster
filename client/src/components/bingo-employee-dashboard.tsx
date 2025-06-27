@@ -969,11 +969,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Auto-continue game after 2 seconds if not a winner
         setTimeout(() => {
           setShowWinnerResult(false);
-          // Restore the original game state
-          setGameActive(currentGameActive);
-          setGamePaused(currentGamePaused);
-          setGameFinished(currentGameFinished);
-          
           // If game was active before checking, continue calling numbers
           if (activeGameId && !currentGameFinished && currentGameActive) {
             // Continue calling numbers automatically after 2 seconds
@@ -1554,7 +1549,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     >
                       New Game
                     </Button>
-                  ) : gameActive ? (
+                  ) : activeGameId && !gameFinished ? (
                     <Button 
                       onClick={() => {
                         if (gamePaused) {
@@ -1569,7 +1564,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     </Button>
                   ) : null}
                   
-                  {gameActive ? (
+                  {activeGameId && !gameFinished ? (
                     <Button 
                       onClick={() => resetGameMutation.mutate()}
                       disabled={resetGameMutation.isPending}
