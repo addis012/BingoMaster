@@ -357,8 +357,23 @@ export function CollectorDashboard({ user }: { user: User }) {
           <TabsContent value="my-marked" className="space-y-3 sm:space-y-4">
             <Card>
               <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="text-base sm:text-lg">My Marked Cartelas</CardTitle>
-                <p className="text-xs sm:text-sm text-muted-foreground">Tap to unbook if needed</p>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="text-base sm:text-lg">My Marked Cartelas</CardTitle>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Tap to unbook if needed</p>
+                  </div>
+                  {myMarkedCartelas.length > 0 && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleResetAllCartelas}
+                      disabled={resetAllMutation.isPending}
+                      className="text-xs"
+                    >
+                      {resetAllMutation.isPending ? "Resetting..." : "Reset All Cartelas"}
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="p-3 sm:p-6">
                 <div className="space-y-2">

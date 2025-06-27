@@ -832,10 +832,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setLastCalledNumber(null);
       setActiveGameId(null);
       setBookedCartelas(new Set());
+      setSelectedCartelas(new Set());
       setIsShuffling(false);
       setIsHovering(false);
       setNextNumber(null);
       setAudioPlaying(false);
+      setShowWinnerResult(false);
+      setShowWinnerChecker(false);
+      setWinnerCartelaNumber('');
       
       toast({
         title: "Game Ended",
@@ -858,6 +862,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Check winner function - can be called anytime even when paused
   const checkWinner = async () => {
+    // Prevent checking winner if game is already finished
+    if (gameFinished) {
+      toast({
+        title: "Game Already Finished",
+        description: "This game has already ended with a winner",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const cartelaNum = parseInt(winnerCartelaNumber);
     
     if (!cartelaNum || cartelaNum < 1) {
@@ -983,8 +997,47 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           
           // Mark game as completed to save to history
           await fetch(`/api/games/${activeGameId}/complete`, {
-            method: 'PATCH'
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              winnerId: cartelaNum,
+              winnerName: `Cartela ${cartelaNum}`,
+              winningCartela: cartelaNum,
+              prizeAmount: (parseFloat(gameAmount) * selectedCartelas.size).toString()
+            })
           });
+          
+          // Automatically reset all game state after winner is processed
+          setTimeout(() => {
+            setGameActive(false);
+            setGameFinished(false);
+            setGamePaused(false);
+            setCalledNumbers([]);
+            setMarkedNumbers([]);
+            setLastCalledNumber(null);
+            setActiveGameId(null);
+            setBookedCartelas(new Set());
+            setSelectedCartelas(new Set());
+            setIsShuffling(false);
+            setIsHovering(false);
+            setNextNumber(null);
+            setAudioPlaying(false);
+            setShowWinnerResult(false);
+            setShowWinnerChecker(false);
+            
+            // Stop any ongoing audio
+            if (currentAudio) {
+              currentAudio.pause();
+              currentAudio.currentTime = 0;
+              setCurrentAudio(null);
+            }
+            
+            // Clear any pending timers
+            if (numberCallTimer.current) {
+              clearTimeout(numberCallTimer.current);
+              numberCallTimer.current = null;
+            }
+          }, 5000); // Auto-reset after 5 seconds
           
           // Invalidate all related queries to update admin dashboard
           queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
