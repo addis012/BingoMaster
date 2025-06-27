@@ -832,6 +832,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setShowWinnerChecker(false);
       setWinnerCartelaNumber('');
       
+      // Invalidate queries to force refresh and clear called numbers from cache
+      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cartelas', user?.shopId] });
+      
       toast({
         title: "Reset Complete",
         description: "All cartelas and game state have been reset"
