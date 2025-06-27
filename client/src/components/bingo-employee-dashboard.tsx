@@ -961,6 +961,21 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setShowWinnerResult(true);
         setShowWinnerChecker(false);
         
+        // Auto-continue game after 2 seconds if not a winner
+        setTimeout(() => {
+          setShowWinnerResult(false);
+          // Resume game if it was active before checking
+          if (activeGameId && !gameFinished) {
+            setGamePaused(false);
+            // Continue calling numbers if game is still active
+            setTimeout(() => {
+              if (!gameFinished && activeGameId) {
+                callNumberMutation.mutate();
+              }
+            }, 500);
+          }
+        }, 2000);
+        
       } else {
         // IS A WINNER - Pause game completely and show green popup
         setGamePaused(true);
@@ -1002,7 +1017,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               winnerId: cartelaNum,
               winnerName: `Cartela ${cartelaNum}`,
               winningCartela: cartelaNum,
-              prizeAmount: (parseFloat(gameAmount) * selectedCartelas.size).toString()
+              prizeAmount: (parseFloat(gameAmount) * bookedCartelas.size).toString()
             })
           });
           
