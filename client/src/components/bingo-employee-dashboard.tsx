@@ -833,18 +833,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setWinnerCartelaNumber('');
       
       toast({
-        title: "Game Ended",
-        description: "Game has been completed and reset"
+        title: "Reset Complete",
+        description: "All cartelas and game state have been reset"
       });
       
       // Immediately invalidate queries and refresh state
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
-      
-      // Add a small delay to prevent immediate pickup of next active game
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['/api/games/active'] });
-      }, 500);
     },
     onError: (error: any) => {
       toast({

@@ -122,18 +122,17 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
-### June 27, 2025 - Complete Game State Management and Reset System (COMPLETED)
-- ✅ Fixed reset button functionality to properly end games and clear all cartela states
-- ✅ Modified backend `/api/games/:gameId/complete` endpoint to handle null winnerId for reset scenarios
-- ✅ Enhanced game completion logic to distinguish between winner completion and reset operations
-- ✅ Implemented proper state clearing for both employee manual selections and collector markings
-- ✅ Fixed frontend reset mutation to use correct POST method with proper payload structure
-- ✅ Added immediate query invalidation after reset to prevent state synchronization issues
-- ✅ Prevented multiple reset clicks from causing button availability problems
-- ✅ Enhanced winner detection to prevent check winner from being clicked after game ends
-- ✅ Implemented automatic game reset after winner is found (5-second delay)
+### June 27, 2025 - Manual Reset System and Game State Fixes (COMPLETED)
+- ✅ Removed automatic game reset after winner is found - now requires manual reset via reset button
+- ✅ Fixed reset button becoming disabled after game ends - now properly available for manual reset
+- ✅ Fixed collector "Reset All Cartelas" button by updating API permissions to allow collector access
+- ✅ Fixed admin game history showing incorrect player numbers - now uses actual player count instead of cartela count
+- ✅ Enhanced reset mutation to use cartela reset endpoint instead of complex game completion logic
+- ✅ Cleaned up database by removing multiple stacked active/paused games that caused cascade reset issues
+- ✅ Updated reset functionality to work with finished game state without requiring active game ID
+- ✅ Fixed frontend state management to prevent button availability issues during reset operations
+- ✅ Enhanced game completion flow to keep games in finished state until manual reset
 - ✅ Fixed cartela access control during active games (collectors see greyed-out, disabled cartelas)
-- ✅ Added "Reset All Cartelas" button functionality to collector dashboard
 - ✅ Completed comprehensive bidirectional cartela blocking system with proper role-based permissions
 
 ### December 21, 2024 - Collector System Implementation
