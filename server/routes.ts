@@ -3319,7 +3319,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         prizeAmount: prizeAmount.toFixed(2),
         adminProfit: adminProfit.toFixed(2),
         superAdminCommission: superAdminCommission.toFixed(2),
-        playerCount: existingPlayers.length,
+        playerCount: totalCartelas, // Use actual cartela count from frontend
         winnerName: winnerPlayer.playerName || `Player ${winnerCartelaNumber}`,
         winningCartela: `#${winnerCartelaNumber}`,
         completedAt: new Date()

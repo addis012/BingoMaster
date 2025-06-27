@@ -982,9 +982,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               winnerCartelaNumber: cartelaNum,
-              totalPlayers: selectedCartelas.size,
-              entryFeePerPlayer: parseFloat(gameAmount),
-              allCartelaNumbers: Array.from(selectedCartelas),
+              totalPlayers: bookedCartelas.size, // Use bookedCartelas which contains actual played cartelas
+              entryFeePerPlayer: parseFloat(gameAmount || '14'), // Ensure valid number
+              allCartelaNumbers: Array.from(bookedCartelas), // Use bookedCartelas instead of selectedCartelas
               calledNumbers: calledNumbers,
               pattern: result.winningPattern
             })

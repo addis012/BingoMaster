@@ -122,11 +122,14 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
-### June 27, 2025 - Manual Reset System and Game State Fixes (COMPLETED)
+### June 27, 2025 - Manual Reset System and Game History Data Accuracy Fixes (COMPLETED)
 - ✅ Removed automatic game reset after winner is found - now requires manual reset via reset button
 - ✅ Fixed reset button becoming disabled after game ends - now properly available for manual reset
 - ✅ Fixed collector "Reset All Cartelas" button by updating API permissions to allow collector access
-- ✅ Fixed admin game history showing incorrect player numbers - now uses actual player count instead of cartela count
+- ✅ Fixed admin game history showing incorrect player numbers and financial data - now uses actual cartela count from frontend
+- ✅ Fixed called numbers persisting correctly until manual reset (no auto-clear after winner detection)
+- ✅ Updated frontend to send accurate game data (bookedCartelas vs selectedCartelas) to declare-winner endpoint
+- ✅ Fixed backend game history recording to use frontend-provided player count instead of empty database records
 - ✅ Enhanced reset mutation to use cartela reset endpoint instead of complex game completion logic
 - ✅ Cleaned up database by removing multiple stacked active/paused games that caused cascade reset issues
 - ✅ Updated reset functionality to work with finished game state without requiring active game ID
