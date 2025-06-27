@@ -883,6 +883,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     // Store current game state before checking to preserve it
     const wasGameActive = gameActive;
     const wasGamePaused = gamePaused;
+    const wasActiveGameId = activeGameId;
     
     // Prevent checking winner if game is already finished
     if (gameFinished) {
@@ -894,7 +895,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
     
-    console.log(`🔍 CHECKING WINNER - Game state before: active=${wasGameActive}, paused=${wasGamePaused}`);
+    console.log(`🔍 CHECKING WINNER - Game state before: active=${wasGameActive}, paused=${wasGamePaused}, gameId=${wasActiveGameId}`);
     
     const cartelaNum = parseInt(winnerCartelaNumber);
     
@@ -989,14 +990,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Auto-continue game after 2 seconds if not a winner
         setTimeout(() => {
           setShowWinnerResult(false);
-          console.log(`❌ NOT A WINNER - Preserved state: wasActive=${wasGameActive}, wasPaused=${wasGamePaused}`);
-          console.log(`❌ Current state: active=${gameActive}, paused=${gamePaused}`);
+          console.log(`❌ NOT A WINNER - Preserved state: wasActive=${wasGameActive}, wasPaused=${wasGamePaused}, wasGameId=${wasActiveGameId}`);
+          console.log(`❌ Current state: active=${gameActive}, paused=${gamePaused}, gameId=${activeGameId}`);
+          
+          // CRITICAL: Restore original game state if it was corrupted during winner checking
+          if (activeGameId !== wasActiveGameId || gameActive !== wasGameActive || gamePaused !== wasGamePaused) {
+            console.log(`🚨 STATE CORRUPTION DETECTED - Restoring original state`);
+            setActiveGameId(wasActiveGameId);
+            setGameActive(wasGameActive);
+            setGamePaused(wasGamePaused);
+          }
           
           // Continue number calling if game was running before check
           if (wasGameActive && !wasGamePaused) {
             console.log(`🎯 AUTO-CONTINUING number calling since game was running before checking`);
             setTimeout(() => {
-              if (!gameFinished && activeGameId && gameActive && !gamePaused) {
+              if (!gameFinished && wasActiveGameId && wasGameActive && !wasGamePaused) {
                 callNumberMutation.mutate();
               }
             }, 500);
