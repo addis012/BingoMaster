@@ -3247,9 +3247,9 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         players: existingPlayers.map(p => ({ id: p.id, cartelas: p.cartelaNumbers, fee: p.entryFee }))
       });
 
-      // Use frontend-provided data for accurate calculations
-      const totalCartelas = allCartelaNumbers ? allCartelaNumbers.length : totalPlayers;
-      const actualEntryFee = parseFloat(entryFeePerPlayer.toString());
+      // Use frontend-provided data for accurate calculations - prioritize actual data
+      const totalCartelas = allCartelaNumbers ? allCartelaNumbers.length : (totalPlayers || 0);
+      const actualEntryFee = parseFloat(entryFeePerPlayer?.toString() || '0');
       const totalCollected = totalCartelas * actualEntryFee;
       
       console.log('📊 CORRECTED CALCULATION:', {

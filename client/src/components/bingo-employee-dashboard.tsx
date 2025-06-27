@@ -168,13 +168,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Convert string array to number array for proper number tracking
       const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
       
-      // Only update called numbers if game is active, otherwise clear them for waiting games
-      if (incomingStatus === 'active' || gameCalledNumbers.length > 0) {
-        setCalledNumbers(gameCalledNumbers);
-      } else {
-        // Clear called numbers for waiting/paused games with no numbers
-        setCalledNumbers([]);
-      }
+      // Always update called numbers to reflect the current game state
+      setCalledNumbers(gameCalledNumbers);
       // Only sync marked numbers if this is a fresh game load (not during active play)
       if (gameCalledNumbers.length === 0 || !markedNumbers.length) {
         const numbersToMark = gameCalledNumbers.slice(0, -1);
