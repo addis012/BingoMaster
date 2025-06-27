@@ -413,6 +413,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Enhanced pause game function for immediate stop
   const enhancedPauseGame = async () => {
     try {
+      console.log(`🛑 PAUSING GAME: activeGameId=${activeGameId}, gameActive=${gameActive}`);
+      
       // Call backend to pause the game
       const response = await fetch(`/api/games/${activeGameId}/pause`, {
         method: 'PATCH',
@@ -421,6 +423,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       });
       
       if (response.ok) {
+        console.log(`✅ PAUSE API SUCCESS - Setting gamePaused=true`);
         setGamePaused(true);
         
         // Immediately stop all audio and animations
@@ -442,10 +445,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setNextNumber(null);
         setAudioPlaying(false);
         
+        // Force refresh active game state to prevent state corruption
+        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+        
         toast({
           title: "Game Paused",
           description: "Game has been paused immediately"
         });
+        
+        console.log(`🛑 PAUSE COMPLETE: gamePaused=${true}, gameActive=${gameActive}`);
+      } else {
+        console.error(`❌ PAUSE API FAILED: ${response.status}`);
       }
     } catch (error) {
       console.error('Failed to pause game:', error);
@@ -1155,6 +1165,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Resume game function - continues number calling
   const resumeGame = async () => {
     try {
+      console.log(`▶️ RESUMING GAME: activeGameId=${activeGameId}, gamePaused=${gamePaused}`);
+      
       // Call backend to resume the game
       const response = await fetch(`/api/games/${activeGameId}/pause`, {
         method: 'PATCH',
@@ -1163,6 +1175,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       });
       
       if (response.ok) {
+        console.log(`✅ RESUME API SUCCESS - Setting gamePaused=false`);
         setGamePaused(false);
         
         // Resume paused audio if it exists
@@ -1179,6 +1192,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           });
         }
         
+        // Force refresh active game state to prevent state corruption
+        queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
+        
         toast({
           title: "Game Resumed",
           description: "Game has been resumed"
@@ -1190,6 +1206,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             callNumberMutation.mutate();
           }, 500);
         }
+        
+        console.log(`▶️ RESUME COMPLETE: gamePaused=${false}, gameActive=${gameActive}`);
+      } else {
+        console.error(`❌ RESUME API FAILED: ${response.status}`);
       }
     } catch (error) {
       console.error('Failed to resume game:', error);
