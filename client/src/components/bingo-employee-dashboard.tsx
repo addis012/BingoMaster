@@ -168,8 +168,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Convert string array to number array for proper number tracking
       const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
       
-      // Always update called numbers to reflect the current game state
-      setCalledNumbers(gameCalledNumbers);
+      // Only update called numbers if game is active, otherwise clear them for waiting games
+      if (incomingStatus === 'active' || gameCalledNumbers.length > 0) {
+        setCalledNumbers(gameCalledNumbers);
+      } else {
+        // Clear called numbers for waiting/paused games with no numbers
+        setCalledNumbers([]);
+      }
       // Only sync marked numbers if this is a fresh game load (not during active play)
       if (gameCalledNumbers.length === 0 || !markedNumbers.length) {
         const numbersToMark = gameCalledNumbers.slice(0, -1);
@@ -840,6 +845,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Immediately invalidate queries and refresh state
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+      
+      // Force immediate refetch to ensure fresh data
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/games/active'] });
+      }, 100);
     },
     onError: (error: any) => {
       toast({
