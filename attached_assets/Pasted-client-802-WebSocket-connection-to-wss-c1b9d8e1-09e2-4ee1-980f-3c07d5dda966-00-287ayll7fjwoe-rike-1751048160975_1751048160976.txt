@@ -1,0 +1,335 @@
+client:802 WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=Ymm1AgjaLd9j' failed: 
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+chunk-SXRIVT2P.js?v=ba3a0a77:21609 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+bingo-employee-dashboard.tsx:222 No active game - All cartelas data: undefined
+bingo-employee-dashboard.tsx:234 No active game - Collector marked cartelas: []
+use-auth.ts:91 Auth state updated: {id: 14, username: 'adad', role: 'employee', name: 'addisu', email: null, …}
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:169 🎮 UPDATING activeGameId from null to 14
+bingo-employee-dashboard.tsx:192 All cartelas data: undefined
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+client:815 WebSocket connection to 'wss://localhost:5173/?token=Ymm1AgjaLd9j' failed: 
+createConnection @ client:815
+connect @ client:437
+connect @ client:822
+client:830 [vite] failed to connect to websocket.
+your current setup:
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:830
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:169 🎮 UPDATING activeGameId from null to 14
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1578 🔘 BUTTON CLICKED: gamePaused=false, gameActive=true
+bingo-employee-dashboard.tsx:1583 ⏸️ Calling enhancedPauseGame()
+bingo-employee-dashboard.tsx:416 🛑 PAUSING GAME: activeGameId=14, gameActive=true
+bingo-employee-dashboard.tsx:426 ✅ PAUSE API SUCCESS - Setting gamePaused=true
+bingo-employee-dashboard.tsx:456 🛑 PAUSE COMPLETE: gamePaused=true, gameActive=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:169 🎮 UPDATING activeGameId from null to 14
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1578 🔘 BUTTON CLICKED: gamePaused=false, gameActive=true
+bingo-employee-dashboard.tsx:1583 ⏸️ Calling enhancedPauseGame()
+bingo-employee-dashboard.tsx:416 🛑 PAUSING GAME: activeGameId=14, gameActive=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:426 ✅ PAUSE API SUCCESS - Setting gamePaused=true
+bingo-employee-dashboard.tsx:456 🛑 PAUSE COMPLETE: gamePaused=true, gameActive=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:770 Audio for N38 not available
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:169 🎮 UPDATING activeGameId from null to 14
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: waiting
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1578 🔘 BUTTON CLICKED: gamePaused=false, gameActive=true
+bingo-employee-dashboard.tsx:1583 ⏸️ Calling enhancedPauseGame()
+bingo-employee-dashboard.tsx:416 🛑 PAUSING GAME: activeGameId=14, gameActive=true
+bingo-employee-dashboard.tsx:426 ✅ PAUSE API SUCCESS - Setting gamePaused=true
+bingo-employee-dashboard.tsx:456 🛑 PAUSE COMPLETE: gamePaused=true, gameActive=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1578 🔘 BUTTON CLICKED: gamePaused=false, gameActive=true
+bingo-employee-dashboard.tsx:1583 ⏸️ Calling enhancedPauseGame()
+bingo-employee-dashboard.tsx:416 🛑 PAUSING GAME: activeGameId=14, gameActive=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:426 ✅ PAUSE API SUCCESS - Setting gamePaused=true
+bingo-employee-dashboard.tsx:456 🛑 PAUSE COMPLETE: gamePaused=true, gameActive=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1578 🔘 BUTTON CLICKED: gamePaused=false, gameActive=true
+bingo-employee-dashboard.tsx:1583 ⏸️ Calling enhancedPauseGame()
+bingo-employee-dashboard.tsx:416 🛑 PAUSING GAME: activeGameId=14, gameActive=true
+bingo-employee-dashboard.tsx:426 ✅ PAUSE API SUCCESS - Setting gamePaused=true
+bingo-employee-dashboard.tsx:456 🛑 PAUSE COMPLETE: gamePaused=true, gameActive=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1578 🔘 BUTTON CLICKED: gamePaused=true, gameActive=true
+bingo-employee-dashboard.tsx:1580 ▶️ Calling resumeGame()
+bingo-employee-dashboard.tsx:1158 ▶️ RESUMING GAME: activeGameId=14, gamePaused=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1168 ✅ RESUME API SUCCESS - Setting gamePaused=false
+bingo-employee-dashboard.tsx:1200 ▶️ RESUME COMPLETE: gamePaused=false, gameActive=true
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: active
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=false
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+bingo-employee-dashboard.tsx:1578 🔘 BUTTON CLICKED: gamePaused=false, gameActive=true
+bingo-employee-dashboard.tsx:1583 ⏸️ Calling enhancedPauseGame()
+bingo-employee-dashboard.tsx:416 🛑 PAUSING GAME: activeGameId=14, gameActive=true
+bingo-employee-dashboard.tsx:426 ✅ PAUSE API SUCCESS - Setting gamePaused=true
+bingo-employee-dashboard.tsx:456 🛑 PAUSE COMPLETE: gamePaused=true, gameActive=true
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:1591 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+bingo-employee-dashboard.tsx:158 🎮 GAME SYNC: Incoming game ID 14, status: paused
+bingo-employee-dashboard.tsx:159 🎮 CURRENT STATE: activeGameId=14, gameActive=true, gamePaused=true
+bingo-employee-dashboard.tsx:192 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:204 Game cartelas: []
+bingo-employee-dashboard.tsx:205 Collector marked cartelas: []
