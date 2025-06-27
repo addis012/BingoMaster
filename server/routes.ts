@@ -3596,14 +3596,19 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       // Reset all marked cartelas in the shop to available state
       await storage.resetShopCartelas(shopId);
       
-      // Reset any active games in the shop (clear called numbers and set to waiting)
-      const activeGame = await storage.getActiveGameByShop(shopId);
-      if (activeGame) {
-        await storage.updateGameNumbers(activeGame.id, []);
-        await storage.updateGameStatus(activeGame.id, 'waiting');
+      // Only reset games if user is employee or admin (not collector)
+      if (user.role === 'employee' || user.role === 'admin') {
+        // Reset any active games in the shop (clear called numbers and set to waiting)
+        const activeGame = await storage.getActiveGameByShop(shopId);
+        if (activeGame) {
+          await storage.updateGameNumbers(activeGame.id, []);
+          await storage.updateGameStatus(activeGame.id, 'waiting');
+        }
+        res.json({ message: "All cartelas and game state reset successfully" });
+      } else {
+        // Collector only resets cartelas, not games
+        res.json({ message: "All cartelas reset successfully" });
       }
-      
-      res.json({ message: "All cartelas and game state reset successfully" });
     } catch (error) {
       console.error("Error resetting cartelas:", error);
       res.status(500).json({ error: "Failed to reset cartelas" });

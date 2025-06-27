@@ -1629,6 +1629,7 @@ export class DatabaseStorage implements IStorage {
         markedAt: null,
         isBooked: false,
         bookedBy: null,
+        gameId: null,
         updatedAt: new Date()
       })
       .where(eq(cartelas.shopId, shopId));
