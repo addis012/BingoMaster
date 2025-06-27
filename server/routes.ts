@@ -733,13 +733,14 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       
       console.log(`🎯 GAME COMPLETION REQUEST - Game ${gameId}, Winner ${winnerId}, Cartela ${winningCartela}`);
       
-      // Validate that winnerId is provided
-      if (!winnerId) {
+      // Allow null winnerId for reset scenarios
+      const isResetOperation = winnerId === null || winnerId === undefined;
+      if (!isResetOperation && !winnerId) {
         console.error(`❌ No winnerId provided for game ${gameId}`);
         return res.status(400).json({ message: "Winner ID is required" });
       }
       
-      // Get game, shop, and winner details
+      // Get game, shop, and player details
       const game = await storage.getGame(gameId);
       if (!game) {
         console.error(`❌ Game ${gameId} not found`);
@@ -748,28 +749,40 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       
       const shop = await storage.getShop(game.shopId);
       const players = await storage.getGamePlayers(gameId);
-      const winner = players.find(p => p.id === winnerId);
       const employee = await storage.getUser(game.employeeId);
       
-      // Validate that winner exists in the game
-      if (!winner) {
-        console.error(`❌ Winner ${winnerId} not found in game ${gameId} players`);
-        return res.status(400).json({ message: "Winner not found in game players" });
+      // For non-reset operations, validate that winner exists
+      if (!isResetOperation) {
+        const winner = players.find(p => p.id === winnerId);
+        if (!winner) {
+          console.error(`❌ Winner ${winnerId} not found in game ${gameId} players`);
+          return res.status(400).json({ message: "Winner not found in game players" });
+        }
       }
       
       // Calculate total collected from entry fees
       let totalCollectedBirr = players.length * parseFloat(game.entryFee || "0");
       console.log(`📊 Revenue calculation: ${players.length} players × ${game.entryFee} ETB = ${totalCollectedBirr} ETB`);
       
-      // Update game status with winner details
-      const updatedGame = await storage.updateGame(gameId, {
+      // Update game status 
+      const gameUpdateData: any = {
         status: 'completed',
-        winnerId,
         completedAt: new Date(),
         prizePool: totalCollectedBirr.toString(),
-      });
+      };
+      
+      // Only add winnerId for non-reset operations
+      if (!isResetOperation) {
+        gameUpdateData.winnerId = winnerId;
+      }
+      
+      const updatedGame = await storage.updateGame(gameId, gameUpdateData);
 
-      console.log(`✅ Game ${gameId} marked as completed with winner ${winnerId}`);
+      if (isResetOperation) {
+        console.log(`🔄 Game ${gameId} reset and completed without winner`);
+      } else {
+        console.log(`✅ Game ${gameId} marked as completed with winner ${winnerId}`);
+      }
 
       // Process game profits with Super Admin revenue logging
       await storage.processGameProfits(gameId, totalCollectedBirr.toString());
@@ -782,9 +795,10 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       res.json({
         success: true,
         game: updatedGame,
-        message: "Game completed successfully",
+        message: isResetOperation ? "Game reset successfully" : "Game completed successfully",
         revenueLogged: true,
-        cartelasReset: true
+        cartelasReset: true,
+        isReset: isResetOperation
       });
     } catch (error) {
       console.error("Error completing game:", error);
