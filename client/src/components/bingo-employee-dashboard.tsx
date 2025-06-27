@@ -862,9 +862,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Check winner function - can be called anytime even when paused
   const checkWinner = async () => {
     // Store current game state before checking to preserve it
-    const currentGameActive = gameActive;
-    const currentGamePaused = gamePaused;
-    const currentGameFinished = gameFinished;
+    const wasGameActive = gameActive;
+    const wasGamePaused = gamePaused;
     
     // Prevent checking winner if game is already finished
     if (gameFinished) {
@@ -874,6 +873,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         variant: "destructive"
       });
       return;
+    }
+    
+    // Temporarily pause the game for winner checking
+    if (wasGameActive && !wasGamePaused) {
+      setGamePaused(true);
     }
     
     const cartelaNum = parseInt(winnerCartelaNumber);
@@ -969,8 +973,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Auto-continue game after 2 seconds if not a winner
         setTimeout(() => {
           setShowWinnerResult(false);
-          // If game was active before checking, continue calling numbers
-          if (activeGameId && !currentGameFinished && currentGameActive) {
+          // Restore previous game state
+          if (wasGameActive && !wasGamePaused) {
+            setGamePaused(false); // Resume the game
             // Continue calling numbers automatically after 2 seconds
             setTimeout(() => {
               if (!gameFinished && activeGameId && gameActive) {
@@ -1549,7 +1554,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     >
                       New Game
                     </Button>
-                  ) : activeGameId && !gameFinished ? (
+                  ) : gameActive ? (
                     <Button 
                       onClick={() => {
                         if (gamePaused) {
@@ -1564,7 +1569,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     </Button>
                   ) : null}
                   
-                  {activeGameId && !gameFinished ? (
+                  {gameActive ? (
                     <Button 
                       onClick={() => resetGameMutation.mutate()}
                       disabled={resetGameMutation.isPending}
