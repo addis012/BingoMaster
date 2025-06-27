@@ -296,6 +296,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateGameNumbers(gameId: number, calledNumbers: string[]): Promise<Game> {
+    // Get current game to check if it's paused
+    const currentGame = await this.getGame(gameId);
+    if (currentGame && currentGame.status === 'paused') {
+      throw new Error('Cannot update numbers for paused game');
+    }
+    
     const [game] = await db.update(games)
       .set({ calledNumbers })
       .where(eq(games.id, gameId))
