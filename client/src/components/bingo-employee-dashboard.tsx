@@ -1064,35 +1064,60 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   };
 
   // Pause game function - instantly stops audio, animations, and number calling like pausing music
-  const pauseGame = () => {
-    setGamePaused(true);
+  const pauseGame = async () => {
+    if (!activeGameId) return;
     
-    // Clear the timer immediately to stop number calling
-    if (numberCallTimer.current) {
-      clearTimeout(numberCallTimer.current);
-      numberCallTimer.current = null;
+    try {
+      // Call backend to pause the game
+      const response = await fetch(`/api/games/${activeGameId}/pause`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPaused: true })
+      });
+      
+      if (response.ok) {
+        setGamePaused(true);
+        
+        // Clear the timer immediately to stop number calling
+        if (numberCallTimer.current) {
+          clearTimeout(numberCallTimer.current);
+          numberCallTimer.current = null;
+        }
+        
+        // Preserve audio state if currently playing
+        if (currentAudio && !currentAudio.paused) {
+          setPausedAudio(currentAudio);
+          setPausedAudioTime(currentAudio.currentTime);
+          currentAudio.pause();
+          setCurrentAudio(null);
+        }
+        
+        // Stop all animations immediately
+        setIsShuffling(false);
+        setIsHovering(false);
+        setNextNumber(null);
+        
+        // Clear any auto-calling intervals
+        if (autoCallInterval) {
+          clearInterval(autoCallInterval);
+          setAutoCallInterval(null);
+        }
+        setIsAutoCall(false);
+        setIsPaused(false);
+        
+        toast({
+          title: "Game Paused",
+          description: "Game has been paused"
+        });
+      }
+    } catch (error) {
+      console.error('Failed to pause game:', error);
+      toast({
+        title: "Error",
+        description: "Failed to pause game",
+        variant: "destructive"
+      });
     }
-    
-    // Preserve audio state if currently playing
-    if (currentAudio && !currentAudio.paused) {
-      setPausedAudio(currentAudio);
-      setPausedAudioTime(currentAudio.currentTime);
-      currentAudio.pause();
-      setCurrentAudio(null);
-    }
-    
-    // Stop all animations immediately
-    setIsShuffling(false);
-    setIsHovering(false);
-    setNextNumber(null);
-    
-    // Clear any auto-calling intervals
-    if (autoCallInterval) {
-      clearInterval(autoCallInterval);
-      setAutoCallInterval(null);
-    }
-    setIsAutoCall(false);
-    setIsPaused(false);
   };
 
   // Resume game function - continues number calling
