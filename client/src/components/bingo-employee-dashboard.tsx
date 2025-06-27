@@ -875,10 +875,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
     
-    // Temporarily pause the game for winner checking
-    if (wasGameActive && !wasGamePaused) {
-      setGamePaused(true);
-    }
+    console.log(`🔍 CHECKING WINNER - Game state before: active=${wasGameActive}, paused=${wasGamePaused}`);
     
     const cartelaNum = parseInt(winnerCartelaNumber);
     
@@ -973,10 +970,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Auto-continue game after 2 seconds if not a winner
         setTimeout(() => {
           setShowWinnerResult(false);
-          // Restore previous game state
+          console.log(`❌ NOT A WINNER - Game state after: active=${gameActive}, paused=${gamePaused}`);
+          
+          // Continue if game was active before checking
           if (wasGameActive && !wasGamePaused) {
-            setGamePaused(false); // Resume the game
-            // Continue calling numbers automatically after 2 seconds
+            console.log(`🎯 AUTO-CONTINUING number calling since game was active before checking`);
             setTimeout(() => {
               if (!gameFinished && activeGameId && gameActive) {
                 callNumberMutation.mutate();
