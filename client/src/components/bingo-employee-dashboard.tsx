@@ -928,7 +928,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       const result = await response.json();
       
       if (!result.isWinner) {
-        // NOT A WINNER - Show red popup and resume game
+        // NOT A WINNER - Show red popup but DON'T modify game state
         setWinnerResult({
           isWinner: false,
           cartela: cartelaNum,
@@ -970,13 +970,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Auto-continue game after 2 seconds if not a winner
         setTimeout(() => {
           setShowWinnerResult(false);
-          console.log(`❌ NOT A WINNER - Game state after: active=${gameActive}, paused=${gamePaused}`);
+          console.log(`❌ NOT A WINNER - Preserved state: wasActive=${wasGameActive}, wasPaused=${wasGamePaused}`);
+          console.log(`❌ Current state: active=${gameActive}, paused=${gamePaused}`);
           
-          // Continue if game was active before checking
+          // Continue number calling if game was running before check
           if (wasGameActive && !wasGamePaused) {
-            console.log(`🎯 AUTO-CONTINUING number calling since game was active before checking`);
+            console.log(`🎯 AUTO-CONTINUING number calling since game was running before checking`);
             setTimeout(() => {
-              if (!gameFinished && activeGameId && gameActive) {
+              if (!gameFinished && activeGameId && gameActive && !gamePaused) {
                 callNumberMutation.mutate();
               }
             }, 500);
