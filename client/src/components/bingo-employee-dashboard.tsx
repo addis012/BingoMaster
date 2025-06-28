@@ -111,6 +111,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     
     // Debug logging
     console.log('🧮 EMPLOYEE CALCULATION DEBUG:', {
+      bookedCartelasSize: bookedCartelas.size,
+      selectedCartelasSize: selectedCartelas.size,
       totalCartelas,
       amountPerCartela,
       totalCollected,
@@ -119,7 +121,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       winnerAmount,
       profitAmount,
       activeGameEntryFee: activeGame?.entryFee,
-      gameAmountState: gameAmount
+      gameAmountState: gameAmount,
+      shopDataFull: shopData
     });
     
     return {
