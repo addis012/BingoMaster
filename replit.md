@@ -122,6 +122,15 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
+### June 28, 2025 - Fixed Admin Game History Player Count and Non-Winner Game Continuation (COMPLETED)
+- ✅ Fixed admin game history to accurately count both employee-selected and collector-marked cartelas
+- ✅ Updated frontend player count calculation to use bookedCartelas.size + selectedCartelas.size
+- ✅ Fixed allCartelaNumbers array to include cartelas from both employee and collector sources
+- ✅ Added "Continue Game Now" button to non-winner modal for immediate game resumption
+- ✅ Updated total calculations throughout horizontal dashboard for consistency
+- ✅ Game history now properly records actual player count instead of database player records only
+- ✅ Financial calculations now reflect true total collected amounts from all cartela sources
+
 ### June 27, 2025 - Manual Reset System and Game History Data Accuracy Fixes (COMPLETED)
 - ✅ Removed automatic game reset after winner is found - now requires manual reset via reset button
 - ✅ Fixed reset button becoming disabled after game ends - now properly available for manual reset
