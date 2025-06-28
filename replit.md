@@ -128,9 +128,11 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 - ✅ Updated horizontal dashboard to use correct camelCase field names for cartela filtering
 - ✅ Fixed cartela counting logic to combine both employee and collector cartelas in single bookedCartelas set
 - ✅ Eliminated double-counting by using unified cartela count calculation
-- ✅ Added comprehensive API debugging to verify cartela identification (shows 4 cartelas: 2 collector + 2 employee)
-- ✅ Verified 4 cartelas × 20 birr entry fee = 80 birr total, 80 × 70% = 56 birr prize calculation
-- ✅ Game history now properly records actual player count from all cartela sources
+- ✅ Added comprehensive API debugging to verify cartela identification (shows 4 cartelas: 1 collector + 3 employee)
+- ✅ Fixed declare-winner endpoint to use frontend-provided totalCartelas count instead of incomplete game_players table
+- ✅ Updated backend revenue calculation to count actual marked cartelas from cartelas table
+- ✅ Verified 4 cartelas × 20 birr entry fee = 80 birr total, 80 × 70% = 56 birr prize calculation works correctly
+- ✅ Game history now properly records actual player count from all cartela sources (confirmed: progressive counts 1→2→3 players)
 - ✅ Financial calculations now reflect true total collected amounts from all cartela sources
 
 ### June 27, 2025 - Manual Reset System and Game History Data Accuracy Fixes (COMPLETED)
