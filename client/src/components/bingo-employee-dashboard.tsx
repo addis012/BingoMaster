@@ -109,6 +109,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const winnerAmount = totalCollected * (1 - profitMargin);
     const profitAmount = totalCollected * profitMargin;
     
+    // Debug logging
+    console.log('🧮 EMPLOYEE CALCULATION DEBUG:', {
+      totalCartelas,
+      amountPerCartela,
+      totalCollected,
+      profitMarginPercent: (shopData as any)?.profitMargin || '0',
+      profitMargin,
+      winnerAmount,
+      profitAmount,
+      activeGameEntryFee: activeGame?.entryFee,
+      gameAmountState: gameAmount
+    });
+    
     return {
       totalCollected,
       winnerAmount,
