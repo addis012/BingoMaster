@@ -893,23 +893,39 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setShowWinnerChecker(false);
       setWinnerCartelaNumber('');
       
+      // Force immediate UI update by clearing all audio states
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setCurrentAudio(null);
+      }
+      if (currentAudioRef) {
+        currentAudioRef.pause();
+        currentAudioRef.currentTime = 0;
+        setCurrentAudioRef(null);
+      }
+      if (autoCallInterval) {
+        clearInterval(autoCallInterval);
+        setAutoCallInterval(null);
+      }
+      
       // Invalidate queries to force refresh and clear called numbers from cache
       queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/cartelas', user?.shopId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
       
       toast({
         title: "Reset Complete",
-        description: "All cartelas and game state have been reset"
+        description: "All cartelas and called numbers have been cleared"
       });
       
-      // Immediately invalidate queries and refresh state
-      queryClient.invalidateQueries({ queryKey: ['/api/games/active'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
-      
-      // Force immediate refetch to ensure fresh data
+      // Force immediate refetch to ensure fresh data and visual update
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/games/active'] });
-      }, 100);
+        // Force re-render by triggering state update
+        setCalledNumbers([]);
+        setMarkedNumbers([]);
+      }, 50);
     },
     onError: (error: any) => {
       toast({
