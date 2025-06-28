@@ -760,9 +760,19 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         }
       }
       
-      // Calculate total collected from entry fees
-      let totalCollectedBirr = players.length * parseFloat(game.entryFee || "0");
-      console.log(`📊 Revenue calculation: ${players.length} players × ${game.entryFee} ETB = ${totalCollectedBirr} ETB`);
+      // Calculate total collected from entry fees using ACTUAL marked cartelas (both employee and collector)
+      const shopCartelas = await storage.getCartelasByShop(game.shopId);
+      const markedCartelas = shopCartelas.filter(c => c.collectorId !== null || c.bookedBy !== null);
+      const actualPlayerCount = markedCartelas.length;
+      let totalCollectedBirr = actualPlayerCount * parseFloat(game.entryFee || "0");
+      
+      console.log(`📊 CORRECTED Revenue calculation: ${actualPlayerCount} marked cartelas × ${game.entryFee} ETB = ${totalCollectedBirr} ETB`);
+      console.log(`📊 Marked cartelas breakdown:`, markedCartelas.map(c => ({
+        number: c.cartelaNumber,
+        source: c.collectorId !== null ? 'collector' : 'employee',
+        collectorId: c.collectorId,
+        bookedBy: c.bookedBy
+      })));
       
       // Update game status 
       const gameUpdateData: any = {
