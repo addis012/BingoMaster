@@ -936,12 +936,37 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   });
 
-  // Check winner function - can be called anytime even when paused
+  // Check winner function - immediately pauses game when called
   const checkWinner = async () => {
-    // Store current game state before checking to preserve it
-    const wasGameActive = gameActive;
-    const wasGamePaused = gamePaused;
-    const wasActiveGameId = activeGameId;
+    // IMMEDIATELY PAUSE THE GAME AND STOP ALL AUDIO/TIMERS
+    setGamePaused(true);
+    
+    // Clear any ongoing auto-call intervals
+    if (autoCallInterval) {
+      clearInterval(autoCallInterval);
+      setAutoCallInterval(null);
+    }
+    
+    // Clear any number call timers
+    if (numberCallTimer.current) {
+      clearTimeout(numberCallTimer.current);
+      numberCallTimer.current = null;
+    }
+    
+    // Stop any currently playing audio
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+    if (currentAudioRef) {
+      currentAudioRef.pause();
+      currentAudioRef.currentTime = 0;
+      setCurrentAudioRef(null);
+    }
+    
+    setAudioPlaying(false);
+    setIsAutoCall(false);
     
     // Prevent checking winner if game is already finished
     if (gameFinished) {
@@ -953,7 +978,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
     
-    console.log(`🔍 CHECKING WINNER - Game state before: active=${wasGameActive}, paused=${wasGamePaused}, gameId=${wasActiveGameId}`);
+    console.log(`🔍 CHECKING WINNER - Game immediately paused, all audio stopped`);
     
     const cartelaNum = parseInt(winnerCartelaNumber);
     
@@ -1052,8 +1077,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         }, 2000);
         
       } else {
-        // IS A WINNER - Pause game completely and show green popup
+        // IS A WINNER - Immediately pause the game and show green popup
         setGamePaused(true);
+        
+        // Clear any ongoing auto-call intervals to prevent more numbers
+        if (autoCallInterval) {
+          clearInterval(autoCallInterval);
+          setAutoCallInterval(null);
+        }
+        if (numberCallTimer.current) {
+          clearTimeout(numberCallTimer.current);
+          numberCallTimer.current = null;
+        }
+        
         setGameActive(false);
         setGameFinished(true);
         
@@ -1072,13 +1108,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Submit winner to backend and complete the game
         try {
           // Get actual game entry fee from active game data
-          const actualEntryFee = activeGame?.entryFee ? parseFloat(activeGame.entryFee.toString()) : parseFloat(gameAmount || '20');
+          const actualEntryFee = parseFloat(gameAmount || '20');
+          const totalPlayersCount = bookedCartelas.size + selectedCartelas.size; // Include both collector and employee cartelas
+          const { winnerAmount } = calculateAmounts(); // Use the correct calculation from our function
           
           console.log('🎯 EMPLOYEE DECLARING WINNER:', {
             cartelaNumber: cartelaNum,
-            totalPlayers: bookedCartelas.size,
+            totalPlayers: totalPlayersCount,
             actualEntryFee,
+            winnerAmount,
             bookedCartelas: Array.from(bookedCartelas),
+            selectedCartelas: Array.from(selectedCartelas),
             calledNumbers: calledNumbers.length
           });
           
@@ -1087,9 +1127,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               winnerCartelaNumber: cartelaNum,
-              totalPlayers: bookedCartelas.size, // Use bookedCartelas which contains actual played cartelas
-              entryFeePerPlayer: actualEntryFee, // Use actual game entry fee
-              allCartelaNumbers: Array.from(bookedCartelas), // Use bookedCartelas instead of selectedCartelas
+              totalPlayers: totalPlayersCount,
+              entryFeePerPlayer: actualEntryFee,
+              totalCartelas: totalPlayersCount, // Send accurate total count
+              allCartelaNumbers: [...Array.from(bookedCartelas), ...Array.from(selectedCartelas)],
               calledNumbers: calledNumbers,
               pattern: result.winningPattern
             })
