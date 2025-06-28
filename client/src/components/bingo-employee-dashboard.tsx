@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -148,6 +149,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     },
     enabled: !!user?.shopId,
     refetchInterval: 2000 // Refresh every 2 seconds for real-time updates
+  });
+
+  // Get collectors under this employee
+  const { data: collectors = [] } = useQuery({
+    queryKey: [`/api/employees/${user?.id}/collectors`],
+    enabled: !!user?.id,
   });
 
   // Sync with active game data
@@ -691,6 +698,74 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to unmark cartela",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mark cartela by collector mutation
+  const markCartelaByCollectorMutation = useMutation({
+    mutationFn: async (cartelaNumber: number) => {
+      if (!selectedCollector) throw new Error('Please select a collector first');
+      
+      const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === cartelaNumber);
+      if (!cartela) throw new Error('Cartela not found');
+      
+      const response = await fetch('/api/collectors/mark-cartela', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          cartelaId: cartela.id, 
+          collectorId: selectedCollector 
+        })
+      });
+      if (!response.ok) throw new Error('Failed to mark cartela for collector');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+      toast({
+        title: "Success",
+        description: "Cartela marked for collector",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to mark cartela for collector",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Unmark cartela by collector mutation
+  const unmarkCartelaByCollectorMutation = useMutation({
+    mutationFn: async (cartelaNumber: number) => {
+      const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === cartelaNumber);
+      if (!cartela) throw new Error('Cartela not found');
+      
+      const response = await fetch('/api/collectors/unmark-cartela', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          cartelaId: cartela.id, 
+          collectorId: cartela.collector_id 
+        })
+      });
+      if (!response.ok) throw new Error('Failed to unmark cartela');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+      toast({
+        title: "Success",
+        description: "Cartela unmarked from collector",
+      });
     },
     onError: (error: any) => {
       toast({
@@ -1865,6 +1940,26 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               </span>
             </DialogDescription>
           </DialogHeader>
+          
+          {/* Collector Selection */}
+          <div className="px-6 pb-4">
+            <Label className="text-sm font-medium">Select Collector for Cartela Marking</Label>
+            <Select
+              value={selectedCollector?.toString() || ""}
+              onValueChange={(value) => setSelectedCollector(value ? parseInt(value) : null)}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Choose a collector..." />
+              </SelectTrigger>
+              <SelectContent>
+                {collectors.map((collector: any) => (
+                  <SelectItem key={collector.id} value={collector.id.toString()}>
+                    {collector.name} (@{collector.username})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-10 gap-4 p-6">
             {(cartelas || []).map((cartela: any) => (
               <div key={cartela.cartelaNumber} className="text-center">
@@ -1896,17 +1991,54 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 >
                   {cartela.cartelaNumber}
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-xs px-2 py-1 h-5"
-                  onClick={() => {
-                    setPreviewCartela(cartela.cartelaNumber);
-                    setShowCartelaPreview(true);
-                  }}
-                >
-                  View
-                </Button>
+                <div className="space-y-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs px-2 py-1 h-5 w-full"
+                    onClick={() => {
+                      setPreviewCartela(cartela.cartelaNumber);
+                      setShowCartelaPreview(true);
+                    }}
+                  >
+                    View
+                  </Button>
+                  
+                  {/* Collector marking functionality */}
+                  {cartela.collector_id ? (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="text-xs px-2 py-1 h-5 w-full"
+                      onClick={() => {
+                        unmarkCartelaByCollectorMutation.mutate(cartela.cartelaNumber);
+                      }}
+                      disabled={unmarkCartelaByCollectorMutation.isPending}
+                    >
+                      {unmarkCartelaByCollectorMutation.isPending ? "..." : "Unmark"}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="text-xs px-2 py-1 h-5 w-full"
+                      onClick={() => {
+                        if (selectedCollector) {
+                          markCartelaByCollectorMutation.mutate(cartela.cartelaNumber);
+                        } else {
+                          toast({
+                            title: "No Collector Selected",
+                            description: "Please select a collector first",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      disabled={markCartelaByCollectorMutation.isPending || !selectedCollector}
+                    >
+                      {markCartelaByCollectorMutation.isPending ? "..." : "Mark for Collector"}
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
