@@ -69,6 +69,13 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
     refetchInterval: 2000,
   });
 
+  // Fetch cartelas to get collector-marked ones
+  const { data: cartelas } = useQuery({
+    queryKey: [`/api/cartelas/${user?.shopId}`],
+    enabled: !!user?.shopId,
+    refetchInterval: 2000,
+  });
+
   // Calculate values
   const adminProfitMargin = (adminStats as any)?.commissionRate || 30;
   const totalCartelasCount = bookedCartelas.size + selectedCartelas.size;
