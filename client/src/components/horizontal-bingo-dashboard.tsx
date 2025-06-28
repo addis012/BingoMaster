@@ -83,23 +83,23 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       
       const collectorMarkedCartelas = (cartelas as any[])
         .filter((c: any) => {
-          const hasCollector = c.collector_id !== null && c.collector_id !== undefined;
+          const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
           if (hasCollector) {
-            console.log('✅ Collector cartela found:', { number: c.cartela_number, collectorId: c.collector_id });
+            console.log('✅ Collector cartela found:', { number: c.cartelaNumber, collectorId: c.collectorId });
           }
           return hasCollector;
         })
-        .map((c: any) => c.cartela_number);
+        .map((c: any) => c.cartelaNumber);
       
       const employeeBookedCartelas = (cartelas as any[])
         .filter((c: any) => {
-          const hasEmployee = c.booked_by !== null && c.booked_by !== undefined;
+          const hasEmployee = c.bookedBy !== null && c.bookedBy !== undefined;
           if (hasEmployee) {
-            console.log('✅ Employee cartela found:', { number: c.cartela_number, bookedBy: c.booked_by });
+            console.log('✅ Employee cartela found:', { number: c.cartelaNumber, bookedBy: c.bookedBy });
           }
           return hasEmployee;
         })
-        .map((c: any) => c.cartela_number);
+        .map((c: any) => c.cartelaNumber);
       
       const allBookedCartelas = [...collectorMarkedCartelas, ...employeeBookedCartelas];
       
