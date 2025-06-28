@@ -80,12 +80,12 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   useEffect(() => {
     if (cartelas) {
       const collectorMarkedCartelas = (cartelas as any[])
-        .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
-        .map((c: any) => c.cartelaNumber);
+        .filter((c: any) => c.collector_id !== null && c.collector_id !== undefined)
+        .map((c: any) => c.cartela_number);
       
       const employeeBookedCartelas = (cartelas as any[])
-        .filter((c: any) => c.bookedBy !== null && c.bookedBy !== undefined)
-        .map((c: any) => c.cartelaNumber);
+        .filter((c: any) => c.booked_by !== null && c.booked_by !== undefined)
+        .map((c: any) => c.cartela_number);
       
       const allBookedCartelas = [...collectorMarkedCartelas, ...employeeBookedCartelas];
       
