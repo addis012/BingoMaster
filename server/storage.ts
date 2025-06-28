@@ -1609,6 +1609,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markCartelaByCollector(cartelaId: number, collectorId: number): Promise<void> {
+    // Check if cartela is already marked by an employee
+    const existingCartela = await db.select().from(cartelas).where(eq(cartelas.id, cartelaId)).limit(1);
+    
+    if (existingCartela.length > 0 && existingCartela[0].bookedBy !== null) {
+      throw new Error('Cartela is already marked by an employee');
+    }
+    
     await db.update(cartelas)
       .set({
         collectorId,
@@ -1701,6 +1708,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markCartelaByEmployee(cartelaId: number, employeeId: number): Promise<void> {
+    // Check if cartela is already marked by a collector
+    const existingCartela = await db.select().from(cartelas).where(eq(cartelas.id, cartelaId)).limit(1);
+    
+    if (existingCartela.length > 0 && existingCartela[0].collectorId !== null) {
+      throw new Error('Cartela is already marked by a collector');
+    }
+    
     await db.update(cartelas)
       .set({
         bookedBy: employeeId,
