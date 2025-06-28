@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -39,7 +38,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
   const [showCartelaSelector, setShowCartelaSelector] = useState(false);
-  const [selectedCollector, setSelectedCollector] = useState<number | null>(null);
   
   // Winner checking
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
@@ -151,27 +149,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     refetchInterval: 2000 // Refresh every 2 seconds for real-time updates
   });
 
-  // Get collectors under this employee
-  const { data: collectors = [], isLoading: collectorsLoading, error: collectorsError } = useQuery({
-    queryKey: [`/api/employees/${user?.id}/collectors`],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const response = await fetch(`/api/employees/${user?.id}/collectors`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch collectors');
-      }
-      return response.json();
-    }
-  });
-
-  // Debug collectors data
-  console.log("Collectors query:", { collectors, collectorsLoading, collectorsError, userId: user?.id });
-
   // Sync with active game data
   useEffect(() => {
     if (activeGame) {
@@ -225,7 +202,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setMarkedNumbers(numbersToMark); // All except last number
       }
       
-      // Include employee-selected cartelas, collector-marked cartelas, and game cartelas
+      // Include both game cartelas and collector-marked cartelas
       const gameCartelas = new Set((activeGame as any).cartelas || []);
       
       // Debug: Log all cartelas to see their structure
@@ -233,32 +210,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       const collectorMarkedCartelas = (cartelas || [])
         .filter((c: any) => {
-          const hasCollector = c.collector_id !== null && c.collector_id !== undefined;
+          const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
           if (hasCollector) {
-            console.log(`Cartela ${c.cartela_number} marked by collector ${c.collector_id}`);
+            console.log(`Cartela ${c.cartelaNumber} marked by collector ${c.collectorId}`);
           }
           return hasCollector;
         })
-        .map((c: any) => c.cartela_number);
-      
-      const employeeBookedCartelas = (cartelas || [])
-        .filter((c: any) => {
-          const hasEmployee = c.booked_by !== null && c.booked_by !== undefined;
-          if (hasEmployee) {
-            console.log(`Cartela ${c.cartela_number} booked by employee ${c.booked_by}`);
-          }
-          return hasEmployee;
-        })
-        .map((c: any) => c.cartela_number);
+        .map((c: any) => c.cartelaNumber);
       
       console.log("Game cartelas:", Array.from(gameCartelas));
       console.log("Collector marked cartelas:", collectorMarkedCartelas);
-      console.log("Employee booked cartelas:", employeeBookedCartelas);
       
-      const allCartelas = [...Array.from(gameCartelas), ...collectorMarkedCartelas, ...employeeBookedCartelas];
-      console.log("Total booked cartelas:", allCartelas);
-      
-      setBookedCartelas(new Set(allCartelas));
+      setBookedCartelas(new Set([...Array.from(gameCartelas), ...collectorMarkedCartelas]));
       
       const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
@@ -271,37 +234,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setMarkedNumbers([]);
       setLastCalledNumber(null);
       
-      // Still show both collector-marked and employee-booked cartelas as unavailable even when no active game
+      // Still show collector-marked cartelas as unavailable even when no active game
       // Debug: Log all cartelas to see their structure
       console.log("No active game - All cartelas data:", cartelas?.slice(0, 3));
       
       const collectorMarkedCartelas = (cartelas || [])
         .filter((c: any) => {
-          const hasCollector = c.collector_id !== null && c.collector_id !== undefined;
+          const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
           if (hasCollector) {
-            console.log(`No active game - Cartela ${c.cartela_number} marked by collector ${c.collector_id}`);
+            console.log(`No active game - Cartela ${c.cartelaNumber} marked by collector ${c.collectorId}`);
           }
           return hasCollector;
         })
-        .map((c: any) => c.cartela_number);
-      
-      const employeeBookedCartelas = (cartelas || [])
-        .filter((c: any) => {
-          const hasEmployee = c.booked_by !== null && c.booked_by !== undefined;
-          if (hasEmployee) {
-            console.log(`No active game - Cartela ${c.cartela_number} booked by employee ${c.booked_by}`);
-          }
-          return hasEmployee;
-        })
-        .map((c: any) => c.cartela_number);
-      
-      const allCartelas = [...collectorMarkedCartelas, ...employeeBookedCartelas];
+        .map((c: any) => c.cartelaNumber);
       
       console.log("No active game - Collector marked cartelas:", collectorMarkedCartelas);
-      console.log("No active game - Employee booked cartelas:", employeeBookedCartelas);
-      console.log("No active game - Total booked cartelas:", allCartelas);
-      
-      setBookedCartelas(new Set(allCartelas));
+      setBookedCartelas(new Set(collectorMarkedCartelas));
     }
   }, [activeGame, cartelas]);
 
@@ -713,74 +661,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to unmark cartela",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Mark cartela by collector mutation
-  const markCartelaByCollectorMutation = useMutation({
-    mutationFn: async (cartelaNumber: number) => {
-      if (!selectedCollector) throw new Error('Please select a collector first');
-      
-      const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === cartelaNumber);
-      if (!cartela) throw new Error('Cartela not found');
-      
-      const response = await fetch('/api/collectors/mark-cartela', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          cartelaId: cartela.id, 
-          collectorId: selectedCollector 
-        })
-      });
-      if (!response.ok) throw new Error('Failed to mark cartela for collector');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
-      toast({
-        title: "Success",
-        description: "Cartela marked for collector",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to mark cartela for collector",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Unmark cartela by collector mutation
-  const unmarkCartelaByCollectorMutation = useMutation({
-    mutationFn: async (cartelaNumber: number) => {
-      const cartela = (cartelas || []).find((c: any) => c.cartelaNumber === cartelaNumber);
-      if (!cartela) throw new Error('Cartela not found');
-      
-      const response = await fetch('/api/collectors/unmark-cartela', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          cartelaId: cartela.id, 
-          collectorId: cartela.collector_id 
-        })
-      });
-      if (!response.ok) throw new Error('Failed to unmark cartela');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
-      toast({
-        title: "Success",
-        description: "Cartela unmarked from collector",
-      });
     },
     onError: (error: any) => {
       toast({
@@ -1955,36 +1835,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               </span>
             </DialogDescription>
           </DialogHeader>
-          
-          {/* Collector Selection */}
-          <div className="px-6 pb-4">
-            <Label className="text-sm font-medium">Select Collector for Cartela Marking</Label>
-            <Select
-              value={selectedCollector?.toString() || ""}
-              onValueChange={(value) => setSelectedCollector(value ? parseInt(value) : null)}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder={collectorsLoading ? "Loading collectors..." : "Choose a collector..."} />
-              </SelectTrigger>
-              <SelectContent>
-                {collectorsLoading ? (
-                  <SelectItem value="loading" disabled>Loading...</SelectItem>
-                ) : collectors && Array.isArray(collectors) && collectors.length > 0 ? (
-                  collectors.map((collector: any) => (
-                    <SelectItem key={collector.id} value={collector.id.toString()}>
-                      {collector.name} (@{collector.username})
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>No collectors found</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            {collectorsError && (
-              <p className="text-xs text-red-500 mt-1">Error loading collectors: {(collectorsError as any)?.message}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">Debug: Found {collectors?.length || 0} collectors</p>
-          </div>
           <div className="grid grid-cols-10 gap-4 p-6">
             {(cartelas || []).map((cartela: any) => (
               <div key={cartela.cartelaNumber} className="text-center">
@@ -2016,54 +1866,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 >
                   {cartela.cartelaNumber}
                 </div>
-                <div className="space-y-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs px-2 py-1 h-5 w-full"
-                    onClick={() => {
-                      setPreviewCartela(cartela.cartelaNumber);
-                      setShowCartelaPreview(true);
-                    }}
-                  >
-                    View
-                  </Button>
-                  
-                  {/* Collector marking functionality */}
-                  {cartela.collector_id ? (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="text-xs px-2 py-1 h-5 w-full"
-                      onClick={() => {
-                        unmarkCartelaByCollectorMutation.mutate(cartela.cartelaNumber);
-                      }}
-                      disabled={unmarkCartelaByCollectorMutation.isPending}
-                    >
-                      {unmarkCartelaByCollectorMutation.isPending ? "..." : "Unmark"}
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="text-xs px-2 py-1 h-5 w-full"
-                      onClick={() => {
-                        if (selectedCollector) {
-                          markCartelaByCollectorMutation.mutate(cartela.cartelaNumber);
-                        } else {
-                          toast({
-                            title: "No Collector Selected",
-                            description: "Please select a collector first",
-                            variant: "destructive"
-                          });
-                        }
-                      }}
-                      disabled={markCartelaByCollectorMutation.isPending || !selectedCollector}
-                    >
-                      {markCartelaByCollectorMutation.isPending ? "..." : "Mark for Collector"}
-                    </Button>
-                  )}
-                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs px-2 py-1 h-5"
+                  onClick={() => {
+                    setPreviewCartela(cartela.cartelaNumber);
+                    setShowCartelaPreview(true);
+                  }}
+                >
+                  View
+                </Button>
               </div>
             ))}
           </div>

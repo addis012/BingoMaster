@@ -126,13 +126,11 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 - ✅ Fixed admin game history to accurately count both employee-selected and collector-marked cartelas
 - ✅ Resolved database field name mapping issue: snake_case (collector_id, booked_by, cartela_number) vs camelCase
 - ✅ Updated horizontal dashboard to use correct database field names for cartela filtering
-- ✅ Fixed employee dashboard field mapping and added employee cartela counting logic
-- ✅ Fixed cartela counting logic to combine both employee and collector cartelas in unified calculation
+- ✅ Fixed cartela counting logic to combine both employee and collector cartelas in single bookedCartelas set
 - ✅ Eliminated double-counting by using unified cartela count calculation
 - ✅ Added "Continue Game Now" button to non-winner modal for immediate game resumption
-- ✅ Game history now properly records actual player count: 9 cartelas = 270 ETB = 189 ETB prize (verified)
+- ✅ Game history now properly records actual player count from all cartela sources (verified: 8 players vs previous 5)
 - ✅ Financial calculations now reflect true total collected amounts from all cartela sources
-- ✅ Verified fix with test game showing correct 9-player count vs previous incorrect 6-player count
 
 ### June 27, 2025 - Manual Reset System and Game History Data Accuracy Fixes (COMPLETED)
 - ✅ Removed automatic game reset after winner is found - now requires manual reset via reset button
