@@ -122,12 +122,14 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
-### June 28, 2025 - Fixed Player Count Calculation Accuracy (COMPLETED)
+### June 28, 2025 - Fixed Player Count and Prize Calculation Accuracy (COMPLETED)
 - ✅ Fixed critical calculation bug where system showed 7 cartelas instead of actual 5 in database
 - ✅ Removed stale `selectedCartelas` local state from total calculation to prevent double-counting
 - ✅ Calculation now uses only `bookedCartelas.size` (actual database-marked cartelas)
-- ✅ Employee dashboard now shows accurate totals: 5 cartelas × 20 birr = 100 birr collected
-- ✅ Winner amounts now calculated correctly based on actual player count
+- ✅ Employee dashboard now shows accurate totals based on actual marked cartelas and current entry fee
+- ✅ Fixed backend declare-winner endpoint to use same calculation logic as frontend
+- ✅ Both dashboards now calculate: totalCollected × (1 - profitMargin) for consistent winner amounts
+- ✅ Verified accuracy: 4 cartelas × 30 birr = 120 birr total, 84 birr winner amount (30% profit margin)
 - ✅ Eliminated discrepancy between frontend display and database reality
 - ✅ System ready for production with accurate financial calculations
 
