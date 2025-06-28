@@ -1541,7 +1541,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     )}
                   </div>
                   <div className="text-xs text-gray-600 mt-1">
-                    Total cartelas: {bookedCartelas.size + selectedCartelas.size}
+                    Total cartelas: {(cartelas || []).filter((c: any) => 
+                      (c.collectorId !== null && c.collectorId !== undefined) || 
+                      c.bookedBy === user?.id
+                    ).length}
                   </div>
                 </div>
 
