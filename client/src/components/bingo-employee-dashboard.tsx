@@ -225,10 +225,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         })
         .map((c: any) => c.cartelaNumber);
       
-      console.log("Game cartelas:", Array.from(gameCartelas));
-      console.log("All marked cartelas (no duplicates):", allMarkedCartelas);
+      // Combine game cartelas and marked cartelas without duplication
+      const combinedCartelas = new Set([...Array.from(gameCartelas), ...allMarkedCartelas]);
       
-      setBookedCartelas(new Set([...Array.from(gameCartelas), ...allMarkedCartelas]));
+      console.log("Game cartelas:", Array.from(gameCartelas));
+      console.log("All marked cartelas:", allMarkedCartelas);
+      console.log("Final combined cartelas (no duplicates):", Array.from(combinedCartelas));
+      
+      setBookedCartelas(combinedCartelas);
       
       const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
