@@ -248,7 +248,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         actualPlayerCount,
         actualEntryFee,
         totalCollectedAmount,
-        calculatedPrize: Math.round(totalCollectedAmount * 0.85)
+        note: 'Prize amount will be calculated by backend using actual shop profit margin'
       });
       
       const response = await fetch(`/api/games/${data.gameId}/declare-winner`, {
@@ -257,9 +257,9 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         body: JSON.stringify({
           winnerCartelaNumber: data.cartelaNumber,
           totalPlayers: actualPlayerCount,
-          actualPrizeAmount: Math.round(totalCollectedAmount * 0.85),
           allCartelaNumbers: Array.from(bookedCartelas), // bookedCartelas now includes both collector and employee cartelas
-          entryFeePerPlayer: actualEntryFee
+          entryFeePerPlayer: actualEntryFee,
+          calledNumbers: calledNumbers
         }),
         credentials: 'include'
       });
