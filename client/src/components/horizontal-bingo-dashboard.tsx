@@ -76,21 +76,30 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
     refetchInterval: 2000,
   });
 
-  // Update bookedCartelas to include collector-marked cartelas
+  // Update bookedCartelas to include both collector-marked and employee-booked cartelas
   useEffect(() => {
     if (cartelas) {
       const collectorMarkedCartelas = (cartelas as any[])
         .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
         .map((c: any) => c.cartelaNumber);
       
+      const employeeBookedCartelas = (cartelas as any[])
+        .filter((c: any) => c.bookedBy !== null && c.bookedBy !== undefined)
+        .map((c: any) => c.cartelaNumber);
+      
+      const allBookedCartelas = [...collectorMarkedCartelas, ...employeeBookedCartelas];
+      
       console.log('🎯 HORIZONTAL DASHBOARD: Collector marked cartelas:', collectorMarkedCartelas);
-      setBookedCartelas(new Set(collectorMarkedCartelas));
+      console.log('🎯 HORIZONTAL DASHBOARD: Employee booked cartelas:', employeeBookedCartelas);
+      console.log('🎯 HORIZONTAL DASHBOARD: Total booked cartelas:', allBookedCartelas);
+      
+      setBookedCartelas(new Set(allBookedCartelas));
     }
   }, [cartelas]);
 
   // Calculate values
   const adminProfitMargin = (adminStats as any)?.commissionRate || 30;
-  const totalCartelasCount = bookedCartelas.size + selectedCartelas.size;
+  const totalCartelasCount = bookedCartelas.size; // bookedCartelas now includes both collector and employee cartelas
   const totalCollected = totalCartelasCount * parseFloat(gameAmount || "0");
   const prizeAmount = totalCollected * (100 - adminProfitMargin) / 100;
 
@@ -201,7 +210,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       });
       
       // Always use total cartelas (employee + collector) for accurate player count
-      let actualPlayerCount = bookedCartelas.size + selectedCartelas.size;
+      let actualPlayerCount = bookedCartelas.size; // bookedCartelas now includes both collector and employee cartelas
       let actualEntryFee = parseFloat(gameAmount || "20");
       
       if (playersResponse.ok) {
@@ -212,8 +221,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         }
         console.log('✅ USING CORRECT TOTAL COUNT:', {
           totalCartelas: actualPlayerCount,
-          bookedCartelas: bookedCartelas.size,
-          selectedCartelas: selectedCartelas.size,
+          bookedCartelasSize: bookedCartelas.size,
           entryFeeFromDB: actualEntryFee,
           totalCollected: actualPlayerCount * actualEntryFee,
           dbPlayerRecords: players.length
@@ -242,7 +250,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
           winnerCartelaNumber: data.cartelaNumber,
           totalPlayers: actualPlayerCount,
           actualPrizeAmount: Math.round(totalCollectedAmount * 0.85),
-          allCartelaNumbers: [...Array.from(bookedCartelas), ...Array.from(selectedCartelas)],
+          allCartelaNumbers: Array.from(bookedCartelas), // bookedCartelas now includes both collector and employee cartelas
           entryFeePerPlayer: actualEntryFee
         }),
         credentials: 'include'
