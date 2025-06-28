@@ -3297,7 +3297,7 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       const shop = await storage.getShop(user.shopId!);
       const shopProfitMargin = shop?.profitMargin ? parseFloat(shop.profitMargin) / 100 : 0.10; // Default to 10%
       const adminProfit = totalCollected * shopProfitMargin;
-      const prizeAmount = totalCollected - adminProfit;
+      const prizeAmount = totalCollected * (1 - shopProfitMargin); // Use same calculation as frontend
       const superAdminCommissionRate = shop?.superAdminCommission ? parseFloat(shop.superAdminCommission) / 100 : 0.20;
       const superAdminCommission = adminProfit * superAdminCommissionRate;
 
@@ -3319,7 +3319,8 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         adminProfit,
         prizeAmount,
         superAdminCommissionRate: (superAdminCommissionRate * 100) + '%',
-        superAdminCommission
+        superAdminCommission,
+        calculationMethod: 'totalCollected * (1 - shopProfitMargin)'
       });
 
       // Update game status to completed
