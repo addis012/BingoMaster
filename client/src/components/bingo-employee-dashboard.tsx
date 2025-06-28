@@ -38,6 +38,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
   const [showCartelaSelector, setShowCartelaSelector] = useState(false);
+  const [selectedCollector, setSelectedCollector] = useState<number | null>(null);
   
   // Winner checking
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
