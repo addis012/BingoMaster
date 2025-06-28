@@ -234,14 +234,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       setBookedCartelas(combinedCartelas);
       
-      // Sync selectedCartelas with database reality for employee-marked cartelas
-      const employeeMarkedCartelas = (cartelas || [])
-        .filter((c: any) => c.bookedBy === user?.id)
-        .map((c: any) => c.cartelaNumber);
-      
-      console.log("Employee-marked cartelas from DB:", employeeMarkedCartelas);
-      setSelectedCartelas(new Set(employeeMarkedCartelas));
-      
       const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
     } else {
@@ -275,14 +267,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       console.log("No active game - All marked cartelas (no duplicates):", allMarkedCartelas);
       setBookedCartelas(new Set(allMarkedCartelas));
-      
-      // Sync selectedCartelas with database reality for employee-marked cartelas
-      const employeeMarkedCartelas = (cartelas || [])
-        .filter((c: any) => c.bookedBy === user?.id)
-        .map((c: any) => c.cartelaNumber);
-      
-      console.log("Employee-marked cartelas from DB:", employeeMarkedCartelas);
-      setSelectedCartelas(new Set(employeeMarkedCartelas));
     }
   }, [activeGame, cartelas, user?.id]);
 
