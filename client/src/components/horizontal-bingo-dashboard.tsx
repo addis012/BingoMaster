@@ -181,7 +181,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       });
       
       // Always use total cartelas (employee + collector) for accurate player count
-      let actualPlayerCount = bookedCartelas.size;
+      let actualPlayerCount = bookedCartelas.size + selectedCartelas.size;
       let actualEntryFee = parseFloat(gameAmount || "20");
       
       if (playersResponse.ok) {
@@ -192,6 +192,8 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         }
         console.log('✅ USING CORRECT TOTAL COUNT:', {
           totalCartelas: actualPlayerCount,
+          bookedCartelas: bookedCartelas.size,
+          selectedCartelas: selectedCartelas.size,
           entryFeeFromDB: actualEntryFee,
           totalCollected: actualPlayerCount * actualEntryFee,
           dbPlayerRecords: players.length
@@ -220,7 +222,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
           winnerCartelaNumber: data.cartelaNumber,
           totalPlayers: actualPlayerCount,
           actualPrizeAmount: Math.round(totalCollectedAmount * 0.85),
-          allCartelaNumbers: Array.from(bookedCartelas),
+          allCartelaNumbers: [...Array.from(bookedCartelas), ...Array.from(selectedCartelas)],
           entryFeePerPlayer: actualEntryFee
         }),
         credentials: 'include'
@@ -325,7 +327,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       if (!gameId) {
         console.log('🎮 Creating backend game for cartela booking');
         const game = await createGameMutation.mutateAsync({ 
-          shopId: (user as any).shopId, 
+          shopId: user?.shopId || 0, 
           employeeId: user?.id || 0, 
           entryFee: gameAmount || "20" 
         });
@@ -1004,7 +1006,18 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
                   <div className="text-6xl text-red-600 mb-4">❌</div>
                   <h2 className="text-2xl font-bold text-red-600 mb-2">Not a Winner</h2>
                   <p className="text-lg">Cartela #{winnerResult?.cartelaNumber} Did Not Win</p>
-                  <p className="text-sm text-gray-600 mt-2">Game will resume automatically in 3 seconds</p>
+                  <p className="text-sm text-gray-600 mt-4 mb-4">Game will resume automatically in 3 seconds</p>
+                  <Button 
+                    onClick={() => {
+                      setShowWinnerModal(false);
+                      if (!gameActive && !gameFinished) {
+                        resumeGame();
+                      }
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Continue Game Now
+                  </Button>
                 </div>
               )}
             </div>
