@@ -1639,11 +1639,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   </Button>
                   <Button 
                     onClick={() => {
-                      if (!resetGameMutation.isPending && (activeGameId || gameFinished)) {
-                        resetGameMutation.mutate();
+                      if (!resetGameMutation.isPending) {
+                        // If there's an active game, use the reset mutation
+                        if (activeGameId || gameFinished) {
+                          resetGameMutation.mutate();
+                        } else {
+                          // If no active game, just clear selected cartelas locally
+                          setSelectedCartelas(new Set());
+                          setBookedCartelas(new Set());
+                          setCalledNumbers([]);
+                          setMarkedNumbers([]);
+                          setLastCalledNumber(null);
+                          setWinnerResult({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [], cartelaPattern: undefined });
+                        }
                       }
                     }}
-                    disabled={(!activeGameId && !gameFinished) || resetGameMutation.isPending}
+                    disabled={resetGameMutation.isPending || (selectedCartelas.size === 0 && bookedCartelas.size === 0 && !activeGameId && !gameFinished)}
                     variant="outline"
                   >
                     {resetGameMutation.isPending ? "Resetting..." : "Reset"}
