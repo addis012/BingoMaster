@@ -108,6 +108,25 @@ router.get("/:shopId", async (req, res) => {
       numbers: typeof cartela.numbers === 'string' ? JSON.parse(cartela.numbers) : cartela.numbers,
     }));
 
+    // Debug: Log all cartelas to verify data structure and marked cartelas
+    console.log(`🔍 CARTELA API DEBUG - Total cartelas: ${parsedCartelas.length}`);
+    
+    const markedCartelas = parsedCartelas.filter(c => c.collectorId !== null || c.bookedBy !== null);
+    console.log(`📊 MARKED CARTELAS for shop ${shopId} (${markedCartelas.length} total):`, markedCartelas.map(c => ({
+      number: c.cartelaNumber,
+      collectorId: c.collectorId,
+      bookedBy: c.bookedBy,
+      source: c.collectorId !== null ? 'collector' : (c.bookedBy !== null ? 'employee' : 'none')
+    })));
+    
+    // Also log first few cartelas to verify data structure
+    console.log(`🔍 FIRST 3 CARTELAS structure:`, parsedCartelas.slice(0, 3).map(c => ({
+      id: c.id,
+      number: c.cartelaNumber,
+      collectorId: c.collectorId,
+      bookedBy: c.bookedBy
+    })));
+
     res.json(parsedCartelas);
   } catch (error) {
     console.error("Error fetching cartelas:", error);
