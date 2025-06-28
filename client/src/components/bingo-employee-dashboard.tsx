@@ -879,11 +879,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setGamePaused(false);
       setCalledNumbers([]);
       setMarkedNumbers([]);
+      setBlinkingNumber(null);
       setLastCalledNumber(null);
       setActiveGameId(null);
       setBookedCartelas(new Set());
       setSelectedCartelas(new Set());
       setIsShuffling(false);
+      setIsBoardShuffling(false);
       setIsHovering(false);
       setNextNumber(null);
       setAudioPlaying(false);
