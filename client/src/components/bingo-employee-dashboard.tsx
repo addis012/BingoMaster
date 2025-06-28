@@ -1454,7 +1454,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           {/* Center - Winner Amount */}
           <div className="text-center">
             <div className="text-6xl font-bold text-green-600">
-              Winner Gets: <span className="text-8xl">{calculateAmounts().winnerAmount.toFixed(2)} Birr</span>
+              Winner Gets: <span className="text-8xl">{(() => {
+                const amounts = calculateAmounts();
+                console.log('🎯 DISPLAY CALCULATION:', amounts);
+                return amounts.winnerAmount.toFixed(2);
+              })()} Birr</span>
             </div>
           </div>
 
