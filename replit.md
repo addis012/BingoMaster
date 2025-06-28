@@ -122,6 +122,14 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
+### June 28, 2025 - Fixed Cartela Duplication Display Issue (COMPLETED)
+- ✅ Resolved cartela duplication in employee dashboard where cartelas appeared as both collector and employee
+- ✅ Added bidirectional protection in storage layer: employees cannot mark collector cartelas, collectors cannot mark employee cartelas
+- ✅ Fixed frontend badge display to properly separate collector (green) vs employee (blue) cartelas using direct database filtering
+- ✅ Updated cartela count calculation to prevent overlap and show accurate totals
+- ✅ Tested and verified: clicking employee cartelas now only shows blue "Manual" badge, no dual-marking
+- ✅ Database integrity maintained: each cartela has either collectorId OR bookedBy, never both
+
 ### June 28, 2025 - Fixed Admin Game History Player Count and Database Field Mapping (COMPLETED)
 - ✅ Fixed admin game history to accurately count both employee-selected and collector-marked cartelas
 - ✅ Resolved critical database field name mapping issue: API returns camelCase (collectorId, bookedBy, cartelaNumber) not snake_case
