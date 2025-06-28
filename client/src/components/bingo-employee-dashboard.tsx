@@ -100,7 +100,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Calculate amounts based on selected cartelas and profit margin
   const calculateAmounts = () => {
-    const totalCartelas = bookedCartelas.size + selectedCartelas.size; // Include both collector and employee cartelas
+    // Only use bookedCartelas (actual database-marked cartelas) to avoid double-counting
+    // selectedCartelas is local state that can be stale during active games
+    const totalCartelas = bookedCartelas.size;
     // Always use the current gameAmount state for real-time calculation updates
     const amountPerCartela = parseFloat(gameAmount) || 20;
     const totalCollected = totalCartelas * amountPerCartela;
