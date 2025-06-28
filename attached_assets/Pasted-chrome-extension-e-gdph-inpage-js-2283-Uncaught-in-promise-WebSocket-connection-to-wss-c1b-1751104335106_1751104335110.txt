@@ -1,0 +1,783 @@
+chrome-extension://e…gdph/inpage.js:2283 Uncaught (in promise) 
+ WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=trNTbxvGfJqm' failed: 
+createConnection @ client:802
+ WebSocket connection to 'wss://localhost:5173/?token=trNTbxvGfJqm' failed: 
+createConnection @ client:815
+ [vite] failed to connect to websocket.
+your current setup:
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:830
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Attempting login with: Object
+ Login response: Object
+ No active game - All cartelas data: undefined
+ No active game - Collector marked cartelas: Array(0)
+ Auth state updated: Object
+ No active game - All cartelas data: Array(3)
+ No active game - Cartela 4 marked by collector 26
+ No active game - Cartela 5 marked by collector 26
+ No active game - Cartela 6 marked by collector 26
+ No active game - Cartela 7 marked by collector 26
+ No active game - Cartela 9 marked by collector 26
+ No active game - Collector marked cartelas: Array(5)
+ No active game - All cartelas data: Array(3)
+ No active game - Cartela 4 marked by collector 26
+ No active game - Cartela 5 marked by collector 26
+ No active game - Cartela 6 marked by collector 26
+ No active game - Cartela 7 marked by collector 26
+ No active game - Cartela 9 marked by collector 26
+ No active game - Collector marked cartelas: Array(5)
+ No active game - All cartelas data: Array(3)
+ No active game - Cartela 4 marked by collector 26
+ No active game - Cartela 5 marked by collector 26
+ No active game - Cartela 6 marked by collector 26
+ No active game - Cartela 7 marked by collector 26
+ No active game - Cartela 8 marked by collector 26
+ No active game - Cartela 9 marked by collector 26
+ No active game - Collector marked cartelas: Array(6)
+ 🎮 GAME SYNC: Incoming game ID 259, status: waiting
+ 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+ 🎮 UPDATING activeGameId from null to 259
+ 🎮 UPDATING GAME STATE: waiting
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: active
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=false
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔘 BUTTON RENDER: gamePaused=false → "Pause Game"
+ 🔍 CHECKING WINNER - Game state before: active=true, paused=false, gameId=259
+ 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+/api/games/259/numbers:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+ 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+ 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+ 🎮 GAME SYNC: Incoming game ID 259, status: paused
+ 🎮 CURRENT STATE: activeGameId=259, gameActive=true, gamePaused=true
+ 🎮 PRESERVING LOCAL STATE - no sync needed
+ All cartelas data: Array(3)
+ Cartela 4 marked by collector 26
+ Cartela 5 marked by collector 26
+ Cartela 6 marked by collector 26
+ Cartela 7 marked by collector 26
+ Cartela 8 marked by collector 26
+ Cartela 9 marked by collector 26
+ Game cartelas: Array(0)
+ Collector marked cartelas: Array(6)
+ 🔘 BUTTON RENDER: gamePaused=true → "Resume Game"
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ /@fs/home/runner/wor…6.js?v=ba3a0a77:332
+/api/games/259/complete:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)

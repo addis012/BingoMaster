@@ -202,7 +202,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setMarkedNumbers(numbersToMark); // All except last number
       }
       
-      // Include both game cartelas and collector-marked cartelas
+      // Include employee-selected cartelas, collector-marked cartelas, and game cartelas
       const gameCartelas = new Set((activeGame as any).cartelas || []);
       
       // Debug: Log all cartelas to see their structure
@@ -210,18 +210,32 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       const collectorMarkedCartelas = (cartelas || [])
         .filter((c: any) => {
-          const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
+          const hasCollector = c.collector_id !== null && c.collector_id !== undefined;
           if (hasCollector) {
-            console.log(`Cartela ${c.cartelaNumber} marked by collector ${c.collectorId}`);
+            console.log(`Cartela ${c.cartela_number} marked by collector ${c.collector_id}`);
           }
           return hasCollector;
         })
-        .map((c: any) => c.cartelaNumber);
+        .map((c: any) => c.cartela_number);
+      
+      const employeeBookedCartelas = (cartelas || [])
+        .filter((c: any) => {
+          const hasEmployee = c.booked_by !== null && c.booked_by !== undefined;
+          if (hasEmployee) {
+            console.log(`Cartela ${c.cartela_number} booked by employee ${c.booked_by}`);
+          }
+          return hasEmployee;
+        })
+        .map((c: any) => c.cartela_number);
       
       console.log("Game cartelas:", Array.from(gameCartelas));
       console.log("Collector marked cartelas:", collectorMarkedCartelas);
+      console.log("Employee booked cartelas:", employeeBookedCartelas);
       
-      setBookedCartelas(new Set([...Array.from(gameCartelas), ...collectorMarkedCartelas]));
+      const allCartelas = [...Array.from(gameCartelas), ...collectorMarkedCartelas, ...employeeBookedCartelas];
+      console.log("Total booked cartelas:", allCartelas);
+      
+      setBookedCartelas(new Set(allCartelas));
       
       const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
@@ -234,22 +248,37 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setMarkedNumbers([]);
       setLastCalledNumber(null);
       
-      // Still show collector-marked cartelas as unavailable even when no active game
+      // Still show both collector-marked and employee-booked cartelas as unavailable even when no active game
       // Debug: Log all cartelas to see their structure
       console.log("No active game - All cartelas data:", cartelas?.slice(0, 3));
       
       const collectorMarkedCartelas = (cartelas || [])
         .filter((c: any) => {
-          const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
+          const hasCollector = c.collector_id !== null && c.collector_id !== undefined;
           if (hasCollector) {
-            console.log(`No active game - Cartela ${c.cartelaNumber} marked by collector ${c.collectorId}`);
+            console.log(`No active game - Cartela ${c.cartela_number} marked by collector ${c.collector_id}`);
           }
           return hasCollector;
         })
-        .map((c: any) => c.cartelaNumber);
+        .map((c: any) => c.cartela_number);
+      
+      const employeeBookedCartelas = (cartelas || [])
+        .filter((c: any) => {
+          const hasEmployee = c.booked_by !== null && c.booked_by !== undefined;
+          if (hasEmployee) {
+            console.log(`No active game - Cartela ${c.cartela_number} booked by employee ${c.booked_by}`);
+          }
+          return hasEmployee;
+        })
+        .map((c: any) => c.cartela_number);
+      
+      const allCartelas = [...collectorMarkedCartelas, ...employeeBookedCartelas];
       
       console.log("No active game - Collector marked cartelas:", collectorMarkedCartelas);
-      setBookedCartelas(new Set(collectorMarkedCartelas));
+      console.log("No active game - Employee booked cartelas:", employeeBookedCartelas);
+      console.log("No active game - Total booked cartelas:", allCartelas);
+      
+      setBookedCartelas(new Set(allCartelas));
     }
   }, [activeGame, cartelas]);
 
