@@ -81,31 +81,24 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
     if (cartelas) {
       console.log('🔍 HORIZONTAL DASHBOARD: Raw cartelas data sample:', cartelas?.slice(0, 10));
       
-      const collectorMarkedCartelas = (cartelas as any[])
+      // Create a single set to avoid double-counting cartelas that have both collector and employee markings
+      const allBookedCartelas = (cartelas as any[])
         .filter((c: any) => {
           const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
-          if (hasCollector) {
-            console.log('✅ Collector cartela found:', { number: c.cartelaNumber, collectorId: c.collectorId });
-          }
-          return hasCollector;
-        })
-        .map((c: any) => c.cartelaNumber);
-      
-      const employeeBookedCartelas = (cartelas as any[])
-        .filter((c: any) => {
           const hasEmployee = c.bookedBy !== null && c.bookedBy !== undefined;
-          if (hasEmployee) {
-            console.log('✅ Employee cartela found:', { number: c.cartelaNumber, bookedBy: c.bookedBy });
+          const isMarked = hasCollector || hasEmployee;
+          
+          if (isMarked) {
+            const source = hasCollector ? 'collector' : 'employee';
+            const dualMarked = hasCollector && hasEmployee ? ' (DUAL-MARKED)' : '';
+            console.log(`✅ Marked cartela found: #${c.cartelaNumber} by ${source}${dualMarked}`);
           }
-          return hasEmployee;
+          
+          return isMarked;
         })
         .map((c: any) => c.cartelaNumber);
       
-      const allBookedCartelas = [...collectorMarkedCartelas, ...employeeBookedCartelas];
-      
-      console.log('🎯 HORIZONTAL DASHBOARD: Collector marked cartelas:', collectorMarkedCartelas);
-      console.log('🎯 HORIZONTAL DASHBOARD: Employee booked cartelas:', employeeBookedCartelas);
-      console.log('🎯 HORIZONTAL DASHBOARD: Total booked cartelas:', allBookedCartelas);
+      console.log('🎯 HORIZONTAL DASHBOARD: All marked cartelas (no duplicates):', allBookedCartelas);
       console.log('🎯 HORIZONTAL DASHBOARD: Final bookedCartelas set size:', allBookedCartelas.length);
       
       setBookedCartelas(new Set(allBookedCartelas));

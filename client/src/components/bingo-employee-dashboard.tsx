@@ -202,26 +202,33 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setMarkedNumbers(numbersToMark); // All except last number
       }
       
-      // Include both game cartelas and collector-marked cartelas
+      // Include game cartelas and all marked cartelas (avoiding double-counting)
       const gameCartelas = new Set((activeGame as any).cartelas || []);
       
       // Debug: Log all cartelas to see their structure
       console.log("All cartelas data:", cartelas?.slice(0, 3));
       
-      const collectorMarkedCartelas = (cartelas || [])
+      // Get all marked cartelas (both collector and employee) without double-counting
+      const allMarkedCartelas = (cartelas || [])
         .filter((c: any) => {
           const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
-          if (hasCollector) {
-            console.log(`Cartela ${c.cartelaNumber} marked by collector ${c.collectorId}`);
+          const hasEmployee = c.bookedBy !== null && c.bookedBy !== undefined;
+          const isMarked = hasCollector || hasEmployee;
+          
+          if (isMarked) {
+            const source = hasCollector ? 'collector' : 'employee';
+            const dualMarked = hasCollector && hasEmployee ? ' (DUAL-MARKED)' : '';
+            console.log(`Marked cartela: #${c.cartelaNumber} by ${source}${dualMarked}`);
           }
-          return hasCollector;
+          
+          return isMarked;
         })
         .map((c: any) => c.cartelaNumber);
       
       console.log("Game cartelas:", Array.from(gameCartelas));
-      console.log("Collector marked cartelas:", collectorMarkedCartelas);
+      console.log("All marked cartelas (no duplicates):", allMarkedCartelas);
       
-      setBookedCartelas(new Set([...Array.from(gameCartelas), ...collectorMarkedCartelas]));
+      setBookedCartelas(new Set([...Array.from(gameCartelas), ...allMarkedCartelas]));
       
       const lastNumber = gameCalledNumbers.slice(-1)[0];
       setLastCalledNumber(lastNumber || null);
@@ -234,22 +241,28 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setMarkedNumbers([]);
       setLastCalledNumber(null);
       
-      // Still show collector-marked cartelas as unavailable even when no active game
+      // Still show all marked cartelas as unavailable even when no active game
       // Debug: Log all cartelas to see their structure
       console.log("No active game - All cartelas data:", cartelas?.slice(0, 3));
       
-      const collectorMarkedCartelas = (cartelas || [])
+      const allMarkedCartelas = (cartelas || [])
         .filter((c: any) => {
           const hasCollector = c.collectorId !== null && c.collectorId !== undefined;
-          if (hasCollector) {
-            console.log(`No active game - Cartela ${c.cartelaNumber} marked by collector ${c.collectorId}`);
+          const hasEmployee = c.bookedBy !== null && c.bookedBy !== undefined;
+          const isMarked = hasCollector || hasEmployee;
+          
+          if (isMarked) {
+            const source = hasCollector ? 'collector' : 'employee';
+            const dualMarked = hasCollector && hasEmployee ? ' (DUAL-MARKED)' : '';
+            console.log(`No active game - Marked cartela: #${c.cartelaNumber} by ${source}${dualMarked}`);
           }
-          return hasCollector;
+          
+          return isMarked;
         })
         .map((c: any) => c.cartelaNumber);
       
-      console.log("No active game - Collector marked cartelas:", collectorMarkedCartelas);
-      setBookedCartelas(new Set(collectorMarkedCartelas));
+      console.log("No active game - All marked cartelas (no duplicates):", allMarkedCartelas);
+      setBookedCartelas(new Set(allMarkedCartelas));
     }
   }, [activeGame, cartelas]);
 
