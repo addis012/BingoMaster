@@ -76,6 +76,18 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
     refetchInterval: 2000,
   });
 
+  // Update bookedCartelas to include collector-marked cartelas
+  useEffect(() => {
+    if (cartelas) {
+      const collectorMarkedCartelas = (cartelas as any[])
+        .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
+        .map((c: any) => c.cartelaNumber);
+      
+      console.log('🎯 HORIZONTAL DASHBOARD: Collector marked cartelas:', collectorMarkedCartelas);
+      setBookedCartelas(new Set(collectorMarkedCartelas));
+    }
+  }, [cartelas]);
+
   // Calculate values
   const adminProfitMargin = (adminStats as any)?.commissionRate || 30;
   const totalCartelasCount = bookedCartelas.size + selectedCartelas.size;
