@@ -122,6 +122,13 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
+### June 28, 2025 - Fixed Prize Calculation and Flexible Profit Margin (COMPLETED)
+- ✅ Fixed prize calculation discrepancy between employee dashboard (70 birr) and admin game history (56 birr)
+- ✅ Employee dashboard now uses admin's flexible profit margin setting instead of hardcoded defaults
+- ✅ Calculation automatically updates every 5 seconds to reflect admin profit margin changes
+- ✅ Both dashboards now show consistent winner amounts based on actual shop profit margin
+- ✅ Admin has full control over profit margins that employees see in real-time
+
 ### June 28, 2025 - Fixed Cartela Duplication Display Issue (COMPLETED)
 - ✅ Resolved cartela duplication in employee dashboard where cartelas appeared as both collector and employee
 - ✅ Added bidirectional protection in storage layer: employees cannot mark collector cartelas, collectors cannot mark employee cartelas

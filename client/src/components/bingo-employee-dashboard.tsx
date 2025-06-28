@@ -103,8 +103,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const totalCartelas = bookedCartelas.size + selectedCartelas.size; // Include both collector and employee cartelas
     const amountPerCartela = parseFloat(gameAmount) || 20;
     const totalCollected = totalCartelas * amountPerCartela;
-    // Use shop's actual profit margin from shopData
-    const profitMargin = parseFloat((shopData as any)?.profitMargin || '30') / 100;
+    // Use admin's flexible profit margin from shop data - no fallback to ensure admin control
+    const profitMargin = parseFloat((shopData as any)?.profitMargin || '0') / 100;
     const winnerAmount = totalCollected * (1 - profitMargin);
     const profitAmount = totalCollected * profitMargin;
     
