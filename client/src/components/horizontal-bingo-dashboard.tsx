@@ -55,7 +55,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   // Fetch current user
   const { data: user } = useQuery({
     queryKey: ['/api/auth/me'],
-  });
+  }) as { data: { id: number; shopId: number; role: string } | undefined };
 
   // Fetch admin stats for profit margin
   const { data: adminStats } = useQuery({
@@ -71,7 +71,8 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
 
   // Calculate values
   const adminProfitMargin = (adminStats as any)?.commissionRate || 30;
-  const totalCollected = bookedCartelas.size * parseFloat(gameAmount || "0");
+  const totalCartelasCount = bookedCartelas.size + selectedCartelas.size;
+  const totalCollected = totalCartelasCount * parseFloat(gameAmount || "0");
   const prizeAmount = totalCollected * (100 - adminProfitMargin) / 100;
 
   // Helper function to get letter for number
