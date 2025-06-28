@@ -1639,12 +1639,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   </Button>
                   <Button 
                     onClick={() => {
+                      console.log('🔄 RESET CLICKED - Current state:', {
+                        activeGameId,
+                        gameFinished,
+                        selectedCartelasSize: selectedCartelas.size,
+                        bookedCartelasSize: bookedCartelas.size,
+                        resetPending: resetGameMutation.isPending
+                      });
+                      
                       if (!resetGameMutation.isPending) {
                         // If there's an active game, use the reset mutation
                         if (activeGameId || gameFinished) {
+                          console.log('🔄 Using reset mutation for active game');
                           resetGameMutation.mutate();
                         } else {
                           // If no active game, just clear selected cartelas locally
+                          console.log('🔄 Clearing local state - no active game');
                           setSelectedCartelas(new Set());
                           setBookedCartelas(new Set());
                           setCalledNumbers([]);
