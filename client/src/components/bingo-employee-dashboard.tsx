@@ -152,10 +152,25 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   });
 
   // Get collectors under this employee
-  const { data: collectors = [] } = useQuery({
+  const { data: collectors = [], isLoading: collectorsLoading, error: collectorsError } = useQuery({
     queryKey: [`/api/employees/${user?.id}/collectors`],
     enabled: !!user?.id,
+    queryFn: async () => {
+      const response = await fetch(`/api/employees/${user?.id}/collectors`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch collectors');
+      }
+      return response.json();
+    }
   });
+
+  // Debug collectors data
+  console.log("Collectors query:", { collectors, collectorsLoading, collectorsError, userId: user?.id });
 
   // Sync with active game data
   useEffect(() => {
@@ -1949,16 +1964,26 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               onValueChange={(value) => setSelectedCollector(value ? parseInt(value) : null)}
             >
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Choose a collector..." />
+                <SelectValue placeholder={collectorsLoading ? "Loading collectors..." : "Choose a collector..."} />
               </SelectTrigger>
               <SelectContent>
-                {collectors.map((collector: any) => (
-                  <SelectItem key={collector.id} value={collector.id.toString()}>
-                    {collector.name} (@{collector.username})
-                  </SelectItem>
-                ))}
+                {collectorsLoading ? (
+                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                ) : collectors && Array.isArray(collectors) && collectors.length > 0 ? (
+                  collectors.map((collector: any) => (
+                    <SelectItem key={collector.id} value={collector.id.toString()}>
+                      {collector.name} (@{collector.username})
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>No collectors found</SelectItem>
+                )}
               </SelectContent>
             </Select>
+            {collectorsError && (
+              <p className="text-xs text-red-500 mt-1">Error loading collectors: {(collectorsError as any)?.message}</p>
+            )}
+            <p className="text-xs text-gray-500 mt-1">Debug: Found {collectors?.length || 0} collectors</p>
           </div>
           <div className="grid grid-cols-10 gap-4 p-6">
             {(cartelas || []).map((cartela: any) => (

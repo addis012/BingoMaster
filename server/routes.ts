@@ -3677,6 +3677,47 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
+  // Get collectors under employee
+  app.get("/api/employees/:employeeId/collectors", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const employeeId = parseInt(req.params.employeeId);
+      
+      // Ensure employee can only access their own collectors
+      if (user.id !== employeeId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const collectors = await storage.getCollectorsByEmployee(employeeId);
+      
+      // Remove sensitive data
+      const safeCollectors = collectors.map(collector => ({
+        id: collector.id,
+        username: collector.username,
+        name: collector.name,
+        role: collector.role,
+        isBlocked: collector.isBlocked,
+        shopId: collector.shopId,
+        supervisorId: collector.supervisorId,
+        createdAt: collector.createdAt
+      }));
+
+      res.json(safeCollectors);
+    } catch (error) {
+      console.error("Error getting collectors:", error);
+      res.status(500).json({ message: "Failed to get collectors" });
+    }
+  });
+
   app.get("/api/employees/:employeeId/collectors", async (req: Request, res) => {
     try {
       const userId = req.session?.userId;
