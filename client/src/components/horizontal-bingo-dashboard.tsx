@@ -180,24 +180,25 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         credentials: 'include'
       });
       
-      let actualPlayerCount = bookedCartelas.size; // fallback
+      // Always use total cartelas (employee + collector) for accurate player count
+      let actualPlayerCount = bookedCartelas.size;
       let actualEntryFee = parseFloat(gameAmount || "20");
       
       if (playersResponse.ok) {
         const players = await playersResponse.json();
         console.log('🔍 PLAYERS RESPONSE:', players);
-        actualPlayerCount = players.length;
         if (players.length > 0) {
           actualEntryFee = parseFloat(players[0].entryFee || "20");
         }
-        console.log('✅ USING DATABASE DATA:', {
-          playersFromDB: players.length,
+        console.log('✅ USING CORRECT TOTAL COUNT:', {
+          totalCartelas: actualPlayerCount,
           entryFeeFromDB: actualEntryFee,
-          totalFromDB: players.length * actualEntryFee
+          totalCollected: actualPlayerCount * actualEntryFee,
+          dbPlayerRecords: players.length
         });
       } else {
-        console.log('❌ PLAYERS FETCH FAILED, using fallback:', {
-          fallbackCount: actualPlayerCount,
+        console.log('❌ PLAYERS FETCH FAILED, using cartela count:', {
+          totalCartelas: actualPlayerCount,
           fallbackFee: actualEntryFee
         });
       }
