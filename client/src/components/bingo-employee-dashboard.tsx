@@ -1653,14 +1653,26 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           console.log('🔄 Using reset mutation for active game');
                           resetGameMutation.mutate();
                         } else {
-                          // If no active game, just clear selected cartelas locally
-                          console.log('🔄 Clearing local state - no active game');
-                          setSelectedCartelas(new Set());
-                          setBookedCartelas(new Set());
-                          setCalledNumbers([]);
-                          setMarkedNumbers([]);
-                          setLastCalledNumber(null);
-                          setWinnerResult({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [], cartelaPattern: undefined });
+                          // If no active game, clear cartelas in database and locally
+                          console.log('🔄 Clearing cartelas in database and local state');
+                          
+                          // Call the cartela reset API to unmark database cartelas
+                          fetch('/api/cartelas/reset', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ shopId: user?.shopId })
+                          }).then(() => {
+                            console.log('🔄 Database cartelas reset successfully');
+                            // Also clear local state
+                            setSelectedCartelas(new Set());
+                            setBookedCartelas(new Set());
+                            setCalledNumbers([]);
+                            setMarkedNumbers([]);
+                            setLastCalledNumber(null);
+                            setWinnerResult({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [], cartelaPattern: undefined });
+                          }).catch(error => {
+                            console.error('🔄 Failed to reset cartelas:', error);
+                          });
                         }
                       }
                     }}
