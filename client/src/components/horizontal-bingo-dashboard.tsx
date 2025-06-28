@@ -79,12 +79,26 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   // Update bookedCartelas to include both collector-marked and employee-booked cartelas
   useEffect(() => {
     if (cartelas) {
+      console.log('🔍 HORIZONTAL DASHBOARD: Raw cartelas data sample:', cartelas?.slice(0, 10));
+      
       const collectorMarkedCartelas = (cartelas as any[])
-        .filter((c: any) => c.collector_id !== null && c.collector_id !== undefined)
+        .filter((c: any) => {
+          const hasCollector = c.collector_id !== null && c.collector_id !== undefined;
+          if (hasCollector) {
+            console.log('✅ Collector cartela found:', { number: c.cartela_number, collectorId: c.collector_id });
+          }
+          return hasCollector;
+        })
         .map((c: any) => c.cartela_number);
       
       const employeeBookedCartelas = (cartelas as any[])
-        .filter((c: any) => c.booked_by !== null && c.booked_by !== undefined)
+        .filter((c: any) => {
+          const hasEmployee = c.booked_by !== null && c.booked_by !== undefined;
+          if (hasEmployee) {
+            console.log('✅ Employee cartela found:', { number: c.cartela_number, bookedBy: c.booked_by });
+          }
+          return hasEmployee;
+        })
         .map((c: any) => c.cartela_number);
       
       const allBookedCartelas = [...collectorMarkedCartelas, ...employeeBookedCartelas];
@@ -92,6 +106,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       console.log('🎯 HORIZONTAL DASHBOARD: Collector marked cartelas:', collectorMarkedCartelas);
       console.log('🎯 HORIZONTAL DASHBOARD: Employee booked cartelas:', employeeBookedCartelas);
       console.log('🎯 HORIZONTAL DASHBOARD: Total booked cartelas:', allBookedCartelas);
+      console.log('🎯 HORIZONTAL DASHBOARD: Final bookedCartelas set size:', allBookedCartelas.length);
       
       setBookedCartelas(new Set(allBookedCartelas));
     }
