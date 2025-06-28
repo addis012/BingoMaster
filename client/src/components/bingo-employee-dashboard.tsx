@@ -1036,13 +1036,24 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         
         // Submit winner to backend and complete the game
         try {
+          // Get actual game entry fee from active game data
+          const actualEntryFee = activeGame?.entryFee ? parseFloat(activeGame.entryFee.toString()) : parseFloat(gameAmount || '20');
+          
+          console.log('🎯 EMPLOYEE DECLARING WINNER:', {
+            cartelaNumber: cartelaNum,
+            totalPlayers: bookedCartelas.size,
+            actualEntryFee,
+            bookedCartelas: Array.from(bookedCartelas),
+            calledNumbers: calledNumbers.length
+          });
+          
           await fetch(`/api/games/${activeGameId}/declare-winner`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               winnerCartelaNumber: cartelaNum,
               totalPlayers: bookedCartelas.size, // Use bookedCartelas which contains actual played cartelas
-              entryFeePerPlayer: parseFloat(gameAmount || '14'), // Ensure valid number
+              entryFeePerPlayer: actualEntryFee, // Use actual game entry fee
               allCartelaNumbers: Array.from(bookedCartelas), // Use bookedCartelas instead of selectedCartelas
               calledNumbers: calledNumbers,
               pattern: result.winningPattern
