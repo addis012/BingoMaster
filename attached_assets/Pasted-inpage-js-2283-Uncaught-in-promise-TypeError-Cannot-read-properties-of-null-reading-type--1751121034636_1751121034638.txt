@@ -1,0 +1,161 @@
+inpage.js:2283 Uncaught (in promise) TypeError: Cannot read properties of null (reading 'type')
+    at mr.<anonymous> (inpage.js:2283:37280)
+    at Generator.next (<anonymous>)
+    at ke (inpage.js:2283:36168)
+(anonymous) @ inpage.js:2283
+ke @ inpage.js:2283
+Promise.then
+Mn @ inpage.js:2283
+ke @ inpage.js:2283
+Promise.then
+Mn @ inpage.js:2283
+(anonymous) @ inpage.js:2283
+Nm @ inpage.js:2283
+boot @ inpage.js:2283
+(anonymous) @ inpage.js:2283
+setTimeout
+start @ inpage.js:2283
+(anonymous) @ inpage.js:2283
+start @ inpage.js:2283
+(anonymous) @ inpage.js:2307
+(anonymous) @ inpage.js:2307
+yD @ inpage.js:2307
+bD @ inpage.js:2307
+(anonymous) @ inpage.js:2307
+(anonymous) @ inpage.js:2307
+(anonymous) @ inpage.js:2307
+client:802 WebSocket connection to 'wss://c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/?token=d-rCTb84n2xy' failed: 
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:815 WebSocket connection to 'wss://localhost:5173/?token=d-rCTb84n2xy' failed: 
+createConnection @ client:815
+connect @ client:437
+connect @ client:822
+client:830 [vite] failed to connect to websocket.
+your current setup:
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) c1b9d8e1-09e2-4ee1-980f-3c07d5dda966-00-287ayll7fjwoe.riker.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:830
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:882 [vite] TypeError: Cannot read properties of undefined (reading 'send')
+    at Object.send (client:483:10)
+    at Object.send (client:849:21)
+    at Object.send (client:326:24)
+    at Object.send (client:417:33)
+error @ client:882
+(anonymous) @ client:137
+Promise.catch
+send @ client:136
+send @ client:100
+sendError @ employee:16
+(anonymous) @ employee:24
+chunk-SXRIVT2P.js?v=ba3a0a77:21609 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:267 No active game - All cartelas data: undefined
+bingo-employee-dashboard.tsx:285 No active game - All marked cartelas (no duplicates): []
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:267 No active game - All cartelas data: undefined
+bingo-employee-dashboard.tsx:285 No active game - All marked cartelas (no duplicates): []
+use-auth.ts:91 Auth state updated: {id: 14, username: 'adad', role: 'employee', name: 'addisu', email: null, …}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:176 🎮 GAME SYNC: Incoming game ID 269, status: waiting
+bingo-employee-dashboard.tsx:177 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:187 🎮 UPDATING activeGameId from null to 269
+bingo-employee-dashboard.tsx:203 🎮 UPDATING GAME STATE: waiting
+bingo-employee-dashboard.tsx:226 All cartelas data: undefined
+bingo-employee-dashboard.tsx:248 Game cartelas: []
+bingo-employee-dashboard.tsx:249 All marked cartelas: []
+bingo-employee-dashboard.tsx:250 Final combined cartelas (no duplicates): []
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:176 🎮 GAME SYNC: Incoming game ID 269, status: waiting
+bingo-employee-dashboard.tsx:177 🎮 CURRENT STATE: activeGameId=269, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:208 🎮 PRESERVING LOCAL STATE - no sync needed
+bingo-employee-dashboard.tsx:226 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:238 Marked cartela: #5 by collector
+bingo-employee-dashboard.tsx:238 Marked cartela: #10 by collector
+bingo-employee-dashboard.tsx:248 Game cartelas: []
+bingo-employee-dashboard.tsx:249 All marked cartelas: (2) [5, 10]
+bingo-employee-dashboard.tsx:250 Final combined cartelas (no duplicates): (2) [5, 10]
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 2, selectedCartelasSize: 0, totalCartelas: 2, amountPerCartela: 20, totalCollected: 40, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 40, winnerAmount: 34, profitAmount: 6, totalCartelas: 2}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 2, selectedCartelasSize: 0, totalCartelas: 2, amountPerCartela: 20, totalCollected: 40, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 40, winnerAmount: 34, profitAmount: 6, totalCartelas: 2}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 2, selectedCartelasSize: 0, totalCartelas: 2, amountPerCartela: 20, totalCollected: 40, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 40, winnerAmount: 34, profitAmount: 6, totalCartelas: 2}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:176 🎮 GAME SYNC: Incoming game ID 269, status: waiting
+bingo-employee-dashboard.tsx:177 🎮 CURRENT STATE: activeGameId=null, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:187 🎮 UPDATING activeGameId from null to 269
+bingo-employee-dashboard.tsx:203 🎮 UPDATING GAME STATE: waiting
+bingo-employee-dashboard.tsx:226 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:248 Game cartelas: []
+bingo-employee-dashboard.tsx:249 All marked cartelas: []
+bingo-employee-dashboard.tsx:250 Final combined cartelas (no duplicates): []
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 0, totalCartelas: 0, amountPerCartela: 20, totalCollected: 0, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 0, winnerAmount: 0, profitAmount: 0, totalCartelas: 0}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 1, totalCartelas: 1, amountPerCartela: 20, totalCollected: 20, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 20, winnerAmount: 17, profitAmount: 3, totalCartelas: 1}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 1, totalCartelas: 1, amountPerCartela: 20, totalCollected: 20, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 20, winnerAmount: 17, profitAmount: 3, totalCartelas: 1}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 1, totalCartelas: 1, amountPerCartela: 20, totalCollected: 20, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 20, winnerAmount: 17, profitAmount: 3, totalCartelas: 1}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 0, selectedCartelasSize: 1, totalCartelas: 1, amountPerCartela: 20, totalCollected: 20, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 20, winnerAmount: 17, profitAmount: 3, totalCartelas: 1}
+bingo-employee-dashboard.tsx:176 🎮 GAME SYNC: Incoming game ID 269, status: waiting
+bingo-employee-dashboard.tsx:177 🎮 CURRENT STATE: activeGameId=269, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:208 🎮 PRESERVING LOCAL STATE - no sync needed
+bingo-employee-dashboard.tsx:226 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:238 Marked cartela: #1 by employee
+bingo-employee-dashboard.tsx:238 Marked cartela: #5 by collector
+bingo-employee-dashboard.tsx:248 Game cartelas: []
+bingo-employee-dashboard.tsx:249 All marked cartelas: (2) [1, 5]
+bingo-employee-dashboard.tsx:250 Final combined cartelas (no duplicates): (2) [1, 5]
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 2, selectedCartelasSize: 1, totalCartelas: 3, amountPerCartela: 20, totalCollected: 60, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 60, winnerAmount: 51, profitAmount: 9, totalCartelas: 3}
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 2, selectedCartelasSize: 1, totalCartelas: 3, amountPerCartela: 20, totalCollected: 60, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 60, winnerAmount: 51, profitAmount: 9, totalCartelas: 3}
+bingo-employee-dashboard.tsx:176 🎮 GAME SYNC: Incoming game ID 269, status: waiting
+bingo-employee-dashboard.tsx:177 🎮 CURRENT STATE: activeGameId=269, gameActive=false, gamePaused=false
+bingo-employee-dashboard.tsx:208 🎮 PRESERVING LOCAL STATE - no sync needed
+bingo-employee-dashboard.tsx:226 All cartelas data: (3) [{…}, {…}, {…}]
+bingo-employee-dashboard.tsx:238 Marked cartela: #1 by employee
+bingo-employee-dashboard.tsx:238 Marked cartela: #5 by collector
+bingo-employee-dashboard.tsx:238 Marked cartela: #10 by collector
+bingo-employee-dashboard.tsx:248 Game cartelas: []
+bingo-employee-dashboard.tsx:249 All marked cartelas: (3) [1, 5, 10]
+bingo-employee-dashboard.tsx:250 Final combined cartelas (no duplicates): (3) [1, 5, 10]
+bingo-employee-dashboard.tsx:113 🧮 EMPLOYEE CALCULATION DEBUG: {bookedCartelasSize: 3, selectedCartelasSize: 1, totalCartelas: 4, amountPerCartela: 20, totalCollected: 80, …}
+bingo-employee-dashboard.tsx:1462 🎯 DISPLAY CALCULATION: {totalCollected: 80, winnerAmount: 68, profitAmount: 12, totalCartelas: 4}
