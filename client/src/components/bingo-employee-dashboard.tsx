@@ -1519,17 +1519,21 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <Label className="text-sm font-medium">Cartelas for Game</Label>
                   <div className="flex flex-wrap gap-1 mt-2 min-h-[2rem]">
                     {/* Show collector-marked cartelas */}
-                    {Array.from(bookedCartelas).map(num => (
-                      <Badge key={num} className="bg-green-500 text-white">
-                        #{num} (Collector)
-                      </Badge>
-                    ))}
+                    {(cartelas || [])
+                      .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
+                      .map((c: any) => (
+                        <Badge key={c.cartelaNumber} className="bg-green-500 text-white">
+                          #{c.cartelaNumber} (Collector)
+                        </Badge>
+                      ))}
                     {/* Show employee-selected cartelas */}
-                    {Array.from(selectedCartelas).map(num => (
-                      <Badge key={num} className="bg-blue-500 text-white">
-                        #{num} (Manual)
-                      </Badge>
-                    ))}
+                    {(cartelas || [])
+                      .filter((c: any) => c.bookedBy === user?.id)
+                      .map((c: any) => (
+                        <Badge key={c.cartelaNumber} className="bg-blue-500 text-white">
+                          #{c.cartelaNumber} (Manual)
+                        </Badge>
+                      ))}
                     {bookedCartelas.size === 0 && selectedCartelas.size === 0 && (
                       <span className="text-xs text-gray-500 italic">
                         No cartelas ready - collectors can mark cartelas or you can select manually
