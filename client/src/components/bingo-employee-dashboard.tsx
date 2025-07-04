@@ -358,6 +358,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         fileName = `${letter}0${num}.mp3`;
       }
       return `/voices/alex/${fileName}`;
+    } else if (selectedVoice === 'melat') {
+      // Melat voice uses standard naming format
+      fileName = `${letter}${num}.mp3`;
+      return `/voices/betty/${fileName}`;
     } else {
       // Female voices use the original naming format
       fileName = `${letter}${num}.mp3`;
@@ -379,6 +383,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '/voices/alex/passed before you say bingo.mp3';
         case 'disqualified':
           return '/voices/alex/when the cartela was bing diclared not a winner and he try for the second time his cartela will be disqualified.mp3';
+        default:
+          return '';
+      }
+    } else if (selectedVoice === 'melat') {
+      // Melat voice uses Betty voice files
+      switch (eventType) {
+        case 'gameStart':
+          return '/voices/betty/start_game.mp3';
+        case 'winner':
+          return '/voices/betty/winner.mp3';
+        case 'notWinner':
+          return '/voices/betty/not_winner_cartela.mp3';
+        case 'passedBeforeBingo':
+          return '/voices/betty/passed_before_you_say_bingo.mp3';
+        case 'disqualified':
+          return '/voices/betty/when_the_cartela_was_bing_diclared_not_a_winner_and_he_try_for_the_second_time_his_cartela_will_be_disqualified.mp3';
         default:
           return '';
       }
@@ -1556,6 +1576,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 <SelectContent>
                   <SelectItem value="female1">Female Voice</SelectItem>
                   <SelectItem value="alex">Alex (Male)</SelectItem>
+                  <SelectItem value="melat">Melat (Female)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

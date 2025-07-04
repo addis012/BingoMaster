@@ -132,6 +132,12 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 - ✅ Created voice-specific audio path helper functions
 - ✅ Maintained separate female voice system using original audio files
 - ✅ Voice selection persists between sessions and applies to all game audio
+- ✅ **NEW: Added Melat (female) voice as third voice option**
+- ✅ Integrated Betty voice files as "Melat" voice with proper file organization in /voices/betty/
+- ✅ Normalized Betty voice file names to match system expectations (B1.mp3, G46.mp3, etc.)
+- ✅ Added Melat voice support for all BINGO numbers (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
+- ✅ Included Melat-specific game event audio files (start_game.mp3, winner.mp3, not_winner_cartela.mp3, etc.)
+- ✅ Voice system now supports three voices: Female Voice (original), Alex (Male), and Melat (Female)
 
 ### June 28, 2025 - Fixed Player Count and Prize Calculation Accuracy (COMPLETED)
 - ✅ Fixed critical calculation bug where system showed 7 cartelas instead of actual 5 in database
