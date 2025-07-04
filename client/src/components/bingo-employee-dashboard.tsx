@@ -943,7 +943,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({ shopId: user?.shopId })
       });
       if (!response.ok) throw new Error('Failed to reset cartelas');
       return response.json();
@@ -1742,35 +1742,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       });
                       
                       if (!resetGameMutation.isPending) {
-                        // If there's an active game, use the reset mutation
-                        if (activeGameId || gameFinished) {
-                          console.log('🔄 Using reset mutation for active game');
-                          resetGameMutation.mutate();
-                        } else {
-                          // If no active game, clear cartelas in database and locally
-                          console.log('🔄 Clearing cartelas in database and local state');
-                          
-                          // Call the cartela reset API to unmark database cartelas
-                          fetch('/api/cartelas/reset', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ shopId: user?.shopId })
-                          }).then(() => {
-                            console.log('🔄 Database cartelas reset successfully');
-                            // Also clear local state
-                            setSelectedCartelas(new Set());
-                            setBookedCartelas(new Set());
-                            setCalledNumbers([]);
-                            setMarkedNumbers([]);
-                            setLastCalledNumber(null);
-                            setWinnerResult({ isWinner: false, cartela: 0, message: "", pattern: "", winningCells: [], cartelaPattern: undefined });
-                          }).catch(error => {
-                            console.error('🔄 Failed to reset cartelas:', error);
-                          });
-                        }
+                        // Always use reset mutation for consistency
+                        console.log('🔄 Using reset mutation');
+                        resetGameMutation.mutate();
                       }
                     }}
-                    disabled={resetGameMutation.isPending || (selectedCartelas.size === 0 && bookedCartelas.size === 0 && !activeGameId && !gameFinished)}
+                    disabled={resetGameMutation.isPending}
                     variant="outline"
                   >
                     {resetGameMutation.isPending ? "Resetting..." : "Reset"}
