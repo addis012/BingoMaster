@@ -6,11 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FIXED_CARTELAS, getCartelaNumbers, getFixedCartelaPattern } from "@/data/fixed-cartelas";
 import { EmployeeCollectorManagement } from "@/components/employee-collector-management";
+import { Volume2 } from "lucide-react";
 
 interface BingoEmployeeDashboardProps {
   onLogout: () => void;
@@ -33,6 +35,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [currentAudioRef, setCurrentAudioRef] = useState<HTMLAudioElement | null>(null);
+  
+  // Voice selection
+  const [selectedVoice, setSelectedVoice] = useState<string>(() => {
+    return localStorage.getItem('bingoVoice') || 'female1';
+  });
+
+  // Save voice preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('bingoVoice', selectedVoice);
+  }, [selectedVoice]);
   
   // Cartela management
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
@@ -329,6 +341,28 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     if (num >= 46 && num <= 60) return "G";
     if (num >= 61 && num <= 75) return "O";
     return "?";
+  };
+
+  // Helper function to get audio file path based on voice and number
+  const getAudioPath = (num: number): string => {
+    const letter = getLetterForNumber(num);
+    let fileName = '';
+    
+    if (selectedVoice === 'alex') {
+      // Alex voice files use specific naming patterns based on observation
+      if (num >= 1 && num <= 4) {
+        fileName = `${letter} ${num}.mp3`;
+      } else if (num >= 5 && num <= 9) {
+        fileName = `${letter}0${num}.mp3`;
+      } else if (num >= 10 && num <= 75) {
+        fileName = `${letter}0${num}.mp3`;
+      }
+      return `/voices/alex/${fileName}`;
+    } else {
+      // Female voices use the original naming format
+      fileName = `${letter}${num}.mp3`;
+      return `/voices/${selectedVoice}/${fileName}`;
+    }
   };
 
   // Helper function to get ball color for number
@@ -808,7 +842,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         }, 2500);
         
         try {
-          const audio = new Audio(`/attached_assets/${letter}${newNumber}.mp3`);
+          const audioPath = getAudioPath(newNumber);
+          const audio = new Audio(audioPath);
           audio.volume = 0.8;
           setCurrentAudioRef(audio);
           
@@ -1468,6 +1503,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Voice Selection */}
+            <div className="flex items-center space-x-2">
+              <Volume2 className="h-5 w-5 text-gray-600" />
+              <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Voice" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="female1">Female Voice</SelectItem>
+                  <SelectItem value="alex">Alex (Male)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
             <Button onClick={onLogout} className="bg-red-500 hover:bg-red-600 text-white">
               Log Out
             </Button>
