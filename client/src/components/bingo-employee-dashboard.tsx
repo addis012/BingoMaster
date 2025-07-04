@@ -228,7 +228,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Always update called numbers to reflect the current game state
       setCalledNumbers(gameCalledNumbers);
       // Only sync marked numbers if this is a fresh game load (not during active play)
-      if (gameCalledNumbers.length === 0 || !markedNumbers.length) {
+      if (gameCalledNumbers.length === 0) {
+        // If no called numbers, ensure board is completely clear
+        setMarkedNumbers([]);
+      } else if (!markedNumbers.length) {
+        // Fresh game load: mark all numbers except the last one
         const numbersToMark = gameCalledNumbers.slice(0, -1);
         setMarkedNumbers(numbersToMark); // All except last number
       }
@@ -1034,7 +1038,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         // Force re-render by triggering state update
         setCalledNumbers([]);
         setMarkedNumbers([]);
-      }, 50);
+        // Also clear any blinking states that might persist
+        setBlinkingNumber(null);
+        setLastCalledNumber(null);
+      }, 100);
     },
     onError: (error: any) => {
       toast({
