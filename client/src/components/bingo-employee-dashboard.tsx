@@ -1223,7 +1223,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         try {
           // Get actual game entry fee from active game data
           const actualEntryFee = parseFloat(gameAmount || '20');
-          const totalPlayersCount = bookedCartelas.size + selectedCartelas.size; // Include both collector and employee cartelas
+          // Use only bookedCartelas (actual database-marked cartelas) to avoid double-counting
+          // selectedCartelas is local state that can overlap with bookedCartelas during active games
+          const totalPlayersCount = bookedCartelas.size;
           const { winnerAmount } = calculateAmounts(); // Use the correct calculation from our function
           
           console.log('🎯 EMPLOYEE DECLARING WINNER:', {
@@ -1244,7 +1246,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               totalPlayers: totalPlayersCount,
               entryFeePerPlayer: actualEntryFee,
               totalCartelas: totalPlayersCount, // Send accurate total count
-              allCartelaNumbers: [...Array.from(bookedCartelas), ...Array.from(selectedCartelas)],
+              allCartelaNumbers: Array.from(bookedCartelas), // Use only database-marked cartelas
               calledNumbers: calledNumbers,
               pattern: result.winningPattern
             })
