@@ -55,6 +55,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [showWinnerChecker, setShowWinnerChecker] = useState(false);
   const [winnerCartelaNumber, setWinnerCartelaNumber] = useState("");
   const [showWinnerResult, setShowWinnerResult] = useState(false);
+  
+  // Cartela disqualification tracking
+  const [checkedCartelas, setCheckedCartelas] = useState<Set<number>>(new Set()); // Track cartelas checked once
+  const [disqualifiedCartelas, setDisqualifiedCartelas] = useState<Set<number>>(new Set()); // Track disqualified cartelas
+  const [showDisqualificationPopup, setShowDisqualificationPopup] = useState(false);
+  const [disqualificationCartelaNumber, setDisqualificationCartelaNumber] = useState<number | null>(null);
   interface WinnerResult {
     isWinner: boolean;
     cartela: number;
@@ -386,7 +392,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         case 'passedBeforeBingo':
           return '/voices/alex/passed before you say bingo.mp3';
         case 'disqualified':
-          return '/voices/alex/when the cartela was bing diclared not a winner and he try for the second time his cartela will be disqualified.mp3';
+          return '/voices/alex/disqualified.mp3';
         default:
           return '';
       }
@@ -402,7 +408,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         case 'passedBeforeBingo':
           return '/voices/betty/passed_before_you_say_bingo.mp3';
         case 'disqualified':
-          return '/voices/betty/when_the_cartela_was_bing_diclared_not_a_winner_and_he_try_for_the_second_time_his_cartela_will_be_disqualified.mp3';
+          return '/voices/betty/disqualified.mp3';
         default:
           return '';
       }
@@ -415,6 +421,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '/attached_assets/winner_1750069128882.mp3';
         case 'notWinner':
           return '/attached_assets/losser_1750069128883.mp3';
+        case 'disqualified':
+          return '/voices/female1/disqualified.mp3';
         default:
           return '';
       }
@@ -1006,6 +1014,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setShowWinnerChecker(false);
       setWinnerCartelaNumber('');
       
+      // Clear disqualification tracking
+      setCheckedCartelas(new Set());
+      setDisqualifiedCartelas(new Set());
+      setShowDisqualificationPopup(false);
+      setDisqualificationCartelaNumber(null);
+      
       // Force immediate UI update by clearing all audio states
       if (currentAudio) {
         currentAudio.pause();
@@ -1107,6 +1121,36 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return;
     }
 
+    // Check if cartela is already disqualified
+    if (disqualifiedCartelas.has(cartelaNum)) {
+      toast({
+        title: "Cartela Disqualified",
+        description: `Cartela #${cartelaNum} has been disqualified and cannot be checked for winner`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if cartela has been checked before (first warning)
+    if (checkedCartelas.has(cartelaNum)) {
+      // Second attempt - show disqualification popup and play audio
+      setDisqualificationCartelaNumber(cartelaNum);
+      setShowDisqualificationPopup(true);
+      
+      // Play disqualification audio
+      const disqualificationAudio = getGameEventAudioPath('disqualified');
+      if (disqualificationAudio) {
+        const audio = new Audio(disqualificationAudio);
+        audio.volume = 0.8;
+        audio.play().catch(error => console.log('Failed to play disqualification audio:', error));
+      }
+      
+      // Add to disqualified cartelas
+      setDisqualifiedCartelas(prev => new Set([...prev, cartelaNum]));
+      
+      return;
+    }
+
     // Check if cartela is selected by employee OR marked by collector
     const isCartelaInGame = selectedCartelas.has(cartelaNum) || bookedCartelas.has(cartelaNum);
     
@@ -1156,6 +1200,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           winningCells: [],
           cartelaPattern: result.cartelaPattern
         });
+        
+        // Track this cartela as checked (first attempt)
+        setCheckedCartelas(prev => new Set([...prev, cartelaNum]));
         
         // Clear any existing timer to prevent audio overlap
         if (numberCallTimer.current) {
@@ -1725,19 +1772,53 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     {/* Show collector-marked cartelas */}
                     {(cartelas || [])
                       .filter((c: any) => c.collectorId !== null && c.collectorId !== undefined)
-                      .map((c: any) => (
-                        <Badge key={c.cartelaNumber} className="bg-green-500 text-white">
-                          #{c.cartelaNumber} (Collector)
-                        </Badge>
-                      ))}
+                      .map((c: any) => {
+                        const cartelaNum = c.cartelaNumber;
+                        const isDisqualified = disqualifiedCartelas.has(cartelaNum);
+                        const isChecked = checkedCartelas.has(cartelaNum);
+                        
+                        let badgeClass = "bg-green-500 text-white";
+                        let badgeText = `#${cartelaNum} (Collector)`;
+                        
+                        if (isDisqualified) {
+                          badgeClass = "bg-red-600 text-white";
+                          badgeText = `#${cartelaNum} (DISQUALIFIED)`;
+                        } else if (isChecked) {
+                          badgeClass = "bg-yellow-600 text-white";
+                          badgeText = `#${cartelaNum} (⚠️ Checked)`;
+                        }
+                        
+                        return (
+                          <Badge key={cartelaNum} className={badgeClass}>
+                            {badgeText}
+                          </Badge>
+                        );
+                      })}
                     {/* Show employee-selected cartelas */}
                     {(cartelas || [])
                       .filter((c: any) => c.bookedBy === user?.id)
-                      .map((c: any) => (
-                        <Badge key={c.cartelaNumber} className="bg-blue-500 text-white">
-                          #{c.cartelaNumber} (Manual)
-                        </Badge>
-                      ))}
+                      .map((c: any) => {
+                        const cartelaNum = c.cartelaNumber;
+                        const isDisqualified = disqualifiedCartelas.has(cartelaNum);
+                        const isChecked = checkedCartelas.has(cartelaNum);
+                        
+                        let badgeClass = "bg-blue-500 text-white";
+                        let badgeText = `#${cartelaNum} (Manual)`;
+                        
+                        if (isDisqualified) {
+                          badgeClass = "bg-red-600 text-white";
+                          badgeText = `#${cartelaNum} (DISQUALIFIED)`;
+                        } else if (isChecked) {
+                          badgeClass = "bg-yellow-600 text-white";
+                          badgeText = `#${cartelaNum} (⚠️ Checked)`;
+                        }
+                        
+                        return (
+                          <Badge key={cartelaNum} className={badgeClass}>
+                            {badgeText}
+                          </Badge>
+                        );
+                      })}
                     {bookedCartelas.size === 0 && selectedCartelas.size === 0 && (
                       <span className="text-xs text-gray-500 italic">
                         No cartelas ready - collectors can mark cartelas or you can select manually
@@ -1749,6 +1830,21 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       (c.collectorId !== null && c.collectorId !== undefined) || 
                       c.bookedBy === user?.id
                     ).length}
+                  </div>
+                  {/* Legend for cartela status colors */}
+                  <div className="mt-2 text-xs space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded"></div>
+                      <span>Collector cartelas</span>
+                      <div className="w-3 h-3 bg-blue-500 rounded ml-2"></div>
+                      <span>Manual cartelas</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-600 rounded"></div>
+                      <span>⚠️ Checked once (next attempt = disqualified)</span>
+                      <div className="w-3 h-3 bg-red-600 rounded ml-2"></div>
+                      <span>Disqualified</span>
+                    </div>
                   </div>
                 </div>
 
@@ -2338,6 +2434,41 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               className={`px-8 py-2 ${winnerResult.isWinner ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"} text-white`}
             >
               {winnerResult.isWinner ? "Close & Complete Game" : "Continue Game"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disqualification Warning Popup */}
+      <Dialog open={showDisqualificationPopup} onOpenChange={setShowDisqualificationPopup}>
+        <DialogContent className="max-w-md bg-red-50 border-red-200">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-red-700 text-xl font-bold">
+              ⚠️ Cartela Disqualified
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <div className="text-lg font-semibold text-red-800 mb-4">
+              Cartela #{disqualificationCartelaNumber} has been DISQUALIFIED
+            </div>
+            <div className="text-red-700 mb-4">
+              This cartela was already checked once and found not to be a winner. 
+              According to the rules, it cannot be checked again and is now disqualified from this game.
+            </div>
+            <div className="text-sm text-red-600 font-medium">
+              This cartela cannot be used to declare winner for the rest of this game.
+            </div>
+          </div>
+          <DialogFooter className="flex justify-center">
+            <Button
+              onClick={() => {
+                setShowDisqualificationPopup(false);
+                setDisqualificationCartelaNumber(null);
+                setWinnerCartelaNumber('');
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white px-8"
+            >
+              Understood
             </Button>
           </DialogFooter>
         </DialogContent>
