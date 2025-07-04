@@ -1137,37 +1137,42 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setDisqualificationCartelaNumber(cartelaNum);
       setShowDisqualificationPopup(true);
       
-      // Play disqualification audio with delay to ensure popup is shown
-      setTimeout(() => {
-        const disqualificationAudio = getGameEventAudioPath('disqualified');
-        console.log('🔊 Disqualification audio path:', disqualificationAudio);
-        console.log('🔊 Selected voice:', selectedVoice);
+      // Play disqualification audio immediately - user interaction is already present
+      const disqualificationAudio = getGameEventAudioPath('disqualified');
+      console.log('🔊 Disqualification audio path:', disqualificationAudio);
+      console.log('🔊 Selected voice:', selectedVoice);
+      
+      if (disqualificationAudio) {
+        // Create and play audio immediately using user interaction context
+        const audio = new Audio(disqualificationAudio);
+        audio.volume = 0.8;
         
-        if (disqualificationAudio) {
-          const audio = new Audio(disqualificationAudio);
-          audio.volume = 0.8;
-          audio.preload = 'auto';
-          
-          audio.onloadeddata = () => console.log('✅ Disqualification audio loaded successfully');
-          audio.oncanplaythrough = () => console.log('✅ Disqualification audio ready to play');
-          audio.onerror = (error) => console.error('❌ Disqualification audio error:', error);
-          
-          // Try to play immediately
-          audio.play().then(() => {
-            console.log('✅ Disqualification audio started playing');
+        audio.onloadeddata = () => console.log('✅ Disqualification audio loaded successfully');
+        audio.oncanplaythrough = () => console.log('✅ Disqualification audio ready to play');
+        audio.onerror = (error) => console.error('❌ Disqualification audio error:', error);
+        
+        // Force immediate playback using user gesture context
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            console.log('✅ Disqualification audio started playing automatically');
           }).catch(error => {
-            console.error('❌ Failed to play disqualification audio:', error);
-            console.error('Audio error details:', {
-              error: error.message,
-              audioSrc: audio.src,
-              readyState: audio.readyState,
-              networkState: audio.networkState
-            });
+            console.error('❌ Failed to play disqualification audio automatically:', error);
+            
+            // Fallback: Try playing with a very short delay
+            setTimeout(() => {
+              audio.play().then(() => {
+                console.log('✅ Disqualification audio started playing (delayed)');
+              }).catch(delayedError => {
+                console.error('❌ Delayed audio play also failed:', delayedError);
+              });
+            }, 100);
           });
-        } else {
-          console.error('❌ No disqualification audio path found for voice:', selectedVoice);
         }
-      }, 200);  // Small delay to ensure popup is rendered
+      } else {
+        console.error('❌ No disqualification audio path found for voice:', selectedVoice);
+      }
       
       // Add to disqualified cartelas
       setDisqualifiedCartelas(prev => new Set([...prev, cartelaNum]));
@@ -2483,21 +2488,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               This cartela cannot be used to declare winner for the rest of this game.
             </div>
           </div>
-          <DialogFooter className="flex justify-center gap-4">
-            <Button
-              onClick={() => {
-                // Play disqualification audio manually
-                const disqualificationAudio = getGameEventAudioPath('disqualified');
-                if (disqualificationAudio) {
-                  const audio = new Audio(disqualificationAudio);
-                  audio.volume = 0.8;
-                  audio.play().catch(error => console.error('Manual audio play failed:', error));
-                }
-              }}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-4"
-            >
-              🔊 Play Audio
-            </Button>
+          <DialogFooter className="flex justify-center">
             <Button
               onClick={() => {
                 setShowDisqualificationPopup(false);
