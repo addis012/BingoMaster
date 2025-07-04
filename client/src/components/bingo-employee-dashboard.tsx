@@ -1139,10 +1139,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Play disqualification audio
       const disqualificationAudio = getGameEventAudioPath('disqualified');
+      console.log('🔊 Disqualification audio path:', disqualificationAudio);
       if (disqualificationAudio) {
         const audio = new Audio(disqualificationAudio);
         audio.volume = 0.8;
-        audio.play().catch(error => console.log('Failed to play disqualification audio:', error));
+        audio.onloadeddata = () => console.log('✅ Disqualification audio loaded successfully');
+        audio.onerror = (error) => console.error('❌ Disqualification audio error:', error);
+        audio.play().then(() => {
+          console.log('✅ Disqualification audio started playing');
+        }).catch(error => {
+          console.error('❌ Failed to play disqualification audio:', error);
+        });
+      } else {
+        console.error('❌ No disqualification audio path found');
       }
       
       // Add to disqualified cartelas
