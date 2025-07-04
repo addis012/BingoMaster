@@ -122,6 +122,17 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
+### July 4, 2025 - Voice Selection System Implementation (COMPLETED)
+- ✅ Added voice selector in employee dashboard top right corner with speaker icon
+- ✅ Implemented Alex (male) voice support with proper file name mapping for BINGO numbers
+- ✅ Added Alex-specific game event audio files (start game, winner, not winner, passed before bingo, disqualified)
+- ✅ Set up voice preference storage in browser localStorage
+- ✅ Updated audio system to dynamically use selected voice for all number calling and game events
+- ✅ Organized voice files in /voices/alex/ and /voices/female1/ directories
+- ✅ Created voice-specific audio path helper functions
+- ✅ Maintained separate female voice system using original audio files
+- ✅ Voice selection persists between sessions and applies to all game audio
+
 ### June 28, 2025 - Fixed Player Count and Prize Calculation Accuracy (COMPLETED)
 - ✅ Fixed critical calculation bug where system showed 7 cartelas instead of actual 5 in database
 - ✅ Removed stale `selectedCartelas` local state from total calculation to prevent double-counting

@@ -365,6 +365,38 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   };
 
+  // Helper function to get audio file path for game events based on voice
+  const getGameEventAudioPath = (eventType: string): string => {
+    if (selectedVoice === 'alex') {
+      switch (eventType) {
+        case 'gameStart':
+          return '/voices/alex/Start game.mp3';
+        case 'winner':
+          return '/voices/alex/Winner.mp3';
+        case 'notWinner':
+          return '/voices/alex/not winner cartela.mp3';
+        case 'passedBeforeBingo':
+          return '/voices/alex/passed before you say bingo.mp3';
+        case 'disqualified':
+          return '/voices/alex/when the cartela was bing diclared not a winner and he try for the second time his cartela will be disqualified.mp3';
+        default:
+          return '';
+      }
+    } else {
+      // Female voice uses original files
+      switch (eventType) {
+        case 'gameStart':
+          return '/attached_assets/game started_1750069128880.mp3';
+        case 'winner':
+          return '/attached_assets/winner_1750069128882.mp3';
+        case 'notWinner':
+          return '/attached_assets/losser_1750069128883.mp3';
+        default:
+          return '';
+      }
+    }
+  };
+
   // Helper function to get ball color for number
   const getBallColor = (num: number): string => {
     if (num >= 1 && num <= 15) return "from-blue-500 to-blue-700"; // B - Blue
@@ -765,11 +797,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Play game start sound
       try {
-        const audio = new Audio('/attached_assets/game started_1750069128880.mp3');
-        audio.volume = 0.8;
-        audio.play().catch(() => {
-          console.log('Start game sound not available');
-        });
+        const audioPath = getGameEventAudioPath('gameStart');
+        if (audioPath) {
+          const audio = new Audio(audioPath);
+          audio.volume = 0.8;
+          audio.play().catch(() => {
+            console.log('Start game sound not available');
+          });
+        }
       } catch (error) {
         console.log('Start audio playback error');
       }
@@ -1106,14 +1141,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           setAudioPlaying(true);
           setTimeout(() => {
             try {
-              const audio = new Audio('/attached_assets/losser_1750069128883.mp3');
-              audio.volume = 0.8;
-              audio.onended = () => setAudioPlaying(false);
-              audio.onerror = () => setAudioPlaying(false);
-              audio.play().catch(() => {
-                console.log('Loser sound not available');
+              const audioPath = getGameEventAudioPath('notWinner');
+              if (audioPath) {
+                const audio = new Audio(audioPath);
+                audio.volume = 0.8;
+                audio.onended = () => setAudioPlaying(false);
+                audio.onerror = () => setAudioPlaying(false);
+                audio.play().catch(() => {
+                  console.log('Loser sound not available');
+                  setAudioPlaying(false);
+                });
+              } else {
                 setAudioPlaying(false);
-              });
+              }
             } catch (error) {
               console.log('Loser audio playback error');
               setAudioPlaying(false);
@@ -1213,11 +1253,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           
           // Play winner sound
           try {
-            const audio = new Audio('/attached_assets/winner_1750069128882.mp3');
-            audio.volume = 0.8;
-            audio.play().catch(() => {
-              console.log('Winner sound not available');
-            });
+            const audioPath = getGameEventAudioPath('winner');
+            if (audioPath) {
+              const audio = new Audio(audioPath);
+              audio.volume = 0.8;
+              audio.play().catch(() => {
+                console.log('Winner sound not available');
+              });
+            }
           } catch (error) {
             console.log('Winner audio playback error');
           }
