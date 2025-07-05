@@ -3615,16 +3615,30 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       
       // Only reset games if user is employee or admin (not collector)
       if (user.role === 'employee' || user.role === 'admin') {
-        // Reset any active games in the shop (clear called numbers and set to waiting)
+        // Reset any games in the shop (including completed ones after winner declaration)
         const activeGame = await storage.getActiveGameByShop(shopId);
-        if (activeGame) {
-          console.log(`🔄 RESET: Clearing ${activeGame.calledNumbers?.length || 0} called numbers from game ${activeGame.id}`);
-          await storage.updateGameNumbers(activeGame.id, []);
-          await storage.updateGameStatus(activeGame.id, 'waiting');
+        
+        // If no active game found, check for recently completed games (within last hour)
+        let gameToReset = activeGame;
+        if (!activeGame) {
+          const recentGames = await storage.getRecentGamesByShop(shopId, 1); // Get last 1 hour
+          const completedGame = recentGames.find(g => g.status === 'completed');
+          if (completedGame) {
+            console.log(`🔄 RESET: Found completed game ${completedGame.id} to reset`);
+            gameToReset = completedGame;
+          }
+        }
+        
+        if (gameToReset) {
+          console.log(`🔄 RESET: Clearing ${gameToReset.calledNumbers?.length || 0} called numbers from game ${gameToReset.id} (status: ${gameToReset.status})`);
+          await storage.updateGameNumbers(gameToReset.id, []);
+          await storage.updateGameStatus(gameToReset.id, 'waiting');
           
           // Verify the reset worked
-          const verifyGame = await storage.getGame(activeGame.id);
-          console.log(`🔄 RESET VERIFY: Game ${activeGame.id} now has ${verifyGame?.calledNumbers?.length || 0} called numbers, status: ${verifyGame?.status}`);
+          const verifyGame = await storage.getGame(gameToReset.id);
+          console.log(`🔄 RESET VERIFY: Game ${gameToReset.id} now has ${verifyGame?.calledNumbers?.length || 0} called numbers, status: ${verifyGame?.status}`);
+        } else {
+          console.log(`🔄 RESET: No active or recent completed games found for shop ${shopId}`);
         }
         res.json({ message: "All cartelas and game state reset successfully" });
       } else {

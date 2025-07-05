@@ -277,6 +277,19 @@ export class DatabaseStorage implements IStorage {
     return game || undefined;
   }
 
+  async getRecentGamesByShop(shopId: number, hoursBack: number = 1): Promise<Game[]> {
+    const cutoffTime = new Date();
+    cutoffTime.setHours(cutoffTime.getHours() - hoursBack);
+    
+    const recentGames = await db.select().from(games)
+      .where(and(
+        eq(games.shopId, shopId),
+        gte(games.createdAt, cutoffTime)
+      ))
+      .orderBy(desc(games.id));
+    return recentGames;
+  }
+
   async createGame(insertGame: InsertGame): Promise<Game> {
     const [game] = await db.insert(games).values(insertGame).returning();
     return game;
