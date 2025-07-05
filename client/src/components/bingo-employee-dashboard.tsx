@@ -233,14 +233,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Always update called numbers to reflect the current game state
       setCalledNumbers(gameCalledNumbers);
-      // Only sync marked numbers if this is a fresh game load (not during active play)
+      // Always sync marked numbers to match called numbers from server
       if (gameCalledNumbers.length === 0) {
         // If no called numbers, ensure board is completely clear
         setMarkedNumbers([]);
-      } else if (!markedNumbers.length) {
-        // Fresh game load: mark all numbers except the last one
+        setBlinkingNumber(null);
+        setLastCalledNumber(null);
+        console.log('🎮 SYNC: Board cleared - no called numbers on server');
+      } else if (!markedNumbers.length || markedNumbers.length !== gameCalledNumbers.length - 1) {
+        // Fresh game load or desync: mark all numbers except the last one
         const numbersToMark = gameCalledNumbers.slice(0, -1);
         setMarkedNumbers(numbersToMark); // All except last number
+        console.log('🎮 SYNC: Board marked with', numbersToMark.length, 'numbers');
       }
       
       // Include game cartelas and all marked cartelas (avoiding double-counting)
@@ -1068,6 +1072,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           setBlinkingNumber(null);
           setLastCalledNumber(null);
           console.log('🔄 FORCED RESET: Called numbers should be cleared now');
+          
+          // Additional forced clear to overcome any timing issues
+          setTimeout(() => {
+            setCalledNumbers([]);
+            setMarkedNumbers([]);
+            setBlinkingNumber(null);
+            setLastCalledNumber(null);
+            console.log('🔄 TRIPLE RESET: Final clear to ensure board is empty');
+          }, 100);
         }, 50);
       }, 100);
     },
