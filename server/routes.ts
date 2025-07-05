@@ -3618,8 +3618,13 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         // Reset any active games in the shop (clear called numbers and set to waiting)
         const activeGame = await storage.getActiveGameByShop(shopId);
         if (activeGame) {
+          console.log(`🔄 RESET: Clearing ${activeGame.calledNumbers?.length || 0} called numbers from game ${activeGame.id}`);
           await storage.updateGameNumbers(activeGame.id, []);
           await storage.updateGameStatus(activeGame.id, 'waiting');
+          
+          // Verify the reset worked
+          const verifyGame = await storage.getGame(activeGame.id);
+          console.log(`🔄 RESET VERIFY: Game ${activeGame.id} now has ${verifyGame?.calledNumbers?.length || 0} called numbers, status: ${verifyGame?.status}`);
         }
         res.json({ message: "All cartelas and game state reset successfully" });
       } else {

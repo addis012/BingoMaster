@@ -209,6 +209,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       setActiveGameId(incomingGameId);
       
+      // Convert string array to number array for proper number tracking
+      const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
+      
+      // Check if this is a reset scenario (game has 'waiting' status with leftover called numbers)
+      if (incomingStatus === 'waiting' && gameCalledNumbers.length > 0) {
+        console.log(`🎮 RESET DETECTED: Game status is waiting but has ${gameCalledNumbers.length} called numbers - forcing clear`);
+        // Force clear all numbers and visual state for reset scenario
+        setCalledNumbers([]);
+        setMarkedNumbers([]);
+        setBlinkingNumber(null);
+        setLastCalledNumber(null);
+        return; // Skip normal sync logic
+      }
+      
       // Skip state updates if pause operation is in progress
       if (pauseOperationInProgress) {
         console.log(`🚫 SKIPPING SYNC - pause operation in progress`);
@@ -227,9 +241,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       } else {
         console.log(`🎮 PRESERVING LOCAL STATE - no sync needed`);
       }
-      
-      // Convert string array to number array for proper number tracking
-      const gameCalledNumbers = ((activeGame as any).calledNumbers || []).map((n: string) => parseInt(n));
       
       // Always update called numbers to reflect the current game state
       setCalledNumbers(gameCalledNumbers);
