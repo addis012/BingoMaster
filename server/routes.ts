@@ -3630,13 +3630,27 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         }
         
         if (gameToReset) {
-          console.log(`🔄 RESET: Clearing ${gameToReset.calledNumbers?.length || 0} called numbers from game ${gameToReset.id} (status: ${gameToReset.status})`);
-          await storage.updateGameNumbers(gameToReset.id, []);
-          await storage.updateGameStatus(gameToReset.id, 'waiting');
+          console.log(`🔄 RESET: Archiving old game ${gameToReset.id} and creating fresh game for shop ${shopId}`);
           
-          // Verify the reset worked
-          const verifyGame = await storage.getGame(gameToReset.id);
-          console.log(`🔄 RESET VERIFY: Game ${gameToReset.id} now has ${verifyGame?.calledNumbers?.length || 0} called numbers, status: ${verifyGame?.status}`);
+          // Archive the old game by setting it to completed (if not already)
+          if (gameToReset.status !== 'completed') {
+            await storage.updateGameStatus(gameToReset.id, 'completed');
+          }
+          
+          // Create a completely new game with fresh ID
+          const newGame = await storage.createGame({
+            shopId: shopId,
+            employeeId: userId,
+            status: 'waiting',
+            prizePool: '0.00',
+            entryFee: gameToReset.entryFee || '20.00', // Keep the same entry fee
+            calledNumbers: [],
+            winnerId: null,
+            startedAt: null,
+            completedAt: null
+          });
+          
+          console.log(`🔄 RESET SUCCESS: Created fresh game ${newGame.id} (old game ${gameToReset.id} archived)`);
         } else {
           console.log(`🔄 RESET: No active or recent completed games found for shop ${shopId}`);
         }
