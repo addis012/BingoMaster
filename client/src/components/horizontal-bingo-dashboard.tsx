@@ -311,7 +311,12 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       }
     },
     onError: (error) => {
-      console.error('Check winner mutation error:', error);
+      console.error('❌ CHECK WINNER MUTATION ERROR:', error);
+      console.error('❌ ERROR DETAILS:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       toast({
         title: "Error Checking Winner",
         description: `Failed to check winner: ${error.message}`,
