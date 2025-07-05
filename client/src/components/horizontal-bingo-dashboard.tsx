@@ -251,22 +251,38 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
         note: 'Prize amount will be calculated by backend using actual shop profit margin'
       });
       
-      const response = await fetch(`/api/games/${data.gameId}/declare-winner`, {
+      const requestBody = {
+        winnerCartelaNumber: data.cartelaNumber,
+        totalPlayers: actualPlayerCount,
+        allCartelaNumbers: Array.from(bookedCartelas), // bookedCartelas now includes both collector and employee cartelas
+        entryFeePerPlayer: actualEntryFee,
+        calledNumbers: calledNumbers
+      };
+      
+      console.log('🚀 SENDING DECLARE WINNER REQUEST:', {
+        url: `/api/games/${data.gameId}/declare-winner`,
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          winnerCartelaNumber: data.cartelaNumber,
-          totalPlayers: actualPlayerCount,
-          allCartelaNumbers: Array.from(bookedCartelas), // bookedCartelas now includes both collector and employee cartelas
-          entryFeePerPlayer: actualEntryFee,
-          calledNumbers: calledNumbers
-        }),
-        credentials: 'include'
+        body: requestBody
       });
+      
+      let response;
+      try {
+        response = await fetch(`/api/games/${data.gameId}/declare-winner`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+          credentials: 'include'
+        });
+      } catch (fetchError) {
+        console.error('❌ FETCH ERROR:', fetchError);
+        throw new Error(`Network error: ${fetchError.message}`);
+      }
+      
+      console.log('📡 DECLARE WINNER RESPONSE STATUS:', response.status, response.statusText);
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Declare winner error response:', errorText);
+        console.error('❌ Declare winner error response:', errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
       
