@@ -1209,37 +1209,63 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setShowWinnerResult(true);
       setShowWinnerChecker(false);
       
-      // Play "not selected" audio immediately
+      // Play "not selected" audio immediately with improved error handling
       const notSelectedAudio = getGameEventAudioPath('notSelected');
       console.log('🔊 Not selected audio path:', notSelectedAudio);
       console.log('🔊 Selected voice:', selectedVoice);
       
       if (notSelectedAudio) {
-        const audio = new Audio(notSelectedAudio);
+        const audio = new Audio();
         audio.volume = 0.8;
+        audio.preload = 'auto';
         
-        audio.onloadeddata = () => console.log('✅ Not selected audio loaded successfully');
-        audio.oncanplaythrough = () => console.log('✅ Not selected audio ready to play');
-        audio.onerror = (error) => console.error('❌ Not selected audio error:', error);
+        // Enhanced error logging
+        audio.onloadstart = () => console.log('🔄 Not selected audio load started');
+        audio.onloadeddata = () => console.log('✅ Not selected audio data loaded');
+        audio.oncanplay = () => console.log('✅ Not selected audio can play');
+        audio.oncanplaythrough = () => console.log('✅ Not selected audio ready to play through');
         
-        const playPromise = audio.play();
-        
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            console.log('✅ Not selected audio started playing automatically');
-          }).catch(error => {
-            console.error('❌ Failed to play not selected audio automatically:', error);
-            
-            // Fallback: Try playing with a very short delay
-            setTimeout(() => {
-              audio.play().then(() => {
-                console.log('✅ Not selected audio started playing (delayed)');
-              }).catch(delayedError => {
-                console.error('❌ Delayed not selected audio play also failed:', delayedError);
-              });
-            }, 100);
+        audio.onerror = (error) => {
+          console.error('❌ Not selected audio error details:', {
+            error: error,
+            code: audio.error?.code,
+            message: audio.error?.message,
+            src: audio.src,
+            readyState: audio.readyState,
+            networkState: audio.networkState
           });
-        }
+        };
+        
+        // Set source and try to play
+        audio.src = notSelectedAudio;
+        
+        // Use a timeout to ensure audio is loaded before playing
+        setTimeout(() => {
+          const playPromise = audio.play();
+          
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              console.log('✅ Not selected audio started playing automatically');
+            }).catch(error => {
+              console.error('❌ Failed to play not selected audio:', error);
+              
+              // Try alternative approach - create new audio instance
+              setTimeout(() => {
+                try {
+                  const fallbackAudio = new Audio(notSelectedAudio);
+                  fallbackAudio.volume = 0.8;
+                  fallbackAudio.play().then(() => {
+                    console.log('✅ Fallback not selected audio played successfully');
+                  }).catch(fallbackError => {
+                    console.error('❌ Fallback audio also failed:', fallbackError);
+                  });
+                } catch (err) {
+                  console.error('❌ Failed to create fallback audio:', err);
+                }
+              }, 200);
+            });
+          }
+        }, 100);
       } else {
         console.error('❌ No not selected audio path found for voice:', selectedVoice);
       }

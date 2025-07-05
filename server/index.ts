@@ -24,6 +24,17 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+// Serve static audio files with proper MIME types (before other routes)
+import path from "path";
+const publicPath = path.resolve(process.cwd(), "public");
+app.use(express.static(publicPath, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.mp3')) {
+      res.setHeader('Content-Type', 'audio/mpeg');
+    }
+  }
+}));
+
 // Configure session store
 const PgSession = ConnectPgSimple(session);
 
