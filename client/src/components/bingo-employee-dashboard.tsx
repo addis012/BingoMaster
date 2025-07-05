@@ -393,6 +393,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '/voices/alex/passed before you say bingo.mp3';
         case 'disqualified':
           return '/voices/alex/disqualified.mp3';
+        case 'notSelected':
+          return '/voices/alex/not_selected.mp3';
         default:
           return '';
       }
@@ -409,6 +411,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '/voices/betty/passed_before_you_say_bingo.mp3';
         case 'disqualified':
           return '/voices/betty/disqualified.mp3';
+        case 'notSelected':
+          return '/voices/betty/not_selected.mp3';
         default:
           return '';
       }
@@ -423,6 +427,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '/attached_assets/losser_1750069128883.mp3';
         case 'disqualified':
           return '/voices/female1/disqualified.mp3';
+        case 'notSelected':
+          return '/voices/female1/not_selected.mp3';
         default:
           return '';
       }
@@ -1049,12 +1055,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Force immediate refetch to ensure fresh data and visual update
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/games/active'] });
-        // Force re-render by triggering state update
+        // Force re-render by triggering state update MULTIPLE times to ensure UI updates
         setCalledNumbers([]);
         setMarkedNumbers([]);
-        // Also clear any blinking states that might persist
         setBlinkingNumber(null);
         setLastCalledNumber(null);
+        
+        // Force another state update after a brief delay to ensure visual reset
+        setTimeout(() => {
+          setCalledNumbers([]);
+          setMarkedNumbers([]);
+          setBlinkingNumber(null);
+          setLastCalledNumber(null);
+          console.log('🔄 FORCED RESET: Called numbers should be cleared now');
+        }, 50);
       }, 100);
     },
     onError: (error: any) => {
@@ -1194,6 +1208,41 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       });
       setShowWinnerResult(true);
       setShowWinnerChecker(false);
+      
+      // Play "not selected" audio immediately
+      const notSelectedAudio = getGameEventAudioPath('notSelected');
+      console.log('🔊 Not selected audio path:', notSelectedAudio);
+      console.log('🔊 Selected voice:', selectedVoice);
+      
+      if (notSelectedAudio) {
+        const audio = new Audio(notSelectedAudio);
+        audio.volume = 0.8;
+        
+        audio.onloadeddata = () => console.log('✅ Not selected audio loaded successfully');
+        audio.oncanplaythrough = () => console.log('✅ Not selected audio ready to play');
+        audio.onerror = (error) => console.error('❌ Not selected audio error:', error);
+        
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            console.log('✅ Not selected audio started playing automatically');
+          }).catch(error => {
+            console.error('❌ Failed to play not selected audio automatically:', error);
+            
+            // Fallback: Try playing with a very short delay
+            setTimeout(() => {
+              audio.play().then(() => {
+                console.log('✅ Not selected audio started playing (delayed)');
+              }).catch(delayedError => {
+                console.error('❌ Delayed not selected audio play also failed:', delayedError);
+              });
+            }, 100);
+          });
+        }
+      } else {
+        console.error('❌ No not selected audio path found for voice:', selectedVoice);
+      }
       
       // Auto-close after 3 seconds
       setTimeout(() => {
