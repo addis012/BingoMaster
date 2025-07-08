@@ -152,8 +152,13 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 - ✅ **FIXED: Audio jumping and interruption issues**
 - ✅ Enhanced audio state management to prevent overlapping playback
 - ✅ Improved audio cleanup with immediate state reset on completion
-- ✅ Reduced marking delay to 100ms for better audio synchronization
+- ✅ Reduced marking delay to 50ms for better audio synchronization
 - ✅ Added comprehensive audio blocking to prevent simultaneous audio calls
+- ✅ **NEW: Dynamic audio timeout system for variable speeds**
+- ✅ Audio automatically adjusts to calling speed (3s, 6s, etc.) to prevent interruption
+- ✅ Intelligent timeout calculation: (speed - 500ms buffer) with 4.5s maximum
+- ✅ Forced audio cutoff for fast speeds ensures smooth transitions
+- ✅ Works seamlessly with preloaded Arada voice system
 - ✅ Voice system now supports four distinct voices: Female Voice (original), Alex (Male), Melat (Female), and Arada (Male)
 
 ### June 28, 2025 - Fixed Player Count and Prize Calculation Accuracy (COMPLETED)

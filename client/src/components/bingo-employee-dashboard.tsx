@@ -1055,10 +1055,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setBlinkingNumber(newNumber);
         
         // Don't mark the current number - it will be marked when the NEXT number starts
+        // Dynamic timeout based on calling speed - for faster speeds, force shorter audio
+        const callingSpeedMs = autoPlaySpeed * 1000;
+        const maxAudioTime = Math.min(callingSpeedMs - 500, 4500); // Leave 500ms buffer, max 4.5s
         const audioResetTimer = setTimeout(() => {
+          console.log(`🔊 AUDIO TIMEOUT: Force stopping after ${maxAudioTime}ms for speed ${autoPlaySpeed}s`);
+          if (currentAudioRef) {
+            currentAudioRef.pause();
+            currentAudioRef.currentTime = 0;
+          }
           setAudioPlaying(false);
           setCurrentAudioRef(null);
-        }, 4500); // Increased timeout to 4.5 seconds for longer voice files
+        }, maxAudioTime);
         
         try {
           const audioPath = getAudioPath(newNumber);
@@ -1080,7 +1088,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           
           audio.onended = () => {
             clearTimeout(audioResetTimer);
-            console.log(`🔊 AUDIO: Completed playing ${letter}${newNumber}`);
+            console.log(`🔊 AUDIO: Completed playing ${letter}${newNumber} naturally`);
             // Clean up audio state immediately
             setAudioPlaying(false);
             setCurrentAudioRef(null);
@@ -1092,7 +1100,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 }
                 return prev;
               });
-            }, 100); // Faster marking for better sync
+            }, 50); // Even faster marking for fast speeds
           };
           
           audio.onerror = (error) => {
