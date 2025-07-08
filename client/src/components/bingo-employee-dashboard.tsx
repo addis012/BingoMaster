@@ -659,28 +659,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         default:
           return '';
       }
-    } else if (selectedVoice === 'melat') {
-      // Melat voice uses Betty voice files
-      switch (eventType) {
-        case 'gameStart':
-          return '/voices/betty/start_game.mp3';
-        case 'winner':
-          return '/voices/betty/winner.mp3';
-        case 'notWinner':
-          return '/voices/betty/not_winner_cartela.mp3';
-        case 'passedBeforeBingo':
-          return '/voices/betty/passed_before_you_say_bingo.mp3';
-        case 'disqualified':
-          return '/voices/betty/disqualified.mp3';
-        case 'notSelected':
-          return '/voices/betty/not_selected.mp3';
-        case 'shuffle':
-          return '/voices/melat/shuffle.mp3'; // Melat uses own shuffle if available, otherwise silent
-        default:
-          return '';
-      }
-    } else if (['arada', 'real_arada', 'betty', 'nati', 'tigrigna', 'oromifa', 'female1'].includes(selectedVoice)) {
-      // Common voices for arada, real_arada, betty, nati, tigrigna, oromifa, and female voice
+
+    } else if (['arada', 'real_arada', 'betty', 'nati', 'tigrigna', 'oromifa', 'female1', 'melat'].includes(selectedVoice)) {
+      // Common voices for arada, real_arada, betty, nati, tigrigna, oromifa, melat, and female voice
       switch (eventType) {
         case 'gameStart':
           return '/voices/common/start_game.mp3';
