@@ -49,20 +49,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return localStorage.getItem('employeeTheme') || 'classic';
   });
 
-  // Save voice preference to localStorage and preload audio
+  // Save voice preference to localStorage and preload audio (simplified)
   useEffect(() => {
     localStorage.setItem('bingoVoice', selectedVoice);
-    // Clear existing preloaded audio before loading new voice
-    preloadedAudio.forEach(audio => {
-      audio.pause();
-      audio.src = '';
-      audio.load();
-    });
+    // Clear existing preloaded audio to prevent mixing
     setPreloadedAudio(new Map());
     setAudioPreloadComplete(false);
     
-    // Preload only the selected voice
-    preloadAllAudioFiles(selectedVoice);
+    // Only preload for voices that need it (simplified approach)
+    if (['alex', 'melat', 'arada'].includes(selectedVoice)) {
+      preloadAllAudioFiles(selectedVoice);
+    } else {
+      setAudioPreloadComplete(true); // Mark as ready for non-preloaded voices
+    }
   }, [selectedVoice]);
 
   // Comprehensive audio preloading function
@@ -71,15 +70,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setAudioPreloadComplete(false);
     setAudioLoadingProgress({ loaded: 0, total: 0 });
 
-    // Aggressively clear existing preloaded audio to prevent voice mixing
-    console.log(`🔊 PRELOAD: Clearing ${preloadedAudio.size} existing audio files before loading ${voice}`);
-    preloadedAudio.forEach((audio, key) => {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.src = '';
-      audio.load();
-      console.log(`🧹 CLEANUP: Cleared ${key}`);
-    });
+    // Clear existing preloaded audio (simplified cleanup)
     setPreloadedAudio(new Map());
 
     // Define all BINGO numbers (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
@@ -1265,21 +1256,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           
           // Try preloaded audio first for instant, uninterrupted playback
           let audio: HTMLAudioElement;
-          if (audioPreloadComplete && preloadedAudio.has(bingoNotation)) {
-            // Clone the preloaded audio to avoid interference
-            const preloadedFile = preloadedAudio.get(bingoNotation)!;
-            audio = preloadedFile.cloneNode() as HTMLAudioElement;
-            audio.currentTime = 0;
-            audio.volume = 1.0;
-            console.log(`🔊 PRELOAD: Using cloned preloaded audio for ${bingoNotation} (voice: ${selectedVoice})`);
-          } else {
-            // Fallback to dynamic loading
-            const audioPath = getAudioPath(newNumber);
-            audio = new Audio(audioPath);
-            audio.volume = 0.8;
-            audio.preload = 'auto';
-            console.log(`🔊 FALLBACK: Using dynamic loading for ${bingoNotation} at ${audioPath} (voice: ${selectedVoice})`);
-          }
+          // Use direct audio loading - simpler and more reliable
+          const audioPath = getAudioPath(newNumber);
+          audio = new Audio(audioPath);
+          audio.volume = 0.8;
+          audio.preload = 'auto';
+          console.log(`🔊 AUDIO: Playing ${bingoNotation} using voice: ${selectedVoice} at ${audioPath}`);
           
           setCurrentAudioRef(audio);
           
@@ -1856,26 +1838,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           
           // Play winner sound using preloaded audio for instant playback
           try {
-            if (audioPreloadComplete && preloadedAudio.has('winner')) {
-              // Clone the preloaded audio to avoid interference
-              const preloadedFile = preloadedAudio.get('winner')!;
-              const audio = preloadedFile.cloneNode() as HTMLAudioElement;
-              audio.currentTime = 0;
-              audio.volume = 1.0;
+            // Play winner sound directly
+            const audioPath = getGameEventAudioPath('winner');
+            if (audioPath) {
+              const audio = new Audio(audioPath);
+              audio.volume = 0.8;
               audio.play().catch(() => {
-                console.log('Winner sound playback error');
+                console.log('Winner sound not available');
               });
-              console.log(`🔊 PRELOAD: Playing winner sound from cache (voice: ${selectedVoice})`);
-            } else {
-              // Fallback to dynamic loading
-              const audioPath = getGameEventAudioPath('winner');
-              if (audioPath) {
-                const audio = new Audio(audioPath);
-                audio.volume = 0.8;
-                audio.play().catch(() => {
-                  console.log('Winner sound not available');
-                });
-              }
+              console.log(`🔊 WINNER: Playing winner sound for voice: ${selectedVoice}`);
             }
           } catch (error) {
             console.log('Winner audio playback error');
