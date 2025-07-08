@@ -1037,8 +1037,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       
       // Play number audio if available and no other audio is playing
-      if (newNumber && !audioPlaying) {
+      if (newNumber && !audioPlaying && !currentAudioRef) {
         const letter = getLetterForNumber(newNumber);
+        console.log(`🔊 AUDIO: Starting playback for ${letter}${newNumber} (audioPlaying: ${audioPlaying})`);
         setAudioPlaying(true);
         
         // If there was a previous blinking number, mark it fully now
@@ -1079,9 +1080,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           
           audio.onended = () => {
             clearTimeout(audioResetTimer);
+            console.log(`🔊 AUDIO: Completed playing ${letter}${newNumber}`);
+            // Clean up audio state immediately
             setAudioPlaying(false);
             setCurrentAudioRef(null);
-            console.log(`🔊 AUDIO: Finished playing ${letter}${newNumber}`);
             // Mark the number after audio completes
             setTimeout(() => {
               setMarkedNumbers(prev => {
@@ -1090,7 +1092,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 }
                 return prev;
               });
-            }, 200); // Faster marking for better sync
+            }, 100); // Faster marking for better sync
           };
           
           audio.onerror = (error) => {
