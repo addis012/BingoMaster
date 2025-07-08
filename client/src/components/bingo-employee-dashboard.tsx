@@ -56,12 +56,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setPreloadedAudio(new Map());
     setAudioPreloadComplete(false);
     
-    // Only preload for voices that need it (simplified approach)
-    if (['alex', 'melat', 'arada'].includes(selectedVoice)) {
-      preloadAllAudioFiles(selectedVoice);
-    } else {
-      setAudioPreloadComplete(true); // Mark as ready for non-preloaded voices
-    }
+    // Simplified audio system - no preloading for better performance
+    setAudioPreloadComplete(true);
+    console.log(`🔊 AUDIO: Voice ${selectedVoice} ready - no preloading for better performance`);
   }, [selectedVoice]);
 
   // Comprehensive audio preloading function
@@ -89,7 +86,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const getVoiceDir = (voice: string) => {
       switch (voice) {
         case 'alex': return 'alex';
-        case 'melat': return 'betty';
+        case 'melat': return 'melat';
         case 'arada': return 'arada';
         case 'real_arada': return 'real_arada';
         case 'tigrigna': return 'tigrigna';
@@ -326,7 +323,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Active game query
   const { data: activeGame } = useQuery({
     queryKey: ['/api/games/active'],
-    refetchInterval: 2000
+    refetchInterval: 8000 // Reduced polling for better performance
   });
 
   // Shop data query with frequent refresh for real-time profit margin updates
@@ -377,7 +374,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const { data: gameHistory } = useQuery({
     queryKey: ['/api/analytics/shop', user?.shopId],
     enabled: !!user?.shopId,
-    refetchInterval: 10000 // Refresh every 10 seconds for live updates
+    refetchInterval: 15000 // Reduced polling for better performance
   });
 
   // Admin credit balance query
@@ -403,7 +400,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     enabled: !!user?.shopId,
-    refetchInterval: 2000 // Refresh every 2 seconds for real-time updates
+    refetchInterval: 5000 // Refresh every 5 seconds for better performance
   });
 
   // Sync with active game data
