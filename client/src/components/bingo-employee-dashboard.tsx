@@ -87,7 +87,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const getVoiceDir = (voice: string) => {
       switch (voice) {
         case 'alex': return 'alex';
-        case 'melat': return 'betty';
+        case 'melat': return 'melat';
         case 'arada': return 'arada';
         case 'real_arada': return 'real-arada';
         case 'tigrigna': return 'tigrigna';
@@ -606,7 +606,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     } else if (selectedVoice === 'melat') {
       // Melat voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
-      return `/voices/betty/${fileName}`;
+      return `/voices/melat/${fileName}`;
     } else if (selectedVoice === 'arada') {
       // Arada voice uses normalized names
       fileName = `${letter}${num}.mp3`;
@@ -2161,7 +2161,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <SelectContent>
                     <SelectItem value="female1">Female Voice</SelectItem>
                     <SelectItem value="alex">Alex (Male)</SelectItem>
-                    <SelectItem value="melat">Melat (Female) [uses Betty voice]</SelectItem>
+                    <SelectItem value="melat">Melat (Female)</SelectItem>
                     <SelectItem value="arada">Arada (Male)</SelectItem>
                     <SelectItem value="real_arada">Real Arada (Male)</SelectItem>
                     <SelectItem value="tigrigna">Tigrigna (Female)</SelectItem>
