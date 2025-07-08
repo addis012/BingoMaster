@@ -41,10 +41,91 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return localStorage.getItem('bingoVoice') || 'female1';
   });
 
+  // Theme selection
+  const [selectedTheme, setSelectedTheme] = useState<string>(() => {
+    return localStorage.getItem('employeeTheme') || 'classic';
+  });
+
   // Save voice preference to localStorage
   useEffect(() => {
     localStorage.setItem('bingoVoice', selectedVoice);
   }, [selectedVoice]);
+
+  // Save theme preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('employeeTheme', selectedTheme);
+  }, [selectedTheme]);
+
+  // Theme configurations
+  const themes = {
+    classic: {
+      name: "Classic Blue",
+      primary: "bg-blue-600 hover:bg-blue-700",
+      secondary: "bg-gray-100",
+      accent: "bg-blue-100",
+      text: "text-gray-900",
+      cardBg: "bg-white",
+      border: "border-gray-200",
+      calledNumbers: "bg-blue-500",
+      gameButton: "bg-blue-600 hover:bg-blue-700 border-blue-200",
+      numberCell: "hover:bg-blue-50",
+      selectedCartela: "border-blue-500 bg-blue-50"
+    },
+    dark: {
+      name: "Dark Pro",
+      primary: "bg-slate-700 hover:bg-slate-800",
+      secondary: "bg-slate-800",
+      accent: "bg-slate-600",
+      text: "text-slate-100",
+      cardBg: "bg-slate-900",
+      border: "border-slate-700",
+      calledNumbers: "bg-slate-600",
+      gameButton: "bg-slate-700 hover:bg-slate-800 border-slate-500",
+      numberCell: "hover:bg-slate-700",
+      selectedCartela: "border-slate-400 bg-slate-800"
+    },
+    green: {
+      name: "Green Success",
+      primary: "bg-green-600 hover:bg-green-700",
+      secondary: "bg-green-50",
+      accent: "bg-green-100",
+      text: "text-gray-900",
+      cardBg: "bg-white",
+      border: "border-green-200",
+      calledNumbers: "bg-green-500",
+      gameButton: "bg-green-600 hover:bg-green-700 border-green-200",
+      numberCell: "hover:bg-green-50",
+      selectedCartela: "border-green-500 bg-green-50"
+    },
+    purple: {
+      name: "Purple Premium",
+      primary: "bg-purple-600 hover:bg-purple-700",
+      secondary: "bg-purple-50",
+      accent: "bg-purple-100",
+      text: "text-gray-900",
+      cardBg: "bg-white",
+      border: "border-purple-200",
+      calledNumbers: "bg-purple-500",
+      gameButton: "bg-purple-600 hover:bg-purple-700 border-purple-200",
+      numberCell: "hover:bg-purple-50",
+      selectedCartela: "border-purple-500 bg-purple-50"
+    },
+    orange: {
+      name: "Orange Energy",
+      primary: "bg-orange-600 hover:bg-orange-700",
+      secondary: "bg-orange-50",
+      accent: "bg-orange-100",
+      text: "text-gray-900",
+      cardBg: "bg-white",
+      border: "border-orange-200",
+      calledNumbers: "bg-orange-500",
+      gameButton: "bg-orange-600 hover:bg-orange-700 border-orange-200",
+      numberCell: "hover:bg-orange-50",
+      selectedCartela: "border-orange-500 bg-orange-50"
+    }
+  };
+
+  const currentTheme = themes[selectedTheme as keyof typeof themes] || themes.classic;
   
   // Cartela management
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
