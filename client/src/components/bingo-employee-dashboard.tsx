@@ -821,22 +821,30 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     // Play shuffle sound effect using voice system
     try {
       const shuffleAudioPath = getGameEventAudio('shuffle');
+      console.log('🔊 SHUFFLE DEBUG:', { selectedVoice, shuffleAudioPath });
+      
       if (shuffleAudioPath) {
         const audio = new Audio(shuffleAudioPath);
         audio.volume = 0.7;
-        audio.play().catch(() => {
-          console.log('Shuffle sound not available for voice:', selectedVoice);
+        audio.play().catch((error) => {
+          console.log('Shuffle sound not available for voice:', selectedVoice, error);
+          // Fallback to original money counter sound
+          const fallbackAudio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
+          fallbackAudio.volume = 0.7;
+          fallbackAudio.play().catch(() => {
+            console.log('Default shuffle sound also not available');
+          });
         });
       } else {
         // Fallback to original money counter sound if no shuffle voice available
-        const audio = new Audio('/attached_assets/money-counter-95830_1750080978946.mp3');
+        const audio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
         audio.volume = 0.7;
         audio.play().catch(() => {
           console.log('Default shuffle sound not available');
         });
       }
     } catch (error) {
-      console.log('Audio playback error for shuffle sound');
+      console.log('Audio playbook error for shuffle sound:', error);
     }
     
     // Shuffle animation phases
