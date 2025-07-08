@@ -490,6 +490,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Real Arada voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
       return `/voices/real-arada/${fileName}`;
+    } else if (selectedVoice === 'tigrigna') {
+      // Tigrigna voice uses standard naming format
+      fileName = `${letter}${num}.mp3`;
+      return `/voices/tigrigna/${fileName}`;
     } else {
       // Female voices use the original naming format
       fileName = `${letter}${num}.mp3`;
@@ -540,6 +544,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     } else if (selectedVoice === 'real-arada') {
       // Real Arada voice placeholder - no game event files yet, falls back to silent
       return '';
+    } else if (selectedVoice === 'tigrigna') {
+      // Tigrigna voice placeholder - no game event files yet, falls back to silent
+      return '';
     } else {
       // Female voice uses original files
       switch (eventType) {
@@ -577,9 +584,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     console.log(`🔊 PRELOAD: Completed preloading 75 ${selectedVoice} voice files`);
   };
 
-  // Trigger preloading when Arada or Real Arada voice is selected
+  // Trigger preloading when Arada, Real Arada, or Tigrigna voice is selected
   useEffect(() => {
-    if (selectedVoice === 'arada' || selectedVoice === 'real-arada') {
+    if (selectedVoice === 'arada' || selectedVoice === 'real-arada' || selectedVoice === 'tigrigna') {
       preloadAradaAudio();
     } else {
       // Clear preloaded audio for other voices to save memory
@@ -1969,6 +1976,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <SelectItem value="melat">Melat (Female)</SelectItem>
                   <SelectItem value="arada">Arada (Male)</SelectItem>
                   <SelectItem value="real-arada">Real Arada (Male)</SelectItem>
+                  <SelectItem value="tigrigna">Tigrigna (Female)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
