@@ -118,9 +118,9 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
 
   const handleEdit = (cartela: Cartela) => {
     setEditingCartela(cartela);
-    setCartelaName(cartela.name);
-    setCartelaNumber(cartela.cartelaNumber.toString());
-    setPattern(cartela.pattern);
+    setCartelaName(cartela.name || "");
+    setCartelaNumber(cartela.cartelaNumber?.toString() || "");
+    setPattern(cartela.pattern || Array(5).fill(null).map(() => Array(5).fill(0)));
     setIsCreateOpen(true);
   };
 
@@ -164,7 +164,8 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
   };
 
   const formatCartelaDisplay = (cartela: Cartela) => {
-    return `${cartela.cartelaNumber}: ${cartela.numbers.join(",")}`;
+    const numbers = cartela.numbers || [];
+    return `${cartela.cartelaNumber}: ${Array.isArray(numbers) ? numbers.join(",") : "No numbers"}`;
   };
 
   return (
@@ -366,8 +367,8 @@ export default function UnifiedCartelaManager({ shopId, adminId }: UnifiedCartel
                       {formatCartelaDisplay(cartela)}
                     </p>
                     <div className="grid grid-cols-5 gap-1 text-xs">
-                      {cartela.pattern.map((row, rowIndex) =>
-                        row.map((value, colIndex) => (
+                      {(cartela.pattern || []).map((row, rowIndex) =>
+                        (row || []).map((value, colIndex) => (
                           <div
                             key={`${rowIndex}-${colIndex}`}
                             className={`text-center p-1 rounded ${
