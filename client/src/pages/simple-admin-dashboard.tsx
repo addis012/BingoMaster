@@ -833,30 +833,28 @@ export default function SimpleAdminDashboard({ onLogout }: SimpleAdminDashboardP
           </TabsContent>
 
           <TabsContent value="cartelas" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Grid3X3 className="w-5 h-5" />
-                  Custom Cartela Management
-                </CardTitle>
-                <CardDescription>
-                  Create and manage custom cartela patterns for your shop
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {user && user.shopId && (
-                  <CustomCartelaBuilder 
-                    shopId={user.shopId} 
-                    adminId={user.id}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="cartelas" className="space-y-6">
             {user && (
-              <UnifiedCartelaManager shopId={user.shopId} adminId={user.id} />
+              <div className="space-y-6">
+                <UnifiedCartelaManager shopId={user.shopId} adminId={user.id} />
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Grid3X3 className="w-5 h-5" />
+                      Custom Cartela Builder
+                    </CardTitle>
+                    <CardDescription>
+                      Create and manage custom cartela patterns for your shop
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <CustomCartelaBuilder 
+                      shopId={user.shopId} 
+                      adminId={user.id}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </TabsContent>
 
