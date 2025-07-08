@@ -481,6 +481,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Melat voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
       return `/voices/betty/${fileName}`;
+    } else if (selectedVoice === 'arada') {
+      // Arada voice uses normalized names
+      fileName = `${letter}${num}.mp3`;
+      return `/voices/arada/${fileName}`;
     } else {
       // Female voices use the original naming format
       fileName = `${letter}${num}.mp3`;
@@ -525,6 +529,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         default:
           return '';
       }
+    } else if (selectedVoice === 'arada') {
+      // Arada voice placeholder - no game event files yet
+      return '';
     } else {
       // Female voice uses original files
       switch (eventType) {
@@ -1855,6 +1862,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <SelectItem value="female1">Female Voice</SelectItem>
                   <SelectItem value="alex">Alex (Male)</SelectItem>
                   <SelectItem value="melat">Melat (Female)</SelectItem>
+                  <SelectItem value="arada">Arada (Male)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
