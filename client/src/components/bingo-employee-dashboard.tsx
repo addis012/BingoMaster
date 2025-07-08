@@ -39,11 +39,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [audioLoadingProgress, setAudioLoadingProgress] = useState({ loaded: 0, total: 0 });
   const [audioPreloadComplete, setAudioPreloadComplete] = useState(false);
   
-  // Voice selection - debug current voice
+  // Voice selection
   const [selectedVoice, setSelectedVoice] = useState<string>(() => {
-    const savedVoice = localStorage.getItem('bingoVoice') || 'female1';
-    console.log('🔊 VOICE INIT: Loading saved voice:', savedVoice);
-    return savedVoice;
+    return localStorage.getItem('bingoVoice') || 'female1';
   });
 
   // Theme selection
@@ -53,7 +51,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Save voice preference to localStorage and preload audio
   useEffect(() => {
-    console.log('🔊 VOICE CHANGE: Setting voice to:', selectedVoice);
     localStorage.setItem('bingoVoice', selectedVoice);
     preloadAllAudioFiles(selectedVoice);
   }, [selectedVoice]);
@@ -83,16 +80,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     // Define game event sounds
     const gameEvents = ['start_game', 'winner', 'not_winner_cartela', 'disqualified', 'shuffle'];
 
-    // Get voice directory - fixed to handle real_arada properly
+    // Get voice directory
     const getVoiceDir = (voice: string) => {
       switch (voice) {
         case 'alex': return 'alex';
-        case 'melat': return 'melat';
+        case 'melat': return 'betty';
         case 'arada': return 'arada';
-        case 'real_arada': return 'real-arada';
+        case 'real_arada': return 'real_arada';
         case 'tigrigna': return 'tigrigna';
         case 'oromifa': return 'oromifa';
-        case 'betty': return 'betty';
+        case 'betty': return 'betty_voice';
         case 'nati': return 'nati';
         case 'female1':
         default: return 'female1';
@@ -154,7 +151,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         const eventPath = useCommonEvents 
           ? `/voices/common/${event}.mp3`
           : `/voices/${voiceDir}/${event}.mp3`;
-        console.log(`🔊 PRELOAD EVENT: ${event} for ${voice} at ${eventPath}`);
         return preloadAudio(event, eventPath);
       });
 
@@ -591,7 +587,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const getAudioPath = (num: number): string => {
     const letter = getLetterForNumber(num);
     let fileName = '';
-    console.log(`🎯 AUDIO PATH DEBUG: Getting path for ${letter}${num} with selectedVoice: ${selectedVoice}`);
     
     if (selectedVoice === 'alex') {
       // Alex voice files use specific naming patterns based on observation
@@ -606,12 +601,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     } else if (selectedVoice === 'melat') {
       // Melat voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
-      return `/voices/melat/${fileName}`;
+      return `/voices/betty/${fileName}`;
     } else if (selectedVoice === 'arada') {
       // Arada voice uses normalized names
       fileName = `${letter}${num}.mp3`;
       return `/voices/arada/${fileName}`;
-    } else if (selectedVoice === 'real_arada') {
+    } else if (selectedVoice === 'real-arada') {
       // Real Arada voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
       return `/voices/real-arada/${fileName}`;
@@ -659,9 +654,28 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         default:
           return '';
       }
-
-    } else if (['arada', 'real_arada', 'betty', 'nati', 'tigrigna', 'oromifa', 'female1', 'melat'].includes(selectedVoice)) {
-      // Common voices for arada, real_arada, betty, nati, tigrigna, oromifa, melat, and female voice
+    } else if (selectedVoice === 'melat') {
+      // Melat voice uses Betty voice files
+      switch (eventType) {
+        case 'gameStart':
+          return '/voices/betty/start_game.mp3';
+        case 'winner':
+          return '/voices/betty/winner.mp3';
+        case 'notWinner':
+          return '/voices/betty/not_winner_cartela.mp3';
+        case 'passedBeforeBingo':
+          return '/voices/betty/passed_before_you_say_bingo.mp3';
+        case 'disqualified':
+          return '/voices/betty/disqualified.mp3';
+        case 'notSelected':
+          return '/voices/betty/not_selected.mp3';
+        case 'shuffle':
+          return '/voices/melat/shuffle.mp3'; // Melat uses own shuffle if available, otherwise silent
+        default:
+          return '';
+      }
+    } else if (['arada', 'real-arada', 'betty', 'nati', 'tigrigna', 'oromifa', 'female1'].includes(selectedVoice)) {
+      // Common voices for arada, real-arada, betty, nati, tigrigna, oromifa, and female voice
       switch (eventType) {
         case 'gameStart':
           return '/voices/common/start_game.mp3';
@@ -719,7 +733,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Trigger preloading when Arada, Real Arada, Tigrigna, Oromifa, Betty, or Nati voice is selected
   useEffect(() => {
-    if (['arada', 'real_arada', 'tigrigna', 'oromifa', 'betty', 'nati'].includes(selectedVoice)) {
+    if (['arada', 'real-arada', 'tigrigna', 'oromifa', 'betty', 'nati'].includes(selectedVoice)) {
       preloadAradaAudio();
     } else {
       // Clear preloaded audio for other voices to save memory
@@ -1234,7 +1248,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
           const bingoNotation = getBingoNotation(newNumber);
           console.log(`🔊 AUDIO DEBUG: Playing ${letter}${newNumber} (${bingoNotation}) using voice: ${selectedVoice}`);
-          console.log(`🔊 VOICE DEBUG: Current selectedVoice state: ${selectedVoice}`);
           
           // Try preloaded audio first for instant, uninterrupted playback
           let audio: HTMLAudioElement;
