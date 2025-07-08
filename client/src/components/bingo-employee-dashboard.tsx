@@ -39,9 +39,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [audioLoadingProgress, setAudioLoadingProgress] = useState({ loaded: 0, total: 0 });
   const [audioPreloadComplete, setAudioPreloadComplete] = useState(false);
   
-  // Voice selection
+  // Voice selection - debug current voice
   const [selectedVoice, setSelectedVoice] = useState<string>(() => {
-    return localStorage.getItem('bingoVoice') || 'female1';
+    const savedVoice = localStorage.getItem('bingoVoice') || 'female1';
+    console.log('🔊 VOICE INIT: Loading saved voice:', savedVoice);
+    return savedVoice;
   });
 
   // Theme selection
@@ -51,6 +53,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Save voice preference to localStorage and preload audio
   useEffect(() => {
+    console.log('🔊 VOICE CHANGE: Setting voice to:', selectedVoice);
     localStorage.setItem('bingoVoice', selectedVoice);
     preloadAllAudioFiles(selectedVoice);
   }, [selectedVoice]);
@@ -80,7 +83,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     // Define game event sounds
     const gameEvents = ['start_game', 'winner', 'not_winner_cartela', 'disqualified', 'shuffle'];
 
-    // Get voice directory
+    // Get voice directory - fixed to handle real_arada properly
     const getVoiceDir = (voice: string) => {
       switch (voice) {
         case 'alex': return 'alex';
@@ -151,6 +154,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         const eventPath = useCommonEvents 
           ? `/voices/common/${event}.mp3`
           : `/voices/${voiceDir}/${event}.mp3`;
+        console.log(`🔊 PRELOAD EVENT: ${event} for ${voice} at ${eventPath}`);
         return preloadAudio(event, eventPath);
       });
 
@@ -587,6 +591,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const getAudioPath = (num: number): string => {
     const letter = getLetterForNumber(num);
     let fileName = '';
+    console.log(`🎯 AUDIO PATH DEBUG: Getting path for ${letter}${num} with selectedVoice: ${selectedVoice}`);
     
     if (selectedVoice === 'alex') {
       // Alex voice files use specific naming patterns based on observation
@@ -606,10 +611,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Arada voice uses normalized names
       fileName = `${letter}${num}.mp3`;
       return `/voices/arada/${fileName}`;
-    } else if (selectedVoice === 'real-arada') {
+    } else if (selectedVoice === 'real_arada') {
       // Real Arada voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
-      return `/voices/real-arada/${fileName}`;
+      return `/voices/real_arada/${fileName}`;
     } else if (selectedVoice === 'tigrigna') {
       // Tigrigna voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
@@ -674,8 +679,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         default:
           return '';
       }
-    } else if (['arada', 'real-arada', 'betty', 'nati', 'tigrigna', 'oromifa', 'female1'].includes(selectedVoice)) {
-      // Common voices for arada, real-arada, betty, nati, tigrigna, oromifa, and female voice
+    } else if (['arada', 'real_arada', 'betty', 'nati', 'tigrigna', 'oromifa', 'female1'].includes(selectedVoice)) {
+      // Common voices for arada, real_arada, betty, nati, tigrigna, oromifa, and female voice
       switch (eventType) {
         case 'gameStart':
           return '/voices/common/start_game.mp3';
@@ -733,7 +738,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   // Trigger preloading when Arada, Real Arada, Tigrigna, Oromifa, Betty, or Nati voice is selected
   useEffect(() => {
-    if (['arada', 'real-arada', 'tigrigna', 'oromifa', 'betty', 'nati'].includes(selectedVoice)) {
+    if (['arada', 'real_arada', 'tigrigna', 'oromifa', 'betty', 'nati'].includes(selectedVoice)) {
       preloadAradaAudio();
     } else {
       // Clear preloaded audio for other voices to save memory
@@ -1248,6 +1253,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
           const bingoNotation = getBingoNotation(newNumber);
           console.log(`🔊 AUDIO DEBUG: Playing ${letter}${newNumber} (${bingoNotation}) using voice: ${selectedVoice}`);
+          console.log(`🔊 VOICE DEBUG: Current selectedVoice state: ${selectedVoice}`);
           
           // Try preloaded audio first for instant, uninterrupted playback
           let audio: HTMLAudioElement;
