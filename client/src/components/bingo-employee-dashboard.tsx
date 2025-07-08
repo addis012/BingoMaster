@@ -35,7 +35,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [currentAudioRef, setCurrentAudioRef] = useState<HTMLAudioElement | null>(null);
-  const [preloadedAudio, setPreloadedAudio] = useState<Map<number, HTMLAudioElement>>(new Map());
+  const [preloadedAudio, setPreloadedAudio] = useState<Map<string, HTMLAudioElement>>(new Map());
+  const [audioLoadingProgress, setAudioLoadingProgress] = useState({ loaded: 0, total: 0 });
+  const [audioPreloadComplete, setAudioPreloadComplete] = useState(false);
   
   // Voice selection
   const [selectedVoice, setSelectedVoice] = useState<string>(() => {
@@ -47,10 +49,128 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return localStorage.getItem('employeeTheme') || 'classic';
   });
 
-  // Save voice preference to localStorage
+  // Save voice preference to localStorage and preload audio
   useEffect(() => {
     localStorage.setItem('bingoVoice', selectedVoice);
+    preloadAllAudioFiles(selectedVoice);
   }, [selectedVoice]);
+
+  // Comprehensive audio preloading function
+  const preloadAllAudioFiles = async (voice: string) => {
+    console.log(`🔊 PRELOAD: Starting audio preload for voice: ${voice}`);
+    setAudioPreloadComplete(false);
+    setAudioLoadingProgress({ loaded: 0, total: 0 });
+
+    // Clear existing preloaded audio
+    preloadedAudio.forEach(audio => {
+      audio.pause();
+      audio.src = '';
+    });
+    setPreloadedAudio(new Map());
+
+    // Define all BINGO numbers (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
+    const allNumbers = [
+      ...Array.from({length: 15}, (_, i) => `B${i + 1}`),
+      ...Array.from({length: 15}, (_, i) => `I${i + 16}`),
+      ...Array.from({length: 15}, (_, i) => `N${i + 31}`),
+      ...Array.from({length: 15}, (_, i) => `G${i + 46}`),
+      ...Array.from({length: 15}, (_, i) => `O${i + 61}`)
+    ];
+
+    // Define game event sounds
+    const gameEvents = ['start_game', 'winner', 'not_winner_cartela', 'disqualified', 'shuffle'];
+
+    // Get voice directory
+    const getVoiceDir = (voice: string) => {
+      switch (voice) {
+        case 'alex': return 'alex';
+        case 'melat': return 'betty';
+        case 'arada': return 'arada';
+        case 'real_arada': return 'real_arada';
+        case 'tigrigna': return 'tigrigna';
+        case 'oromifa': return 'oromifa';
+        case 'betty': return 'betty_voice';
+        case 'nati': return 'nati';
+        case 'female1':
+        default: return 'female1';
+      }
+    };
+
+    const voiceDir = getVoiceDir(voice);
+    const newPreloadedAudio = new Map<string, HTMLAudioElement>();
+    
+    // Calculate total files to load
+    const totalFiles = allNumbers.length + gameEvents.length;
+    setAudioLoadingProgress({ loaded: 0, total: totalFiles });
+    let loadedCount = 0;
+
+    // Function to preload a single audio file
+    const preloadAudio = (fileName: string, filePath: string): Promise<HTMLAudioElement> => {
+      return new Promise((resolve, reject) => {
+        const audio = new Audio();
+        audio.preload = 'auto';
+        audio.volume = 1.0;
+        
+        const onLoad = () => {
+          console.log(`🔊 PRELOAD: Loaded ${fileName}`);
+          loadedCount++;
+          setAudioLoadingProgress({ loaded: loadedCount, total: totalFiles });
+          newPreloadedAudio.set(fileName, audio);
+          audio.removeEventListener('canplaythrough', onLoad);
+          audio.removeEventListener('error', onError);
+          resolve(audio);
+        };
+
+        const onError = (e: any) => {
+          console.warn(`🔊 PRELOAD: Failed to load ${fileName}:`, e);
+          loadedCount++;
+          setAudioLoadingProgress({ loaded: loadedCount, total: totalFiles });
+          audio.removeEventListener('canplaythrough', onLoad);
+          audio.removeEventListener('error', onError);
+          resolve(audio); // Still resolve to continue loading other files
+        };
+
+        audio.addEventListener('canplaythrough', onLoad);
+        audio.addEventListener('error', onError);
+        audio.src = filePath;
+        audio.load();
+      });
+    };
+
+    try {
+      // Preload all BINGO number audio files
+      const numberPromises = allNumbers.map(number => {
+        const filePath = `/voices/${voiceDir}/${number}.mp3`;
+        return preloadAudio(number, filePath);
+      });
+
+      // Preload game event audio files
+      const eventPromises = gameEvents.map(event => {
+        // Use voice-specific events for Alex and Melat, common events for others
+        const useCommonEvents = !['alex', 'melat'].includes(voice);
+        const eventPath = useCommonEvents 
+          ? `/voices/common/${event}.mp3`
+          : `/voices/${voiceDir}/${event}.mp3`;
+        return preloadAudio(event, eventPath);
+      });
+
+      // Wait for all audio files to load
+      await Promise.all([...numberPromises, ...eventPromises]);
+      
+      setPreloadedAudio(newPreloadedAudio);
+      setAudioPreloadComplete(true);
+      console.log(`🔊 PRELOAD: Completed! Loaded ${newPreloadedAudio.size} audio files for ${voice}`);
+      
+      toast({
+        title: "Audio Ready",
+        description: `All ${newPreloadedAudio.size} audio files preloaded for ${voice} voice`,
+      });
+
+    } catch (error) {
+      console.error('🔊 PRELOAD: Error during audio preloading:', error);
+      setAudioPreloadComplete(true); // Mark as complete even with errors
+    }
+  };
 
   // Save theme preference to localStorage
   useEffect(() => {
@@ -1117,19 +1237,32 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         }, maxAudioTime);
         
         try {
-          const audioPath = getAudioPath(newNumber);
-          console.log(`🔊 AUDIO DEBUG: Playing ${letter}${newNumber} with path: ${audioPath} using voice: ${selectedVoice}`);
+          const getBingoNotation = (num: number): string => {
+            if (num >= 1 && num <= 15) return `B${num}`;
+            if (num >= 16 && num <= 30) return `I${num}`;
+            if (num >= 31 && num <= 45) return `N${num}`;
+            if (num >= 46 && num <= 60) return `G${num}`;
+            if (num >= 61 && num <= 75) return `O${num}`;
+            return `${num}`;
+          };
+
+          const bingoNotation = getBingoNotation(newNumber);
+          console.log(`🔊 AUDIO DEBUG: Playing ${letter}${newNumber} (${bingoNotation}) using voice: ${selectedVoice}`);
           
-          // Use preloaded audio for Arada voice to eliminate lag
+          // Try preloaded audio first for instant, uninterrupted playback
           let audio: HTMLAudioElement;
-          if (selectedVoice === 'arada' && preloadedAudio.has(newNumber)) {
-            audio = preloadedAudio.get(newNumber)!;
+          if (audioPreloadComplete && preloadedAudio.has(bingoNotation)) {
+            audio = preloadedAudio.get(bingoNotation)!;
             audio.currentTime = 0; // Reset to beginning
-            console.log(`🔊 AUDIO: Using preloaded audio for ${letter}${newNumber}`);
+            audio.volume = 1.0;
+            console.log(`🔊 PRELOAD: Using preloaded audio for ${bingoNotation} - instant playback guaranteed`);
           } else {
+            // Fallback to dynamic loading
+            const audioPath = getAudioPath(newNumber);
             audio = new Audio(audioPath);
             audio.volume = 0.8;
             audio.preload = 'auto';
+            console.log(`🔊 FALLBACK: Using dynamic loading for ${bingoNotation} at ${audioPath}`);
           }
           
           setCurrentAudioRef(audio);
@@ -1166,15 +1299,18 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           };
           
           // Play audio immediately for preloaded or after loading for new audio
-          if (selectedVoice === 'arada' && preloadedAudio.has(newNumber)) {
+          if (audioPreloadComplete && preloadedAudio.has(bingoNotation)) {
             audio.play().catch((error) => {
-              console.error(`🔊 AUDIO PLAY ERROR: Failed to play preloaded ${audioPath}:`, error);
+              console.error(`🔊 PRELOAD PLAY ERROR: Failed to play preloaded ${bingoNotation}:`, error);
+              clearTimeout(audioResetTimer);
+              setAudioPlaying(false);
+              setCurrentAudioRef(null);
             });
           } else {
             audio.oncanplaythrough = () => {
               console.log(`🔊 AUDIO: Ready to play ${letter}${newNumber}`);
               audio.play().catch((error) => {
-                console.error(`🔊 AUDIO PLAY ERROR: Failed to play ${audioPath}:`, error);
+                console.error(`🔊 AUDIO PLAY ERROR: Failed to play dynamic audio:`, error);
                 clearTimeout(audioResetTimer);
                 setAudioPlaying(false);
                 setCurrentAudioRef(null);
@@ -1702,15 +1838,26 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           queryClient.invalidateQueries({ queryKey: ['/api/analytics/trends'] });
           queryClient.invalidateQueries({ queryKey: ['/api/analytics/profit-distribution'] });
           
-          // Play winner sound
+          // Play winner sound using preloaded audio for instant playback
           try {
-            const audioPath = getGameEventAudioPath('winner');
-            if (audioPath) {
-              const audio = new Audio(audioPath);
-              audio.volume = 0.8;
+            if (audioPreloadComplete && preloadedAudio.has('winner')) {
+              const audio = preloadedAudio.get('winner')!;
+              audio.currentTime = 0;
+              audio.volume = 1.0;
               audio.play().catch(() => {
-                console.log('Winner sound not available');
+                console.log('Winner sound playback error');
               });
+              console.log('🔊 PRELOAD: Playing winner sound from cache');
+            } else {
+              // Fallback to dynamic loading
+              const audioPath = getGameEventAudioPath('winner');
+              if (audioPath) {
+                const audio = new Audio(audioPath);
+                audio.volume = 0.8;
+                audio.play().catch(() => {
+                  console.log('Winner sound not available');
+                });
+              }
             }
           } catch (error) {
             console.log('Winner audio playback error');
@@ -1997,25 +2144,50 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Voice Selection */}
+            {/* Voice Selection with Audio Preloading Progress */}
             <div className="flex items-center space-x-2">
               <Volume2 className="h-5 w-5 text-gray-600" />
-              <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Voice" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="female1">Female Voice</SelectItem>
-                  <SelectItem value="alex">Alex (Male)</SelectItem>
-                  <SelectItem value="melat">Melat (Female)</SelectItem>
-                  <SelectItem value="arada">Arada (Male)</SelectItem>
-                  <SelectItem value="real-arada">Real Arada (Male)</SelectItem>
-                  <SelectItem value="tigrigna">Tigrigna (Female)</SelectItem>
-                  <SelectItem value="oromifa">Oromifa (Female)</SelectItem>
-                  <SelectItem value="betty">Betty (Female)</SelectItem>
-                  <SelectItem value="nati">Nati (Male)</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-1">
+                <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Voice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="female1">Female Voice</SelectItem>
+                    <SelectItem value="alex">Alex (Male)</SelectItem>
+                    <SelectItem value="melat">Melat (Female)</SelectItem>
+                    <SelectItem value="arada">Arada (Male)</SelectItem>
+                    <SelectItem value="real_arada">Real Arada (Male)</SelectItem>
+                    <SelectItem value="tigrigna">Tigrigna (Female)</SelectItem>
+                    <SelectItem value="oromifa">Oromifa (Female)</SelectItem>
+                    <SelectItem value="betty">Betty (Female)</SelectItem>
+                    <SelectItem value="nati">Nati (Male)</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {/* Audio Preloading Progress Indicator */}
+                {!audioPreloadComplete && audioLoadingProgress.total > 0 && (
+                  <div className="w-32 space-y-1">
+                    <div className="flex items-center justify-between text-xs text-gray-600">
+                      <span>Loading...</span>
+                      <span>{audioLoadingProgress.loaded}/{audioLoadingProgress.total}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1">
+                      <div 
+                        className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                        style={{ width: `${(audioLoadingProgress.loaded / audioLoadingProgress.total) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {audioPreloadComplete && (
+                  <div className="w-32 text-xs text-green-600 flex items-center gap-1">
+                    <span>✓</span>
+                    <span>Audio Ready</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Theme Selection */}
