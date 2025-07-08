@@ -835,9 +835,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       console.log('Error playing shuffle sound:', error);
     }
     
-    // Shuffle animation phases
+    // Shuffle animation phases - synchronized with 5-second audio
     let shuffleCount = 0;
-    const maxShuffles = 8;
+    const maxShuffles = 10; // 10 shuffles over 5 seconds
+    const shuffleIntervalTime = 500; // 500ms per shuffle = 5 seconds total
     
     const shuffleInterval = setInterval(() => {
       // Create randomized positions for visual effect
@@ -851,9 +852,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setShuffledPositions([]);
         setTimeout(() => {
           setIsBoardShuffling(false);
-        }, 300);
+        }, 200);
       }
-    }, 200);
+    }, shuffleIntervalTime);
   };
 
   // Enhanced restart function - restore previous game setup
