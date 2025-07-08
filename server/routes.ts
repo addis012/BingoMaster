@@ -3477,6 +3477,11 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         return res.status(403).json({ message: "Collector or employee access required" });
       }
 
+      // Check if collector is blocked
+      if (user.role === 'collector' && user.isBlocked) {
+        return res.status(403).json({ message: "Account is blocked. Contact your supervisor." });
+      }
+
       const { cartelaId, collectorId } = req.body;
       
       if (!cartelaId || !collectorId) {
@@ -3503,6 +3508,11 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
       const user = await storage.getUser(userId);
       if (!user || (user.role !== 'collector' && user.role !== 'employee')) {
         return res.status(403).json({ message: "Collector or employee access required" });
+      }
+
+      // Check if collector is blocked
+      if (user.role === 'collector' && user.isBlocked) {
+        return res.status(403).json({ message: "Account is blocked. Contact your supervisor." });
       }
 
       const { cartelaId, collectorId } = req.body;

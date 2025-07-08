@@ -17,6 +17,7 @@ interface User {
   role: string;
   shopId: number;
   supervisorId: number;
+  isBlocked?: boolean;
 }
 
 interface Cartela {
@@ -45,6 +46,31 @@ export function CollectorDashboard({ user }: { user: User }) {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check if collector is blocked
+  if (user.isBlocked) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-red-600">Account Blocked</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-gray-600">
+              Your account has been blocked by your supervisor. You cannot access cartela selection at this time.
+            </p>
+            <p className="text-sm text-gray-500">
+              Please contact your supervisor for assistance.
+            </p>
+            <Button onClick={handleLogout} variant="outline" className="w-full">
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Logout function
   const handleLogout = async () => {
