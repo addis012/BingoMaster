@@ -201,7 +201,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Active game query
   const { data: activeGame } = useQuery({
     queryKey: ['/api/games/active'],
-    refetchInterval: 30000
+    refetchInterval: gameActive ? 5000 : 30000 // More frequent polling during active games
   });
 
   // Shop data query with frequent refresh for real-time profit margin updates
@@ -264,7 +264,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     enabled: !!user?.shopId,
-    refetchInterval: 45000 // Refresh every 45 seconds for real-time updates
+    refetchInterval: false // Disable automatic polling - use manual refetch after mutations
   });
 
   // Sync with active game data
@@ -921,8 +921,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       if (!response.ok) throw new Error('Failed to mark cartela');
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+    onSuccess: async (data, cartelaNumber) => {
+      // Update local state immediately for instant UI feedback
+      setSelectedCartelas(prev => new Set([...prev, cartelaNumber]));
+      
+      // Force immediate refetch for instant update
+      await refetchCartelas();
+      
+      toast({
+        title: "Cartela Marked",
+        description: `Cartela #${cartelaNumber} marked successfully`
+      });
     },
     onError: (error: any) => {
       toast({
@@ -950,8 +959,21 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       if (!response.ok) throw new Error('Failed to unmark cartela');
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/cartelas/${user?.shopId}`] });
+    onSuccess: async (data, cartelaNumber) => {
+      // Update local state immediately for instant UI feedback
+      setSelectedCartelas(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cartelaNumber);
+        return newSet;
+      });
+      
+      // Force immediate refetch for instant update
+      await refetchCartelas();
+      
+      toast({
+        title: "Cartela Unmarked",
+        description: `Cartela #${cartelaNumber} unmarked successfully`
+      });
     },
     onError: (error: any) => {
       toast({
