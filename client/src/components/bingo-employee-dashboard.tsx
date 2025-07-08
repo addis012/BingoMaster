@@ -479,9 +479,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       return `/voices/alex/${fileName}`;
     } else if (selectedVoice === 'melat') {
-      // Melat voice uses standard naming format
+      // Melat voice uses standard naming format (updated files)
       fileName = `${letter}${num}.mp3`;
-      return `/voices/betty/${fileName}`;
+      return `/voices/melat2/${fileName}`;
     } else if (selectedVoice === 'arada') {
       // Arada voice uses normalized names
       fileName = `${letter}${num}.mp3`;
@@ -535,22 +535,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '';
       }
     } else if (selectedVoice === 'melat') {
-      // Melat voice uses Betty voice files
+      // Melat voice uses updated voice files
       switch (eventType) {
         case 'gameStart':
-          return '/voices/betty/start_game.mp3';
+          return '/voices/melat2/start_game.mp3';
         case 'winner':
-          return '/voices/betty/winner.mp3';
+          return '/voices/melat2/winner.mp3';
         case 'notWinner':
-          return '/voices/betty/not_winner_cartela.mp3';
+          return '/voices/melat2/not_winner_cartela.mp3';
         case 'passedBeforeBingo':
-          return '/voices/betty/passed_before_you_say_bingo.mp3';
+          return '/voices/melat2/not_winner_cartela.mp3'; // Use same as not_winner for now
         case 'disqualified':
-          return '/voices/betty/disqualified.mp3';
-        case 'notSelected':
-          return '/voices/betty/not_selected.mp3';
+          return '/voices/melat2/disqualified.mp3';
         case 'shuffle':
-          return '/voices/melat/shuffle.mp3'; // Melat uses own shuffle if available, otherwise silent
+          return '/voices/common/shuffle.mp3'; // Use common shuffle for melat
+        case 'notSelected':
+          return '/voices/melat2/not_winner_cartela.mp3'; // Use same as not_winner for now
         default:
           return '';
       }
@@ -611,9 +611,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     console.log(`🔊 PRELOAD: Completed preloading 75 ${selectedVoice} voice files`);
   };
 
-  // Trigger preloading when Arada, Real Arada, Tigrigna, Oromifa, Betty, or Nati voice is selected
+  // Trigger preloading when Arada, Real Arada, Tigrigna, Oromifa, Betty, Nati, or Melat voice is selected
   useEffect(() => {
-    if (['arada', 'real-arada', 'tigrigna', 'oromifa', 'betty', 'nati'].includes(selectedVoice)) {
+    if (['arada', 'real-arada', 'tigrigna', 'oromifa', 'betty', 'nati', 'melat'].includes(selectedVoice)) {
       preloadAradaAudio();
     } else {
       // Clear preloaded audio for other voices to save memory

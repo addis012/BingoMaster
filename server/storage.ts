@@ -1662,6 +1662,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(cartelas.collectorId, collectorId));
   }
 
+  async unmarkAllCartelasByCollector(collectorId: number): Promise<void> {
+    await db.update(cartelas)
+      .set({
+        collectorId: null,
+        markedAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(cartelas.collectorId, collectorId));
+  }
+
   async resetShopCartelas(shopId: number): Promise<void> {
     await db.update(cartelas)
       .set({
