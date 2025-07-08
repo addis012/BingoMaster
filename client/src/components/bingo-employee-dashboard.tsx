@@ -494,6 +494,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Tigrigna voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
       return `/voices/tigrigna/${fileName}`;
+    } else if (selectedVoice === 'oromifa') {
+      // Oromifa voice uses standard naming format
+      fileName = `${letter}${num}.mp3`;
+      return `/voices/oromifa/${fileName}`;
     } else {
       // Female voices use the original naming format
       fileName = `${letter}${num}.mp3`;
@@ -547,6 +551,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     } else if (selectedVoice === 'tigrigna') {
       // Tigrigna voice placeholder - no game event files yet, falls back to silent
       return '';
+    } else if (selectedVoice === 'oromifa') {
+      // Oromifa voice placeholder - no game event files yet, falls back to silent
+      return '';
     } else {
       // Female voice uses original files
       switch (eventType) {
@@ -584,9 +591,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     console.log(`🔊 PRELOAD: Completed preloading 75 ${selectedVoice} voice files`);
   };
 
-  // Trigger preloading when Arada, Real Arada, or Tigrigna voice is selected
+  // Trigger preloading when Arada, Real Arada, Tigrigna, or Oromifa voice is selected
   useEffect(() => {
-    if (selectedVoice === 'arada' || selectedVoice === 'real-arada' || selectedVoice === 'tigrigna') {
+    if (selectedVoice === 'arada' || selectedVoice === 'real-arada' || selectedVoice === 'tigrigna' || selectedVoice === 'oromifa') {
       preloadAradaAudio();
     } else {
       // Clear preloaded audio for other voices to save memory
@@ -1977,6 +1984,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <SelectItem value="arada">Arada (Male)</SelectItem>
                   <SelectItem value="real-arada">Real Arada (Male)</SelectItem>
                   <SelectItem value="tigrigna">Tigrigna (Female)</SelectItem>
+                  <SelectItem value="oromifa">Oromifa (Female)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

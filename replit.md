@@ -165,6 +165,11 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 - ✅ Integrated complete BINGO number support for Tigrigna voice (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
 - ✅ Extended audio preloading system to include Tigrigna voice for optimal performance
 - ✅ Voice system now supports six distinct voices: Female Voice, Alex (Male), Melat (Female), Arada (Male), Real Arada (Male), and Tigrigna (Female)
+- ✅ **NEW: Added Oromifa (Female) voice as seventh voice option**
+- ✅ Converted 75 Oromifa Female voice files from WAV to MP3 format for browser compatibility
+- ✅ Integrated complete BINGO number support for Oromifa voice (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
+- ✅ Extended audio preloading system to include Oromifa voice for optimal performance
+- ✅ Voice system now supports seven distinct voices: Female Voice, Alex (Male), Melat (Female), Arada (Male), Real Arada (Male), Tigrigna (Female), and Oromifa (Female)
 
 ### June 28, 2025 - Fixed Player Count and Prize Calculation Accuracy (COMPLETED)
 - ✅ Fixed critical calculation bug where system showed 7 cartelas instead of actual 5 in database
