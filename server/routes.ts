@@ -3738,6 +3738,66 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
     }
   });
 
+  // Block/Unblock collector
+  app.post("/api/employees/collectors/:collectorId/block", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const collectorId = parseInt(req.params.collectorId);
+      const { block } = req.body;
+
+      // Verify collector belongs to this employee
+      const collector = await storage.getUser(collectorId);
+      if (!collector || collector.supervisorId !== user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updatedCollector = await storage.updateUser(collectorId, { isBlocked: block });
+      res.json(updatedCollector);
+    } catch (error) {
+      console.error("Error updating collector status:", error);
+      res.status(500).json({ message: "Failed to update collector status" });
+    }
+  });
+
+  // Delete collector
+  app.delete("/api/employees/collectors/:collectorId", async (req: Request, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'employee') {
+        return res.status(403).json({ message: "Employee access required" });
+      }
+
+      const collectorId = parseInt(req.params.collectorId);
+
+      // Verify collector belongs to this employee
+      const collector = await storage.getUser(collectorId);
+      if (!collector || collector.supervisorId !== user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Delete collector
+      await storage.deleteUser(collectorId);
+      res.json({ message: "Collector deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting collector:", error);
+      res.status(500).json({ message: "Failed to delete collector" });
+    }
+  });
+
   // Advanced Analytics and Reporting API Endpoints
 
   // Get comprehensive shop analytics

@@ -73,6 +73,44 @@ export function EmployeeCollectorManagement({ user }: { user: User }) {
     queryKey: [`/api/employees/${user.id}/collectors`],
   });
 
+  // Block/Unblock collector mutation
+  const toggleBlockMutation = useMutation({
+    mutationFn: async ({ collectorId, block }: { collectorId: number; block: boolean }) => {
+      const response = await fetch(`/api/employees/collectors/${collectorId}/block`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ block }),
+      });
+      if (!response.ok) throw new Error("Failed to update collector status");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Collector status updated successfully" });
+      queryClient.invalidateQueries({ queryKey: [`/api/employees/${user.id}/collectors`] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete collector mutation
+  const deleteCollectorMutation = useMutation({
+    mutationFn: async (collectorId: number) => {
+      const response = await fetch(`/api/employees/collectors/${collectorId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete collector");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Collector deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: [`/api/employees/${user.id}/collectors`] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Create collector mutation
   const createCollectorMutation = useMutation({
     mutationFn: async (data: CreateCollectorData) => {
@@ -319,15 +357,29 @@ export function EmployeeCollectorManagement({ user }: { user: User }) {
                     </div>
                     
                     <div className="mt-4 flex space-x-2">
-                      <Button variant="outline" size="sm" className="flex-1">
-                        View Stats
-                      </Button>
                       <Button 
                         variant={collector.isBlocked ? "default" : "outline"} 
                         size="sm"
                         className="flex-1"
+                        onClick={() => toggleBlockMutation.mutate({ 
+                          collectorId: collector.id, 
+                          block: !collector.isBlocked 
+                        })}
+                        disabled={toggleBlockMutation.isPending}
                       >
                         {collector.isBlocked ? "Unblock" : "Block"}
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete collector ${collector.name}? This action cannot be undone.`)) {
+                            deleteCollectorMutation.mutate(collector.id);
+                          }
+                        }}
+                        disabled={deleteCollectorMutation.isPending}
+                      >
+                        Delete
                       </Button>
                     </div>
                   </CardContent>
