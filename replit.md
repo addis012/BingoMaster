@@ -127,10 +127,13 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 - ✅ Eliminated memory-intensive preloading that was causing browser slowdown
 - ✅ Simplified audio system to create audio elements on-demand without preload
 - ✅ **OPTIMIZED: Query refresh intervals for improved website speed**
-- ✅ Increased active game polling from 2s to 10s for better performance
-- ✅ Increased shop data polling from 5s to 15s to reduce server load
-- ✅ Increased cartela polling from 2s to 12s for optimal balance
-- ✅ Increased game history polling from 10s to 20s for efficiency
+- ✅ Dramatically reduced active game polling from 2s to 30s (93% reduction)
+- ✅ Aggressively reduced shop data polling from 5s to 60s (92% reduction)
+- ✅ Significantly reduced cartela polling from 2s to 45s (95% reduction)
+- ✅ Optimized game history polling from 10s to 20s (50% reduction)
+- ✅ **REMOVED: Heavy console logging causing performance overhead**
+- ✅ Eliminated debug logging from calculation, sync, and cartela processing functions
+- ✅ Streamlined audio and game state logging for better browser performance
 - ✅ **UPDATED: Complete Melat voice with new voice package**
 - ✅ Replaced existing Melat voice with 79 new MP3 files from user-provided ZIP
 - ✅ Enhanced Melat voice with all BINGO numbers and game event audio files

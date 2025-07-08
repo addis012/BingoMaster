@@ -201,14 +201,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Active game query
   const { data: activeGame } = useQuery({
     queryKey: ['/api/games/active'],
-    refetchInterval: 10000
+    refetchInterval: 30000
   });
 
   // Shop data query with frequent refresh for real-time profit margin updates
   const { data: shopData } = useQuery({
     queryKey: [`/api/shops/${user?.shopId}`],
     enabled: !!user?.shopId,
-    refetchInterval: 15000 // Refresh every 15 seconds to catch admin changes
+    refetchInterval: 60000 // Refresh every 60 seconds to catch admin changes
   });
 
   // Calculate amounts based on selected cartelas and profit margin
@@ -224,21 +224,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     const winnerAmount = totalCollected * (1 - profitMargin);
     const profitAmount = totalCollected * profitMargin;
     
-    // Debug logging
-    console.log('🧮 EMPLOYEE CALCULATION DEBUG:', {
-      bookedCartelasSize: bookedCartelas.size,
-      selectedCartelasSize: selectedCartelas.size,
-      totalCartelas,
-      amountPerCartela,
-      totalCollected,
-      profitMarginPercent: (shopData as any)?.profitMargin || '0',
-      profitMargin,
-      winnerAmount,
-      profitAmount,
-      activeGameEntryFee: activeGame?.entryFee,
-      gameAmountState: gameAmount,
-      activeGameFull: activeGame
-    });
+    // Removed heavy debug logging for better performance
     
     return {
       totalCollected,
@@ -278,7 +264,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     enabled: !!user?.shopId,
-    refetchInterval: 12000 // Refresh every 12 seconds for real-time updates
+    refetchInterval: 45000 // Refresh every 45 seconds for real-time updates
   });
 
   // Sync with active game data
@@ -288,18 +274,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       const incomingGameId = (activeGame as any).id;
       const incomingStatus = (activeGame as any).status;
       
-      console.log(`🎮 GAME SYNC: Incoming game ID ${incomingGameId}, status: ${incomingStatus}`);
-      console.log(`🎮 CURRENT STATE: activeGameId=${activeGameId}, gameActive=${gameActive}, gamePaused=${gamePaused}`);
+      // Removed game sync logging for better performance
       
       // If the incoming game is completed, don't set it as active
       if (incomingStatus === 'completed') {
-        console.log(`🎮 SKIPPING completed game ${incomingGameId}`);
+        // Skip completed games
         return;
       }
       
       // Always sync the game ID to prevent mismatches
       if (incomingGameId !== activeGameId) {
-        console.log(`🎮 UPDATING activeGameId from ${activeGameId} to ${incomingGameId}`);
+        // Update active game ID
       }
       
       setActiveGameId(incomingGameId);
@@ -309,7 +294,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Check if this is a reset scenario (game has 'waiting' status with leftover called numbers)
       if (incomingStatus === 'waiting' && gameCalledNumbers.length > 0) {
-        console.log(`🎮 RESET DETECTED: Game status is waiting but has ${gameCalledNumbers.length} called numbers - forcing clear`);
+        // Reset detected - clear called numbers
         // Force clear all numbers and visual state for reset scenario
         setCalledNumbers([]);
         setMarkedNumbers([]);
@@ -329,12 +314,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           (incomingStatus === 'active' && !gameActive) ||
           (incomingStatus === 'paused' && !gamePaused) ||
           (incomingStatus === 'waiting' && (gameActive || gamePaused))) {
-        console.log(`🎮 UPDATING GAME STATE: ${incomingStatus}`);
+        // Update game state
         setGameActive(incomingStatus === 'active');
         setGameFinished(incomingStatus === 'completed');
         setGamePaused(incomingStatus === 'paused');
       } else {
-        console.log(`🎮 PRESERVING LOCAL STATE - no sync needed`);
+        // Preserve local state
       }
       
       // Always update called numbers to reflect the current game state
@@ -345,19 +330,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         setMarkedNumbers([]);
         setBlinkingNumber(null);
         setLastCalledNumber(null);
-        console.log('🎮 SYNC: Board cleared - no called numbers on server');
+        // Board cleared - no called numbers
       } else if (!markedNumbers.length || markedNumbers.length !== gameCalledNumbers.length - 1) {
         // Fresh game load or desync: mark all numbers except the last one
         const numbersToMark = gameCalledNumbers.slice(0, -1);
         setMarkedNumbers(numbersToMark); // All except last number
-        console.log('🎮 SYNC: Board marked with', numbersToMark.length, 'numbers');
+        // Sync board with called numbers
       }
       
       // Include game cartelas and all marked cartelas (avoiding double-counting)
       const gameCartelas = new Set((activeGame as any).cartelas || []);
       
       // Debug: Log all cartelas to see their structure
-      console.log("All cartelas data:", cartelas?.slice(0, 3));
+      // Active game cartela processing
       
       // Get all marked cartelas (both collector and employee) without double-counting
       const allMarkedCartelas = (cartelas || [])
@@ -369,7 +354,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           if (isMarked) {
             const source = hasCollector ? 'collector' : 'employee';
             const dualMarked = hasCollector && hasEmployee ? ' (DUAL-MARKED)' : '';
-            console.log(`Marked cartela: #${c.cartelaNumber} by ${source}${dualMarked}`);
+            // Process marked cartela
           }
           
           return isMarked;
@@ -379,9 +364,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Combine game cartelas and marked cartelas without duplication
       const combinedCartelas = new Set([...Array.from(gameCartelas), ...allMarkedCartelas]);
       
-      console.log("Game cartelas:", Array.from(gameCartelas));
-      console.log("All marked cartelas:", allMarkedCartelas);
-      console.log("Final combined cartelas (no duplicates):", Array.from(combinedCartelas));
+      // Process game cartelas
+      // Process all marked cartelas and combine without duplicates
       
       setBookedCartelas(combinedCartelas);
       
@@ -398,7 +382,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       
       // Still show all marked cartelas as unavailable even when no active game
       // Debug: Log all cartelas to see their structure
-      console.log("No active game - All cartelas data:", cartelas?.slice(0, 3));
+      // No active game cartela processing
       
       const allMarkedCartelas = (cartelas || [])
         .filter((c: any) => {
@@ -409,7 +393,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           if (isMarked) {
             const source = hasCollector ? 'collector' : 'employee';
             const dualMarked = hasCollector && hasEmployee ? ' (DUAL-MARKED)' : '';
-            console.log(`No active game - Marked cartela: #${c.cartelaNumber} by ${source}${dualMarked}`);
+            // Process marked cartela without active game
           }
           
           return isMarked;
@@ -1619,7 +1603,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           const totalPlayersCount = bookedCartelas.size;
           const { winnerAmount } = calculateAmounts(); // Use the correct calculation from our function
           
-          console.log('🎯 EMPLOYEE DECLARING WINNER:', {
+          // Employee declaring winner (removed logging for performance)
+          const winnerData = {
             cartelaNumber: cartelaNum,
             totalPlayers: totalPlayersCount,
             actualEntryFee,
@@ -1627,7 +1612,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             bookedCartelas: Array.from(bookedCartelas),
             selectedCartelas: Array.from(selectedCartelas),
             calledNumbers: calledNumbers.length
-          });
+          };
           
           await fetch(`/api/games/${activeGameId}/declare-winner`, {
             method: 'POST',
@@ -1952,7 +1937,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             <div className="text-6xl font-bold text-green-600">
               Winner Gets: <span className="text-8xl">{(() => {
                 const amounts = calculateAmounts();
-                console.log('🎯 DISPLAY CALCULATION:', amounts);
+                // Display calculation completed
                 return amounts.winnerAmount.toFixed(2);
               })()} Birr</span>
             </div>
@@ -2304,7 +2289,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   ) : gameActive ? (
                     <Button 
                       onClick={() => {
-                        console.log(`🔘 BUTTON CLICKED: gamePaused=${gamePaused}, gameActive=${gameActive}`);
+                        // Button clicked - pause/resume toggle
                         if (gamePaused) {
                           console.log(`▶️ Calling resumeGame()`);
                           resumeGame();
@@ -2317,7 +2302,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     >
                       {(() => {
                         const buttonText = gamePaused ? "Resume Game" : "Pause Game";
-                        console.log(`🔘 BUTTON RENDER: gamePaused=${gamePaused} → "${buttonText}"`);
+                        // Button render state updated
                         return buttonText;
                       })()}
                     </Button>
