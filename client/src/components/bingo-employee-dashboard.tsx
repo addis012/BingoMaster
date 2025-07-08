@@ -498,6 +498,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Oromifa voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
       return `/voices/oromifa/${fileName}`;
+    } else if (selectedVoice === 'betty') {
+      // Betty voice uses standard naming format
+      fileName = `${letter}${num}.mp3`;
+      return `/voices/betty/${fileName}`;
+    } else if (selectedVoice === 'nati') {
+      // Nati voice uses standard naming format
+      fileName = `${letter}${num}.mp3`;
+      return `/voices/nati/${fileName}`;
     } else {
       // Female voices use the original naming format
       fileName = `${letter}${num}.mp3`;
@@ -521,6 +529,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '/voices/alex/disqualified.mp3';
         case 'notSelected':
           return '/voices/alex/not_selected.mp3';
+        case 'shuffle':
+          return '/voices/alex/shuffle.mp3'; // Alex uses own shuffle if available, otherwise silent
         default:
           return '';
       }
@@ -539,21 +549,31 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '/voices/betty/disqualified.mp3';
         case 'notSelected':
           return '/voices/betty/not_selected.mp3';
+        case 'shuffle':
+          return '/voices/melat/shuffle.mp3'; // Melat uses own shuffle if available, otherwise silent
         default:
           return '';
       }
-    } else if (selectedVoice === 'arada') {
-      // Arada voice placeholder - no game event files yet
-      return '';
-    } else if (selectedVoice === 'real-arada') {
-      // Real Arada voice placeholder - no game event files yet, falls back to silent
-      return '';
-    } else if (selectedVoice === 'tigrigna') {
-      // Tigrigna voice placeholder - no game event files yet, falls back to silent
-      return '';
-    } else if (selectedVoice === 'oromifa') {
-      // Oromifa voice placeholder - no game event files yet, falls back to silent
-      return '';
+    } else if (['arada', 'real-arada', 'betty', 'nati', 'tigrigna', 'oromifa', 'female1'].includes(selectedVoice)) {
+      // Common voices for arada, real-arada, betty, nati, tigrigna, oromifa, and female voice
+      switch (eventType) {
+        case 'gameStart':
+          return '/voices/common/start_game.mp3';
+        case 'winner':
+          return '/voices/common/winner.mp3';
+        case 'notWinner':
+          return '/voices/common/not_winner_cartela.mp3';
+        case 'passedBeforeBingo':
+          return '/voices/common/not_winner_cartela.mp3'; // Use same as not_winner for now
+        case 'disqualified':
+          return '/voices/common/disqualified.mp3';
+        case 'shuffle':
+          return '/voices/common/shuffle.mp3';
+        case 'notSelected':
+          return '/voices/common/not_winner_cartela.mp3'; // Use same as not_winner for now
+        default:
+          return '';
+      }
     } else {
       // Female voice uses original files
       switch (eventType) {
@@ -591,9 +611,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     console.log(`🔊 PRELOAD: Completed preloading 75 ${selectedVoice} voice files`);
   };
 
-  // Trigger preloading when Arada, Real Arada, Tigrigna, or Oromifa voice is selected
+  // Trigger preloading when Arada, Real Arada, Tigrigna, Oromifa, Betty, or Nati voice is selected
   useEffect(() => {
-    if (selectedVoice === 'arada' || selectedVoice === 'real-arada' || selectedVoice === 'tigrigna' || selectedVoice === 'oromifa') {
+    if (['arada', 'real-arada', 'tigrigna', 'oromifa', 'betty', 'nati'].includes(selectedVoice)) {
       preloadAradaAudio();
     } else {
       // Clear preloaded audio for other voices to save memory
@@ -798,13 +818,23 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     // Create array of all 75 numbers for shuffling
     const allNumbers = Array.from({length: 75}, (_, i) => i + 1);
     
-    // Play shuffle sound effect
+    // Play shuffle sound effect using voice system
     try {
-      const audio = new Audio('/attached_assets/money-counter-95830_1750080978946.mp3');
-      audio.volume = 0.7;
-      audio.play().catch(() => {
-        console.log('Shuffle sound not available');
-      });
+      const shuffleAudioPath = getGameEventAudio('shuffle');
+      if (shuffleAudioPath) {
+        const audio = new Audio(shuffleAudioPath);
+        audio.volume = 0.7;
+        audio.play().catch(() => {
+          console.log('Shuffle sound not available for voice:', selectedVoice);
+        });
+      } else {
+        // Fallback to original money counter sound if no shuffle voice available
+        const audio = new Audio('/attached_assets/money-counter-95830_1750080978946.mp3');
+        audio.volume = 0.7;
+        audio.play().catch(() => {
+          console.log('Default shuffle sound not available');
+        });
+      }
     } catch (error) {
       console.log('Audio playback error for shuffle sound');
     }
@@ -1985,6 +2015,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <SelectItem value="real-arada">Real Arada (Male)</SelectItem>
                   <SelectItem value="tigrigna">Tigrigna (Female)</SelectItem>
                   <SelectItem value="oromifa">Oromifa (Female)</SelectItem>
+                  <SelectItem value="betty">Betty (Female)</SelectItem>
+                  <SelectItem value="nati">Nati (Male)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
