@@ -57,21 +57,43 @@ try:
             f.write(dashboard.text)
         print("Dashboard content saved to dashboard.html")
         
-        # Extract key styling information
+        # Try to explore other pages by checking the JavaScript app
+        # Common bingo platform pages to try
+        pages_to_explore = [
+            '/game',
+            '/play',
+            '/bingo',
+            '/games',
+            '/profile',
+            '/wallet',
+            '/history',
+            '/settings',
+            '/admin',
+            '/shop',
+            '/cartela',
+            '/cartelas'
+        ]
+        
+        print("\nExploring other pages...")
+        for page in pages_to_explore:
+            try:
+                url = f"https://plus.gobingoet.com{page}"
+                response = session.get(url, timeout=5)
+                if response.status_code == 200 and len(response.text) > 1000:
+                    # Save page content if it's substantial
+                    filename = f"page_{page.replace('/', '_')}.html"
+                    with open(filename, 'w', encoding='utf-8') as f:
+                        f.write(response.text)
+                    print(f"✅ Found page: {page} - saved as {filename}")
+                else:
+                    print(f"❌ Page {page}: Status {response.status_code}")
+            except Exception as e:
+                print(f"❌ Page {page}: Error {e}")
+        
+        # Extract styling information from dashboard
         soup = BeautifulSoup(dashboard.text, 'html.parser')
-        
-        # Look for stylesheets and styling classes
         stylesheets = soup.find_all('link', {'rel': 'stylesheet'})
-        print(f"Found {len(stylesheets)} stylesheets")
-        
-        # Look for main content areas
-        main_content = soup.find('main') or soup.find('div', class_=lambda x: x and 'dashboard' in x.lower())
-        if main_content:
-            print("Found main dashboard content")
-            
-        # Extract some key styling patterns
-        cards = soup.find_all('div', class_=lambda x: x and any(word in x.lower() for word in ['card', 'panel', 'widget']))
-        print(f"Found {len(cards)} card-like elements")
+        print(f"\nFound {len(stylesheets)} stylesheets")
         
     else:
         print("Failed to access dashboard")
