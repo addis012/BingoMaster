@@ -613,9 +613,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       }
       return `/voices/alex/${fileName}`;
     } else if (selectedVoice === 'melat') {
-      // Melat voice uses standard naming format
+      // Melat voice uses standard naming format with actual Melat voice files
       fileName = `${letter}${num}.mp3`;
-      return `/voices/betty/${fileName}`;
+      return `/voices/melat/${fileName}`;
     } else if (selectedVoice === 'arada') {
       // Arada voice uses normalized names
       fileName = `${letter}${num}.mp3`;
@@ -669,22 +669,22 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           return '';
       }
     } else if (selectedVoice === 'melat') {
-      // Melat voice uses Betty voice files
+      // Melat voice uses her own voice files (real Melat from Amharic Female folder)
       switch (eventType) {
         case 'gameStart':
-          return '/voices/betty/start_game.mp3';
+          return '/voices/melat/start_game.mp3';
         case 'winner':
-          return '/voices/betty/winner.mp3';
+          return '/voices/melat/winner.mp3';
         case 'notWinner':
-          return '/voices/betty/not_winner_cartela.mp3';
+          return '/voices/melat/not_winner_cartela.mp3';
         case 'passedBeforeBingo':
-          return '/voices/betty/passed_before_you_say_bingo.mp3';
+          return '/voices/melat/not_winner_cartela.mp3'; // Use same as not_winner for now
         case 'disqualified':
-          return '/voices/betty/disqualified.mp3';
+          return '/voices/melat/disqualified.mp3';
         case 'notSelected':
-          return '/voices/betty/not_selected.mp3';
+          return '/voices/melat/not_winner_cartela.mp3'; // Use same as not_winner for now
         case 'shuffle':
-          return '/voices/melat/shuffle.mp3'; // Melat uses own shuffle if available, otherwise silent
+          return '/voices/melat/shuffle.mp3';
         default:
           return '';
       }

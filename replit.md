@@ -122,7 +122,13 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## Recent Changes
 
-### July 8, 2025 - Comprehensive Audio Preloading System Implementation (COMPLETED)
+### July 8, 2025 - Fixed Voice Mapping and Comprehensive Audio Preloading System Implementation (COMPLETED)
+- ✅ **CRITICAL: Fixed Melat Voice Mapping Issue - Now Uses Authentic Melat Voice Files**
+- ✅ Corrected Melat voice to use actual Amharic Female voice files instead of Betty's files
+- ✅ Extracted and converted 75 Melat voice files from user-provided "Amharic Female" folder
+- ✅ Converted WAV files to MP3 format with proper BINGO notation (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
+- ✅ Added Melat-specific game event audio files (start_game, winner, not_winner_cartela, disqualified, shuffle)
+- ✅ Updated voice mapping functions to point Melat to /voices/melat/ directory instead of /voices/betty/
 - ✅ **MAJOR: Complete Audio Preloading System for Uninterrupted Gameplay**
 - ✅ Implemented comprehensive preloading of all 75 BINGO number audio files (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
 - ✅ Added preloading of all 5 game event audio files (start_game, winner, not_winner_cartela, disqualified, shuffle)
@@ -131,6 +137,11 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 - ✅ Added visual progress indicator showing "Loading... X/80" during audio preloading
 - ✅ Real-time progress bar with smooth animation during preloading process
 - ✅ "Audio Ready" confirmation display when preloading completes successfully
+- ✅ **Comprehensive Voice Isolation System - Eliminates Audio Mixing**
+- ✅ Aggressive audio cleanup when switching voices (pause, clear src, reload)
+- ✅ Audio cloning system prevents interference between preloaded files
+- ✅ Only selected voice audio is preloaded, all others completely cleared from memory
+- ✅ Enhanced logging tracks voice selection and audio source for debugging
 - ✅ **Intelligent Audio Playback with Fallback System**
 - ✅ Primary playback uses preloaded audio for instant, lag-free number calling
 - ✅ Automatic fallback to dynamic loading if preloaded audio unavailable
