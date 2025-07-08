@@ -1032,6 +1032,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         
         try {
           const audioPath = getAudioPath(newNumber);
+          console.log(`🔊 AUDIO DEBUG: Playing ${letter}${newNumber} with path: ${audioPath} using voice: ${selectedVoice}`);
           const audio = new Audio(audioPath);
           audio.volume = 0.8;
           setCurrentAudioRef(audio);
@@ -1040,17 +1041,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
             setCurrentAudioRef(null);
+            console.log(`🔊 AUDIO: Finished playing ${letter}${newNumber}`);
             // Don't mark here - marking happens when next number starts
           };
-          audio.onerror = () => {
+          audio.onerror = (error) => {
+            console.error(`🔊 AUDIO ERROR: Failed to load audio ${audioPath}:`, error);
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
             setCurrentAudioRef(null);
             // Mark immediately if audio fails
             setMarkedNumbers(prev => [...prev, newNumber]);
           };
-          audio.play().catch(() => {
-            console.log(`Audio for ${letter}${newNumber} not available`);
+          audio.play().catch((error) => {
+            console.error(`🔊 AUDIO PLAY ERROR: Failed to play ${audioPath}:`, error);
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
             setCurrentAudioRef(null);
