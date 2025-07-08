@@ -49,27 +49,32 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return localStorage.getItem('employeeTheme') || 'classic';
   });
 
-  // Save voice preference and preload specific voice only
+  // Save voice preference and start preloading after a delay
   useEffect(() => {
     localStorage.setItem('bingoVoice', selectedVoice);
     // Clear existing preloaded audio to prevent mixing
     setPreloadedAudio(new Map());
     setAudioPreloadComplete(false);
     
-    // Preload only the selected voice for optimal performance
-    preloadSelectedVoiceOnly(selectedVoice);
+    // Delay preloading by 1 second to let page load first
+    const timer = setTimeout(() => {
+      preloadSelectedVoiceOnly(selectedVoice);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, [selectedVoice]);
 
-  // Smart preloading function - only loads selected voice
+  // Smart preloading function - loads selected voice efficiently  
   const preloadSelectedVoiceOnly = async (voice: string) => {
-    console.log(`🔊 PRELOAD: Loading ${voice} voice for optimal performance`);
-    setAudioPreloadComplete(false);
-    setAudioLoadingProgress({ loaded: 0, total: 0 });
+    try {
+      console.log(`🔊 PRELOAD: Loading ${voice} voice for optimal performance`);
+      setAudioPreloadComplete(false);
+      setAudioLoadingProgress({ loaded: 0, total: 0 });
 
-    // Clear previous voice to save memory
-    setPreloadedAudio(new Map());
+      // Clear previous voice to save memory
+      setPreloadedAudio(new Map());
 
-    // Define all BINGO numbers (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
+      // Define all BINGO numbers (B1-B15, I16-I30, N31-N45, G46-G60, O61-O75)
     const allNumbers = [
       ...Array.from({length: 15}, (_, i) => `B${i + 1}`),
       ...Array.from({length: 15}, (_, i) => `I${i + 16}`),
@@ -167,6 +172,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         description: `${newPreloadedAudio.size} audio files preloaded for instant playback`,
       });
 
+    } catch (loadError) {
+      console.error('🔊 PRELOAD: Error during batch loading:', loadError);
+      setPreloadedAudio(newPreloadedAudio);
+      setAudioPreloadComplete(true);
+    }
+    
     } catch (error) {
       console.error('🔊 PRELOAD: Error during audio preloading:', error);
       setAudioPreloadComplete(true); // Mark as complete even with errors
@@ -322,14 +333,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Active game query
   const { data: activeGame } = useQuery({
     queryKey: ['/api/games/active'],
-    refetchInterval: 8000 // Reduced polling for better performance
+    refetchInterval: 15000 // Much slower polling for better performance
   });
 
   // Shop data query with frequent refresh for real-time profit margin updates
   const { data: shopData } = useQuery({
     queryKey: [`/api/shops/${user?.shopId}`],
     enabled: !!user?.shopId,
-    refetchInterval: 5000 // Refresh every 5 seconds to catch admin changes
+    refetchInterval: 10000 // Slower refresh for better performance
   });
 
   // Calculate amounts based on selected cartelas and profit margin
@@ -369,11 +380,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     };
   };
 
-  // Game history query for admin connection
+  // Game history query for admin connection - delayed loading
   const { data: gameHistory } = useQuery({
     queryKey: ['/api/analytics/shop', user?.shopId],
     enabled: !!user?.shopId,
-    refetchInterval: 15000 // Reduced polling for better performance
+    refetchInterval: false, // Only load on demand
+    staleTime: 120000 // 2 minutes cache
   });
 
   // Admin credit balance query
@@ -386,7 +398,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     enabled: !!(shopData as any)?.adminId,
-    refetchInterval: 30000 // Check admin balance every 30 seconds
+    refetchInterval: 60000 // Check admin balance every minute for better performance
   });
 
   // Cartelas query for real-time updates
@@ -399,7 +411,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       return response.json();
     },
     enabled: !!user?.shopId,
-    refetchInterval: 5000 // Refresh every 5 seconds for better performance
+    refetchInterval: 10000 // Much slower refresh for better performance
   });
 
   // Sync with active game data
