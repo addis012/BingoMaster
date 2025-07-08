@@ -637,10 +637,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setIsPaused(false);
     
     const interval = setInterval(() => {
-      if (!isPaused && gameActive && !gameFinished) {
+      if (!isPaused && gameActive && !gameFinished && !audioPlaying) {
         callNumber();
       }
-    }, 4000); // 4 seconds between calls
+    }, 5500); // 5.5 seconds between calls to allow audio to complete
     
     setAutoCallInterval(interval);
   };
@@ -1028,7 +1028,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         const audioResetTimer = setTimeout(() => {
           setAudioPlaying(false);
           setCurrentAudioRef(null);
-        }, 2500);
+        }, 4500); // Increased timeout to 4.5 seconds for longer voice files
         
         try {
           const audioPath = getAudioPath(newNumber);
@@ -1042,7 +1042,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             setAudioPlaying(false);
             setCurrentAudioRef(null);
             console.log(`🔊 AUDIO: Finished playing ${letter}${newNumber}`);
-            // Don't mark here - marking happens when next number starts
+            // Mark the number after audio completes
+            setTimeout(() => {
+              setMarkedNumbers(prev => {
+                if (!prev.includes(newNumber)) {
+                  return [...prev, newNumber];
+                }
+                return prev;
+              });
+            }, 500); // Small delay to ensure clean state transition
           };
           audio.onerror = (error) => {
             console.error(`🔊 AUDIO ERROR: Failed to load audio ${audioPath}:`, error);
@@ -1050,15 +1058,30 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             setAudioPlaying(false);
             setCurrentAudioRef(null);
             // Mark immediately if audio fails
-            setMarkedNumbers(prev => [...prev, newNumber]);
+            setMarkedNumbers(prev => {
+              if (!prev.includes(newNumber)) {
+                return [...prev, newNumber];
+              }
+              return prev;
+            });
           };
+          
+          audio.oncanplaythrough = () => {
+            console.log(`🔊 AUDIO: Ready to play ${letter}${newNumber}`);
+          };
+          
           audio.play().catch((error) => {
             console.error(`🔊 AUDIO PLAY ERROR: Failed to play ${audioPath}:`, error);
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
             setCurrentAudioRef(null);
             // Mark immediately if audio fails
-            setMarkedNumbers(prev => [...prev, newNumber]);
+            setMarkedNumbers(prev => {
+              if (!prev.includes(newNumber)) {
+                return [...prev, newNumber];
+              }
+              return prev;
+            });
           });
         } catch (error) {
           console.log('Audio playback error');
