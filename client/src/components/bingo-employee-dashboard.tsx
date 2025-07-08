@@ -35,6 +35,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [currentAudioRef, setCurrentAudioRef] = useState<HTMLAudioElement | null>(null);
+  const [preloadedAudio, setPreloadedAudio] = useState<Map<number, HTMLAudioElement>>(new Map());
   
   // Voice selection
   const [selectedVoice, setSelectedVoice] = useState<string>(() => {
@@ -551,6 +552,34 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   };
 
+  // Preload audio files for Arada voice to eliminate lag
+  const preloadAradaAudio = () => {
+    console.log(`🔊 PRELOAD: Starting preload for Arada voice`);
+    const newPreloaded = new Map();
+    
+    // Preload all 75 BINGO numbers for Arada voice
+    for (let num = 1; num <= 75; num++) {
+      const audioPath = getAudioPath(num);
+      const audio = new Audio(audioPath);
+      audio.preload = 'auto';
+      audio.volume = 0.8;
+      newPreloaded.set(num, audio);
+    }
+    
+    setPreloadedAudio(newPreloaded);
+    console.log(`🔊 PRELOAD: Completed preloading 75 Arada voice files`);
+  };
+
+  // Trigger preloading when Arada voice is selected
+  useEffect(() => {
+    if (selectedVoice === 'arada') {
+      preloadAradaAudio();
+    } else {
+      // Clear preloaded audio for other voices to save memory
+      setPreloadedAudio(new Map());
+    }
+  }, [selectedVoice]);
+
   // Helper function to get ball color for number
   const getBallColor = (num: number): string => {
     if (num >= 1 && num <= 15) return "from-blue-500 to-blue-700"; // B - Blue
@@ -640,7 +669,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       if (!isPaused && gameActive && !gameFinished && !audioPlaying) {
         callNumber();
       }
-    }, 5500); // 5.5 seconds between calls to allow audio to complete
+    }, 6000); // 6 seconds between calls for better audio completion
     
     setAutoCallInterval(interval);
   };
@@ -1033,8 +1062,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         try {
           const audioPath = getAudioPath(newNumber);
           console.log(`🔊 AUDIO DEBUG: Playing ${letter}${newNumber} with path: ${audioPath} using voice: ${selectedVoice}`);
-          const audio = new Audio(audioPath);
-          audio.volume = 0.8;
+          
+          // Use preloaded audio for Arada voice to eliminate lag
+          let audio: HTMLAudioElement;
+          if (selectedVoice === 'arada' && preloadedAudio.has(newNumber)) {
+            audio = preloadedAudio.get(newNumber)!;
+            audio.currentTime = 0; // Reset to beginning
+            console.log(`🔊 AUDIO: Using preloaded audio for ${letter}${newNumber}`);
+          } else {
+            audio = new Audio(audioPath);
+            audio.volume = 0.8;
+            audio.preload = 'auto';
+          }
+          
           setCurrentAudioRef(audio);
           
           audio.onended = () => {
@@ -1050,8 +1090,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 }
                 return prev;
               });
-            }, 500); // Small delay to ensure clean state transition
+            }, 200); // Faster marking for better sync
           };
+          
           audio.onerror = (error) => {
             console.error(`🔊 AUDIO ERROR: Failed to load audio ${audioPath}:`, error);
             clearTimeout(audioResetTimer);
@@ -1066,12 +1107,29 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             });
           };
           
-          audio.oncanplaythrough = () => {
-            console.log(`🔊 AUDIO: Ready to play ${letter}${newNumber}`);
-          };
-          
-          audio.play().catch((error) => {
-            console.error(`🔊 AUDIO PLAY ERROR: Failed to play ${audioPath}:`, error);
+          // Play audio immediately for preloaded or after loading for new audio
+          if (selectedVoice === 'arada' && preloadedAudio.has(newNumber)) {
+            audio.play().catch((error) => {
+              console.error(`🔊 AUDIO PLAY ERROR: Failed to play preloaded ${audioPath}:`, error);
+            });
+          } else {
+            audio.oncanplaythrough = () => {
+              console.log(`🔊 AUDIO: Ready to play ${letter}${newNumber}`);
+              audio.play().catch((error) => {
+                console.error(`🔊 AUDIO PLAY ERROR: Failed to play ${audioPath}:`, error);
+                clearTimeout(audioResetTimer);
+                setAudioPlaying(false);
+                setCurrentAudioRef(null);
+                setMarkedNumbers(prev => {
+                  if (!prev.includes(newNumber)) {
+                    return [...prev, newNumber];
+                  }
+                  return prev;
+                });
+              });
+            };
+          audio.onerror = (error) => {
+            console.error(`🔊 AUDIO ERROR: Failed to load audio ${audioPath}:`, error);
             clearTimeout(audioResetTimer);
             setAudioPlaying(false);
             setCurrentAudioRef(null);
@@ -1082,7 +1140,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               }
               return prev;
             });
-          });
+          };
+          
+            // Start loading the audio immediately for non-preloaded files
+            audio.load();
+          }
         } catch (error) {
           console.log('Audio playback error');
           clearTimeout(audioResetTimer);
