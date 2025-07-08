@@ -89,10 +89,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         case 'alex': return 'alex';
         case 'melat': return 'betty';
         case 'arada': return 'arada';
-        case 'real_arada': return 'real_arada';
+        case 'real_arada': return 'real-arada';
         case 'tigrigna': return 'tigrigna';
         case 'oromifa': return 'oromifa';
-        case 'betty': return 'betty_voice';
+        case 'betty': return 'betty';
         case 'nati': return 'nati';
         case 'female1':
         default: return 'female1';
@@ -614,7 +614,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     } else if (selectedVoice === 'real_arada') {
       // Real Arada voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
-      return `/voices/real_arada/${fileName}`;
+      return `/voices/real-arada/${fileName}`;
     } else if (selectedVoice === 'tigrigna') {
       // Tigrigna voice uses standard naming format
       fileName = `${letter}${num}.mp3`;
@@ -2161,7 +2161,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <SelectContent>
                     <SelectItem value="female1">Female Voice</SelectItem>
                     <SelectItem value="alex">Alex (Male)</SelectItem>
-                    <SelectItem value="melat">Melat (Female)</SelectItem>
+                    <SelectItem value="melat">Melat (Female) [uses Betty voice]</SelectItem>
                     <SelectItem value="arada">Arada (Male)</SelectItem>
                     <SelectItem value="real_arada">Real Arada (Male)</SelectItem>
                     <SelectItem value="tigrigna">Tigrigna (Female)</SelectItem>
