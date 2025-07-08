@@ -818,37 +818,21 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     // Create array of all 75 numbers for shuffling
     const allNumbers = Array.from({length: 75}, (_, i) => i + 1);
     
-    // Play shuffle sound effect using voice system
-    console.log('🔊 SHUFFLE FUNCTION CALLED with voice:', selectedVoice);
-    
+    // Play universal shuffle sound (independent of voice selection)
     try {
-      const shuffleAudioPath = getGameEventAudio('shuffle');
-      console.log('🔊 SHUFFLE DEBUG:', { selectedVoice, shuffleAudioPath });
-      
-      if (shuffleAudioPath) {
-        console.log('🔊 Playing shuffle sound:', shuffleAudioPath);
-        const audio = new Audio(shuffleAudioPath);
-        audio.volume = 0.7;
-        audio.play().catch((error) => {
-          console.log('Shuffle sound not available for voice:', selectedVoice, error);
-          // Fallback to original money counter sound
-          const fallbackAudio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
-          fallbackAudio.volume = 0.7;
-          fallbackAudio.play().catch(() => {
-            console.log('Default shuffle sound also not available');
-          });
+      const audio = new Audio('/voices/common/shuffle.mp3');
+      audio.volume = 0.7;
+      audio.play().catch((error) => {
+        console.log('Shuffle sound not available, trying fallback:', error);
+        // Fallback to money counter sound
+        const fallbackAudio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
+        fallbackAudio.volume = 0.7;
+        fallbackAudio.play().catch(() => {
+          console.log('Fallback shuffle sound also not available');
         });
-      } else {
-        console.log('🔊 No shuffle path, using fallback');
-        // Fallback to original money counter sound if no shuffle voice available
-        const audio = new Audio('/attached_assets/money-counter-95830_1750063611267.mp3');
-        audio.volume = 0.7;
-        audio.play().catch(() => {
-          console.log('Default shuffle sound not available');
-        });
-      }
+      });
     } catch (error) {
-      console.log('Audio playback error for shuffle sound:', error);
+      console.log('Error playing shuffle sound:', error);
     }
     
     // Shuffle animation phases
