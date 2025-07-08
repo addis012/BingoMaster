@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FIXED_CARTELAS, getCartelaNumbers, getFixedCartelaPattern } from "@/data/fixed-cartelas";
 import { EmployeeCollectorManagement } from "@/components/employee-collector-management";
-import { Volume2 } from "lucide-react";
+import { Volume2, Palette } from "lucide-react";
 
 interface BingoEmployeeDashboardProps {
   onLogout: () => void;
