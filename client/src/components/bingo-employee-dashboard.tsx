@@ -122,6 +122,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       gameButton: "bg-orange-600 hover:bg-orange-700 border-orange-200",
       numberCell: "hover:bg-orange-50",
       selectedCartela: "border-orange-500 bg-orange-50"
+    },
+    gobingo: {
+      name: "GoBingo Style",
+      primary: "bg-gradient-to-b from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700",
+      secondary: "bg-red-800",
+      accent: "bg-yellow-400",
+      text: "text-white",
+      cardBg: "bg-red-900",
+      border: "border-yellow-400",
+      calledNumbers: "bg-gradient-to-b from-yellow-400 to-yellow-600",
+      gameButton: "bg-gradient-to-b from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 border-yellow-400 text-black font-bold",
+      numberCell: "hover:bg-yellow-100 hover:text-black",
+      selectedCartela: "border-yellow-400 bg-yellow-900 bg-opacity-20"
     }
   };
 
@@ -1788,7 +1801,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const showLowCreditWarning = adminData && adminCreditBalance < 500;
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-y-auto">
+    <div className={`min-h-screen ${currentTheme.secondary} overflow-y-auto`}>
       {/* Admin Low Credit Warning */}
       {showLowCreditWarning && (
         <div className="bg-orange-100 border-l-4 border-orange-500 p-4 mb-4">
@@ -1810,11 +1823,11 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       )}
 
       {/* Header */}
-      <div className="bg-white shadow-sm border-b p-4">
+      <div className={`${currentTheme.cardBg} shadow-sm ${currentTheme.border} border-b p-4`}>
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Bingo Play</h1>
-            <p className="text-sm text-gray-600">
+            <h1 className={`text-xl font-bold ${currentTheme.text}`}>Bingo Play</h1>
+            <p className={`text-sm ${currentTheme.text} opacity-75`}>
               {user?.username} - employee
             </p>
           </div>
@@ -1845,6 +1858,24 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Theme Selection */}
+            <div className="flex items-center space-x-2">
+              <Palette className="h-5 w-5 text-gray-600" />
+              <Select value={selectedTheme} onValueChange={setSelectedTheme}>
+                <SelectTrigger className="w-36">
+                  <SelectValue placeholder="Theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="classic">Classic Blue</SelectItem>
+                  <SelectItem value="dark">Dark Pro</SelectItem>
+                  <SelectItem value="green">Green Success</SelectItem>
+                  <SelectItem value="purple">Purple Premium</SelectItem>
+                  <SelectItem value="orange">Orange Energy</SelectItem>
+                  <SelectItem value="gobingo">GoBingo Style</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             <Button onClick={onLogout} className="bg-red-500 hover:bg-red-600 text-white">
               Log Out
@@ -1855,7 +1886,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
       {/* Main Content with Tabs */}
       <Tabs defaultValue="game" className="w-full">
-        <div className="bg-white border-b px-4">
+        <div className={`${currentTheme.cardBg} ${currentTheme.border} border-b px-4`}>
           <TabsList className="grid w-fit grid-cols-2">
             <TabsTrigger value="game">Bingo Game</TabsTrigger>
             <TabsTrigger value="collectors">Collectors</TabsTrigger>
@@ -2062,7 +2093,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <Button 
                     onClick={() => setShowCartelaSelector(true)}
                     disabled={gameActive || resetGameMutation.isPending}
-                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                    className={`${currentTheme.primary} text-white`}
                   >
                     Add More
                   </Button>
@@ -2092,7 +2123,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     <Button 
                       onClick={() => createGameMutation.mutate()}
                       disabled={(selectedCartelas.size === 0 && bookedCartelas.size === 0) || createGameMutation.isPending}
-                      className="bg-green-500 hover:bg-green-600 text-white"
+                      className={`${currentTheme.gameButton} text-white`}
                     >
                       {createGameMutation.isPending ? "Starting..." : "Start Game"}
                     </Button>
@@ -2100,7 +2131,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                     <Button 
                       onClick={() => startGameMutation.mutate()}
                       disabled={startGameMutation.isPending}
-                      className="bg-green-500 hover:bg-green-600 text-white"
+                      className={`${currentTheme.gameButton} text-white`}
                     >
                       {startGameMutation.isPending ? "Starting..." : "Start Game"}
                     </Button>
