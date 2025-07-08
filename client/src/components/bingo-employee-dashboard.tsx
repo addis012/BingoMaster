@@ -125,16 +125,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     },
     gobingo: {
       name: "GoBingo Style",
-      primary: "bg-gradient-to-b from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700",
-      secondary: "bg-red-800",
-      accent: "bg-yellow-400",
+      primary: "bg-gradient-to-b from-[#fff521] to-[#9d9302] hover:from-[#f0e91f] hover:to-[#8a8102] border-2 border-[#fff521] text-black font-bold font-poetsen shadow-md",
+      secondary: "bg-[#f21800]", // Main body color from GoBingo
+      accent: "bg-[#fff521]", // Pure yellow accent
       text: "text-white",
-      cardBg: "bg-red-900",
-      border: "border-yellow-400",
-      calledNumbers: "bg-gradient-to-b from-yellow-400 to-yellow-600",
-      gameButton: "bg-gradient-to-b from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 border-yellow-400 text-black font-bold",
-      numberCell: "hover:bg-yellow-100 hover:text-black",
-      selectedCartela: "border-yellow-400 bg-yellow-900 bg-opacity-20"
+      cardBg: "bg-white border-2 border-[#fff521] shadow-lg rounded-lg",
+      border: "border-[#fff521]",
+      calledNumbers: "bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black font-bold border-2 border-[#fff521] rounded-lg shadow-md",
+      gameButton: "bg-gradient-to-b from-[#fff521] to-[#9d9302] hover:from-[#f0e91f] hover:to-[#8a8102] border-2 border-[#fff521] text-black font-bold font-poetsen shadow-md transition-all duration-200",
+      numberCell: "hover:bg-[#fff521] hover:text-black transition-colors duration-200",
+      selectedCartela: "border-[#fff521] bg-gradient-to-br from-[#fff521]/20 to-[#9d9302]/20 shadow-xl"
     }
   };
 
@@ -1823,19 +1823,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       )}
 
       {/* Header */}
-      <div className={`${currentTheme.cardBg} shadow-sm ${currentTheme.border} border-b p-4`}>
+      <div className={`${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#fff521]' : currentTheme.cardBg} shadow-sm ${currentTheme.border} border-b p-4`}>
         <div className="flex justify-between items-center">
           <div>
-            <h1 className={`text-xl font-bold ${currentTheme.text}`}>Bingo Play</h1>
-            <p className={`text-sm ${currentTheme.text} opacity-75`}>
+            <h1 className={`text-xl font-bold ${selectedTheme === 'gobingo' ? 'text-black font-poetsen text-2xl' : currentTheme.text}`}>Bingo Play</h1>
+            <p className={`text-sm ${selectedTheme === 'gobingo' ? 'text-black font-poetsen' : currentTheme.text} opacity-75`}>
               {user?.username} - employee
             </p>
           </div>
           
           {/* Center - Winner Amount */}
           <div className="text-center">
-            <div className="text-6xl font-bold text-green-600">
-              Winner Gets: <span className="text-8xl">{(() => {
+            <div className={`${selectedTheme === 'gobingo' ? 'text-black font-teko text-5xl' : 'text-green-600 text-6xl'} font-bold`}>
+              Winner Gets: <span className={`${selectedTheme === 'gobingo' ? 'text-6xl font-teko' : 'text-8xl'}`}>{(() => {
                 const amounts = calculateAmounts();
                 console.log('🎯 DISPLAY CALCULATION:', amounts);
                 return amounts.winnerAmount.toFixed(2);
@@ -2240,7 +2240,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <div className="space-y-2">
                 {/* B Row */}
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#5100ff] text-black font-poetsen' : 'bg-red-500 text-white'}`}>
                     B
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2251,12 +2251,20 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           key={num} 
                           className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
-                              ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
+                              ? selectedTheme === 'gobingo' 
+                                ? 'animate-pulse bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black transform scale-110 border-2 border-[#fff521]'
+                                : 'animate-pulse bg-yellow-200 text-black transform scale-110'
                               : blinkingNumber === num
-                                ? 'bg-red-500 text-white slow-blink' 
+                                ? selectedTheme === 'gobingo'
+                                  ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black slow-blink border-2 border-[#fff521] shadow-lg'
+                                  : 'bg-red-500 text-white slow-blink'
                               : markedNumbers.includes(num) 
-                                ? 'bg-red-500 text-white' 
-                                : 'bg-gray-100 text-black border'
+                                ? selectedTheme === 'gobingo'
+                                  ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black border-2 border-[#fff521] shadow-md font-poetsen'
+                                  : 'bg-red-500 text-white'
+                                : selectedTheme === 'gobingo'
+                                  ? 'bg-gradient-to-b from-[#c31504] to-[#870e00] text-[#e61602] border rounded-lg shadow-md hover:bg-gradient-to-b hover:from-[#fff521] hover:to-[#9d9302] hover:text-black transition-all duration-300'
+                                  : 'bg-gray-100 text-black border'
                           }`}
                         >
                           {shuffledNum}
@@ -2268,7 +2276,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
                 {/* I Row */}
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-blue-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#e91e63] text-black font-poetsen' : 'bg-blue-500 text-white'}`}>
                     I
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2296,7 +2304,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
                 {/* N Row */}
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-green-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#000dff] text-black font-poetsen' : 'bg-green-500 text-white'}`}>
                     N
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2324,7 +2332,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
                 {/* G Row */}
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-yellow-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#dbcd0a] text-black font-poetsen' : 'bg-yellow-500 text-white'}`}>
                     G
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2352,7 +2360,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
                 {/* O Row */}
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-purple-500 text-white rounded flex items-center justify-center font-bold text-sm">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#2fe91e] text-black font-poetsen' : 'bg-purple-500 text-white'}`}>
                     O
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2493,9 +2501,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               {/* BINGO Headers */}
               <div className="grid grid-cols-5 gap-1">
                 {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                  const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                  // GoBingo exact letter colors from their CSS
+                  const gobingoColors = [
+                    'bg-[#5100ff] border-[#5100ff]', // B: Purple
+                    'bg-[#e91e63] border-[#e91e63]', // I: Pink
+                    'bg-[#000dff] border-[#000dff]', // N: Blue
+                    'bg-[#dbcd0a] border-[#dbcd0a]', // G: Yellow
+                    'bg-[#2fe91e] border-[#2fe91e]'  // O: Green
+                  ];
+                  const defaultColors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+                  const colorClass = selectedTheme === 'gobingo' ? gobingoColors[index] : defaultColors[index];
+                  
                   return (
-                    <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-sm`}>
+                    <div key={letter} className={`h-8 ${colorClass} ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black font-poetsen border-2' : 'text-white'} rounded flex items-center justify-center font-bold text-sm`}>
                       {letter}
                     </div>
                   );
