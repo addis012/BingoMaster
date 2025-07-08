@@ -137,6 +137,7 @@ export interface IStorage {
   // Collector methods
   markCartelaByCollector(cartelaId: number, collectorId: number): Promise<void>;
   unmarkCartelaByCollector(cartelaId: number, collectorId: number): Promise<void>;
+  unmarkAllCartelasByCollector(collectorId: number): Promise<void>;
   getCollectorStats(collectorId: number): Promise<any>;
   getCollectorsByEmployee(employeeId: number): Promise<User[]>;
   
@@ -1649,6 +1650,16 @@ export class DatabaseStorage implements IStorage {
         eq(cartelas.id, cartelaId),
         eq(cartelas.collectorId, collectorId)
       ));
+  }
+
+  async unmarkAllCartelasByCollector(collectorId: number): Promise<void> {
+    await db.update(cartelas)
+      .set({
+        collectorId: null,
+        markedAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(cartelas.collectorId, collectorId));
   }
 
   async resetShopCartelas(shopId: number): Promise<void> {

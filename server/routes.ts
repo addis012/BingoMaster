@@ -3799,8 +3799,16 @@ export async function registerRoutes(app: Express): Promise<{ server: Server; ws
         return res.status(403).json({ message: "Access denied" });
       }
 
+      // First, clean up any cartelas assigned to this collector
+      await storage.unmarkAllCartelasByCollector(collectorId);
+      
       // Delete collector
-      await storage.deleteUser(collectorId);
+      const deleted = await storage.deleteUser(collectorId);
+      if (!deleted) {
+        return res.status(404).json({ message: "Collector not found" });
+      }
+      
+      console.log(`Collector ${collectorId} deleted successfully by employee ${user.id}`);
       res.json({ message: "Collector deleted successfully" });
     } catch (error) {
       console.error("Error deleting collector:", error);
