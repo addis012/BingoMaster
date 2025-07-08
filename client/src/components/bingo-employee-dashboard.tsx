@@ -52,6 +52,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Save voice preference to localStorage and preload audio
   useEffect(() => {
     localStorage.setItem('bingoVoice', selectedVoice);
+    // Clear existing preloaded audio before loading new voice
+    preloadedAudio.forEach(audio => {
+      audio.pause();
+      audio.src = '';
+      audio.load();
+    });
+    setPreloadedAudio(new Map());
+    setAudioPreloadComplete(false);
+    
+    // Preload only the selected voice
     preloadAllAudioFiles(selectedVoice);
   }, [selectedVoice]);
 
@@ -61,10 +71,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setAudioPreloadComplete(false);
     setAudioLoadingProgress({ loaded: 0, total: 0 });
 
-    // Clear existing preloaded audio
-    preloadedAudio.forEach(audio => {
+    // Aggressively clear existing preloaded audio to prevent voice mixing
+    console.log(`🔊 PRELOAD: Clearing ${preloadedAudio.size} existing audio files before loading ${voice}`);
+    preloadedAudio.forEach((audio, key) => {
       audio.pause();
+      audio.currentTime = 0;
       audio.src = '';
+      audio.load();
+      console.log(`🧹 CLEANUP: Cleared ${key}`);
     });
     setPreloadedAudio(new Map());
 
@@ -1252,17 +1266,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           // Try preloaded audio first for instant, uninterrupted playback
           let audio: HTMLAudioElement;
           if (audioPreloadComplete && preloadedAudio.has(bingoNotation)) {
-            audio = preloadedAudio.get(bingoNotation)!;
-            audio.currentTime = 0; // Reset to beginning
+            // Clone the preloaded audio to avoid interference
+            const preloadedFile = preloadedAudio.get(bingoNotation)!;
+            audio = preloadedFile.cloneNode() as HTMLAudioElement;
+            audio.currentTime = 0;
             audio.volume = 1.0;
-            console.log(`🔊 PRELOAD: Using preloaded audio for ${bingoNotation} - instant playback guaranteed`);
+            console.log(`🔊 PRELOAD: Using cloned preloaded audio for ${bingoNotation} (voice: ${selectedVoice})`);
           } else {
             // Fallback to dynamic loading
             const audioPath = getAudioPath(newNumber);
             audio = new Audio(audioPath);
             audio.volume = 0.8;
             audio.preload = 'auto';
-            console.log(`🔊 FALLBACK: Using dynamic loading for ${bingoNotation} at ${audioPath}`);
+            console.log(`🔊 FALLBACK: Using dynamic loading for ${bingoNotation} at ${audioPath} (voice: ${selectedVoice})`);
           }
           
           setCurrentAudioRef(audio);
@@ -1841,13 +1857,15 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           // Play winner sound using preloaded audio for instant playback
           try {
             if (audioPreloadComplete && preloadedAudio.has('winner')) {
-              const audio = preloadedAudio.get('winner')!;
+              // Clone the preloaded audio to avoid interference
+              const preloadedFile = preloadedAudio.get('winner')!;
+              const audio = preloadedFile.cloneNode() as HTMLAudioElement;
               audio.currentTime = 0;
               audio.volume = 1.0;
               audio.play().catch(() => {
                 console.log('Winner sound playback error');
               });
-              console.log('🔊 PRELOAD: Playing winner sound from cache');
+              console.log(`🔊 PRELOAD: Playing winner sound from cache (voice: ${selectedVoice})`);
             } else {
               // Fallback to dynamic loading
               const audioPath = getGameEventAudioPath('winner');
