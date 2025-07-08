@@ -486,6 +486,10 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       // Arada voice uses normalized names
       fileName = `${letter}${num}.mp3`;
       return `/voices/arada/${fileName}`;
+    } else if (selectedVoice === 'real-arada') {
+      // Real Arada voice uses standard naming format
+      fileName = `${letter}${num}.mp3`;
+      return `/voices/real-arada/${fileName}`;
     } else {
       // Female voices use the original naming format
       fileName = `${letter}${num}.mp3`;
@@ -533,6 +537,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     } else if (selectedVoice === 'arada') {
       // Arada voice placeholder - no game event files yet
       return '';
+    } else if (selectedVoice === 'real-arada') {
+      // Real Arada voice placeholder - no game event files yet, falls back to silent
+      return '';
     } else {
       // Female voice uses original files
       switch (eventType) {
@@ -552,12 +559,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
   };
 
-  // Preload audio files for Arada voice to eliminate lag
+  // Preload audio files for Arada voices to eliminate lag
   const preloadAradaAudio = () => {
-    console.log(`🔊 PRELOAD: Starting preload for Arada voice`);
+    console.log(`🔊 PRELOAD: Starting preload for ${selectedVoice} voice`);
     const newPreloaded = new Map();
     
-    // Preload all 75 BINGO numbers for Arada voice
+    // Preload all 75 BINGO numbers for Arada voices
     for (let num = 1; num <= 75; num++) {
       const audioPath = getAudioPath(num);
       const audio = new Audio(audioPath);
@@ -567,12 +574,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     }
     
     setPreloadedAudio(newPreloaded);
-    console.log(`🔊 PRELOAD: Completed preloading 75 Arada voice files`);
+    console.log(`🔊 PRELOAD: Completed preloading 75 ${selectedVoice} voice files`);
   };
 
-  // Trigger preloading when Arada voice is selected
+  // Trigger preloading when Arada or Real Arada voice is selected
   useEffect(() => {
-    if (selectedVoice === 'arada') {
+    if (selectedVoice === 'arada' || selectedVoice === 'real-arada') {
       preloadAradaAudio();
     } else {
       // Clear preloaded audio for other voices to save memory
@@ -1961,6 +1968,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                   <SelectItem value="alex">Alex (Male)</SelectItem>
                   <SelectItem value="melat">Melat (Female)</SelectItem>
                   <SelectItem value="arada">Arada (Male)</SelectItem>
+                  <SelectItem value="real-arada">Real Arada (Male)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
