@@ -2850,10 +2850,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           </DialogFooter>
         </DialogContent>
       </Dialog>
-                </div>
-              </div>
-            </div>
-            )}
 
             {/* Win History Section */}
             {activeSection === 'win-history' && (
