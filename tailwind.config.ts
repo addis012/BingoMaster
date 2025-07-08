@@ -5,10 +5,6 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-      fontFamily: {
-        'poetsen': ['Poetsen One', 'sans-serif'],
-        'teko': ['Teko', 'sans-serif'],
-      },
       gridTemplateColumns: {
         '15': 'repeat(15, minmax(0, 1fr))',
       },

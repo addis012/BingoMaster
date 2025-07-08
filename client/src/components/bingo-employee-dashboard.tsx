@@ -46,11 +46,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     return localStorage.getItem('employeeTheme') || 'classic';
   });
 
-  // Navigation state - GoBingo sections
-  const [activeSection, setActiveSection] = useState<string>(() => {
-    return localStorage.getItem('employeeActiveSection') || 'play-bingo';
-  });
-
   // Save voice preference to localStorage
   useEffect(() => {
     localStorage.setItem('bingoVoice', selectedVoice);
@@ -60,11 +55,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   useEffect(() => {
     localStorage.setItem('employeeTheme', selectedTheme);
   }, [selectedTheme]);
-
-  // Save active section to localStorage
-  useEffect(() => {
-    localStorage.setItem('employeeActiveSection', activeSection);
-  }, [activeSection]);
 
   // Theme configurations
   const themes = {
@@ -135,16 +125,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     },
     gobingo: {
       name: "GoBingo Style",
-      primary: "bg-gradient-to-b from-[#fff521] to-[#9d9302] hover:from-[#f0e91f] hover:to-[#8a8102] border-2 border-[#fff521] text-black font-bold font-poetsen shadow-md",
-      secondary: "bg-[#f21800]", // Main body color from GoBingo
-      accent: "bg-[#fff521]", // Pure yellow accent
+      primary: "bg-gradient-to-b from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700",
+      secondary: "bg-red-800",
+      accent: "bg-yellow-400",
       text: "text-white",
-      cardBg: "bg-white border-2 border-[#fff521] shadow-lg rounded-lg",
-      border: "border-[#fff521]",
-      calledNumbers: "bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black font-bold border-2 border-[#fff521] rounded-lg shadow-md",
-      gameButton: "bg-gradient-to-b from-[#fff521] to-[#9d9302] hover:from-[#f0e91f] hover:to-[#8a8102] border-2 border-[#fff521] text-black font-bold font-poetsen shadow-md transition-all duration-200",
-      numberCell: "hover:bg-[#fff521] hover:text-black transition-colors duration-200",
-      selectedCartela: "border-[#fff521] bg-gradient-to-br from-[#fff521]/20 to-[#9d9302]/20 shadow-xl"
+      cardBg: "bg-red-900",
+      border: "border-yellow-400",
+      calledNumbers: "bg-gradient-to-b from-yellow-400 to-yellow-600",
+      gameButton: "bg-gradient-to-b from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 border-yellow-400 text-black font-bold",
+      numberCell: "hover:bg-yellow-100 hover:text-black",
+      selectedCartela: "border-yellow-400 bg-yellow-900 bg-opacity-20"
     }
   };
 
@@ -1833,19 +1823,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       )}
 
       {/* Header */}
-      <div className={`${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#fff521]' : currentTheme.cardBg} shadow-sm ${currentTheme.border} border-b p-4`}>
+      <div className={`${currentTheme.cardBg} shadow-sm ${currentTheme.border} border-b p-4`}>
         <div className="flex justify-between items-center">
           <div>
-            <h1 className={`text-xl font-bold ${selectedTheme === 'gobingo' ? 'text-black font-poetsen text-2xl' : currentTheme.text}`}>Bingo Play</h1>
-            <p className={`text-sm ${selectedTheme === 'gobingo' ? 'text-black font-poetsen' : currentTheme.text} opacity-75`}>
+            <h1 className={`text-xl font-bold ${currentTheme.text}`}>Bingo Play</h1>
+            <p className={`text-sm ${currentTheme.text} opacity-75`}>
               {user?.username} - employee
             </p>
           </div>
           
           {/* Center - Winner Amount */}
           <div className="text-center">
-            <div className={`${selectedTheme === 'gobingo' ? 'text-black font-teko text-5xl' : 'text-green-600 text-6xl'} font-bold`}>
-              Winner Gets: <span className={`${selectedTheme === 'gobingo' ? 'text-6xl font-teko' : 'text-8xl'}`}>{(() => {
+            <div className="text-6xl font-bold text-green-600">
+              Winner Gets: <span className="text-8xl">{(() => {
                 const amounts = calculateAmounts();
                 console.log('🎯 DISPLAY CALCULATION:', amounts);
                 return amounts.winnerAmount.toFixed(2);
@@ -1894,128 +1884,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         </div>
       </div>
 
-      {/* GoBingo Style Navigation (when GoBingo theme is selected) */}
-      {selectedTheme === 'gobingo' && (
-        <div className="bg-gradient-to-r from-[#f21800] to-[#c31504] px-4 py-3 border-b-4 border-[#fff521]">
-          <div className="flex space-x-1">
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-              { id: 'play-bingo', label: 'Play Bingo', icon: '🎲' },
-              { id: 'win-history', label: 'Win History', icon: '🏆' },
-              { id: 'view-cartela', label: 'View Cartela', icon: '🎫' },
-              { id: 'settings', label: 'Settings', icon: '⚙️' }
-            ].map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`px-4 py-2 rounded-t-lg font-teko text-lg font-semibold transition-all duration-200 ${
-                  activeSection === section.id
-                    ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black border-2 border-[#fff521] shadow-lg transform scale-105'
-                    : 'bg-gradient-to-b from-[#c31504] to-[#870e00] text-[#fff521] hover:bg-gradient-to-b hover:from-[#fff521] hover:to-[#9d9302] hover:text-black border border-[#fff521]/30'
-                }`}
-              >
-                <span className="mr-2">{section.icon}</span>
-                {section.label}
-              </button>
-            ))}
-          </div>
+      {/* Main Content with Tabs */}
+      <Tabs defaultValue="game" className="w-full">
+        <div className={`${currentTheme.cardBg} ${currentTheme.border} border-b px-4`}>
+          <TabsList className="grid w-fit grid-cols-2">
+            <TabsTrigger value="game">Bingo Game</TabsTrigger>
+            <TabsTrigger value="collectors">Collectors</TabsTrigger>
+          </TabsList>
         </div>
-      )}
 
-      {/* Regular Tabs (when classic theme is selected) */}
-      {selectedTheme !== 'gobingo' && (
-        <Tabs defaultValue="game" className="w-full">
-          <div className={`${currentTheme.cardBg} ${currentTheme.border} border-b px-4`}>
-            <TabsList className="grid w-fit grid-cols-2">
-              <TabsTrigger value="game">Bingo Game</TabsTrigger>
-              <TabsTrigger value="collectors">Collectors</TabsTrigger>
-            </TabsList>
-          </div>
-        </Tabs>
-      )}
-
-      {/* Content Area */}
-      <div className="flex-1">
-        {/* GoBingo Content Sections */}
-        {selectedTheme === 'gobingo' && (
-          <div className="mt-0">
-            {/* Dashboard Section */}
-            {activeSection === 'dashboard' && (
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <Card className="bg-gradient-to-br from-[#fff521] to-[#9d9302] border-2 border-[#f21800]">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-black font-teko text-lg">Total Games Today</p>
-                          <p className="text-3xl font-black text-[#f21800]">{analyticsData?.todayGames || 0}</p>
-                        </div>
-                        <div className="h-12 w-12 bg-[#f21800] rounded-full flex items-center justify-center">
-                          🎲
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-gradient-to-br from-[#fff521] to-[#9d9302] border-2 border-[#f21800]">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-black font-teko text-lg">Today's Revenue</p>
-                          <p className="text-3xl font-black text-[#f21800]">{analyticsData?.todayRevenue || 0} Birr</p>
-                        </div>
-                        <div className="h-12 w-12 bg-[#f21800] rounded-full flex items-center justify-center">
-                          💰
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-gradient-to-br from-[#fff521] to-[#9d9302] border-2 border-[#f21800]">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-black font-teko text-lg">Active Cartelas</p>
-                          <p className="text-3xl font-black text-[#f21800]">{bookedCartelas.size}</p>
-                        </div>
-                        <div className="h-12 w-12 bg-[#f21800] rounded-full flex items-center justify-center">
-                          🎫
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <Card className="bg-gradient-to-br from-[#f21800] to-[#c31504] border-2 border-[#fff521]">
-                  <CardHeader className="bg-gradient-to-r from-[#fff521] to-[#9d9302] rounded-t-lg">
-                    <CardTitle className="text-black font-poetsen text-2xl">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <Button onClick={() => setActiveSection('play-bingo')} className="bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black hover:from-[#9d9302] hover:to-[#fff521] border-2 border-[#f21800] font-teko text-lg">
-                        🎲 Start Game
-                      </Button>
-                      <Button onClick={() => setActiveSection('view-cartela')} className="bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black hover:from-[#9d9302] hover:to-[#fff521] border-2 border-[#f21800] font-teko text-lg">
-                        🎫 View Cartelas
-                      </Button>
-                      <Button onClick={() => setActiveSection('win-history')} className="bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black hover:from-[#9d9302] hover:to-[#fff521] border-2 border-[#f21800] font-teko text-lg">
-                        🏆 History
-                      </Button>
-                      <Button onClick={() => setActiveSection('settings')} className="bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black hover:from-[#9d9302] hover:to-[#fff521] border-2 border-[#f21800] font-teko text-lg">
-                        ⚙️ Settings
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Play Bingo Section - Shows existing game content */}
-            {activeSection === 'play-bingo' && (
-              <div className="mt-0">
-                <div className="flex">
-                  {/* Left Panel */}
-                  <div className="w-80 p-4">
+        <TabsContent value="game" className="mt-0">
+          <div className="flex">
+        {/* Left Panel */}
+        <div className="w-80 p-4">
           {/* Current Number Display */}
           <Card className="mb-4">
             <CardContent className="p-6 text-center">
@@ -2359,7 +2240,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <div className="space-y-2">
                 {/* B Row */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#5100ff] text-black font-poetsen' : 'bg-red-500 text-white'}`}>
+                  <div className="w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center font-bold text-sm">
                     B
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2370,20 +2251,12 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                           key={num} 
                           className={`h-16 w-16 rounded flex items-center justify-center text-2xl font-black transition-all duration-200 ${
                             isBoardShuffling 
-                              ? selectedTheme === 'gobingo' 
-                                ? 'animate-pulse bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black transform scale-110 border-2 border-[#fff521]'
-                                : 'animate-pulse bg-yellow-200 text-black transform scale-110'
+                              ? 'animate-pulse bg-yellow-200 text-black transform scale-110' 
                               : blinkingNumber === num
-                                ? selectedTheme === 'gobingo'
-                                  ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black slow-blink border-2 border-[#fff521] shadow-lg'
-                                  : 'bg-red-500 text-white slow-blink'
+                                ? 'bg-red-500 text-white slow-blink' 
                               : markedNumbers.includes(num) 
-                                ? selectedTheme === 'gobingo'
-                                  ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black border-2 border-[#fff521] shadow-md font-poetsen'
-                                  : 'bg-red-500 text-white'
-                                : selectedTheme === 'gobingo'
-                                  ? 'bg-gradient-to-b from-[#c31504] to-[#870e00] text-[#e61602] border rounded-lg shadow-md hover:bg-gradient-to-b hover:from-[#fff521] hover:to-[#9d9302] hover:text-black transition-all duration-300'
-                                  : 'bg-gray-100 text-black border'
+                                ? 'bg-red-500 text-white' 
+                                : 'bg-gray-100 text-black border'
                           }`}
                         >
                           {shuffledNum}
@@ -2395,7 +2268,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
                 {/* I Row */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#e91e63] text-black font-poetsen' : 'bg-blue-500 text-white'}`}>
+                  <div className="w-8 h-8 bg-blue-500 text-white rounded flex items-center justify-center font-bold text-sm">
                     I
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2423,7 +2296,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
                 {/* N Row */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#000dff] text-black font-poetsen' : 'bg-green-500 text-white'}`}>
+                  <div className="w-8 h-8 bg-green-500 text-white rounded flex items-center justify-center font-bold text-sm">
                     N
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2451,7 +2324,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
                 {/* G Row */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#dbcd0a] text-black font-poetsen' : 'bg-yellow-500 text-white'}`}>
+                  <div className="w-8 h-8 bg-yellow-500 text-white rounded flex items-center justify-center font-bold text-sm">
                     G
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2479,7 +2352,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
                 {/* O Row */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] border-2 border-[#2fe91e] text-black font-poetsen' : 'bg-purple-500 text-white'}`}>
+                  <div className="w-8 h-8 bg-purple-500 text-white rounded flex items-center justify-center font-bold text-sm">
                     O
                   </div>
                   <div className="grid grid-cols-15 gap-1 flex-1">
@@ -2620,19 +2493,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               {/* BINGO Headers */}
               <div className="grid grid-cols-5 gap-1">
                 {['B', 'I', 'N', 'G', 'O'].map((letter, index) => {
-                  // GoBingo exact letter colors from their CSS
-                  const gobingoColors = [
-                    'bg-[#5100ff] border-[#5100ff]', // B: Purple
-                    'bg-[#e91e63] border-[#e91e63]', // I: Pink
-                    'bg-[#000dff] border-[#000dff]', // N: Blue
-                    'bg-[#dbcd0a] border-[#dbcd0a]', // G: Yellow
-                    'bg-[#2fe91e] border-[#2fe91e]'  // O: Green
-                  ];
-                  const defaultColors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
-                  const colorClass = selectedTheme === 'gobingo' ? gobingoColors[index] : defaultColors[index];
-                  
+                  const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
                   return (
-                    <div key={letter} className={`h-8 ${colorClass} ${selectedTheme === 'gobingo' ? 'bg-gradient-to-b from-[#fff521] to-[#9d9302] text-black font-poetsen border-2' : 'text-white'} rounded flex items-center justify-center font-bold text-sm`}>
+                    <div key={letter} className={`h-8 ${colors[index]} text-white rounded flex items-center justify-center font-bold text-sm`}>
                       {letter}
                     </div>
                   );
@@ -2850,163 +2713,14 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </TabsContent>
 
-            {/* Win History Section */}
-            {activeSection === 'win-history' && (
-              <div className="p-6">
-                <Card className="bg-gradient-to-br from-[#f21800] to-[#c31504] border-2 border-[#fff521]">
-                  <CardHeader className="bg-gradient-to-r from-[#fff521] to-[#9d9302] rounded-t-lg">
-                    <CardTitle className="text-black font-poetsen text-2xl">🏆 Win History</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="text-center text-[#fff521] font-teko text-xl">
-                      Game history will appear here...
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* View Cartela Section */}
-            {activeSection === 'view-cartela' && (
-              <div className="p-6">
-                <Card className="bg-gradient-to-br from-[#f21800] to-[#c31504] border-2 border-[#fff521]">
-                  <CardHeader className="bg-gradient-to-r from-[#fff521] to-[#9d9302] rounded-t-lg">
-                    <CardTitle className="text-black font-poetsen text-2xl">🎫 View Cartelas</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="text-center text-[#fff521] font-teko text-xl">
-                      Cartela management will appear here...
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Settings Section */}
-            {activeSection === 'settings' && (
-              <div className="p-6">
-                <Card className="bg-gradient-to-br from-[#f21800] to-[#c31504] border-2 border-[#fff521]">
-                  <CardHeader className="bg-gradient-to-r from-[#fff521] to-[#9d9302] rounded-t-lg">
-                    <CardTitle className="text-black font-poetsen text-2xl">⚙️ Settings</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label className="text-[#fff521] font-teko text-lg">Voice Selection</Label>
-                          <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                            <SelectTrigger className="bg-gradient-to-r from-[#fff521] to-[#9d9302] border-[#f21800] text-black">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="female1">Female Voice</SelectItem>
-                              <SelectItem value="alex">Alex (Male)</SelectItem>
-                              <SelectItem value="melat">Melat (Female)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label className="text-[#fff521] font-teko text-lg">Theme Selection</Label>
-                          <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-                            <SelectTrigger className="bg-gradient-to-r from-[#fff521] to-[#9d9302] border-[#f21800] text-black">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="classic">Classic Blue</SelectItem>
-                              <SelectItem value="dark">Dark Pro</SelectItem>
-                              <SelectItem value="green">Green Success</SelectItem>
-                              <SelectItem value="purple">Purple Premium</SelectItem>
-                              <SelectItem value="orange">Orange Energy</SelectItem>
-                              <SelectItem value="gobingo">GoBingo Style</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+        <TabsContent value="collectors" className="mt-0">
+          <div className="p-6">
+            <EmployeeCollectorManagement user={user as any} />
           </div>
-        )}
-
-        {/* Regular Tabs Content (when not GoBingo theme) */}
-        {selectedTheme !== 'gobingo' && (
-          <Tabs defaultValue="game" className="w-full">
-            <TabsContent value="game" className="mt-0">
-              <div className="flex">
-                {/* Left Panel */}
-                <div className="w-80 p-4">
-                  {/* Current Number Display */}
-                  <Card className="mb-4">
-                    <CardContent className="p-6 text-center">
-                      {activeGameId ? (
-                        <>
-                          <div className="flex justify-center items-center mb-4">
-                            {/* Show next number if hovering, otherwise show last called number */}
-                            {isHovering && nextNumber ? (
-                              <div className={`relative w-48 h-48 bg-gradient-to-br ${getBallColor(nextNumber)} rounded-full shadow-lg transform scale-110 animate-pulse transition-all duration-300`}>
-                                {/* Ball shine effect */}
-                                <div className="absolute top-4 left-6 w-8 h-8 bg-white/30 rounded-full blur-sm"></div>
-                                <div className="absolute top-2 left-4 w-4 h-4 bg-white/50 rounded-full"></div>
-                                
-                                {/* Letter */}
-                                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white font-black text-2xl">
-                                  {getLetterForNumber(nextNumber)}
-                                </div>
-                                
-                                {/* Inner white circle for number background */}
-                                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-white rounded-full flex items-center justify-center">
-                                  <span className="text-gray-900 font-black text-6xl">
-                                    {nextNumber}
-                                  </span>
-                                </div>
-                              </div>
-                            ) : lastCalledNumber ? (
-                              <div className={`relative w-48 h-48 bg-gradient-to-br ${getBallColor(lastCalledNumber)} rounded-full shadow-lg transform ${isShuffling ? 'animate-bounce scale-110' : 'hover:scale-105'} transition-all duration-300`}>
-                                {/* Ball shine effect */}
-                                <div className="absolute top-4 left-6 w-8 h-8 bg-white/30 rounded-full blur-sm"></div>
-                                <div className="absolute top-2 left-4 w-4 h-4 bg-white/50 rounded-full"></div>
-                                
-                                {/* Letter */}
-                                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white font-black text-2xl">
-                                  {getLetterForNumber(lastCalledNumber)}
-                                </div>
-                                
-                                {/* Inner white circle for number background */}
-                                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-white rounded-full flex items-center justify-center">
-                                  <span className="text-gray-900 font-black text-6xl">
-                                    {lastCalledNumber}
-                                  </span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="w-48 h-48 border-4 border-dashed border-gray-300 rounded-full flex items-center justify-center">
-                                <span className="text-gray-500 text-lg font-semibold">Ready to Start</span>
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="w-48 h-48 border-4 border-dashed border-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <span className="text-gray-500 text-lg font-semibold">No Active Game</span>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="collectors" className="mt-0">
-              <div className="p-6">
-                <EmployeeCollectorManagement user={user as any} />
-              </div>
-            </TabsContent>
-          </Tabs>
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

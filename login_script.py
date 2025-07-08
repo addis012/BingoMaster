@@ -57,70 +57,21 @@ try:
             f.write(dashboard.text)
         print("Dashboard content saved to dashboard.html")
         
-        # Try to explore other pages by checking the JavaScript app
-        # Common bingo platform pages to try
-        pages_to_explore = [
-            '/game',
-            '/play',
-            '/bingo',
-            '/games',
-            '/profile',
-            '/wallet',
-            '/history',
-            '/settings',
-            '/admin',
-            '/shop',
-            '/cartela',
-            '/cartelas'
-        ]
-        
-        # Try to access the specific navigation pages you mentioned
-        dashboard_pages = [
-            '/dashboard',  # Main dashboard
-            '/play',       # Play Bingo
-            '/history',    # Win History  
-            '/cartela',    # View Cartela
-            '/settings'    # Settings
-        ]
-        
-        print("\nExploring dashboard navigation pages...")
-        for page in dashboard_pages:
-            try:
-                url = f"https://plus.gobingoet.com{page}"
-                response = session.get(url, timeout=10)
-                print(f"📄 {page}: Status {response.status_code}, Content length: {len(response.text)}")
-                
-                if response.status_code == 200:
-                    # Save page content for analysis
-                    filename = f"dashboard_{page.replace('/', '_')}.html"
-                    with open(filename, 'w', encoding='utf-8') as f:
-                        f.write(response.text)
-                    print(f"   💾 Saved as {filename}")
-                    
-                    # Try to extract any navigation structure from the page
-                    soup = BeautifulSoup(response.text, 'html.parser')
-                    nav_elements = soup.find_all(['nav', 'aside', 'ul', 'div'], class_=lambda x: x and any(word in x.lower() for word in ['nav', 'menu', 'sidebar', 'side']))
-                    if nav_elements:
-                        print(f"   🧭 Found {len(nav_elements)} potential navigation elements")
-                        
-            except Exception as e:
-                print(f"❌ {page}: Error {e}")
-        
-        # Also try hash-based routes (common in React SPAs)
-        hash_routes = ['#/dashboard', '#/play', '#/history', '#/cartela', '#/settings']
-        print("\nTrying hash-based routes...")
-        for route in hash_routes:
-            try:
-                url = f"https://plus.gobingoet.com/{route}"
-                response = session.get(url, timeout=5)
-                print(f"📄 {route}: Status {response.status_code}")
-            except Exception as e:
-                print(f"❌ {route}: Error {e}")
-        
-        # Extract styling information from dashboard
+        # Extract key styling information
         soup = BeautifulSoup(dashboard.text, 'html.parser')
+        
+        # Look for stylesheets and styling classes
         stylesheets = soup.find_all('link', {'rel': 'stylesheet'})
-        print(f"\nFound {len(stylesheets)} stylesheets")
+        print(f"Found {len(stylesheets)} stylesheets")
+        
+        # Look for main content areas
+        main_content = soup.find('main') or soup.find('div', class_=lambda x: x and 'dashboard' in x.lower())
+        if main_content:
+            print("Found main dashboard content")
+            
+        # Extract some key styling patterns
+        cards = soup.find_all('div', class_=lambda x: x and any(word in x.lower() for word in ['card', 'panel', 'widget']))
+        print(f"Found {len(cards)} card-like elements")
         
     else:
         print("Failed to access dashboard")
