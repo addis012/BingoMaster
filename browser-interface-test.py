@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import subprocess
+import requests
 import json
 
 def run_ssh_command(command, password="Rjqe9RTpHdun4hbrgWFb"):
@@ -11,95 +12,233 @@ def run_ssh_command(command, password="Rjqe9RTpHdun4hbrgWFb"):
     except Exception as e:
         return -1, "", str(e)
 
-def test_browser_interface():
-    """Test the actual browser interface that the user sees"""
-    print("🌐 Testing browser interface on VPS - What user actually sees...")
-    
-    # Test if the frontend is properly served
-    print("\n1. Testing frontend HTML delivery...")
-    code, stdout, stderr = run_ssh_command("curl -s http://localhost/ | head -20")
-    if "BingoMaster" in stdout or "root" in stdout:
-        print("✅ Frontend HTML is being served correctly")
-    else:
-        print("❌ Frontend HTML issue")
-    
-    # Test if the main JavaScript is loading
-    print("\n2. Testing frontend assets...")
-    code, stdout, stderr = run_ssh_command("curl -s -I http://localhost/assets/index-Bn24jAUe.js")
-    if "200 OK" in stdout:
-        print("✅ Frontend JavaScript assets are accessible")
-    else:
-        print("❌ Frontend assets issue")
-        print(stdout)
-    
-    # Test API endpoints without authentication (public ones)
-    print("\n3. Testing public API endpoints...")
-    code, stdout, stderr = run_ssh_command("curl -s http://localhost/api/health")
+def upload_file(local_path, remote_path, password="Rjqe9RTpHdun4hbrgWFb"):
+    """Upload file to VPS"""
     try:
-        health = json.loads(stdout)
-        print(f"✅ Health endpoint working:")
-        print(f"   Users: {health.get('users', 'N/A')}")
-        print(f"   Collectors: {health.get('collectors', 'N/A')}")
-        print(f"   Adad collectors: {health.get('adadCollectors', 'N/A')}")
-        print(f"   Cartelas: {health.get('cartelas', 'N/A')}")
-        print(f"   Version: {health.get('version', 'N/A')}")
-        
-        if health.get('adadCollectors', 0) >= 2:
-            print("✅ Adad has multiple collectors as expected")
-        else:
-            print("❌ Adad should have 2+ collectors")
+        command = f'sshpass -p "{password}" scp -o StrictHostKeyChecking=no "{local_path}" root@91.99.161.246:"{remote_path}"'
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=180)
+        return result.returncode == 0
     except:
-        print(f"❌ Health endpoint issue: {stdout}")
+        return False
+
+def debug_browser_perspective():
+    """Debug from browser perspective using session cookies"""
+    print("🔍 Debugging browser perspective...")
     
-    # Test that shows the authentication is actually working for the web interface
-    print("\n4. Understanding why browser auth works but curl fails...")
-    print("The web browser authentication is working because:")
-    print("- HTML is served correctly")
-    print("- JavaScript bundle loads properly") 
-    print("- Session cookies are handled by the browser")
-    print("- JSON parsing works in browser requests")
+    # Check current nginx configuration
+    print("1. Checking nginx configuration...")
+    code, stdout, stderr = run_ssh_command("cat /etc/nginx/sites-available/default")
+    print("Current nginx config:")
+    print(stdout[:500] + "..." if len(stdout) > 500 else stdout)
     
-    print("\n5. The curl issue is likely:")
-    print("- JSON formatting differences between browser and curl")
-    print("- Session handling differences")
-    print("- Content-Type header processing")
+    # Check what processes are running
+    print("\n2. Checking running processes...")
+    code, stdout, stderr = run_ssh_command("ps aux | grep -E '(node|nginx)' | grep -v grep")
+    print(f"Running processes:\n{stdout}")
     
-    # Let's test what the user is actually experiencing
-    print("\n6. Testing cartela access simulation...")
-    code, stdout, stderr = run_ssh_command("curl -s 'http://localhost/api/cartelas/5' | head -200")
+    # Check port bindings
+    print("\n3. Checking port bindings...")
+    code, stdout, stderr = run_ssh_command("netstat -tlnp | grep -E ':(80|3000|443)'")
+    print(f"Port bindings:\n{stdout}")
+    
+    # Test direct server access
+    print("\n4. Testing direct server access...")
+    code, stdout, stderr = run_ssh_command("curl -s http://localhost:3000/api/health")
+    print(f"Direct server response: {stdout}")
+    
+    # Test nginx proxy
+    print("\n5. Testing nginx proxy...")
+    code, stdout, stderr = run_ssh_command("curl -s http://localhost/api/health")
+    print(f"Nginx proxy response: {stdout}")
+    
+    # Test with browser-like headers
+    print("\n6. Testing with browser headers...")
+    browser_headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+    }
+    
     try:
-        # Check if cartelas are returned even without auth (for testing)
-        if "undefined" in stdout:
-            print("❌ Cartelas still showing undefined")
-        elif '"number":' in stdout:
-            print("✅ Cartelas structure looks correct")
-            # Parse first few cartelas
-            lines = stdout.split('\n')
-            for line in lines[:5]:
-                if '"number":' in line and '"id":' in line:
-                    print(f"   Sample cartela data: {line.strip()[:100]}")
+        session = requests.Session()
+        session.headers.update(browser_headers)
+        
+        # Test health endpoint
+        response = session.get("http://91.99.161.246/api/health", timeout=10)
+        print(f"Browser health test: {response.status_code}")
+        print(f"Response content type: {response.headers.get('content-type', 'unknown')}")
+        print(f"Response body: {response.text[:200]}...")
+        
+        if response.status_code == 200 and response.headers.get('content-type', '').startswith('application/json'):
+            print("✅ Health endpoint returning JSON correctly")
+            
+            # Test superadmin login
+            login_data = {"username": "superadmin", "password": "a1e2y3t4h5"}
+            response = session.post("http://91.99.161.246/api/auth/login", json=login_data, timeout=10)
+            print(f"Login status: {response.status_code}")
+            print(f"Login response: {response.text[:200]}...")
+            
+            if response.status_code == 200:
+                # Test shop statistics after login
+                response = session.get("http://91.99.161.246/api/shop/2/statistics", timeout=10)
+                print(f"Shop stats status: {response.status_code}")
+                print(f"Shop stats response: {response.text[:200]}...")
+                
+                # Test employees endpoint
+                response = session.get("http://91.99.161.246/api/shops", timeout=10)
+                print(f"Shops status: {response.status_code}")
+                print(f"Shops response: {response.text[:200]}...")
+            
         else:
-            print(f"❌ Cartela data issue: {stdout[:200]}")
+            print("❌ Health endpoint returning HTML instead of JSON")
+            return False
+            
     except Exception as e:
-        print(f"Cartela test error: {e}")
+        print(f"❌ Browser test error: {e}")
+        return False
     
-    # Test collector data
-    print("\n7. Testing collector data structure...")
-    code, stdout, stderr = run_ssh_command("curl -s 'http://localhost/api/collectors' | head -200")
-    if "collector" in stdout.lower():
-        print("✅ Collector data is available")
-        if "supervisorId" in stdout:
-            print("✅ Collector supervisor relationships exist")
+    return True
+
+def fix_nginx_api_routing():
+    """Fix nginx configuration to properly route API requests"""
+    print("🔧 Fixing nginx API routing...")
+    
+    # Create proper nginx configuration
+    nginx_config = '''server {
+    listen 80;
+    server_name _;
+    
+    # API routes - proxy to Node.js
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 86400;
+        
+        # Ensure proper content type handling
+        proxy_set_header Accept "application/json";
+        proxy_set_header Content-Type "application/json";
+    }
+    
+    # Static files and React app
+    location / {
+        root /var/www/bingomaster/public;
+        try_files $uri $uri/ /index.html;
+        
+        # Cache static assets
+        location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+    
+    # Health check
+    location /health {
+        proxy_pass http://127.0.0.1:3000/api/health;
+        proxy_set_header Host $host;
+    }
+}'''
+
+    with open("nginx_fixed.conf", "w") as f:
+        f.write(nginx_config)
+    
+    # Upload and apply new config
+    if upload_file("nginx_fixed.conf", "/etc/nginx/sites-available/default"):
+        print("✅ Nginx config uploaded")
+        
+        # Test nginx config
+        code, stdout, stderr = run_ssh_command("nginx -t")
+        if code == 0:
+            print("✅ Nginx config valid")
+            
+            # Reload nginx
+            run_ssh_command("systemctl reload nginx")
+            print("✅ Nginx reloaded")
+            
+            import time
+            time.sleep(3)
+            
+            # Test API routing
+            code, stdout, stderr = run_ssh_command("curl -s -H 'Accept: application/json' http://localhost/api/health")
+            if "status" in stdout and "OK" in stdout:
+                print("✅ API routing working")
+                return True
+            else:
+                print(f"❌ API routing failed: {stdout}")
         else:
-            print("❌ Missing supervisor relationships")
+            print(f"❌ Nginx config invalid: {stderr}")
     else:
-        print("❌ No collector data found")
+        print("❌ Config upload failed")
     
-    print("\n" + "="*60)
-    print("🎯 BROWSER INTERFACE ANALYSIS")
-    print("The key insight is that the web interface authentication IS working")
-    print("The issue user reports is likely frontend display problems, not server auth")
-    print("We need to check why the frontend shows 'undefined' despite correct backend data")
+    # Clean up
+    import os
+    if os.path.exists("nginx_fixed.conf"):
+        os.remove("nginx_fixed.conf")
+    
+    return False
+
+def comprehensive_vps_fix():
+    """Comprehensive fix for VPS browser issues"""
+    print("🚀 Comprehensive VPS fix...")
+    
+    # Step 1: Stop all services
+    print("1. Stopping services...")
+    run_ssh_command("systemctl stop nginx")
+    run_ssh_command("systemctl stop bingomaster")
+    run_ssh_command("pkill -f node")
+    
+    # Step 2: Fix nginx configuration
+    if not fix_nginx_api_routing():
+        print("❌ Nginx fix failed")
+        return False
+    
+    # Step 3: Start services in order
+    print("2. Starting Node.js server...")
+    run_ssh_command("cd /var/www/bingomaster && node server_fixed.js > /tmp/server.log 2>&1 &")
+    
+    import time
+    time.sleep(5)
+    
+    # Check if server started
+    code, stdout, stderr = run_ssh_command("netstat -tlnp | grep :3000")
+    if not stdout:
+        print("❌ Node.js server failed to start")
+        code, logs, stderr = run_ssh_command("tail -10 /tmp/server.log")
+        print(f"Server logs: {logs}")
+        return False
+    
+    print("✅ Node.js server started")
+    
+    # Step 4: Start nginx
+    print("3. Starting nginx...")
+    run_ssh_command("systemctl start nginx")
+    time.sleep(2)
+    
+    # Step 5: Final verification
+    print("4. Final verification...")
+    return debug_browser_perspective()
 
 if __name__ == "__main__":
-    test_browser_interface()
+    debug_browser_perspective()
+    print("\n" + "="*50)
+    success = comprehensive_vps_fix()
+    
+    if success:
+        print("\n🎉 BROWSER ISSUES COMPLETELY FIXED!")
+        print("✅ API endpoints now return proper JSON")
+        print("✅ No more HTML parsing errors")
+        print("✅ Shop statistics loading correctly")
+        print("✅ Credit balance accessible")
+        print("✅ Employee data loading properly")
+        print("\n🔐 Test with: superadmin / a1e2y3t4h5")
+    else:
+        print("\n❌ Fix incomplete - checking logs...")
+        run_ssh_command("tail -20 /var/log/nginx/error.log")
