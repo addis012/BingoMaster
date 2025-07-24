@@ -1,59 +1,59 @@
 #!/usr/bin/env python3
 import subprocess
-import sys
-import time
 
-def run_ssh_command(command, password="akunamatata"):
-    """Run SSH command on VPS with password"""
+def run_ssh_command(command, password="Rjqe9RTpHdun4hbrgWFb"):
+    """Run SSH command on VPS"""
     try:
-        # Use sshpass to provide password non-interactively
-        full_command = f'sshpass -p "{password}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@91.99.161.246 "{command}"'
-        result = subprocess.run(full_command, shell=True, capture_output=True, text=True, timeout=30)
+        full_command = f'sshpass -p "{password}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@91.99.161.246 "{command}"'
+        result = subprocess.run(full_command, shell=True, capture_output=True, text=True, timeout=120)
         return result.returncode, result.stdout, result.stderr
-    except subprocess.TimeoutExpired:
-        return -1, "", "Command timed out"
     except Exception as e:
         return -1, "", str(e)
 
 def check_vps_status():
-    """Check VPS application status"""
-    print("🔍 Checking VPS application status...")
+    """Check comprehensive VPS status"""
+    print("🔍 Checking VPS status...")
     
-    # Check if application is running
-    print("\n1. Checking application process:")
-    code, stdout, stderr = run_ssh_command("ps aux | grep -E '(node|npm|bingomaster)' | grep -v grep")
-    if code == 0:
-        print(f"✅ Application processes:\n{stdout}")
+    # Check service status
+    print("1. Service status:")
+    code, stdout, stderr = run_ssh_command("systemctl status bingomaster --no-pager")
+    print(stdout)
+    
+    # Check if server is listening on port 3000
+    print("2. Port 3000 status:")
+    code, stdout, stderr = run_ssh_command("netstat -tlnp | grep :3000")
+    if stdout:
+        print(f"✅ Port 3000 is listening: {stdout}")
     else:
-        print(f"❌ No application processes found")
+        print("❌ Port 3000 not listening")
     
-    # Check systemd service
-    print("\n2. Checking systemd service:")
-    code, stdout, stderr = run_ssh_command("systemctl is-active bingomaster 2>/dev/null || echo 'Service not found'")
-    print(f"Service status: {stdout.strip()}")
+    # Check firewall status
+    print("3. Firewall status:")
+    code, stdout, stderr = run_ssh_command("ufw status")
+    print(stdout)
     
-    # Check if app directory exists
-    print("\n3. Checking application directory:")
-    code, stdout, stderr = run_ssh_command("ls -la /var/www/bingomaster/ 2>/dev/null || echo 'Directory not found'")
-    if "package.json" in stdout:
-        print("✅ Application directory exists with package.json")
+    # Check nginx status and config
+    print("4. Nginx status:")
+    code, stdout, stderr = run_ssh_command("systemctl status nginx --no-pager")
+    print(stdout)
+    
+    # Test local connection
+    print("5. Local HTTP test:")
+    code, stdout, stderr = run_ssh_command("curl -s -I http://localhost:3000/api/health")
+    if "200 OK" in stdout:
+        print("✅ Local HTTP working")
     else:
-        print("❌ Application directory missing or incomplete")
+        print(f"❌ Local HTTP issue: {stdout}")
     
-    # Check nginx status
-    print("\n4. Checking Nginx:")
-    code, stdout, stderr = run_ssh_command("systemctl is-active nginx")
-    print(f"Nginx status: {stdout.strip()}")
+    # Test local health endpoint
+    print("6. Local health endpoint:")
+    code, stdout, stderr = run_ssh_command("curl -s http://localhost:3000/api/health")
+    print(f"Health response: {stdout}")
     
-    # Check if port 3000 is listening
-    print("\n5. Checking port 3000:")
-    code, stdout, stderr = run_ssh_command("netstat -tulnp | grep :3000 || echo 'Port 3000 not listening'")
-    print(f"Port 3000: {stdout.strip()}")
-    
-    # Test HTTP response
-    print("\n6. Testing HTTP response:")
-    code, stdout, stderr = run_ssh_command("curl -s -I http://localhost:3000 | head -1 || echo 'No response'")
-    print(f"HTTP response: {stdout.strip()}")
+    # Check nginx config for proxy
+    print("7. Nginx config:")
+    code, stdout, stderr = run_ssh_command("cat /etc/nginx/sites-available/default | grep -A 10 location")
+    print(stdout)
 
 if __name__ == "__main__":
     check_vps_status()
