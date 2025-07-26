@@ -193,6 +193,11 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
   - ✅ **COST-EFFECTIVE SOLUTION**: Deployed working system directly to VPS at http://91.99.161.246
   - ✅ **ALL CREDENTIALS MATCHING DEVELOPMENT**: superadmin/a1e2y3t4h5, admin/123456, adad/123456, collectors working
   - ✅ **LESSON LEARNED**: Deploy working code first before attempting server-side recreations
+- ✅ **DATABASE SETUP SOLUTION - July 25, 2025:**
+  - ✅ **PROBLEM IDENTIFIED**: When pulling code to new Replit, passwords stored in database not code files
+  - ✅ **SETUP SCRIPT CREATED**: `setup-database.js` initializes all users with correct password hashes
+  - ✅ **DOCUMENTATION ADDED**: `DATABASE_SETUP.md` provides complete setup instructions for new environments
+  - ✅ **CREDENTIALS STANDARDIZED**: All 9 users (superadmin, admin, employees, collectors) with working passwords
 
 ### July 8, 2025 - Performance Optimization and Updated Melat Voice (COMPLETED)
 - ✅ **REMOVED: Audio preloading system completely for better website performance**
