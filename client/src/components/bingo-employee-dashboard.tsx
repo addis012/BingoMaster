@@ -35,7 +35,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [activeGameId, setActiveGameId] = useState<number | null>(null);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [currentAudioRef, setCurrentAudioRef] = useState<HTMLAudioElement | null>(null);
-  const [audioBlocked, setAudioBlocked] = useState(false); // Block all audio after Check Winner
 
   
   // Voice selection
@@ -604,12 +603,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   // Call a single number with hover effect and audio
   const callNumber = async () => {
     if (!activeGameId || isPaused) return;
-    
-    // CRITICAL: Block all number calling after Check Winner is clicked
-    if (audioBlocked) {
-      console.log('🛑 CALLNUMBER BLOCKED: Audio blocked, preventing number call');
-      return;
-    }
 
     const numberToCall = getNextNumber();
     if (!numberToCall) {
@@ -1306,7 +1299,6 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       setIsHovering(false);
       setNextNumber(null);
       setAudioPlaying(false);
-      setAudioBlocked(false); // CRITICAL: Allow audio again after reset
       setShowWinnerResult(false);
       setShowWinnerChecker(false);
       setWinnerCartelaNumber('');
@@ -2632,34 +2624,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
                       }
                     });
                     
-                    // Stop all timers and intervals FIRST - be extremely aggressive
-                    console.log('🛑 CLEARING ALL TIMERS AND INTERVALS');
+                    // Stop all timers and intervals FIRST
                     if (autoCallInterval) {
                       clearInterval(autoCallInterval);
                       setAutoCallInterval(null);
-                      console.log('🛑 Cleared autoCallInterval');
                     }
                     if (numberCallTimer.current) {
                       clearTimeout(numberCallTimer.current);
                       numberCallTimer.current = null;
-                      console.log('🛑 Cleared numberCallTimer');
                     }
-                    
-                    // Clear ALL possible timers in the window
-                    const highestTimeoutId = setTimeout(() => {}, 0);
-                    for (let i = 0; i < highestTimeoutId; i++) {
-                      clearTimeout(i);
-                    }
-                    console.log(`🛑 Cleared all timeouts up to ${highestTimeoutId}`);
-                    
-                    // Set all game states to stopped and BLOCK future audio
                     setIsAutoCall(false);
                     setAudioPlaying(false);
-                    setGameActive(false);
-                    setGamePaused(true);
-                    setAudioBlocked(true); // CRITICAL: Block all future audio
-                    
-                    console.log('🛑 All game states set to stopped, AUDIO BLOCKED');
                     
                     // THEN pause the game formally
                     pauseGame();
