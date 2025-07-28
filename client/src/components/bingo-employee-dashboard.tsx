@@ -185,7 +185,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [isHovering, setIsHovering] = useState(false);
   
   // Speed control
-  const [autoPlaySpeed, setAutoPlaySpeed] = useState(4); // seconds between numbers - increased for better Arada voice compatibility
+  const [autoPlaySpeed, setAutoPlaySpeed] = useState(6); // seconds between numbers - increased significantly for Arada voice compatibility
   
   // Timer reference for instant pause control
   const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
@@ -665,8 +665,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
     setIsPaused(false);
     
     const interval = setInterval(() => {
-      if (!isPaused && gameActive && !gameFinished && !audioPlaying) {
+      console.log(`🎯 AUTO-CALL CHECK: isPaused=${isPaused}, gameActive=${gameActive}, gameFinished=${gameFinished}, audioPlaying=${audioPlaying}, voice=${selectedVoice}`);
+      // For Arada voice, be more lenient with audio blocking to ensure smooth flow
+      const canCallNumber = selectedVoice === 'arada' || selectedVoice === 'real-arada' 
+        ? (!isPaused && gameActive && !gameFinished) // Less strict for Arada
+        : (!isPaused && gameActive && !gameFinished && !audioPlaying); // Original logic for others
+        
+      if (canCallNumber) {
+        console.log(`🎯 CALLING NUMBER: speed=${autoPlaySpeed}s, voice=${selectedVoice}`);
         callNumber();
+      } else {
+        console.log(`🎯 SKIPPING CALL: blocked by audioPlaying=${audioPlaying} or other conditions`);
       }
     }, autoPlaySpeed * 1000); // Use the actual autoPlaySpeed setting
     
@@ -1089,8 +1098,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         let maxAudioTime;
         
         if (selectedVoice === 'arada' || selectedVoice === 'real-arada') {
-          // Arada voice needs more time - give it 80% of the calling interval
-          maxAudioTime = Math.min(callingSpeedMs * 0.8, 6000); // Max 6 seconds for Arada
+          // Arada voice needs much more time - give it the full calling interval minus small buffer
+          maxAudioTime = Math.max(callingSpeedMs - 200, 5000); // Almost full interval, min 5 seconds for Arada
+          console.log(`🔊 ARADA TIMING: Using ${maxAudioTime}ms timeout for Arada voice (calling every ${callingSpeedMs}ms)`);
         } else {
           // Other voices use the original timing
           maxAudioTime = Math.min(callingSpeedMs - 500, 4500); // Leave 500ms buffer, max 4.5s
