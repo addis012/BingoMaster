@@ -2609,7 +2609,34 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <div className="mt-6 flex gap-4 justify-center">
                 <Button 
                   onClick={() => {
-                    // Immediately pause the game to stop number calling
+                    // IMMEDIATE AUDIO STOP - before any other processing
+                    console.log('🛑 CHECK WINNER BUTTON: Immediate audio kill');
+                    
+                    // Kill all audio elements immediately and aggressively
+                    const allAudioElements = document.querySelectorAll('audio');
+                    allAudioElements.forEach((audio, index) => {
+                      if (!audio.paused) {
+                        console.log(`🛑 KILLING audio ${index + 1} mid-playback`);
+                        audio.pause();
+                        audio.currentTime = 0;
+                        audio.volume = 0;
+                        audio.src = '';
+                      }
+                    });
+                    
+                    // Stop all timers and intervals FIRST
+                    if (autoCallInterval) {
+                      clearInterval(autoCallInterval);
+                      setAutoCallInterval(null);
+                    }
+                    if (numberCallTimer.current) {
+                      clearTimeout(numberCallTimer.current);
+                      numberCallTimer.current = null;
+                    }
+                    setIsAutoCall(false);
+                    setAudioPlaying(false);
+                    
+                    // THEN pause the game formally
                     pauseGame();
                     setShowWinnerChecker(true);
                   }}

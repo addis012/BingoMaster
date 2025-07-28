@@ -212,13 +212,15 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
   - ✅ **REMOVED AUDIO BLOCKING**: Arada voices bypass audioPlaying check for smooth flow
   - ✅ **COMPREHENSIVE DEBUGGING**: Detailed logging shows playback rate and timing calculations
   - ✅ **APPLIED TO ALL DASHBOARDS**: All three dashboards support dynamic Arada voice speed adaptation
-- ✅ **CHECK WINNER UNIVERSAL AUDIO STOP - July 28, 2025:**
-  - ✅ **PROBLEM FIXED**: Check Winner button now stops ALL audio regardless of voice selection
-  - ✅ **UNIVERSAL AUDIO STOPPING**: Enhanced pauseGame() to find and stop all audio elements immediately
+- ✅ **CHECK WINNER IMMEDIATE AUDIO KILL - July 28, 2025:**
+  - ✅ **PROBLEM**: Check Winner button wasn't stopping audio mid-call like pausing music
+  - ✅ **SOLUTION**: Added immediate aggressive audio killing at button click level (before any other processing)
+  - ✅ **IMMEDIATE KILL**: Finds and stops ALL audio elements mid-playback with pause + reset + mute + clear source
+  - ✅ **TIMING PRIORITY**: Stops timers and intervals FIRST to prevent new audio from starting
   - ✅ **VOICE-INDEPENDENT**: Works for all 9 voices without voice-specific logic
-  - ✅ **COMPREHENSIVE CLEANUP**: Resets audio states, timers, and currentAudio references
-  - ✅ **APPLIED TO ALL DASHBOARDS**: Fixed bingo-employee, horizontal-bingo, and new-employee dashboards
-  - ✅ **IMMEDIATE RESPONSE**: Audio stops instantly when Check Winner clicked, no voice exceptions
+  - ✅ **COMPREHENSIVE LOGGING**: Console shows exactly which audio elements are being killed
+  - ✅ **APPLIED TO ALL DASHBOARDS**: Enhanced bingo-employee, horizontal-bingo, and new-employee dashboards
+  - ✅ **MUSIC-LIKE BEHAVIOR**: Audio cuts off instantly mid-word when Check Winner clicked
 
 ### July 8, 2025 - Performance Optimization and Updated Melat Voice (COMPLETED)
 - ✅ **REMOVED: Audio preloading system completely for better website performance**
