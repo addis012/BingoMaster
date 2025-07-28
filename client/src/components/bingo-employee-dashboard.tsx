@@ -141,6 +141,9 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
 
   const currentTheme = themes[selectedTheme as keyof typeof themes] || themes.classic;
   
+  // Global audio killer flag - when true, absolutely no audio should play
+  const [audioKillMode, setAudioKillMode] = useState(false);
+  
   // Cartela management
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());
@@ -1073,11 +1076,21 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         return;
       }
       
-      // Play number audio if available and no other audio is playing
-      if (newNumber && !audioPlaying && !currentAudioRef) {
+      // Play number audio if available and no other audio is playing AND audio kill mode is not active
+      if (newNumber && !audioPlaying && !currentAudioRef && !audioKillMode) {
         const letter = getLetterForNumber(newNumber);
         console.log(`🔊 AUDIO: Starting playback for ${letter}${newNumber} (audioPlaying: ${audioPlaying})`);
         setAudioPlaying(true);
+      } else if (audioKillMode) {
+        console.log(`🛑 AUDIO BLOCKED by kill mode for ${getLetterForNumber(newNumber)}${newNumber}`);
+        // Still update the marked numbers even if audio is blocked
+        if (blinkingNumber !== null) {
+          setMarkedNumbers(prev => [...prev, blinkingNumber]);
+        }
+        const blockedNumbersToMark = updatedNumbers.slice(0, -1);
+        setMarkedNumbers(blockedNumbersToMark);
+        setBlinkingNumber(newNumber);
+        return;
         
         // If there was a previous blinking number, mark it fully now
         if (blinkingNumber !== null) {
@@ -2609,34 +2622,79 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
               <div className="mt-6 flex gap-4 justify-center">
                 <Button 
                   onClick={() => {
-                    // IMMEDIATE AUDIO STOP - before any other processing
-                    console.log('🛑 CHECK WINNER BUTTON: Immediate audio kill');
+                    console.log('🛑🛑🛑 CHECK WINNER BUTTON CLICKED - IMMEDIATE AUDIO KILL 🛑🛑🛑');
                     
-                    // Kill all audio elements immediately and aggressively
-                    const allAudioElements = document.querySelectorAll('audio');
-                    allAudioElements.forEach((audio, index) => {
-                      if (!audio.paused) {
-                        console.log(`🛑 KILLING audio ${index + 1} mid-playback`);
-                        audio.pause();
-                        audio.currentTime = 0;
-                        audio.volume = 0;
-                        audio.src = '';
-                      }
-                    });
+                    // STEP 0: Enable global audio kill mode immediately
+                    setAudioKillMode(true);
+                    console.log('🛑 GLOBAL AUDIO KILL MODE ACTIVATED');
                     
-                    // Stop all timers and intervals FIRST
+                    // STEP 1: INSTANTLY stop all timers and intervals to prevent new audio
                     if (autoCallInterval) {
+                      console.log('🛑 Clearing autoCallInterval');
                       clearInterval(autoCallInterval);
                       setAutoCallInterval(null);
                     }
                     if (numberCallTimer.current) {
+                      console.log('🛑 Clearing numberCallTimer');
                       clearTimeout(numberCallTimer.current);
                       numberCallTimer.current = null;
                     }
+                    
+                    // STEP 2: Set all audio flags to false immediately
                     setIsAutoCall(false);
                     setAudioPlaying(false);
                     
-                    // THEN pause the game formally
+                    // STEP 3: Kill current audio references aggressively
+                    if (currentAudio) {
+                      console.log('🛑 Killing currentAudio');
+                      currentAudio.pause();
+                      currentAudio.currentTime = 0;
+                      currentAudio.volume = 0;
+                      currentAudio.src = '';
+                      setCurrentAudio(null);
+                    }
+                    
+                    if (currentAudioRef) {
+                      console.log('🛑 Killing currentAudioRef');
+                      currentAudioRef.pause();
+                      currentAudioRef.currentTime = 0;
+                      currentAudioRef.volume = 0;
+                      currentAudioRef.src = '';
+                      setCurrentAudioRef(null);
+                    }
+                    
+                    // STEP 4: Aggressively find and destroy ALL audio elements on the page
+                    const allAudioElements = document.querySelectorAll('audio');
+                    console.log(`🛑 Found ${allAudioElements.length} audio elements, killing them all`);
+                    
+                    allAudioElements.forEach((audio, index) => {
+                      console.log(`🛑 TERMINATING audio element ${index + 1}: was paused=${audio.paused}, currentTime=${audio.currentTime}`);
+                      
+                      // Kill it completely
+                      audio.pause();
+                      audio.currentTime = 0;
+                      audio.volume = 0;
+                      audio.muted = true;
+                      
+                      // Clear the source and try to remove from DOM
+                      try {
+                        audio.src = '';
+                        audio.load(); // Force reload with empty src
+                        audio.remove();
+                      } catch (e) {
+                        console.log(`🛑 Could not remove audio ${index + 1}, but muted and cleared`);
+                      }
+                    });
+                    
+                    console.log('🛑 ALL AUDIO ELEMENTS TERMINATED - Opening winner dialog');
+                    
+                    // STEP 5: Auto-disable kill mode after 2 seconds to allow winner verification audio
+                    setTimeout(() => {
+                      setAudioKillMode(false);
+                      console.log('🛑 Audio kill mode auto-disabled after 2 seconds');
+                    }, 2000);
+                    
+                    // STEP 6: Now proceed with game pause and dialog
                     pauseGame();
                     setShowWinnerChecker(true);
                   }}
