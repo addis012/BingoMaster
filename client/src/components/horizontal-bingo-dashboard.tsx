@@ -27,7 +27,7 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   
   // State variables
   const [gameAmount, setGameAmount] = useState("20");
-  const [autoplaySpeed, setAutoplaySpeed] = useState(3);
+  const [autoplaySpeed, setAutoplaySpeed] = useState(4); // Increased for better Arada voice compatibility
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
   const [calledNumbers, setCalledNumbers] = useState<number[]>([]);
   const [lastCalledNumber, setLastCalledNumber] = useState<number | null>(null);

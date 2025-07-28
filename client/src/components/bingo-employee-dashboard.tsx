@@ -185,7 +185,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [isHovering, setIsHovering] = useState(false);
   
   // Speed control
-  const [autoPlaySpeed, setAutoPlaySpeed] = useState(3); // seconds between numbers
+  const [autoPlaySpeed, setAutoPlaySpeed] = useState(4); // seconds between numbers - increased for better Arada voice compatibility
   
   // Timer reference for instant pause control
   const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
@@ -668,7 +668,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       if (!isPaused && gameActive && !gameFinished && !audioPlaying) {
         callNumber();
       }
-    }, 6000); // 6 seconds between calls for better audio completion
+    }, autoPlaySpeed * 1000); // Use the actual autoPlaySpeed setting
     
     setAutoCallInterval(interval);
   };
@@ -1084,8 +1084,17 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         
         // Don't mark the current number - it will be marked when the NEXT number starts
         // Dynamic timeout based on calling speed - for faster speeds, force shorter audio
+        // Special handling for Arada voice which needs longer audio time
         const callingSpeedMs = autoPlaySpeed * 1000;
-        const maxAudioTime = Math.min(callingSpeedMs - 500, 4500); // Leave 500ms buffer, max 4.5s
+        let maxAudioTime;
+        
+        if (selectedVoice === 'arada' || selectedVoice === 'real-arada') {
+          // Arada voice needs more time - give it 80% of the calling interval
+          maxAudioTime = Math.min(callingSpeedMs * 0.8, 6000); // Max 6 seconds for Arada
+        } else {
+          // Other voices use the original timing
+          maxAudioTime = Math.min(callingSpeedMs - 500, 4500); // Leave 500ms buffer, max 4.5s
+        }
         const audioResetTimer = setTimeout(() => {
           console.log(`🔊 AUDIO TIMEOUT: Force stopping after ${maxAudioTime}ms for speed ${autoPlaySpeed}s`);
           if (currentAudioRef) {
