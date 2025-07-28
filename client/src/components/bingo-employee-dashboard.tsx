@@ -1119,6 +1119,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           const audioPath = getAudioPath(newNumber);
           console.log(`🔊 AUDIO DEBUG: Playing ${letter}${newNumber} with path: ${audioPath} using voice: ${selectedVoice}`);
           
+          // Special debugging for G49 specifically
+          if (newNumber === 49) {
+            console.log(`🎯 G49 DEBUG: About to play G49 audio`);
+            console.log(`🎯 G49 PATH: ${audioPath}`);
+            console.log(`🎯 G49 VOICE: ${selectedVoice}`);
+          }
+          
           // Create audio element for each number
           const audio = new Audio(audioPath);
           audio.volume = 0.8;
@@ -1170,8 +1177,19 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           {
             audio.oncanplaythrough = () => {
               console.log(`🔊 AUDIO: Ready to play ${letter}${newNumber}`);
+              
+              // Special G49 debugging
+              if (newNumber === 49) {
+                console.log(`🎯 G49 READY: About to play G49, playbackRate=${audio.playbackRate}`);
+              }
+              
               audio.play().catch((error) => {
-                console.error(`🔊 AUDIO PLAY ERROR: Failed to play ${audioPath}:`, error);
+                console.error(`🔊 AUDIO PLAY ERROR: Failed to play ${audioPath} for ${letter}${newNumber}:`, error);
+                
+                // Special G49 error debugging
+                if (newNumber === 49) {
+                  console.error(`🎯 G49 PLAY ERROR: Specific error with G49:`, error);
+                }
                 clearTimeout(audioResetTimer);
                 setAudioPlaying(false);
                 setCurrentAudioRef(null);
@@ -1201,7 +1219,13 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
             audio.load();
           }
         } catch (error) {
-          console.log('Audio playback error');
+          console.error(`🔊 AUDIO CATCH ERROR: Failed to create audio for ${letter}${newNumber}:`, error);
+          
+          // Special G49 catch debugging
+          if (newNumber === 49) {
+            console.error(`🎯 G49 CATCH ERROR: Exception caught for G49:`, error);
+          }
+          
           clearTimeout(audioResetTimer);
           setAudioPlaying(false);
           setCurrentAudioRef(null);
