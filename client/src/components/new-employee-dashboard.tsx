@@ -24,7 +24,7 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
   const [currentNumber, setCurrentNumber] = useState<number | null>(null);
   const [gameActive, setGameActive] = useState(false);
   const [gameAmount, setGameAmount] = useState("30");
-  const [autoplaySpeed, setAutoplaySpeed] = useState("6"); // Increased significantly for Arada voice compatibility
+  const [autoplaySpeed, setAutoplaySpeed] = useState("4"); // Default balanced for all voices with dynamic audio speed
   const [showCartelaSelector, setShowCartelaSelector] = useState(false);
   const [selectedCartelas, setSelectedCartelas] = useState<Set<number>>(new Set());
   const [bookedCartelas, setBookedCartelas] = useState<Set<number>>(new Set());

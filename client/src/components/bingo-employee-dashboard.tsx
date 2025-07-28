@@ -185,7 +185,7 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
   const [isHovering, setIsHovering] = useState(false);
   
   // Speed control
-  const [autoPlaySpeed, setAutoPlaySpeed] = useState(6); // seconds between numbers - increased significantly for Arada voice compatibility
+  const [autoPlaySpeed, setAutoPlaySpeed] = useState(4); // seconds between numbers - default balanced for all voices
   
   // Timer reference for instant pause control
   const numberCallTimer = useRef<NodeJS.Timeout | null>(null);
@@ -1098,8 +1098,8 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
         let maxAudioTime;
         
         if (selectedVoice === 'arada' || selectedVoice === 'real-arada') {
-          // Arada voice needs much more time - give it the full calling interval minus small buffer
-          maxAudioTime = Math.max(callingSpeedMs - 200, 5000); // Almost full interval, min 5 seconds for Arada
+          // Arada voice gets most of the calling interval for audio completion
+          maxAudioTime = Math.max(callingSpeedMs - 300, 2000); // Leave 300ms buffer, min 2 seconds
           console.log(`🔊 ARADA TIMING: Using ${maxAudioTime}ms timeout for Arada voice (calling every ${callingSpeedMs}ms)`);
         } else {
           // Other voices use the original timing
@@ -1122,6 +1122,16 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           // Create audio element for each number
           const audio = new Audio(audioPath);
           audio.volume = 0.8;
+          
+          // Adjust playback rate based on speed setting for better synchronization
+          if (selectedVoice === 'arada' || selectedVoice === 'real-arada') {
+            // For Arada voice, adjust playback rate based on autoplay speed
+            // Faster speeds = faster playback, slower speeds = normal playback
+            const baseSpeed = 6; // Our reference speed in seconds
+            const speedRatio = baseSpeed / autoPlaySpeed;
+            audio.playbackRate = Math.min(Math.max(speedRatio, 0.7), 1.8); // Limit between 0.7x and 1.8x
+            console.log(`🔊 ARADA SPEED: autoPlaySpeed=${autoPlaySpeed}s, playbackRate=${audio.playbackRate}x`);
+          }
           
           setCurrentAudioRef(audio);
           
