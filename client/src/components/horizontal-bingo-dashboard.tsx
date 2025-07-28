@@ -489,6 +489,17 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
       setAutoCallInterval(null);
     }
     setGameActive(false);
+    
+    // IMMEDIATELY STOP ALL AUDIO (regardless of voice) when Check Winner is clicked
+    const allAudioElements = document.querySelectorAll('audio');
+    allAudioElements.forEach(audio => {
+      if (!audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    });
+    
+    console.log('🛑 CHECK WINNER: All audio stopped immediately');
   };
 
   const resumeGame = () => {

@@ -340,6 +340,17 @@ export default function BingoNewEmployeeDashboard({ onLogout }: BingoNewEmployee
   const pauseGame = () => {
     setGameActive(false);
     stopAutoCalling();
+    
+    // IMMEDIATELY STOP ALL AUDIO (regardless of voice) when Check Winner is clicked
+    const allAudioElements = document.querySelectorAll('audio');
+    allAudioElements.forEach(audio => {
+      if (!audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    });
+    
+    console.log('🛑 CHECK WINNER: All audio stopped immediately');
   };
 
   // Resume game function  

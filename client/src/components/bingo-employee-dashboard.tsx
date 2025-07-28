@@ -1796,13 +1796,31 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
           numberCallTimer.current = null;
         }
         
-        // Preserve audio state if currently playing
-        if (currentAudio && !currentAudio.paused) {
-          setPausedAudio(currentAudio);
-          setPausedAudioTime(currentAudio.currentTime);
+        // IMMEDIATELY STOP ALL AUDIO (regardless of voice) when Check Winner is clicked
+        if (currentAudio) {
           currentAudio.pause();
+          currentAudio.currentTime = 0;
           setCurrentAudio(null);
         }
+        
+        // Also stop any currentAudioRef (used by enhanced audio system)
+        if (currentAudioRef) {
+          currentAudioRef.pause();
+          currentAudioRef.currentTime = 0;
+          setCurrentAudioRef(null);
+        }
+        
+        // Reset all audio playing states
+        setAudioPlaying(false);
+        
+        // Find and stop any other audio elements that might be playing
+        const allAudioElements = document.querySelectorAll('audio');
+        allAudioElements.forEach(audio => {
+          if (!audio.paused) {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+        });
         
         // Stop all animations immediately
         setIsShuffling(false);
