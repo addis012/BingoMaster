@@ -1790,37 +1790,64 @@ export default function BingoEmployeeDashboard({ onLogout }: BingoEmployeeDashbo
       if (response.ok) {
         setGamePaused(true);
         
-        // Clear the timer immediately to stop number calling
+        // FIRST: Stop ALL timers and intervals to prevent new audio
         if (numberCallTimer.current) {
           clearTimeout(numberCallTimer.current);
           numberCallTimer.current = null;
         }
         
-        // IMMEDIATELY STOP ALL AUDIO (regardless of voice) when Check Winner is clicked
+        // Stop auto-call interval immediately
+        if (autoCallInterval) {
+          clearInterval(autoCallInterval);
+          setAutoCallInterval(null);
+        }
+        setIsAutoCall(false);
+        
+        // IMMEDIATE AGGRESSIVE AUDIO STOP - like pausing music
+        console.log('🛑 CHECK WINNER CLICKED: Stopping ALL audio immediately');
+        
+        // Stop current audio references
         if (currentAudio) {
           currentAudio.pause();
           currentAudio.currentTime = 0;
+          currentAudio.remove && currentAudio.remove();
           setCurrentAudio(null);
         }
         
-        // Also stop any currentAudioRef (used by enhanced audio system)
         if (currentAudioRef) {
           currentAudioRef.pause();
           currentAudioRef.currentTime = 0;
+          currentAudioRef.remove && currentAudioRef.remove();
           setCurrentAudioRef(null);
         }
         
-        // Reset all audio playing states
+        // Clear any audio timeouts that might restart audio
+        if (audioResetTimer) {
+          clearTimeout(audioResetTimer);
+        }
+        
+        // Reset all audio states immediately
         setAudioPlaying(false);
         
-        // Find and stop any other audio elements that might be playing
+        // Aggressively find and stop ALL audio elements
         const allAudioElements = document.querySelectorAll('audio');
-        allAudioElements.forEach(audio => {
-          if (!audio.paused) {
-            audio.pause();
-            audio.currentTime = 0;
+        console.log(`🛑 Found ${allAudioElements.length} audio elements to stop`);
+        
+        allAudioElements.forEach((audio, index) => {
+          console.log(`🛑 Stopping audio element ${index + 1}: paused=${audio.paused}, currentTime=${audio.currentTime}`);
+          audio.pause();
+          audio.currentTime = 0;
+          audio.volume = 0; // Mute it completely
+          // Try to remove from DOM if possible
+          try {
+            audio.remove();
+          } catch (e) {
+            // If removal fails, just disable it
+            audio.src = '';
           }
         });
+        
+        console.log('🛑 AUDIO STOP COMPLETE: All audio should be silent now');
         
         // Stop all animations immediately
         setIsShuffling(false);

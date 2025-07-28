@@ -484,22 +484,30 @@ export default function BingoHorizontalDashboard({ onLogout }: BingoHorizontalDa
   };
 
   const pauseGame = () => {
-    if (autoCallInterval) {
-      clearInterval(autoCallInterval);
-      setAutoCallInterval(null);
-    }
-    setGameActive(false);
+    console.log('🛑 CHECK WINNER CLICKED: Stopping everything immediately');
     
-    // IMMEDIATELY STOP ALL AUDIO (regardless of voice) when Check Winner is clicked
+    // FIRST: Stop the interval to prevent new audio from starting
+    setGameActive(false);
+    stopAutoCalling();
+    
+    // THEN: Aggressively stop ALL existing audio like pausing music
     const allAudioElements = document.querySelectorAll('audio');
-    allAudioElements.forEach(audio => {
-      if (!audio.paused) {
-        audio.pause();
-        audio.currentTime = 0;
+    console.log(`🛑 Found ${allAudioElements.length} audio elements to stop`);
+    
+    allAudioElements.forEach((audio, index) => {
+      console.log(`🛑 Stopping audio element ${index + 1}: paused=${audio.paused}, currentTime=${audio.currentTime}`);
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = 0; // Mute completely
+      // Try to clear the source
+      try {
+        audio.src = '';
+      } catch (e) {
+        // Ignore errors
       }
     });
     
-    console.log('🛑 CHECK WINNER: All audio stopped immediately');
+    console.log('🛑 NEW EMPLOYEE DASHBOARD: All audio stopped immediately');
   };
 
   const resumeGame = () => {
