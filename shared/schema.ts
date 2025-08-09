@@ -397,24 +397,18 @@ export const insertCommissionPaymentSchema = createInsertSchema(commissionPaymen
 
 export const insertGameHistorySchema = createInsertSchema(gameHistory).omit({
   id: true,
-  createdAt: true,
-  completedAt: true,
 });
 
 export const insertEmployeeProfitMarginSchema = createInsertSchema(employeeProfitMargins).omit({
   id: true,
-  createdAt: true,
 });
 
 export const insertCartelaSchema = createInsertSchema(cartelas).omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const insertCustomCartelaSchema = createInsertSchema(customCartelas).omit({
   id: true,
-  createdAt: true,
 });
 
 // Types
@@ -458,10 +452,6 @@ export const insertWithdrawalRequestSchema = createInsertSchema(withdrawalReques
   amount: z.string(),
 }).omit({
   id: true,
-  createdAt: true,
-  processedAt: true,
-  processedBy: true,
-  rejectionReason: true,
 });
 
 export type CreditTransfer = typeof creditTransfers.$inferSelect;
@@ -480,7 +470,6 @@ export const insertSuperAdminRevenueSchema = createInsertSchema(superAdminRevenu
   sourceAmount: z.string(),
 }).omit({
   id: true,
-  createdAt: true,
 });
 
 export const insertDailyRevenueSummarySchema = createInsertSchema(dailyRevenueSummary, {
@@ -488,8 +477,6 @@ export const insertDailyRevenueSummarySchema = createInsertSchema(dailyRevenueSu
   totalAdminRevenue: z.string(),
 }).omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export type SuperAdminRevenue = typeof superAdminRevenues.$inferSelect;
