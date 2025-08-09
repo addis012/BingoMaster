@@ -5,6 +5,7 @@ BingoMaster is a comprehensive full-stack web application designed for managing 
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
+Database preference: Considering MongoDB migration from current PostgreSQL setup.
 
 ## Recent Changes
 - **August 9, 2025**: Successfully migrated project from Replit Agent to Replit environment
