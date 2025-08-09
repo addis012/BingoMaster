@@ -3,6 +3,8 @@ import session from "express-session";
 import ConnectPgSimple from "connect-pg-simple";
 import { pool } from "./db";
 import { registerRoutes } from "./routes";
+import { registerMongoDBRoutes } from "./mongodb-routes";
+import { initializeMongoDBData } from "./mongodb-setup";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
@@ -92,6 +94,9 @@ app.use((req, res, next) => {
 
 (async () => {
   const { server } = await registerRoutes(app);
+  
+  // Register MongoDB routes alongside PostgreSQL routes
+  registerMongoDBRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -117,6 +122,13 @@ app.use((req, res, next) => {
   
   server.listen(port, "0.0.0.0", async () => {
     log(`serving on port ${port}`);
+    
+    // Initialize MongoDB data
+    try {
+      await initializeMongoDBData();
+    } catch (error) {
+      console.log("MongoDB initialization failed (optional):", error.message);
+    }
     
     // Hardcoded cartela loading disabled - admins manage their own cartelas
     console.log("Hardcoded cartela auto-loading is disabled. Admins can add cartelas manually.");

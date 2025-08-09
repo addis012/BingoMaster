@@ -9,6 +9,7 @@ import SuperAdminDashboard from "./pages/super-admin-dashboard";
 import EmployeeDashboard from "./pages/employee-dashboard";
 import AdminEmployeeManagement from "./pages/admin-employee-management";
 import { CollectorDashboard } from "./components/collector-dashboard";
+import MongoDBTest from "./pages/MongoDBTest";
 
 function AppRouter() {
   const { user } = useAuth();
@@ -40,6 +41,9 @@ function AppRouter() {
       <Route path="/dashboard/collector">
         {user ? <CollectorDashboard user={user} /> : <LoginPage />}
       </Route>
+      
+      {/* MongoDB Test Page */}
+      <Route path="/mongodb-test" component={MongoDBTest} />
       
       {/* Legacy Routes for backward compatibility */}
       <Route path="/admin">
