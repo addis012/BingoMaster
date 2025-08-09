@@ -14,6 +14,7 @@ Preferred communication style: Simple, everyday language.
   - All dependencies properly installed and configured
   - Application server running successfully on port 5000
   - Security practices implemented with proper client/server separation
+  - User requested MongoDB migration (requires complete database layer rewrite)
 
 ## System Architecture
 
