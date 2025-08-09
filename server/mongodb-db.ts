@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://addisumelke01:a1e2y3t4h5@cluster0.yjzywln.mongodb.net/bingomaster?retryWrites=true&w=majority&appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 export async function connectMongoDB() {
   try {
+    if (!MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is not set');
+    }
     await mongoose.connect(MONGODB_URI);
     console.log('🍃 Connected to MongoDB successfully');
     return mongoose.connection;
