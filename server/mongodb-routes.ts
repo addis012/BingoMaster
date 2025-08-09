@@ -125,7 +125,7 @@ export function registerMongoDBRoutes(app: Express): void {
         email: admin.email,
         isBlocked: admin.isBlocked,
         shopId: admin.shopId?._id,
-        shopName: admin.shopId?.name,
+        shopName: (admin.shopId as any)?.name,
         creditBalance: admin.creditBalance.toString(),
         accountNumber: admin.accountNumber,
         commissionRate: admin.commissionRate.toString(),
@@ -180,7 +180,7 @@ export function registerMongoDBRoutes(app: Express): void {
       await admin.save();
 
       // Update shop with admin ID
-      shop.adminId = admin._id;
+      shop.adminId = admin._id as any;
       await shop.save();
 
       const adminResponse = {
