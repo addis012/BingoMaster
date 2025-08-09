@@ -389,10 +389,16 @@ export const insertGamePlayerSchema = createInsertSchema(gamePlayers).omit({
 
 export const insertTransactionSchema = createInsertSchema(transactions, {
   amount: z.string(),
+}).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertCommissionPaymentSchema = createInsertSchema(commissionPayments, {
   amount: z.string(),
+}).omit({
+  id: true,
+  paidAt: true,
 });
 
 export const insertGameHistorySchema = createInsertSchema(gameHistory).omit({
@@ -436,22 +442,32 @@ export type InsertCustomCartela = z.infer<typeof insertCustomCartelaSchema>;
 // Credit system types
 export const insertCreditTransferSchema = createInsertSchema(creditTransfers, {
   amount: z.string(),
+}).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertCreditLoadSchema = createInsertSchema(creditLoads, {
   amount: z.string(),
+}).omit({
+  id: true,
+  requestedAt: true,
 });
 
 export const insertReferralCommissionSchema = createInsertSchema(referralCommissions, {
   sourceAmount: z.string(),
   commissionRate: z.string(),
   commissionAmount: z.string(),
+}).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertWithdrawalRequestSchema = createInsertSchema(withdrawalRequests, {
   amount: z.string(),
 }).omit({
   id: true,
+  createdAt: true,
 });
 
 export type CreditTransfer = typeof creditTransfers.$inferSelect;
@@ -470,6 +486,7 @@ export const insertSuperAdminRevenueSchema = createInsertSchema(superAdminRevenu
   sourceAmount: z.string(),
 }).omit({
   id: true,
+  createdAt: true,
 });
 
 export const insertDailyRevenueSummarySchema = createInsertSchema(dailyRevenueSummary, {
@@ -477,6 +494,8 @@ export const insertDailyRevenueSummarySchema = createInsertSchema(dailyRevenueSu
   totalAdminRevenue: z.string(),
 }).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export type SuperAdminRevenue = typeof superAdminRevenues.$inferSelect;
