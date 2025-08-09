@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BingoMaster MongoDB - VPS Deployment</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .status { 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 15px 0; 
+            border-left: 4px solid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { 
+            background: #d4f4dd; 
+            border-color: #28a745; 
+            color: #155724; 
+        }
+        .info { 
+            background: #cce7ff; 
+            border-color: #007bff; 
+            color: #004085; 
+        }
+        .error { 
+            background: #ffe6e6; 
+            border-color: #dc3545; 
+            color: #721c24; 
+        }
+        .card { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 10px; 
+            margin: 20px 0; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input { 
+            width: 100%;
+            padding: 12px; 
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .server-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .info-value {
+            font-size: 18px;
+            color: #333;
+            margin-top: 5px;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 BingoMaster MongoDB VPS</h1>
+        <p>Production Deployment Dashboard</p>
+    </div>
+
+    <div class="server-info" id="serverInfo">
+        <div class="info-item">
+            <div class="info-label">Server Status</div>
+            <div class="info-value" id="serverStatus">Checking...</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Database</div>
+            <div class="info-value">MongoDB Atlas</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Server IP</div>
+            <div class="info-value">91.99.161.246</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Uptime</div>
+            <div class="info-value" id="uptime">--</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🔐 Super Admin Login</h3>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter username" value="superadmin">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter password" value="password">
+            </div>
+            <div class="actions">
+                <button type="submit">Login</button>
+                <button type="button" class="btn-secondary" onclick="testConnection()">Test Connection</button>
+            </div>
+        </form>
+        <div id="loginResult"></div>
+    </div>
+
+    <div id="userInfo" style="display:none;" class="card">
+        <h3>👤 User Information</h3>
+        <pre id="userDetails"></pre>
+        <div class="actions">
+            <button class="btn-success" onclick="createTestAdmin()">Create Test Admin</button>
+            <button class="btn-secondary" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 System Health</h3>
+        <div id="healthCheck"></div>
+        <button onclick="checkHealth()" class="btn-secondary">Refresh Health</button>
+    </div>
+
+    <script>
+        // Check server health on load
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                document.getElementById('serverStatus').textContent = data.status;
+                document.getElementById('uptime').textContent = Math.floor(data.uptime) + 's';
+                
+                document.getElementById('healthCheck').innerHTML = `
+                    <div class="status success">✅ Server Health: ${data.status}</div>
+                    <div class="status info">📊 Database: ${data.database}</div>
+                    <div class="status info">🕒 Uptime: ${Math.floor(data.uptime)} seconds</div>
+                    <div class="status info">💾 Memory: ${Math.round(data.memory.used / 1024 / 1024)}MB used</div>
+                    <div class="status info">⚡ Node.js: ${data.version}</div>
+                `;
+            } catch (error) {
+                document.getElementById('serverStatus').textContent = 'Error';
+                document.getElementById('healthCheck').innerHTML = 
+                    '<div class="status error">❌ Health check failed: ' + error.message + '</div>';
+            }
+        }
+
+        // Test connection
+        async function testConnection() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                alert('✅ Connection successful! Server is running with ' + data.database);
+            } catch (error) {
+                alert('❌ Connection failed: ' + error.message);
+            }
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('loginResult').innerHTML = 
+                        '<div class="status success">✅ Login successful! Welcome, ' + data.user.name + '</div>';
+                    document.getElementById('userDetails').textContent = 
+                        JSON.stringify(data.user, null, 2);
+                    document.getElementById('userInfo').style.display = 'block';
+                } else {
+                    document.getElementById('loginResult').innerHTML = 
+                        '<div class="status error">❌ Login failed: ' + data.message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = 
+                    '<div class="status error">❌ Error: ' + error.message + '</div>';
+            }
+        };
+
+        // Create test admin
+        async function createTestAdmin() {
+            try {
+                const response = await fetch('/api/super-admin/admins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'testadmin',
+                        password: 'testpass123',
+                        name: 'Test Admin',
+                        email: 'test@bingo.com'
+                    })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    alert('✅ Test admin created successfully!\nUsername: testadmin\nPassword: testpass123');
+                } else {
+                    alert('❌ Failed to create test admin: ' + data.message);
+                }
+            } catch (error) {
+                alert('❌ Error creating test admin: ' + error.message);
+            }
+        }
+        
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                document.getElementById('userInfo').style.display = 'none';
+                document.getElementById('loginResult').innerHTML = 
+                    '<div class="status info">✅ Logged out successfully</div>';
+            } catch (error) {
+                alert('❌ Logout error: ' + error.message);
+            }
+        }
+
+        // Initialize page
+        checkHealth();
+        
+        // Auto-refresh health every 30 seconds
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+</html>
