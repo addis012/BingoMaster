@@ -1,0 +1,336 @@
+ System information as of Sat Aug  9 08:39:11 PM +07 2025
+
+  System load:  0.05               Processes:             276
+  Usage of /:   19.9% of 74.79GB   Users logged in:       1
+  Memory usage: 66%                IPv4 address for eth0: 91.99.161.246
+  Swap usage:   0%                 IPv6 address for eth0: 2a01:4f8:1c1a:afce::1
+
+ * Strictly confined Kubernetes makes edge and IoT secure. Learn how MicroK8s
+   just raised the bar for easy, resilient and secure K8s cluster deployment.
+
+   https://ubuntu.com/engage/secure-kubernetes-at-the-edge
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+5 additional security updates can be applied with ESM Apps.
+Learn more about enabling ESM Apps service at https://ubuntu.com/esm
+
+
+Last login: Thu Jul 31 18:59:35 2025
+root@aradabingo:~# curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+apt update && apt install -y nodejs nginx git
+2025-08-09 20:41:36 - Installing pre-requisites
+Hit:1 https://mirror.hetzner.com/ubuntu/packages jammy InRelease
+Get:2 https://mirror.hetzner.com/ubuntu/packages jammy-updates InRelease [128 kB]
+Get:3 https://mirror.hetzner.com/ubuntu/packages jammy-backports InRelease [127 kB]
+Get:4 https://mirror.hetzner.com/ubuntu/security jammy-security InRelease [129 kB]
+Hit:5 https://deb.nodesource.com/node_20.x nodistro InRelease
+Get:6 https://mirror.hetzner.com/ubuntu/packages jammy-updates/main amd64 DEP-11 Metadata [112 kB]
+Get:7 https://mirror.hetzner.com/ubuntu/packages jammy-updates/restricted amd64 DEP-11 Metadata [212 B]
+Get:8 https://mirror.hetzner.com/ubuntu/packages jammy-updates/universe amd64 DEP-11 Metadata [359 kB]
+Get:9 https://mirror.hetzner.com/ubuntu/packages jammy-updates/multiverse amd64 DEP-11 Metadata [940 B]
+Get:10 https://mirror.hetzner.com/ubuntu/packages jammy-backports/main amd64 DEP-11 Metadata [7,076 B]
+Get:11 https://mirror.hetzner.com/ubuntu/packages jammy-backports/restricted amd64 DEP-11 Metadata [212 B]
+Get:12 https://mirror.hetzner.com/ubuntu/packages jammy-backports/universe amd64 DEP-11 Metadata [14.0 kB]
+Get:13 https://mirror.hetzner.com/ubuntu/packages jammy-backports/multiverse amd64 DEP-11 Metadata [212 B]
+Get:14 https://mirror.hetzner.com/ubuntu/security jammy-security/main amd64 DEP-11 Metadata [54.5 kB]
+Get:15 https://mirror.hetzner.com/ubuntu/security jammy-security/restricted amd64 DEP-11 Metadata [208 B]
+Get:16 https://mirror.hetzner.com/ubuntu/security jammy-security/universe amd64 DEP-11 Metadata [125 kB]
+Get:17 https://mirror.hetzner.com/ubuntu/security jammy-security/multiverse amd64 DEP-11 Metadata [208 B]
+Fetched 1,058 kB in 1s (1,369 kB/s)
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ca-certificates is already the newest version (20240203~22.04.1).
+curl is already the newest version (7.81.0-1ubuntu1.20).
+gnupg is already the newest version (2.2.27-3ubuntu2.4).
+apt-transport-https is already the newest version (2.4.14).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://mirror.hetzner.com/ubuntu/packages jammy InRelease
+Hit:2 https://mirror.hetzner.com/ubuntu/packages jammy-updates InRelease
+Hit:3 https://mirror.hetzner.com/ubuntu/packages jammy-backports InRelease
+Hit:4 https://mirror.hetzner.com/ubuntu/security jammy-security InRelease
+Hit:5 https://deb.nodesource.com/node_20.x nodistro InRelease
+Reading package lists... Done
+2025-08-09 20:41:51 - Repository configured successfully.
+2025-08-09 20:41:51 - To install Node.js, run: apt-get install nodejs -y
+2025-08-09 20:41:51 - You can use N|solid Runtime as a node.js alternative
+2025-08-09 20:41:51 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Hit:1 https://mirror.hetzner.com/ubuntu/packages jammy InRelease
+Hit:2 https://mirror.hetzner.com/ubuntu/packages jammy-updates InRelease
+Hit:3 https://mirror.hetzner.com/ubuntu/packages jammy-backports InRelease
+Hit:4 https://mirror.hetzner.com/ubuntu/security jammy-security InRelease
+Hit:5 https://deb.nodesource.com/node_20.x nodistro InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+git is already the newest version (1:2.34.1-1ubuntu1.15).
+nginx is already the newest version (1.18.0-6ubuntu14.6).
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+root@aradabingo:~# echo "📋 Node.js version: $(node --version)"
+📋 Node.js version: v20.19.4
+root@aradabingo:~# echo "📋 NPM version: $(npm --version)"
+📋 NPM version: 10.8.2
+root@aradabingo:~# mkdir -p /var/www/bingomaster-mongo
+cd /var/www/bingomaster-mongo
+root@aradabingo:/var/www/bingomaster-mongo# cat > package.json << 'EOF'
+{
+  "name": "bingomaster-mongodb-vps",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "NODE_ENV=production node server/index.js",
+    "dev": "NODE_ENV=development node server/index.js"
+  },
+  "dependencies": {
+    "mongoose": "^8.17.1",
+    "mongodb": "^6.18.0",
+    "bcrypt": "^6.0.0",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "memorystore": "^1.6.7",
+    "ws": "^8.18.0",
+    "zod": "^3.24.2",
+    "nanoid": "^5.1.5",
+    "date-fns": "^3.6.0"
+  }
+}
+EOF
+root@aradabingo:/var/www/bingomaster-mongo# npm install
+
+added 108 packages, and audited 109 packages in 9s
+
+18 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+root@aradabingo:/var/www/bingomaster-mongo# mkdir -p server shared client/dist
+root@aradabingo:/var/www/bingomaster-mongo# cat > server/index.js << 'EOF'
+import express from 'express';
+import session from 'express-session';
+import MemoryStore from 'memorystore';
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const MemStore = MemoryStore(session);
+
+// MongoDB Schema Definitions
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String },
+  isBlocked: { type: Boolean, default: false },
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop' },
+  supervisorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  creditBalance: { type: Number, default: 0 },
+  accountNumber: { type: String, unique: true },
+  referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  commissionRate: { type: Number, default: 25 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const ShopSchema = new mongoose.Schema({
+EOFrtServer().catch(console.error);ttp://91.99.161.246:${PORT}/health`);;);;,
+root@aradabingo:/var/www/bingomaster-mongo# cat > .env.template << 'EOF'
+# BingoMaster MongoDB Environment Variables
+NODE_ENV=production
+PORT=3000
+MONGODB_URI=your_mongodb_connection_string_here
+SESSION_SECRET=bingo-super-secret-session-key-change-this-in-production
+
+# Optional WebSocket port
+WS_PORT=3001
+EOF
+root@aradabingo:/var/www/bingomaster-mongo# mkdir -p client/dist
+cat > client/dist/index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BingoMaster MongoDB - VPS Deployment</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .status { padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .info { background: #d1ecf1; border: 1px solid #b8daff; color: #0c5460; }
+        .form { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        input, button { padding: 8px; margin: 5px; }
+        button { background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🎯 BingoMaster MongoDB VPS</h1>
+    <div class="status success">✅ Server is running successfully!</div>
+    <div class="status info">📊 Database: MongoDB Atlas</div>
+
+    <div class="form">
+        <h3>Super Admin Login</h3>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Username" value="superadmin">
+            <input type="password" id="password" placeholder="Password" value="password"EOFtml>cript>onsole.log('Server health:', data);n(data => {L = '';one';age + '</div>'; '
+root@aradabingo:/var/www/bingomaster-mongo# cat > /etc/systemd/system/bingomaster-mongo.service << 'EOF'
+[Unit]
+Description=BingoMaster MongoDB Application
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/bingomaster-mongo
+ExecStart=/usr/bin/node server/index.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/bingomaster-mongo/.env
+
+[Install]
+WantedBy=multi-user.target
+EOF
+root@aradabingo:/var/www/bingomaster-mongo# cat > /etc/nginx/sites-available/bingomaster-mongo << 'EOF'
+server {
+    listen 80;
+    server_name 91.99.161.246;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 75s;
+    }
+}
+EOF
+root@aradabingo:/var/www/bingomaster-mongo# ln -sf /etc/nginx/sites-available/bingomaster-mongo /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+nginx -t && systemctl reload nginx
+nginx: [warn] conflicting server name "91.99.161.246" on 0.0.0.0:80, ignored
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@aradabingo:/var/www/bingomaster-mongo# systemctl daemon-reload
+systemctl enable bingomaster-mongo
+Created symlink /etc/systemd/system/multi-user.target.wants/bingomaster-mongo.service → /etc/systemd/system/bingomaster-mongo.service.
+root@aradabingo:/var/www/bingomaster-mongo# # Fix the truncated files with complete versions
+cd /var/www/bingomaster-mongo
+
+# Copy and paste this complete server file:
+cat > server/index.js << 'EOF'
+# [Complete server code from vps-server-complete.js]
+> cd /var/www/bingomaster-mongo
+nano .env
+> NODE_ENV=production
+PORT=3000
+MONGODB_URI=mongodb+srv://addisumelke01:a1e2y3t4h5@cluster0.yjzywln.mongodb.net/bingomaster?retryWrites=true&w=majority
+SESSION_SECRET=bingo-super-secret-key-production
+> node server/index.js
+> cd /var/www/bingomaster-mongo
+cat > server/index.js << 'SERVEREOF'
+import express from 'express';
+import session from 'express-session';
+import MemoryStore from 'memorystore';
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const MemStore = MemoryStore(session);
+
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String },
+  isBlocked: { type: Boolean, default: false },
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop' },
+  supervisorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  creditBalance: { type: Number, default: 0 },
+  accountNumber: { type: String, unique: true },
+  referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  commissionRate: { type: Number, default: 25 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const ShopSchema = new mongoose.Schema({
+    timestamp:'MongoDB', res) => {: 'Failed to get admins', error: error.message }););
+> exit
+>
+client/            node_modules/      package-lock.json  shared/
+.env.template      package.json       server/
+>
+client/            node_modules/      package-lock.json  shared/
+.env.template      package.json       server/
+> [200~node server/index.js~
+> node server/index.js
+> node server/index.js
+> exit
+> # Press Ctrl+C to stop test server, then:
+systemctl start bingomaster-mongo
+systemctl status bingomaster-mongo
+> # Press Ctrl+C to stop test server, then:
+systemctl start bingomaster-mongo
+systemctl status bingomaster-mongo
+> ^C
+root@aradabingo:/var/www/bingomaster-mongo# cat > server/index.js << 'EOF'
+# [Complete server code from vps-server-comp# Press Ctrl+C to stop test server, then:
+root@aradabingo:/var/www/bingomaster-mongo# cat > server/index.js << 'EOF'
+# [Complete server code from vps-server-complete.js]
+cd /var/www/bingomaster-mongo
+nano .env
+NODE_ENV=production
+PORT=3000
+MONGODB_URI=mongodb+srv://addisumelke01:a1e2y3t4h5@cluster0.yjzywln.mongodb.net/bingomaster?retryWrites=true&w=majority
+SESSION_SECRET=bingo-super-secret-key-production
+node server/index.js
+cd /var/www/bingomaster-mongo
+cat > server/index.js << 'SERVEREOF'
+import express from 'express';
+import session from 'express-session';
+import MemoryStore from 'memorystore';
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const MemStore = MemoryStore(session);
+
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String },
+  isBlocked: { type: Boolean, default: false },
+systemctl status bingomaster-mongo, then:ed to get admins', error: error.message }););
+> ^C
+root@aradabingo:/var/www/bingomaster-mongo# node server/index.js
+❌ MongoDB connection error: Error: MONGODB_URI environment variable is required
+    at connectMongoDB (file:///var/www/bingomaster-mongo/server/index.js:49:13)
+    at startServer (file:///var/www/bingomaster-mongo/server/index.js:176:9)
+    at file:///var/www/bingomaster-mongo/server/index.js:185:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+root@aradabingo:/var/www/bingomaster-mongo#
