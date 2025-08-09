@@ -8,7 +8,7 @@ import sys
 import time
 import os
 
-def run_ssh_command(command, password="akunamatata"):
+def run_ssh_command(command, password="Rjqe9RTpHdun4hbrgWFb"):
     """Run SSH command on VPS with password"""
     try:
         full_command = f'sshpass -p "{password}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@91.99.161.246 "{command}"'
@@ -19,7 +19,7 @@ def run_ssh_command(command, password="akunamatata"):
     except Exception as e:
         return -1, "", str(e)
 
-def upload_file(local_path, remote_path, password="akunamatata"):
+def upload_file(local_path, remote_path, password="Rjqe9RTpHdun4hbrgWFb"):
     """Upload file to VPS using scp"""
     try:
         command = f'sshpass -p "{password}" scp -o StrictHostKeyChecking=no "{local_path}" root@91.99.161.246:"{remote_path}"'
